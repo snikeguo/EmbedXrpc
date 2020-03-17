@@ -471,11 +471,4 @@ namespace EmbedXrpcIdlParser
         }
     }
 }
-/*
- typedef Int32 uint32_t;
-typedef Byte uint8_t;
-typedef SByte int8_t;
-typedef 
 
-2.3w   
-     */
