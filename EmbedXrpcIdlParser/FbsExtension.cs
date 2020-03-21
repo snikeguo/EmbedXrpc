@@ -82,7 +82,7 @@ namespace EmbedXrpcIdlParser
             ReplaceDic.Add("UInt16", "uint16");
             ReplaceDic.Add("Int16", "int16");
             ReplaceDic.Add("UInt32", "uint32");
-            ReplaceDic.Add("Int32", "int322");
+            ReplaceDic.Add("Int32", "int32");
             ReplaceDic.Add("float", "float");
             ReplaceDic.Add("double", "double");
         }
