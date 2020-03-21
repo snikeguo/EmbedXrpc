@@ -197,6 +197,8 @@
   <ItemGroup>
     <Compile Include="Attribute.cs" />
     <Compile Include="Commands.cs" />
+    <Compile Include="CppCodeGenerater.cs" />
+    <Compile Include="FbsExtension.cs" />
     <Compile Include="ICodeGenerater.cs" />
     <Compile Include="idltest1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
