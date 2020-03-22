@@ -164,6 +164,7 @@ namespace EmbedXrpcIdlParser
 
         public void Parse(string file)
         {
+            Console.WriteLine("parse :{0}...", file);
             using (SimpleAsmProbing.For(Assembly.GetExecutingAssembly().Location.GetDirName()))
             {
                 Assembly assembly = CSScript.Evaluator.CompileCode(File.ReadAllText(file));

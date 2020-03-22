@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
+
 namespace EmbedXrpcIdlParser
 {
     public class FbsField
@@ -86,29 +88,56 @@ namespace EmbedXrpcIdlParser
             ReplaceDic.Add("float", "float");
             ReplaceDic.Add("double", "double");
         }
+        public static StringBuilder EmitPackageTable()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            TargetEnum e = new TargetEnum();
+            e.Name = "PackageType_t";
+            e.IntType = "byte";
+            var evs = e.TargetEnumValues;
+            evs.Add(new TargetEnumValue() { Description = "ServiceRequest", Value = 0 });
+            evs.Add(new TargetEnumValue() { Description = "ServiceResponse", Value = 1});
+            evs.Add(new TargetEnumValue() { Description = "Delegate", Value = 2 });
+            stringBuilder.Append(EmitEnum(e));
+
+            
+            stringBuilder.Append("table Package"+Environment.NewLine);
+            stringBuilder.Append("{" + Environment.NewLine);
+
+            stringBuilder.Append("PackageType:PackageType_t;" + Environment.NewLine);
+            stringBuilder.Append("Data:[uint8];" + Environment.NewLine);
+            stringBuilder.Append("}" + Environment.NewLine);
+            stringBuilder.Append("root_type Package;" + Environment.NewLine);
+            return stringBuilder;
+        }
+        
         public  static void GenerateSerializationCode(string filepath)
         {
+            Console.WriteLine("Generate FBS Serialization Code...");
             Process exep = new Process();
-            exep.StartInfo.FileName = "cmd";
-            exep.StartInfo.Arguments = " flatcc.exe -a "+filepath;
+            exep.StartInfo.FileName = "flatcc.exe";
+            exep.StartInfo.Arguments = "-a " +filepath;
             exep.StartInfo.CreateNoWindow = false;
             exep.StartInfo.UseShellExecute = false;
-            //exep.StartInfo.WorkingDirectory = ".";
-            exep.OutputDataReceived += (s, e) =>
-              {
-                  Console.WriteLine(e.Data);
-              };
-            exep.ErrorDataReceived += (s, e) =>
-              {
-                  Console.WriteLine(e.Data);
-              };
-            exep.Start();
             exep.StartInfo.RedirectStandardOutput = true;
             exep.StartInfo.RedirectStandardError = true;
-            //exep.BeginOutputReadLine();
-            //exep.BeginErrorReadLine();
+            exep.OutputDataReceived += (o, s) =>
+             {
+                 if (s.Data != null && s.Data.Length > 0)
+                     Console.WriteLine("flatcc:    " + s.Data);
+             };
+            exep.ErrorDataReceived += (o, s) =>
+              {
+                  if(s.Data!=null&&s.Data.Length>0)
+                  Console.WriteLine("flatcc:    "+s.Data);
+              };
+            
+            exep.Start();
+            exep.BeginErrorReadLine();
             exep.WaitForExit();//关键，等待外部程序退出后才能往下执行
         }
+
     }
     public static class TargetEnumFbsExtension
     {

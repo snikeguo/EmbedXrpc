@@ -13,6 +13,7 @@ namespace EmbedXrpcIdlParser
         
         public void CodeGen(IdlInfo idlInfo)
         {
+            Console.WriteLine("cpp code gen...");
             cppStreamWriter = new StreamWriter(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".h", false, Encoding.UTF8);
             cppStreamWriter.WriteLine("#include\"EmbedXrpcBaseType.h\"");
 
@@ -40,17 +41,18 @@ namespace EmbedXrpcIdlParser
                 fbsStreamWriter.WriteLine(ifs.ToFbs().ToString());
                 EmitClientInterface(ifs);
             }
+            fbsStreamWriter.WriteLine(FbsHelper.EmitPackageTable().ToString());
+
             cppStreamWriter.Flush();
             cppStreamWriter.Close();
 
             fbsStreamWriter.Flush();
             fbsStreamWriter.Close();
 
-            //FbsHelper.GenerateSerializationCode(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".fbs");
+            FbsHelper.GenerateSerializationCode(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".fbs");
         }
         private StreamWriter cppStreamWriter;
         private StreamWriter fbsStreamWriter;
-
         public static string IdlType2CppType(TargetField field)
         {
             string cppType = field.IdlType;
@@ -66,11 +68,7 @@ namespace EmbedXrpcIdlParser
             }
             return cppType;
         }
-        private void EmitFbsMethodTable(TargetService targetService)
-        {
-            fbsStreamWriter.WriteLine("table " + targetService.ServiceName);
-            fbsStreamWriter.WriteLine("{");
-        }
+        
         public void EmitEnum(TargetEnum targetEnum)
         {
             cppStreamWriter.WriteLine("typedef enum _" + targetEnum.Name);

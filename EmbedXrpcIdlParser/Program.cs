@@ -12,16 +12,16 @@ namespace EmbedXrpcIdlParser
     {
         static void Main(string[] args)
         {
-#if true
+#if false
             IdlInfo idlInfo = new IdlInfo();
             idlInfo.Parse("idltest1.cs");
             CppCodeGenerater cpp = new CppCodeGenerater();
             cpp.CodeGen(idlInfo);
+            Console.WriteLine("complete!");
             Console.ReadLine();
 #else
             Console.WriteLine("example:");
             Console.WriteLine(@".\EmbedXrpcIdlParser.exe cpp  -i idltest1.cs");
-            Console.WriteLine("\n\n\n");
             try
             {
                 var exitCode = Parser.Default.ParseArguments<CommandCppGenerater>(args).WithParsed(CommandCppGenerater.Parsed).WithNotParsed(CommandCppGenerater.NotParsed);
