@@ -19,25 +19,25 @@ struct Student
 };
 
 
-Uint8FieldType Result_Value_Field("Value",offsetof(Result, Value));
-Uint8FieldType Result_Ret_Field("Ret", offsetof(Result, Ret));
-IFieldType* ResultDesc[] =
+Uint8Field Result_Value_Field("Value",offsetof(Result, Value));
+Uint8Field Result_Ret_Field("Ret", offsetof(Result, Ret));
+IField* ResultDesc[] =
 {
 	(&Result_Value_Field),
     (&Result_Ret_Field),
 };
-ObjectFieldType Result_Field("Struct:Result", 2, ResultDesc, offsetof(Student, Result));
+ObjectField Result_Field("Struct:Result", 2, ResultDesc, offsetof(Student, Result));
 
 
-Uint8FieldType Student_Age_Field("Age", offsetof(Student, Age));
-Uint8FieldType Student_StudentIdLen_Field("StudentIdLen", offsetof(Student, StudentIdLen));
-Uint8FieldType Student_StudentId_Element_Field("StudentId_Element",0);
-ArrayFieldType Student_StudentId_Field("StudentId", &Student_StudentId_Element_Field, sizeof(uint8_t), offsetof(Student, StudentId), &Student_StudentIdLen_Field);
+Uint8Field Student_Age_Field("Age", offsetof(Student, Age));
+Uint8Field Student_StudentIdLen_Field("StudentIdLen", offsetof(Student, StudentIdLen));
+Uint8Type u8type;
+ArrayField Student_StudentId_Field("StudentId", &u8type, sizeof(uint8_t), offsetof(Student, StudentId), &Student_StudentIdLen_Field);
 
-Uint8FieldType Student_ResultLen_Field("ResultLen", offsetof(Student, ResultLen));
-ArrayFieldType Student_Results_Field("Results", &Result_Field, sizeof(Result), offsetof(Student, Result), &Student_ResultLen_Field);
+Uint8Field Student_ResultLen_Field("ResultLen", offsetof(Student, ResultLen));
+ArrayField Student_Results_Field("Results", &Result_Field, sizeof(Result), offsetof(Student, Result), &Student_ResultLen_Field);
 
-IFieldType* StudentDesc[] =
+IField* StudentDesc[] =
 {
 	(&Student_Age_Field),
 	(&Student_StudentIdLen_Field),
@@ -46,9 +46,10 @@ IFieldType* StudentDesc[] =
     (&Student_ResultLen_Field),
     (&Student_Results_Field),
 };
-ObjectFieldType StudentField("Student", 6, StudentDesc, 0);
+ObjectField StudentField("Student", 6, StudentDesc, 0);
 
 Student x;
+Student y;
 int main()
 {
     SerializationManager manager;
@@ -68,6 +69,8 @@ int main()
 	x.Result[1].Value = 9;
 	x.Result[1].Ret = 10;
     StudentField.Serialize(manager, 9, &x);
+    manager.Reset();
+    StudentField.Deserialize(manager, &y);
     std::cout << "Hello World!\n";
 }
 
