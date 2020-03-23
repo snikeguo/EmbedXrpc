@@ -3,7 +3,18 @@
 
 #include <iostream>
 #include "EmbedXrpcSerialization.h"
-#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
+
+DefineBaseValueInstance(Uint8);
+DefineBaseValueInstance(Int8);
+DefineBaseValueInstance(Uint16);
+DefineBaseValueInstance(Int16);
+DefineBaseValueInstance(Uint32);
+DefineBaseValueInstance(Int32);
+DefineBaseValueInstance(Uint64);
+DefineBaseValueInstance(Int64);
+DefineBaseValueInstance(Float);
+DefineBaseValueInstance(Double);
+
 struct Result
 {
     uint8_t Value;
@@ -15,7 +26,7 @@ struct Student
     uint8_t StudentIdLen;
     uint8_t StudentId[16];
     uint8_t ResultLen;
-    Result Result[2];
+    Result *Result;
 };
 
 
@@ -31,29 +42,30 @@ ObjectField Result_Field("Struct:Result", 2, ResultDesc, offsetof(Student, Resul
 
 Uint8Field Student_Age_Field("Age", offsetof(Student, Age));
 Uint8Field Student_StudentIdLen_Field("StudentIdLen", offsetof(Student, StudentIdLen));
-Uint8Type u8type;
-ArrayField Student_StudentId_Field("StudentId", &u8type, sizeof(uint8_t), offsetof(Student, StudentId), &Student_StudentIdLen_Field);
+
+ArrayField Student_StudentId_Field("StudentId",true, &Uint8TypeInstance, sizeof(uint8_t), offsetof(Student, StudentId), &Student_StudentIdLen_Field);
 
 Uint8Field Student_ResultLen_Field("ResultLen", offsetof(Student, ResultLen));
-ArrayField Student_Results_Field("Results", &Result_Field, sizeof(Result), offsetof(Student, Result), &Student_ResultLen_Field);
+ArrayField Student_Results_Field("Results", false, &Result_Field, sizeof(Result), offsetof(Student, Result), &Student_ResultLen_Field);
 
 IField* StudentDesc[] =
 {
 	(&Student_Age_Field),
 	(&Student_StudentIdLen_Field),
 	(&Student_StudentId_Field),
-	(&Result_Field),
     (&Student_ResultLen_Field),
     (&Student_Results_Field),
 };
-ObjectField StudentField("Student", 6, StudentDesc, 0);
+ObjectField StudentField("Student", 5, StudentDesc, 0);
 
 Student x;
 Student y;
+Result xr[2];
+uint8_t buf[1024];
 int main()
 {
     SerializationManager manager;
-    uint8_t buf[1024];
+    
     memset(buf, 0, 1024);
     manager.Buf = buf;//(uint8_t *)malloc(1024);
     manager.BufferLen = 1024;
@@ -64,6 +76,7 @@ int main()
     x.StudentId[1] = 5;
     x.StudentId[2] = 6;
     x.ResultLen = 2;
+    x.Result = xr;
     x.Result[0].Value = 7;
     x.Result[0].Ret = 8;
 	x.Result[1].Value = 9;
@@ -71,7 +84,10 @@ int main()
     StudentField.Serialize(manager, 9, &x);
     manager.Reset();
     StudentField.Deserialize(manager, &y);
+    StudentField.Free(&y);
     std::cout << "Hello World!\n";
+    int a;
+    std::cin >> a;
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
