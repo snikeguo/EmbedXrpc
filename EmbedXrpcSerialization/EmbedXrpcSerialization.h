@@ -1,11 +1,12 @@
 #ifndef EmbedXrpcSerialization_H
 #define EmbedXrpcSerialization_H
-/*
-#include <stddef.h>
-#include <stdint.h>
-#include "stdio.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
 #include <cassert>
-*/
+#include <cstdlib>
+#include <cstring>
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
@@ -282,6 +283,7 @@ public:
 		manager.Index++;
 	}
 };
+extern Uint8Type Uint8TypeInstance;
 class Uint8Field : public IField
 {
 public:
