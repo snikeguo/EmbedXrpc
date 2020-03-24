@@ -15,38 +15,44 @@ DefineBaseValueInstance(Int64);
 DefineBaseValueInstance(Float);
 DefineBaseValueInstance(Double);
 
+
 struct Result
 {
-    uint8_t Value;
-    uint8_t Ret;
+	uint8_t Value;
+	uint8_t Ret;
+	int16_t ArgLen;
+	int32_t* Args;
 };
 struct Student
 {
-    uint8_t Age;
-    uint8_t StudentIdLen;
-    uint8_t StudentId[16];
-    uint8_t ResultLen;
-    Result *Result;
+	uint8_t Age;
+	uint8_t StudentIdLen;
+	uint8_t StudentId[16];
+	uint8_t ResultLen;
+	Result* Result;
 };
 
-
-Uint8Field Result_Value_Field("Value",offsetof(Result, Value));
-Uint8Field Result_Ret_Field("Ret", offsetof(Result, Ret));
+Uint8Field Result_Value_Field("Result.Value",offsetof(Result, Value));
+Uint8Field Result_Ret_Field("Result.Ret", offsetof(Result, Ret));
+Int16Field Result_ArgLen_Field("Result.ArgLen", offsetof(Result, ArgLen));
+ArrayField Result_Args_Field("Result.Args", false, &Int32TypeInstance, sizeof(int32_t), offsetof(Result, Args), &Result_ArgLen_Field);
 IField* ResultDesc[] =
 {
 	(&Result_Value_Field),
     (&Result_Ret_Field),
+	&Result_ArgLen_Field,
+    &Result_Args_Field
 };
-ObjectField Result_Field("Struct:Result", 2, ResultDesc, offsetof(Student, Result));
+ObjectType Result_Type(sizeof(ResultDesc)/sizeof(IField), ResultDesc);
 
 
-Uint8Field Student_Age_Field("Age", offsetof(Student, Age));
-Uint8Field Student_StudentIdLen_Field("StudentIdLen", offsetof(Student, StudentIdLen));
+Uint8Field Student_Age_Field("Student.Age", offsetof(Student, Age));
+Uint8Field Student_StudentIdLen_Field("Student.StudentIdLen", offsetof(Student, StudentIdLen));
 
-ArrayField Student_StudentId_Field("StudentId",true, &Uint8TypeInstance, sizeof(uint8_t), offsetof(Student, StudentId), &Student_StudentIdLen_Field);
+ArrayField Student_StudentId_Field("Student.StudentId",true, &Uint8TypeInstance, sizeof(uint8_t), offsetof(Student, StudentId), &Student_StudentIdLen_Field);
 
 Uint8Field Student_ResultLen_Field("ResultLen", offsetof(Student, ResultLen));
-ArrayField Student_Results_Field("Results", false, &Result_Field, sizeof(Result), offsetof(Student, Result), &Student_ResultLen_Field);
+ArrayField Student_Results_Field("Results", false, &Result_Type, sizeof(Result), offsetof(Student, Result), &Student_ResultLen_Field);
 
 IField* StudentDesc[] =
 {
@@ -56,11 +62,14 @@ IField* StudentDesc[] =
     (&Student_ResultLen_Field),
     (&Student_Results_Field),
 };
-ObjectField StudentField("Student", 5, StudentDesc, 0);
+ObjectType StudentType(sizeof(StudentDesc) / sizeof(IField), StudentDesc);
 
 Student x;
 Student y;
-Result xr[2];
+Result xr[3];
+int32_t xrArgs0[16] = { 9,8,7,6,5,4,3,2};
+int32_t xrArgs1[16] = { 1,2,3,4,5,6,7,8 };
+int32_t xrArgs2[16] = { 6,2,3,4,5,6,7,8 };
 uint8_t buf[1024];
 int main()
 {
@@ -70,21 +79,35 @@ int main()
     manager.Buf = buf;//(uint8_t *)malloc(1024);
     manager.BufferLen = 1024;
     manager.Index = 0;
-    x.Age = 2;
+    /*x.Age = 2;
     x.StudentIdLen = 3;
     x.StudentId[0] = 4;
     x.StudentId[1] = 5;
-    x.StudentId[2] = 6;
-    x.ResultLen = 2;
+    x.StudentId[2] = 6;*/
+    x.ResultLen = 3;
     x.Result = xr;
+
+
     x.Result[0].Value = 7;
-    x.Result[0].Ret = 8;
-	x.Result[1].Value = 9;
-	x.Result[1].Ret = 10;
-    StudentField.Serialize(manager, 9, &x);
+    x.Result[0].Ret = 10;
+    x.Result[0].ArgLen = 8;
+    x.Result[0].Args = xrArgs0;
+
+
+    x.Result[1].Value = 9;
+    x.Result[1].Ret = 10;
+	x.Result[1].ArgLen = 10;
+	x.Result[1].Args = xrArgs1;
+
+	x.Result[2].Value = 9;
+	x.Result[2].Ret = 10;
+	x.Result[2].ArgLen = 10;
+	x.Result[2].Args = xrArgs2;
+
+    StudentType.Serialize(manager, 9, &x);
     manager.Reset();
-    StudentField.Deserialize(manager, &y);
-    StudentField.Free(&y);
+    StudentType.Deserialize(manager, &y);
+    StudentType.Free(&y);
     std::cout << "Hello World!\n";
     int a;
     std::cin >> a;

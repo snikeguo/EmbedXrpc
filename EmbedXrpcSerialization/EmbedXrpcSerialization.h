@@ -13,7 +13,20 @@
 #define FREE	free
 #define Debug  printf
 typedef  uint32_t ptr_t;
+/*
+用来测试
+static void* MALLOC(uint32_t size)
+{
+	void* ptr = malloc(size);
+	printf("malloc :0x%x\n", ptr);
+	return ptr;
+}
 
+static void FREE(void* ptr)
+{
+	printf("free :0x%x\n", ptr);
+	free(ptr);
+}*/
 typedef enum {
 	TYPE_UINT8,
 	TYPE_INT8,
@@ -79,18 +92,33 @@ public:
 	virtual void* Malloc(uint32_t arrayLen) { return nullptr; }
 };
 
-class IField :public IType
+class IField //:public IType
 {
 public:
 	
 	virtual uint32_t GetOffset() { return 0; }
 	virtual const char* GetName() = 0;
+	
 
 	virtual IField* GetArrayLenField() { return nullptr; }
 	virtual uint8_t GetArrayLenFieldLen() { return 0; }
 	virtual bool IsFixed() { return true; }
+
+	//type 部分
+	virtual const char* GetTypeName() = 0;
+	//virtual Type_t GetType() = 0;
+	virtual IType* GetTypeInstance() { return nullptr; }
+	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) {}
+	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) {}
+	virtual void Deserialize(SerializationManager& manager, void* v) {}
+	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) {}
+
+	virtual void Free(void* ptr) {}
+	virtual void* Malloc(uint32_t arrayLen) { return nullptr; }
+
 	
 };
+
 class ArrayType :public IType
 {
 public:
@@ -121,20 +149,22 @@ public:
 	{
 		for (uint32_t i = 0; i < arrayLen; i++)
 		{
-			memcpy((void*)((uint8_t*)v + i * ElementTypeLen), &manager.Buf[manager.Index], ElementTypeLen);
-			manager.Index += ElementTypeLen;
+			//memcpy((void*)((uint8_t*)v + i * ElementTypeLen), &manager.Buf[manager.Index], ElementTypeLen);
+			ArrayElementType->Deserialize(manager, (void*)((uint8_t*)v + i * ElementTypeLen));
+			//manager.Index += ElementTypeLen;
 		}
 
 	}
+	
 	void* Malloc(uint32_t arrayLen)
 	{
 		void *ptr=MALLOC(arrayLen * ElementTypeLen);
-		printf("malloc :%x\n", ptr);
+		printf("malloc :0x%x,arrayLen:%d\n", ptr, arrayLen);
 		return ptr;
 	}
 	void Free(void* ptr)
 	{
-		printf("free :%x\n", ptr);
+		printf("free :0x%x\n", ptr);
 		FREE(ptr);
 	}
 };
@@ -146,10 +176,10 @@ public:
 	IField* ArrayLenField;
 	ArrayType t;
 	bool _IsFixed;
-	ArrayField(const char* name,bool isFixed, IType* arrayElementType, uint32_t elementTypeLen, uint32_t offset, IField* alf) :t(arrayElementType, elementTypeLen)
+	ArrayField(const char* name,bool isFixed, IType* arrayElementType, uint32_t elementTypeLen, uint32_t offset, IField* arrayLenField) :t(arrayElementType, elementTypeLen)
 	{
 		Offset = offset;
-		ArrayLenField = alf;
+		ArrayLenField = arrayLenField;
 		Name = name;
 		_IsFixed = isFixed;
 	}
@@ -169,7 +199,7 @@ public:
 	}
 	uint8_t GetArrayLenFieldLen()
 	{
-		switch (ArrayLenField->GetType())
+		switch (ArrayLenField->GetTypeInstance()->GetType())
 		{
 		case TYPE_UINT8:
 			return 1;
@@ -210,9 +240,9 @@ public:
 	{
 		return t.GetTypeName();
 	}
-	Type_t GetType()
+	IType * GetTypeInstance()
 	{
-		return t.GetType();
+		return &t;
 	}
 	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen)
 	{
@@ -277,9 +307,9 @@ public:
 	{
 		return t.GetTypeName();
 	}
-	Type_t GetType()
+	IType* GetTypeInstance()
 	{
-		return t.GetType();
+		return &t;
 	}
 	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)
 	{
@@ -336,9 +366,9 @@ public:\
 	{\
 		return t.GetTypeName();\
 	}\
-	Type_t GetType()\
-	{\
-		return t.GetType();\
+	IType * GetTypeInstance()	\
+	{	\
+		return &t;\
 	}\
 	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)\
 	{\
@@ -360,11 +390,13 @@ CodeGenBaseValueClass(Float, "float", TYPE_FLOAT, 4);
 CodeGenBaseValueClass(Double, "double", TYPE_DOUBLE, 8);
 
 #define DefineBaseValueInstance(prefix) prefix##Type prefix##TypeInstance;
+
+
 class ObjectType :public IType
 {
 public:
 	uint32_t FieldCount;
-	IField** SubFieldsType;
+	IField** SubFields;
 	const char* GetTypeName()
 	{
 		return "Object";
@@ -376,32 +408,31 @@ public:
 	ObjectType(uint32_t fc, IField* ftds[])
 	{
 		FieldCount = fc;
-		SubFieldsType = ftds;
+		SubFields = ftds;
 	}
 	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
-			void* d = (void*)((uint8_t*)v + SubFieldsType[i]->GetOffset());
-			if (SubFieldsType[i]->GetType() != TYPE_ARRAY)
+			void* d = (void*)((uint8_t*)v + SubFields[i]->GetOffset());
+			Debug("Serialize:%s\n", SubFields[i]->GetName());
+			if (SubFields[i]->GetTypeInstance()->GetType() != TYPE_ARRAY)
 			{
-
-				SubFieldsType[i]->Serialize(manager, Tag, d);
+				SubFields[i]->Serialize(manager, Tag, d);
 			}
 			else
 			{
-				IField* arrayLenField = (IField*)SubFieldsType[i]->GetArrayLenField();
+				IField* arrayLenField = (IField*)SubFields[i]->GetArrayLenField();
 				void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-				ArrayField* arrayfield = (ArrayField*)SubFieldsType[i];
+				ArrayField* arrayfield = (ArrayField*)SubFields[i];
 				uint32_t len = 0;
 				memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
-
 				ptr_t* ptr =(ptr_t*) d;
 				if (arrayfield->IsFixed() == false)
 				{
 					ptr = (*(ptr_t**)d);
 				}
-				SubFieldsType[i]->Serialize(manager, Tag, ptr, len);
+				SubFields[i]->Serialize(manager, Tag, ptr, len);
 			}
 		}
 	}
@@ -409,17 +440,18 @@ public:
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
-			void* d = (void*)((uint8_t*)v + SubFieldsType[i]->GetOffset());
-			if (SubFieldsType[i]->GetType() != TYPE_ARRAY)
+			void* d = (void*)((uint8_t*)v + SubFields[i]->GetOffset());
+			Debug("Deserialize:%s\n", SubFields[i]->GetName());
+			if (SubFields[i]->GetTypeInstance()->GetType() != TYPE_ARRAY)
 			{
 
-				SubFieldsType[i]->Deserialize(manager, d);
+				SubFields[i]->Deserialize(manager, d);
 			}
 			else
 			{
-				IField* arrayLenField = (IField*)SubFieldsType[i]->GetArrayLenField();
+				IField* arrayLenField = (IField*)SubFields[i]->GetArrayLenField();
 				void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-				ArrayField* arrayfield = (ArrayField*)SubFieldsType[i];
+				ArrayField* arrayfield = (ArrayField*)SubFields[i];
 				uint32_t len = 0;
 				memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
 
@@ -429,7 +461,7 @@ public:
 					ptr = arrayfield->Malloc(len);
 					memcpy((void *)((ptr_t*)d),&ptr,sizeof(ptr_t));
 				}
-				SubFieldsType[i]->Deserialize(manager, ptr, len);
+				SubFields[i]->Deserialize(manager, ptr, len);
 			}
 		}
 	}
@@ -437,14 +469,30 @@ public:
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
-			if (SubFieldsType[i]->GetType() == TYPE_ARRAY)
-			{
-				void* d = (void*)((uint8_t*)v + SubFieldsType[i]->GetOffset());
-				ArrayField* arrayfield = (ArrayField*)SubFieldsType[i];
-				ptr_t** ptr = (ptr_t**)d;
+			if (SubFields[i]->GetTypeInstance()->GetType() == TYPE_ARRAY)
+			{		
+				ArrayField* arrayfield = (ArrayField*)SubFields[i];				
 				if (arrayfield->IsFixed() == false)
 				{
-					arrayfield->Free(*ptr);
+					IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
+					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
+					uint32_t len = 0;
+					memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+					uint8_t** parentptr = (uint8_t**)((uint8_t*)v + arrayfield->GetOffset());
+					ArrayType *t = (ArrayType *)arrayfield->GetTypeInstance();
+					if (t->ArrayElementType->GetType() == TYPE_OBJECT)
+					{
+						for (uint32_t j = 0; j < len; j++)
+						{
+							uint8_t** subtypeptr= (uint8_t**)((*parentptr)+ t->ElementTypeLen * j);
+							t->ArrayElementType->Free(subtypeptr);
+						}
+						arrayfield->Free(*(uint8_t**)parentptr);
+					}
+					else
+					{
+						arrayfield->Free(*parentptr);
+					}	
 				}
 			}
 
@@ -477,9 +525,9 @@ public:
 	{
 		return t.GetTypeName();
 	}
-	Type_t GetType()
+	IType* GetTypeInstance()
 	{
-		return t.GetType();
+		return &t;
 	}
 	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)
 	{
