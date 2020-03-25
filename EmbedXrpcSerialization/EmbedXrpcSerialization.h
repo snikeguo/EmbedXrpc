@@ -89,7 +89,7 @@ public:
 	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) {}
 	virtual void Deserialize(SerializationManager& manager, void* v) {}
 	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) {}
-	virtual void Free(void* ptr) {}
+	virtual void Free(void* ptr, uint32_t arrayLen = 0) {}
 	virtual void* Malloc(uint32_t arrayLen) { return nullptr; }
 };
 
@@ -114,7 +114,7 @@ public:
 	virtual void Deserialize(SerializationManager& manager, void* v) {}
 	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) {}
 
-	virtual void Free(void* ptr) {}
+	virtual void Free(void* ptr, uint32_t arrayLen=0) {}
 	virtual void* Malloc(uint32_t arrayLen) { return nullptr; }
 
 	
@@ -160,12 +160,16 @@ public:
 	void* Malloc(uint32_t arrayLen)
 	{
 		void *ptr=MALLOC(arrayLen * ElementTypeLen);
-		printf("malloc :0x%x,arrayLen:%d\n", ptr, arrayLen);
+		Debug("malloc :0x%x,arrayLen:%d\n", ptr, arrayLen);
 		return ptr;
 	}
-	void Free(void* ptr)
+	void Free(void* ptr, uint32_t arrayLen = 0)
 	{
-		printf("free :0x%x\n", ptr);
+		for (uint32_t i = 0; i < arrayLen; i++)
+		{
+			ArrayElementType->Free((void*)((uint8_t*)ptr + i * ElementTypeLen), 0);
+		}
+		Debug("free :0x%x\n", ptr);
 		FREE(ptr);
 	}
 };
@@ -257,9 +261,9 @@ public:
 	{
 		return t.Malloc(arrayLen);
 	}
-	void Free(void* ptr)
+	void Free(void* ptr, uint32_t arrayLen = 0)
 	{
-		t.Free(ptr);
+		t.Free(ptr,arrayLen);
 	}
 };
 class Uint8Type :public IType
@@ -467,7 +471,7 @@ public:
 			}
 		}
 	}
-	void Free(void* v)
+	void Free(void* v, uint32_t arrayLen = 0)
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
@@ -480,21 +484,8 @@ public:
 					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
 					uint32_t len = 0;
 					memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
-					uint8_t** parentptr = (uint8_t**)((uint8_t*)v + arrayfield->GetOffset());
-					ArrayType *t = (ArrayType *)arrayfield->GetTypeInstance();
-					if (t->ArrayElementType->GetType() == TYPE_OBJECT)
-					{
-						for (uint32_t j = 0; j < len; j++)
-						{
-							uint8_t** subtypeptr= (uint8_t**)((*parentptr)+ t->ElementTypeLen * j);
-							t->ArrayElementType->Free(subtypeptr);
-						}
-						arrayfield->Free(*(uint8_t**)parentptr);
-					}
-					else
-					{
-						arrayfield->Free(*parentptr);
-					}	
+					uint8_t** arrayfieldPtr = (uint8_t**)((uint8_t*)v + arrayfield->GetOffset());
+					arrayfield->Free(*arrayfieldPtr, len);
 				}
 			}
 
@@ -539,9 +530,9 @@ public:
 	{
 		t.Deserialize(manager, v);
 	}
-	void Free(void* v)
+	void Free(void* v, uint32_t arrayLen = 0)
 	{
-		t.Free(v);
+		t.Free(v, arrayLen);
 	}
 };
 
