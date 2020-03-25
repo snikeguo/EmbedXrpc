@@ -50,7 +50,7 @@ struct  Student_t
 
     [FieldIndex(6)]
     [MaxCount(IsFixed = true, MaxCount = 100, LenFieldIndex = 5)]
-    byte[] StudentId;
+    Int16[] StudentId;
 
     [FieldIndex(7)]
     Sex_t Sex;

@@ -33,6 +33,7 @@ namespace EmbedXrpcIdlParser
         public string IdlType { get; set; }
         public string Name { get; set; }
         public bool IsArray { get; set; }
+        public TargetEnum Enum { get; set; }
         public FieldIndexAttribute FieldIndexAttribute { get; set; }
         public MaxCountAttribute MaxCountAttribute { get; set; }
 
@@ -161,6 +162,17 @@ namespace EmbedXrpcIdlParser
 
         public GenerationOptionParameterAttribute GenerationOptionParameterAttribute = null;
 
+        public TargetEnum GetTargetEnum(string name)
+        {
+            foreach (var e in TargetEnums)
+            {
+                if (name == e.Name)
+                {
+                    return e;
+                }
+            }
+            return null;
+        }
 
         public void Parse(string file)
         {
@@ -210,6 +222,10 @@ namespace EmbedXrpcIdlParser
                                 {
                                     targetField.MaxCountAttribute = field.GetCustomAttribute<MaxCountAttribute>();
                                 }
+                                if (field.FieldType.IsEnum == true)
+                                {
+                                    targetField.Enum = GetTargetEnum(targetField.IdlType);
+                                }
                                 targetStruct.TargetFields.Add(targetField);
                             }
                             TargetStructs.Add(targetStruct);
@@ -248,6 +264,10 @@ namespace EmbedXrpcIdlParser
                                 }
                                 field.IdlType = par.ParameterType.Name;
                                 field.Name = par.Name;
+                                if (par.ParameterType.IsEnum == true)
+                                {
+                                    field.Enum = GetTargetEnum(field.IdlType);
+                                }
                                 targetService.TargetFields.Add(field);
                             }
                             targetInterface.Services.Add(targetService);
@@ -285,6 +305,10 @@ namespace EmbedXrpcIdlParser
                             }
                             field.IdlType = par.ParameterType.Name;
                             field.Name = par.Name;
+                            if (par.ParameterType.IsEnum == true)
+                            {
+                                field.Enum = GetTargetEnum(field.IdlType);
+                            }
                             targetDelegate.TargetFields.Add(field);
                         }
                         TargetDelegates.Add(targetDelegate);

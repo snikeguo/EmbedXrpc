@@ -48,6 +48,7 @@
     <Compile Include="Attribute.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="CppCodeGenerater.cs" />
+    <Compile Include="EmbedXrpcSerializationExtension.cs" />
     <Compile Include="FbsExtension.cs" />
     <Compile Include="ICodeGenerater.cs" />
     <Compile Include="idltest1.cs">
@@ -58,11 +59,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="flatcc.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommandLineParser">

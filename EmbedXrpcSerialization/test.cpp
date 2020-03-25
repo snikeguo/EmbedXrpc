@@ -50,7 +50,7 @@ IField* StudentDesc[] =
     (&Student_ResultLen_Field),
     (&Student_Results_Field),
 };
-ObjectType StudentType(sizeof(StudentDesc) / sizeof(IField), StudentDesc);
+ObjectType StudentType(sizeof(StudentDesc) / sizeof(IField *), StudentDesc);
 
 Student x;
 Student y;
