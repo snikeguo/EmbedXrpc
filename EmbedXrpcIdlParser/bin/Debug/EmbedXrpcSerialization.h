@@ -428,11 +428,15 @@ public:
 			}
 			else
 			{
-				IField* arrayLenField = (IField*)SubFields[i]->GetArrayLenField();
-				void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
 				ArrayField* arrayfield = (ArrayField*)SubFields[i];
-				uint32_t len = 0;
-				memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
+				uint32_t len = 1;
+				if (arrayLenField != nullptr)
+				{
+					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
+					memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+				}
+
 				ptr_t* ptr =(ptr_t*) d;
 				if (arrayfield->IsFixed() == false)
 				{
@@ -455,12 +459,14 @@ public:
 			}
 			else
 			{
-				IField* arrayLenField = (IField*)SubFields[i]->GetArrayLenField();
-				void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
 				ArrayField* arrayfield = (ArrayField*)SubFields[i];
-				uint32_t len = 0;
-				memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
-
+				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
+				uint32_t len = 1;
+				if (arrayLenField != nullptr)
+				{
+					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
+					memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+				}
 				void* ptr = d;
 				if (arrayfield->IsFixed() == false)
 				{
@@ -481,9 +487,12 @@ public:
 				if (arrayfield->IsFixed() == false)
 				{
 					IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
-					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-					uint32_t len = 0;
-					memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+					uint32_t len = 1;
+					if (arrayLenField != nullptr)
+					{
+						void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
+						memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+					}					
 					uint8_t** arrayfieldPtr = (uint8_t**)((uint8_t*)v + arrayfield->GetOffset());
 					arrayfield->Free(*arrayfieldPtr, len);
 				}

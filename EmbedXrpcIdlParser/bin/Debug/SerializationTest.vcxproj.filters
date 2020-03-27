@@ -24,6 +24,9 @@
     <ClCompile Include="StudentService.EmbedXrpcSerialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EmbedXrpcClientObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EmbedXrpcBaseType.h">
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StudentService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EmbedXrpcClientObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

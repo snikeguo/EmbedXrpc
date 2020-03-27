@@ -98,12 +98,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EmbedXrpcClientObject.cpp" />
     <ClCompile Include="EmbedXrpcSerialization.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="StudentService.EmbedXrpcSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EmbedXrpcBaseType.h" />
+    <ClInclude Include="EmbedXrpcClientObject.h" />
     <ClInclude Include="EmbedXrpcSerialization.h" />
     <ClInclude Include="StudentService.EmbedXrpcSerialization.h" />
     <ClInclude Include="StudentService.h" />

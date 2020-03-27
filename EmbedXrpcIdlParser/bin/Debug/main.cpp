@@ -22,6 +22,34 @@ int main()
 	DateTime_t_Type.Deserialize(Manager, &rDataTime);
 	DateTime_t_Type.Free(&rDataTime);
 
+	Manager.Reset();
+	Student_t sStu,rStu;
+	sStu.ResultsLen = 1;
+	sStu.Results[0].Value = 2;
+	sStu.Results[0].NameLen = 3;
+	sStu.Results[0].Name[0] = 4;
+	sStu.Results[0].Name[1] = 5;
+	sStu.Results[0].Name[2] = 6;
+	sStu.Results[0].Name[3] = 7;
+	sStu.Results[0].Arg1 = 8;
+	sStu.Age = 9;
+	uint8_t nameBuf[3] = {0xa,0xb,0xc};
+	sStu.Name = nameBuf;
+	sStu.StudentIdLen = 0xd;
+	sStu.StudentId[0] = 0xe;
+	sStu.StudentId[1] = 0xf;
+	sStu.Sex = Woman;
+	Student_t_Type.Serialize(Manager, 0, &sStu);
+
+	Manager.Reset();
+	Student_t_Type.Deserialize(Manager, &rStu);
+
+	uint8_t rpcBuf[1024];
+	EmbedXrpcClientObject client(rpcBuf,1024);
+	IMyInterfaceClientImpl impl(&client);
+
+	Byte sid[10] = { 1,2,3,4,5,6 };
+	impl.GetStudentInfoFormStudentId(1, sid, 4, 5);
 	cin.get();
 	return 0;
 }

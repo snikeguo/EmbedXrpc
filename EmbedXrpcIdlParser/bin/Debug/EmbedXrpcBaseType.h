@@ -22,4 +22,8 @@ public :
     int IsSuccess;
     T Value;
 };
+class IDelegate
+{
+    override void Invoke(uint8_t* data, uint32_t len);
+};
 #endif

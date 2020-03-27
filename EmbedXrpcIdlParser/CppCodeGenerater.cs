@@ -16,36 +16,37 @@ namespace EmbedXrpcIdlParser
             Console.WriteLine("cpp code gen...");
             cppStreamWriter = new StreamWriter(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".h", false, Encoding.UTF8);
             cppStreamWriter.WriteLine("#include\"EmbedXrpcBaseType.h\"");
-
+            cppStreamWriter.WriteLine("#include\"EmbedXrpcClientObject.h\"");
+            cppStreamWriter.WriteLine($"#include\"{idlInfo.GenerationOptionParameterAttribute.OutPutFileName}.EmbedXrpcSerialization.h\"");
             //fbsStreamWriter = new StreamWriter(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".fbs", false, Encoding.ASCII);
             //fbsStreamWriter.WriteLine("namespace EmbedXrpc;");
 
-            
-
-            EmbedXrpcSerializationCFileStreamWriter = new StreamWriter(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, Encoding.UTF8);
-
-            EmbedXrpcSerializationCFileStreamWriter.WriteLine($"#include\"{idlInfo.GenerationOptionParameterAttribute.OutPutFileName }.h\"");
-            EmbedXrpcSerializationCFileStreamWriter.WriteLine($"#include\"{idlInfo.GenerationOptionParameterAttribute.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
 
-            EmbedXrpcSerializationHFileStreamWriter = new StreamWriter(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine($"#ifndef {idlInfo.GenerationOptionParameterAttribute.OutPutFileName}_EmbedXrpcSerialization_H");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine($"#define {idlInfo.GenerationOptionParameterAttribute.OutPutFileName}_EmbedXrpcSerialization_H");
+            SerializationCFileStreamWriter = new StreamWriter(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, Encoding.UTF8);
 
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("//EmbedXrpc Code gen .By snikeguo.e-mail:snikeguo@foxmail.com");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("//关于snikeguo作者:92年生人,热爱技术,底层功底扎实.深入理解C语言底层到汇编层，单片机从外设/裸机到OS通吃");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("//上位机专注于C# 界面库熟悉WPF.服务器专注于dotnet core");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("//行业经验：汽车电子.独自完成UDS(包括FBL)协议栈  GBT27930-2015(SAE J1939)协议栈等");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("//熟悉BMS业务逻辑,有一套自己稳定出货的BMS软件/硬件/上位机/服务器/USB转CAN&CANFD");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("//TITLE:高级嵌入式软件工程师.软件架构师");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("//微信:snikeguo.有好的职位推荐请加");
+            SerializationCFileStreamWriter.WriteLine($"#include\"{idlInfo.GenerationOptionParameterAttribute.OutPutFileName }.h\"");
+            SerializationCFileStreamWriter.WriteLine($"#include\"{idlInfo.GenerationOptionParameterAttribute.OutPutFileName}.EmbedXrpcSerialization.h\"");
+
+
+            SerializationHFileStreamWriter = new StreamWriter(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
+            SerializationHFileStreamWriter.WriteLine($"#ifndef {idlInfo.GenerationOptionParameterAttribute.OutPutFileName}_EmbedXrpcSerialization_H");
+            SerializationHFileStreamWriter.WriteLine($"#define {idlInfo.GenerationOptionParameterAttribute.OutPutFileName}_EmbedXrpcSerialization_H");
+
+            SerializationHFileStreamWriter.WriteLine("//EmbedXrpc Code gen .By snikeguo.e-mail:snikeguo@foxmail.com");
+            SerializationHFileStreamWriter.WriteLine("//关于snikeguo作者:92年生人,热爱技术,底层功底扎实.深入理解C语言底层到汇编层，单片机从外设/裸机到OS均有涉猎");
+            SerializationHFileStreamWriter.WriteLine("//上位机专注于C# 界面库熟悉WPF.服务器专注于dotnet core");
+            SerializationHFileStreamWriter.WriteLine("//行业经验：汽车电子.独自完成UDS(包括FBL)协议栈  GBT27930-2015(SAE J1939)协议栈等");
+            SerializationHFileStreamWriter.WriteLine("//熟悉BMS业务逻辑,有一套自己稳定出货的BMS软件/硬件/上位机/服务器/USB转CAN&CANFD");
+            SerializationHFileStreamWriter.WriteLine("//TITLE:高级嵌入式软件工程师.软件架构师");
+            SerializationHFileStreamWriter.WriteLine("//微信:snikeguo.有好的职位推荐请加");
 
             //EmbedXrpcSerializationHFileStreamWriter.WriteLine("#include\"EmbedXrpcSerialization.h\"");
             //D:\VSProject\EmbedXrpcIdlParser\EmbedXrpcSerialization
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("#include\"EmbedXrpcSerialization.h\"");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("#ifndef offsetof");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("#endif");
+            SerializationHFileStreamWriter.WriteLine("#include\"EmbedXrpcSerialization.h\"");
+            SerializationHFileStreamWriter.WriteLine("#ifndef offsetof");
+            SerializationHFileStreamWriter.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
+            SerializationHFileStreamWriter.WriteLine("#endif");
             foreach (var em in idlInfo.TargetEnums)
             {
                 //EmitFbsEnum(em);
@@ -56,22 +57,34 @@ namespace EmbedXrpcIdlParser
             {
                 //EmitFbsTable(stru);
                 //fbsStreamWriter.WriteLine(stru.ToFbs().ToString());
-                stru.ToXrpcSerializationCode(EmbedXrpcSerializationCFileStreamWriter, EmbedXrpcSerializationHFileStreamWriter);
+                EmbedXrpcSerializationHelper.EmitStruct(stru.Name, 
+                    stru.TargetFields,
+                    SerializationCFileStreamWriter, 
+                    SerializationHFileStreamWriter);
                 EmitStruct(stru);
             }
 
             foreach (var del in idlInfo.TargetDelegates)
             {
                 //fbsStreamWriter.WriteLine(del.ToFbs().ToString());
+                TargetStruct targetStruct = new TargetStruct();
+                targetStruct.Name = del.MethodName+"Struct";
+                targetStruct.TargetFields = del.TargetFields;
+                EmitStruct(targetStruct);
                 EmitDelegate(del);
+                EmbedXrpcSerializationHelper.EmitStruct(targetStruct.Name,
+                    targetStruct.TargetFields,
+                    SerializationCFileStreamWriter,
+                    SerializationHFileStreamWriter);
             }
-#if false
+
             foreach (var ifs in idlInfo.TargetInterfaces)
             {
                 //fbsStreamWriter.WriteLine(ifs.ToFbs().ToString());
                 EmitClientInterface(ifs);
+                
             }
-#endif
+
             //fbsStreamWriter.WriteLine(FbsHelper.EmitPackageTable().ToString());
 
             cppStreamWriter.Flush();
@@ -81,20 +94,20 @@ namespace EmbedXrpcIdlParser
             //fbsStreamWriter.Close();
             //FbsHelper.GenerateSerializationCode(idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".fbs");
 
-            EmbedXrpcSerializationCFileStreamWriter.Flush();
-            EmbedXrpcSerializationCFileStreamWriter.Close();
+            SerializationCFileStreamWriter.Flush();
+            SerializationCFileStreamWriter.Close();
 
             
 
-            EmbedXrpcSerializationHFileStreamWriter.WriteLine("\n#endif");
+            SerializationHFileStreamWriter.WriteLine("\n#endif");
 
-            EmbedXrpcSerializationHFileStreamWriter.Flush();
-            EmbedXrpcSerializationHFileStreamWriter.Close();
+            SerializationHFileStreamWriter.Flush();
+            SerializationHFileStreamWriter.Close();
         }
         private StreamWriter cppStreamWriter;
         //private StreamWriter fbsStreamWriter;
-        private StreamWriter EmbedXrpcSerializationCFileStreamWriter;
-        private StreamWriter EmbedXrpcSerializationHFileStreamWriter;
+        private StreamWriter SerializationCFileStreamWriter;
+        private StreamWriter SerializationHFileStreamWriter;
         public static string IdlType2CppType(TargetField field)
         {
             string cppType = field.IdlType;
@@ -133,6 +146,7 @@ namespace EmbedXrpcIdlParser
             }
             cppStreamWriter.WriteLine("}" + targetEnum.Name + ";");
         }
+        
         public void EmitStruct(TargetStruct targetStruct)
         {
             cppStreamWriter.WriteLine("typedef struct _" + targetStruct.Name);
@@ -177,19 +191,54 @@ namespace EmbedXrpcIdlParser
         }
         public void EmitClientInterface(TargetInterface targetInterface)
         {
+            foreach (var service in targetInterface.Services)
+            {
+                
+                TargetStruct targetStructRequest = new TargetStruct();
+                targetStructRequest.Name = service.ServiceName + "_Request";
+                targetStructRequest.TargetFields.AddRange(service.TargetFields);
+                EmbedXrpcSerializationHelper.EmitStruct(targetStructRequest.Name,
+                    targetStructRequest.TargetFields,
+                    SerializationCFileStreamWriter,
+                    SerializationHFileStreamWriter);
+                EmitStruct(targetStructRequest);
+
+                if(service.ReturnValue!=null)
+                {
+                    TargetStruct targetStructResponse = new TargetStruct();
+                    targetStructResponse.Name = service.ServiceName + "_Response";
+                    TargetField returnValue = new TargetField();
+                    returnValue.Name = "ReturnValue";
+                    returnValue.IdlType = service.ReturnValue.IdlType;
+                    returnValue.IsArray = false;
+                    returnValue.MaxCountAttribute = null;
+                    targetStructResponse.TargetFields.Add(returnValue);
+                    EmbedXrpcSerializationHelper.EmitStruct(targetStructResponse.Name,
+                        targetStructResponse.TargetFields,
+                        SerializationCFileStreamWriter,
+                        SerializationHFileStreamWriter);
+                    EmitStruct(targetStructResponse);
+                }
+                
+            }
             cppStreamWriter.WriteLine("class " + targetInterface.Name + "ClientImpl");
             cppStreamWriter.WriteLine("{\npublic:\nEmbedXrpcClientObject *RpcClientObject=nullptr;");
             cppStreamWriter.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcClientObject *rpcobj)");
             cppStreamWriter.WriteLine("{\nthis->RpcClientObject=rpcobj;");
             foreach (var service in targetInterface.Services)
             {
-                cppStreamWriter.WriteLine("RpcClientObject->ServicesName.Add(\"" + targetInterface.Name + "." + service.ServiceName + "\");");
+                cppStreamWriter.WriteLine("RpcClientObject->ServicesName.push_back(\"" + targetInterface.Name + "." + service.ServiceName + "\");");
             }
             cppStreamWriter.WriteLine("}");
 
             foreach (var service in targetInterface.Services)
             {
-                cppStreamWriter.Write("Option<" + service.ReturnValue.IdlType + "> " + service.ServiceName + "(");
+                if(service.ReturnValue!=null)
+                    cppStreamWriter.Write("Option<" + service.ReturnValue.IdlType + "> " + service.ServiceName + "(");
+                else
+                {
+                    cppStreamWriter.Write("void " + service.ServiceName + "(");
+                }
                 string temp_fileds = string.Empty;
                 for (int i = 0; i < service.TargetFields.Count; i++)
                 {
@@ -214,6 +263,21 @@ namespace EmbedXrpcIdlParser
 
                 cppStreamWriter.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
+                cppStreamWriter.WriteLine($"{service.ServiceName}_Request sendData;");
+                foreach (var field in service.TargetFields)
+                {
+                    if(field.IsArray==true&&field.MaxCountAttribute.IsFixed==true)
+                    {
+                        string arrayelementtype= field.IdlType.Replace("[","").Replace("]","");
+                        cppStreamWriter.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
+                    }
+                    else
+                    {
+                        cppStreamWriter.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                    }
+                    
+                }
+                cppStreamWriter.WriteLine($"{service.ServiceName}_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);");
                 //todo
                 //1.serialize  service.name to buf
                 //2.serialize fields to buf

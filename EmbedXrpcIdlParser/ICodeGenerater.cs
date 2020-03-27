@@ -34,20 +34,21 @@ namespace EmbedXrpcIdlParser
         public string Name { get; set; }
         public bool IsArray { get; set; }
         public TargetEnum Enum { get; set; }
-        public FieldIndexAttribute FieldIndexAttribute { get; set; }
+        //public FieldIndexAttribute FieldIndexAttribute { get; set; }
         public MaxCountAttribute MaxCountAttribute { get; set; }
 
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(String.Format($"Field: Type:{IdlType},Name:{Name},IsArray:{IsArray},FieldIndex:{FieldIndexAttribute.Index}"));
+            sb.Append(String.Format($"Field: Type:{IdlType},Name:{Name},IsArray:{IsArray}"));
             if (IsArray == true)
             {
-                sb.Append(string.Format($",IsFixed: { MaxCountAttribute.IsFixed},MaxCount: { MaxCountAttribute.MaxCount},LenFieldIndex:{MaxCountAttribute.LenFieldIndex}"));
+                sb.Append(string.Format($",IsFixed: { MaxCountAttribute.IsFixed},MaxCount: { MaxCountAttribute.MaxCount},LenFieldName:{MaxCountAttribute.LenFieldName}"));
             }
             sb.Append("\n");
             return sb.ToString();
         }
+        
     }
     public class TargetReturnValue
     {
@@ -173,7 +174,17 @@ namespace EmbedXrpcIdlParser
             }
             return null;
         }
-
+        public static TargetField GetArrayLenField(IList<TargetField> fields,TargetField arrayField)
+        {
+            foreach (var f in fields)
+            {
+                if(f.Name== arrayField.MaxCountAttribute.LenFieldName)
+                {
+                    return f;
+                }
+            }
+            return null;
+        }
         public void Parse(string file)
         {
             Console.WriteLine("parse :{0}...", file);
@@ -212,9 +223,9 @@ namespace EmbedXrpcIdlParser
                             var fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
                             foreach (var field in fields)
                             {
-                                var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
+                                //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
                                 TargetField targetField = new TargetField();
-                                targetField.FieldIndexAttribute = fieldIndexAttribute;
+                                //targetField.FieldIndexAttribute = fieldIndexAttribute;
                                 targetField.IsArray = field.FieldType.IsArray;
                                 targetField.IdlType = field.FieldType.Name;
                                 targetField.Name = field.Name;
@@ -240,23 +251,29 @@ namespace EmbedXrpcIdlParser
                         var services = type.GetMembers();
                         foreach (var service in services)
                         {
-                            var mt = (service as MethodInfo);
-                            TargetReturnValue returnValue = new TargetReturnValue();
-                            returnValue.IdlType = mt.ReturnType.Name;
-                            if (mt.ReturnType.IsArray == true)
-                            {
-                                throw new Exception("return value does not support array type!");
-                            }
                             TargetService targetService = new TargetService();
-                            targetService.ReturnValue = returnValue;
+
+                            var mt = (service as MethodInfo);
+                            Type rt = mt.ReturnType;
+                            if(rt.Name!="Void")
+                            {
+                                TargetReturnValue returnValue = new TargetReturnValue();
+                                returnValue.IdlType = mt.ReturnType.Name;
+                                if (mt.ReturnType.IsArray == true)
+                                {
+                                    throw new Exception("return value does not support array type!");
+                                }
+
+                                targetService.ReturnValue = returnValue;
+                            }
+
+
                             targetService.ServiceName = mt.Name;
-
-
                             var pars = mt.GetParameters();
                             foreach (var par in pars)
                             {
                                 TargetField field = new TargetField();
-                                field.FieldIndexAttribute = par.GetCustomAttribute<FieldIndexAttribute>();
+                                //field.FieldIndexAttribute = par.GetCustomAttribute<FieldIndexAttribute>();
                                 field.IsArray = par.ParameterType.IsArray;
                                 if (field.IsArray == true)
                                 {
@@ -297,7 +314,7 @@ namespace EmbedXrpcIdlParser
                         foreach (var par in pars)
                         {
                             TargetField field = new TargetField();
-                            field.FieldIndexAttribute = par.GetCustomAttribute<FieldIndexAttribute>();
+                            //field.FieldIndexAttribute = par.GetCustomAttribute<FieldIndexAttribute>();
                             field.IsArray = par.ParameterType.IsArray;
                             if (field.IsArray == true)
                             {

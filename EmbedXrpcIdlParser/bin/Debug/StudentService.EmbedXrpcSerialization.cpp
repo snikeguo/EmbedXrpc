@@ -13,20 +13,18 @@ IField* Result_tDesc []=
 };
 ObjectType Result_t_Type(sizeof(Result_tDesc)/sizeof(IField*),Result_tDesc);
 
-Uint16Field Student_t_ResultsLen2("Student_t.ResultsLen2",offsetof(Student_t,ResultsLen2));
-ArrayField Student_t_Results("Student_t.Results",true,&Result_t_Type,sizeof(Result_t),offsetof(Student_t,Results),&Student_t_ResultsLen2);
+Uint16Field Student_t_ResultsLen("Student_t.ResultsLen",offsetof(Student_t,ResultsLen));
+ArrayField Student_t_Results("Student_t.Results",true,&Result_t_Type,sizeof(Result_t),offsetof(Student_t,Results),&Student_t_ResultsLen);
 Int32Field Student_t_Age("Student_t.Age",offsetof(Student_t,Age));
-Uint8Field Student_t_NameLen("Student_t.NameLen",offsetof(Student_t,NameLen));
-ArrayField Student_t_Name("Student_t.Name",false,&Uint8TypeInstance,sizeof(Byte),offsetof(Student_t,Name),&Student_t_NameLen);
+ArrayField Student_t_Name("Student_t.Name",false,&Uint8TypeInstance,sizeof(Byte),offsetof(Student_t,Name),nullptr);
 Uint8Field Student_t_StudentIdLen("Student_t.StudentIdLen",offsetof(Student_t,StudentIdLen));
 ArrayField Student_t_StudentId("Student_t.StudentId",true,&Int16TypeInstance,sizeof(Int16),offsetof(Student_t,StudentId),&Student_t_StudentIdLen);
 Uint8Field Student_t_Sex("Student_t.Sex",offsetof(Student_t,Sex));
 IField* Student_tDesc []=
 {
-&Student_t_ResultsLen2,
+&Student_t_ResultsLen,
 &Student_t_Results,
 &Student_t_Age,
-&Student_t_NameLen,
 &Student_t_Name,
 &Student_t_StudentIdLen,
 &Student_t_StudentId,
@@ -59,4 +57,42 @@ IField* StudentArray_tDesc []=
 &StudentArray_t_Students,
 };
 ObjectType StudentArray_t_Type(sizeof(StudentArray_tDesc)/sizeof(IField*),StudentArray_tDesc);
+
+ObjectField BroadcastDataTimeStruct_t("BroadcastDataTimeStruct.t",sizeof(DateTime_tDesc)/sizeof(IField*),DateTime_tDesc,offsetof(BroadcastDataTimeStruct,t));
+IField* BroadcastDataTimeStructDesc []=
+{
+&BroadcastDataTimeStruct_t,
+};
+ObjectType BroadcastDataTimeStruct_Type(sizeof(BroadcastDataTimeStructDesc)/sizeof(IField*),BroadcastDataTimeStructDesc);
+
+Uint8Field GetStudentInfoFormStudentId_Request_StudentIdLen("GetStudentInfoFormStudentId_Request.StudentIdLen",offsetof(GetStudentInfoFormStudentId_Request,StudentIdLen));
+ArrayField GetStudentInfoFormStudentId_Request_StudentId("GetStudentInfoFormStudentId_Request.StudentId",true,&Uint8TypeInstance,sizeof(Byte),offsetof(GetStudentInfoFormStudentId_Request,StudentId),&GetStudentInfoFormStudentId_Request_StudentIdLen);
+Int32Field GetStudentInfoFormStudentId_Request_arg2("GetStudentInfoFormStudentId_Request.arg2",offsetof(GetStudentInfoFormStudentId_Request,arg2));
+Int32Field GetStudentInfoFormStudentId_Request_arg3("GetStudentInfoFormStudentId_Request.arg3",offsetof(GetStudentInfoFormStudentId_Request,arg3));
+IField* GetStudentInfoFormStudentId_RequestDesc []=
+{
+&GetStudentInfoFormStudentId_Request_StudentIdLen,
+&GetStudentInfoFormStudentId_Request_StudentId,
+&GetStudentInfoFormStudentId_Request_arg2,
+&GetStudentInfoFormStudentId_Request_arg3,
+};
+ObjectType GetStudentInfoFormStudentId_Request_Type(sizeof(GetStudentInfoFormStudentId_RequestDesc)/sizeof(IField*),GetStudentInfoFormStudentId_RequestDesc);
+
+ObjectField GetStudentInfoFormStudentId_Response_ReturnValue("GetStudentInfoFormStudentId_Response.ReturnValue",sizeof(Student_tDesc)/sizeof(IField*),Student_tDesc,offsetof(GetStudentInfoFormStudentId_Response,ReturnValue));
+IField* GetStudentInfoFormStudentId_ResponseDesc []=
+{
+&GetStudentInfoFormStudentId_Response_ReturnValue,
+};
+ObjectType GetStudentInfoFormStudentId_Response_Type(sizeof(GetStudentInfoFormStudentId_ResponseDesc)/sizeof(IField*),GetStudentInfoFormStudentId_ResponseDesc);
+
+ObjectType GetStudentsInfoFormAge_Request_Type(0,nullptr);
+
+ObjectField GetStudentsInfoFormAge_Response_ReturnValue("GetStudentsInfoFormAge_Response.ReturnValue",sizeof(StudentArray_tDesc)/sizeof(IField*),StudentArray_tDesc,offsetof(GetStudentsInfoFormAge_Response,ReturnValue));
+IField* GetStudentsInfoFormAge_ResponseDesc []=
+{
+&GetStudentsInfoFormAge_Response_ReturnValue,
+};
+ObjectType GetStudentsInfoFormAge_Response_Type(sizeof(GetStudentsInfoFormAge_ResponseDesc)/sizeof(IField*),GetStudentsInfoFormAge_ResponseDesc);
+
+ObjectType Test_Request_Type(0,nullptr);
 

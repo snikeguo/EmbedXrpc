@@ -148,11 +148,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="EmbedXrpcSerialization.cpp" />
+    <ClCompile Include="EmbedXrpc.Port.cpp" />
+    <ClCompile Include="EmbedXrpcClientObject.cpp" />
+    <ClCompile Include="EmbedSerialization.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EmbedXrpcSerialization.h" />
+    <ClInclude Include="EmbedSerializationBaseType.h" />
+    <ClInclude Include="EmbedXrpc.Port.h" />
+    <ClInclude Include="EmbedXrpcCommon.h" />
+    <ClInclude Include="EmbedXrpcClientObject.h" />
+    <ClInclude Include="EmbedSerialization.h" />
+    <ClInclude Include="EmbedXrpcServerObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

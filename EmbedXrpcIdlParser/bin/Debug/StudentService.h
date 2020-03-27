@@ -1,4 +1,6 @@
 ﻿#include"EmbedXrpcBaseType.h"
+#include"EmbedXrpcClientObject.h"
+#include"StudentService.EmbedXrpcSerialization.h"
 typedef enum _Sex_t
 {
 Man = 0,
@@ -13,10 +15,9 @@ SByte Arg1;
 }Result_t;
 typedef struct _Student_t
 {
-UInt16 ResultsLen2;
+UInt16 ResultsLen;
 Result_t Results[32];
 Int32 Age;
-Byte NameLen;
 Byte* Name;
 Byte StudentIdLen;
 Int16 StudentId[100];
@@ -36,4 +37,63 @@ typedef struct _StudentArray_t
 Byte StudentIdLen;
 Student_t Students[64];
 }StudentArray_t;
+typedef struct _BroadcastDataTimeStruct
+{
+DateTime_t t;
+}BroadcastDataTimeStruct;
 typedef void (*BroadcastDataTime)(DateTime_t t);
+typedef struct _GetStudentInfoFormStudentId_Request
+{
+Byte StudentIdLen;
+Byte StudentId[100];
+Int32 arg2;
+Int32 arg3;
+}GetStudentInfoFormStudentId_Request;
+typedef struct _GetStudentInfoFormStudentId_Response
+{
+Student_t ReturnValue;
+}GetStudentInfoFormStudentId_Response;
+typedef struct _GetStudentsInfoFormAge_Request
+{
+}GetStudentsInfoFormAge_Request;
+typedef struct _GetStudentsInfoFormAge_Response
+{
+StudentArray_t ReturnValue;
+}GetStudentsInfoFormAge_Response;
+typedef struct _Test_Request
+{
+}Test_Request;
+class IMyInterfaceClientImpl
+{
+public:
+EmbedXrpcClientObject *RpcClientObject=nullptr;
+IMyInterfaceClientImpl(EmbedXrpcClientObject *rpcobj)
+{
+this->RpcClientObject=rpcobj;
+RpcClientObject->ServicesName.push_back("IMyInterface.GetStudentInfoFormStudentId");
+RpcClientObject->ServicesName.push_back("IMyInterface.GetStudentsInfoFormAge");
+RpcClientObject->ServicesName.push_back("IMyInterface.Test");
+}
+Option<Student_t> GetStudentInfoFormStudentId(Byte StudentIdLen,Byte StudentId[100],Int32 arg2,Int32 arg3)
+{
+//write serialization code:GetStudentInfoFormStudentId(StudentIdLen,StudentId,arg2,arg3,)
+GetStudentInfoFormStudentId_Request sendData;
+memcpy(&sendData.StudentIdLen,&StudentIdLen,sizeof(sendData.StudentIdLen));
+memcpy(sendData.StudentId,StudentId,sizeof(sendData.StudentId)/sizeof(Byte));
+memcpy(&sendData.arg2,&arg2,sizeof(sendData.arg2));
+memcpy(&sendData.arg3,&arg3,sizeof(sendData.arg3));
+GetStudentInfoFormStudentId_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);
+}
+Option<StudentArray_t> GetStudentsInfoFormAge()
+{
+//write serialization code:GetStudentsInfoFormAge()
+GetStudentsInfoFormAge_Request sendData;
+GetStudentsInfoFormAge_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);
+}
+void Test()
+{
+//write serialization code:Test()
+Test_Request sendData;
+Test_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);
+}
+};
