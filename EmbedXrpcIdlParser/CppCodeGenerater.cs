@@ -20,6 +20,9 @@ namespace EmbedXrpcIdlParser
             cppStreamWriter.WriteLine("#include\"EmbedXrpcCommon.h\"");
             cppStreamWriter.WriteLine("#include\"EmbedXrpcClientObject.h\"");
             cppStreamWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+
+            cppStreamWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            cppStreamWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
             //fbsStreamWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".fbs", false, Encoding.ASCII);
             //fbsStreamWriter.WriteLine("namespace EmbedXrpc;");
 
@@ -27,13 +30,17 @@ namespace EmbedXrpcIdlParser
 
             SerializeCWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, Encoding.UTF8);
 
-            SerializeCWriter.WriteLine($"#include\"{outputattr.OutPutPath+outputattr.OutPutFileName }.h\"");
-            SerializeCWriter.WriteLine($"#include\"{outputattr.OutPutPath+outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
-
+            SerializeCWriter.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
+            SerializeCWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+            SerializeCWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            SerializeCWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
             SerializeHWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
             SerializeHWriter.WriteLine($"#ifndef {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
             SerializeHWriter.WriteLine($"#define {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
+
+            SerializeHWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            SerializeHWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
             SerializeHWriter.WriteLine("//EmbedXrpc Code gen .By snikeguo.e-mail:snikeguo@foxmail.com");
             SerializeHWriter.WriteLine("//关于snikeguo作者:92年生人,热爱技术,底层功底扎实.深入理解C语言底层到汇编层，单片机从外设/裸机到OS均有涉猎");

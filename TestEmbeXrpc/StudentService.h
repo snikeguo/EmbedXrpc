@@ -1,6 +1,10 @@
 ﻿#include"EmbedXrpcCommon.h"
 #include"EmbedXrpcClientObject.h"
 #include"StudentService.EmbedXrpcSerialization.h"
+
+//auto code gen ! DO NOT modify this file!
+//自动代码生成,请不要修改本文件!
+
 typedef enum _Sex_t
 {
 Man = 0,

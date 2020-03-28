@@ -10,16 +10,18 @@ namespace EmbedXrpcIdlParser
     public class BaseValueField
     {
         public string Type { get; set; }
+
+        public string Prefix { get; set; } = "Field";
         public string Name { get; set; }
         public string StructName { get; set; }
 
         public string ToCode()
         {
-           return $"{EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Name}(\"{StructName}.{Name}\",offsetof({StructName},{Name}));\n";
+           return $"{EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",offsetof({StructName},{Name}));\n";
         }
         public string ToExtern()
         {
-            return $"extern {EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Name};\n";
+            return $"extern {EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name};\n";
         }
     }
     public class ArrayType
@@ -40,15 +42,17 @@ namespace EmbedXrpcIdlParser
     public class ArrayField:ArrayType
     {
         public bool IsFixed { get; set; }
+        public string Prefix { get; set; } = "Field";
         public string StructName { get; set; }
-        public string LenFieldName { get; set; }
+        public TargetField LenField { get; set; }
         public new string ToCode()
         {
-            return $"ArrayField {StructName}_{Name}(\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{LenFieldName});\n";
+            var arrayLenFieldDesc = LenField == null ? "nullptr" : $"&{StructName}_{Prefix}_{LenField.Name}";
+            return $"ArrayField {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{arrayLenFieldDesc});\n";
         }
         public new string ToExtern()
         {
-            return $"extern ArrayField {StructName}_{Name};\n";
+            return $"extern ArrayField {StructName}_{Prefix}_{Name};\n";
         }
     }
     public class ObjectType
@@ -67,14 +71,15 @@ namespace EmbedXrpcIdlParser
     }
     public class ObjectField:ObjectType
     {
+        public string Prefix { get; set; } = "Field";
         public string StructName { get; set; }
         public new string ToCode()
         {
-            return $"ObjectField {StructName}_{Name}(\"{StructName}.{Name}\",{FieldCount},{FieldDesc},offsetof({StructName},{Name}));\n";
+            return $"ObjectField {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",{FieldCount},{FieldDesc},offsetof({StructName},{Name}));\n";
         }
         public new string ToExtern()
         {
-            return $"extern ObjectField {StructName}_{Name};\n";
+            return $"extern ObjectField {StructName}_{Prefix}_{Name};\n";
         }
     }
     public class EmbedXrpcSerializationHelper
@@ -124,7 +129,7 @@ namespace EmbedXrpcIdlParser
             List<string> FieldsDesc = new List<string>();
             foreach (var field in fields)
             {
-                FieldsDesc.Add($"{name}_{field.Name}");
+                FieldsDesc.Add($"{name}_Field_{field.Name}");
                 if (field.IsArray==false)
                 {                   
                     if (FieldReplaceDic.ContainsKey(field.IdlType) == true)
@@ -132,7 +137,7 @@ namespace EmbedXrpcIdlParser
                         BaseValueField baseValueField = new BaseValueField();
                         baseValueField.Type = field.IdlType;
                         baseValueField.StructName = name;
-                        baseValueField.Name = field.Name;
+                        baseValueField.Name = $"{field.Name}";
                         cfilestringBuilder.Append(baseValueField.ToCode());
                         hfilestringBuilder.Append(baseValueField.ToExtern());
                     }
@@ -141,7 +146,7 @@ namespace EmbedXrpcIdlParser
                         if(field.Enum==null)
                         {
                             ObjectField objectField = new ObjectField();
-                            objectField.Name = field.Name;
+                            objectField.Name = $"{field.Name}";
                             objectField.StructName = name;
                             objectField.FieldCount = $"sizeof({field.IdlType}Desc)/sizeof(IField*)";
                             objectField.FieldDesc = $"{field.IdlType}Desc";
@@ -152,7 +157,7 @@ namespace EmbedXrpcIdlParser
                         {
                             BaseValueField baseValueField = new BaseValueField();
                             baseValueField.Type = field.Enum.IntType;
-                            baseValueField.Name = field.Name;
+                            baseValueField.Name = $"{field.Name}";
                             baseValueField.StructName = name;
                             cfilestringBuilder.Append(baseValueField.ToCode());
                             hfilestringBuilder.Append(baseValueField.ToExtern());
@@ -165,13 +170,13 @@ namespace EmbedXrpcIdlParser
                         CppCodeGenerater.GetIdlTypeArrayElementType(field)+"_Type" : TypeReplaceDic[CppCodeGenerater.GetIdlTypeArrayElementType(field)];
 
                     var arrayLenField = IdlInfo.GetArrayLenField(fields, field);
-                    var arrayLenFieldDesc = arrayLenField==null?"nullptr": $"&{name}_{arrayLenField.Name}";
+                    
 
                     ArrayField arrayField = new ArrayField();
-                    arrayField.Name = field.Name;
+                    arrayField.Name = $"{field.Name}";
                     arrayField.StructName = name;
                     arrayField.IsFixed = field.MaxCountAttribute.IsFixed;
-                    arrayField.LenFieldName = arrayLenFieldDesc;
+                    arrayField.LenField = arrayLenField;
                     arrayField.ArrayElementType = x;
                     arrayField.ArrayElementLen = $"sizeof({ CppCodeGenerater.GetIdlTypeArrayElementType(field)})";
                     cfilestringBuilder.Append(arrayField.ToCode());
@@ -196,7 +201,6 @@ namespace EmbedXrpcIdlParser
 
             cfilewriter.WriteLine(cfilestringBuilder.ToString());
             hfilewriter.WriteLine(hfilestringBuilder.ToString());
-            hfilewriter.WriteLine("\n");
         }
     }
     public static class TargetStructEmbedXrpcSerializationExtension
