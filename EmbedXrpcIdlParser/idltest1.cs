@@ -100,7 +100,7 @@ interface IMyInterface
     void Test();
 }
 
-[GenerationOptionParameter(OutPutFileName="StudentService")]
+[GenerationOptionParameter(OutPutFileName= "StudentService",OutPutPath = @"D:\VSProject\EmbedXrpcIdlParser\TestEmbeXrpc\")]
 public struct GenerationOption
 {
 

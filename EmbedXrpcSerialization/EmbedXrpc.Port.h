@@ -12,12 +12,13 @@ typedef void* EmbeXrpc_Queue_t;
 enum QueueState
 {
 	QueueState_Empty,
+	QueueState_Full,
 	QueueState_OK,
 };
 class IEmbeXrpcPort
 {
 public:
-	virtual EmbeXrpc_Thread_t CreateThread(const char* threadName)=0;
+	virtual EmbeXrpc_Thread_t CreateThread(const char* threadName,void (*Thread)(void *))=0;
 	virtual EmbeXrpc_Mutex_t CreateSemaphore(const char* semaphoreName)=0;
 	virtual EmbeXrpc_Mutex_t CreateMutex(const char* mutexName)=0;
 	virtual EmbeXrpc_Queue_t CreateQueue(const char* queueName,uint32_t queueItemSize,uint32_t maxItemLen) = 0;

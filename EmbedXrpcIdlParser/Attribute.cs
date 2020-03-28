@@ -30,6 +30,7 @@ namespace EmbedXrpcIdlParser
     public sealed class GenerationOptionParameterAttribute : Attribute
     {
         public string OutPutFileName { get; set; } = "idl_gen";
+        public string OutPutPath { get; set; } = "";
         public GenerationOptionParameterAttribute()
         {
            

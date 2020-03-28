@@ -28,11 +28,7 @@
 	 uint8_t* Data;
 	 uint32_t DataLen;
  };
- struct EmbeXrpcResponseReturnRawData
- {
-	 uint8_t* Data;
-	 uint32_t DataLen;
- };
+
 typedef void (*SendPack_t)(uint32_t serviceId, uint32_t dataLen, uint8_t* data);
 template<class T>
 class Option
@@ -53,6 +49,6 @@ class IService
 {
 public:
 	uint32_t Sid;
-	virtual EmbeXrpcResponseReturnRawData Invoke(SerializationManager &manager,IType &type,uint8_t* data, uint32_t len) = 0;
+	virtual void Invoke(SerializationManager &manager,IType &type,uint8_t* data, uint32_t len) = 0;
 };
 #endif

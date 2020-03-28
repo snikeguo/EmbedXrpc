@@ -53,9 +53,9 @@ public:
 				if (obj->Services[i].Sid == recData.Sid)
 				{
 					obj->BufManager.Reset();
-					EmbeXrpcResponseReturnRawData returnData = obj->Services[i].Invoke(obj->BufManager, *recData.MessageType, recData.Data, recData.DataLen);
-					if (returnData.DataLen > 0)//
-						obj->Send(recData.Sid, returnData.DataLen, returnData.Data);
+					 obj->Services[i].Invoke(obj->BufManager, *recData.MessageType, recData.Data, recData.DataLen);
+					if (obj->BufManager.Index > 0)//
+						obj->Send(recData.Sid, obj->BufManager.Index, obj->BufManager.Buf);
 					obj->porter->Free(recData.Data);
 					obj->BufManager.Reset();
 				}

@@ -44,7 +44,7 @@ public:
 	}
 	void Init()
 	{
-		ServiceThreadHandle = porter->CreateThread("ServiceThread");
+		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread);
 		BufMutexHandle = porter->CreateMutex("BufMutex");
 		DelegateMessageQueueHandle = porter->CreateQueue("DelegateMessageQueueHandle",sizeof(EmbeXrpcRawData),10);
 		porter->ThreadStart(ServiceThreadHandle);
@@ -73,8 +73,9 @@ public:
 			}
 		}
 	}
-	static void ServiceThread(EmbedXrpcClientObject* obj)
+	static void ServiceThread(void* arg)
 	{
+		EmbedXrpcClientObject* obj = (EmbedXrpcClientObject*)arg;
 		EmbeXrpcRawData recData;
 		uint32_t i = 0;
 		for (;;)
