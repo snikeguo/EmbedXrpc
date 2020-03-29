@@ -39,7 +39,7 @@ Int32 Sec;
 typedef struct _StudentArray_t
 {
 Byte StudentIdLen;
-Student_t Students[64];
+Student_t Students[2];
 }StudentArray_t;
 typedef struct _BroadcastDataTimeStruct
 {
@@ -55,6 +55,7 @@ Int32 arg3;
 }GetStudentInfoFormStudentId_Request;
 typedef struct _GetStudentInfoFormStudentId_Response
 {
+ResponseState State;
 Student_t ReturnValue;
 }GetStudentInfoFormStudentId_Response;
 typedef struct _GetStudentsInfoFormAge_Request
@@ -62,6 +63,7 @@ typedef struct _GetStudentsInfoFormAge_Request
 }GetStudentsInfoFormAge_Request;
 typedef struct _GetStudentsInfoFormAge_Response
 {
+ResponseState State;
 StudentArray_t ReturnValue;
 }GetStudentsInfoFormAge_Response;
 typedef struct _Test_Request
@@ -74,30 +76,92 @@ EmbedXrpcClientObject *RpcClientObject=nullptr;
 IMyInterfaceClientImpl(EmbedXrpcClientObject *rpcobj)
 {
 this->RpcClientObject=rpcobj;
-RpcClientObject->ServicesName.push_back("IMyInterface.GetStudentInfoFormStudentId");
-RpcClientObject->ServicesName.push_back("IMyInterface.GetStudentsInfoFormAge");
-RpcClientObject->ServicesName.push_back("IMyInterface.Test");
 }
-Option<Student_t> GetStudentInfoFormStudentId(Byte StudentIdLen,Byte StudentId[100],Int32 arg2,Int32 arg3)
+GetStudentInfoFormStudentId_Response GetStudentInfoFormStudentId(Byte StudentIdLen,Byte StudentId[100],Int32 arg2,Int32 arg3)
 {
 //write serialization code:GetStudentInfoFormStudentId(StudentIdLen,StudentId,arg2,arg3,)
 GetStudentInfoFormStudentId_Request sendData;
+RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);
+RpcClientObject->BufManager.Reset();
 memcpy(&sendData.StudentIdLen,&StudentIdLen,sizeof(sendData.StudentIdLen));
 memcpy(sendData.StudentId,StudentId,sizeof(sendData.StudentId)/sizeof(Byte));
 memcpy(&sendData.arg2,&arg2,sizeof(sendData.arg2));
 memcpy(&sendData.arg3,&arg3,sizeof(sendData.arg3));
 GetStudentInfoFormStudentId_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);
+RpcClientObject->Send(GetStudentInfoFormStudentId_Request_ServiceId,RpcClientObject->BufManager.Index,RpcClientObject->BufManager.Buf);
+RpcClientObject->BufManager.Reset();
+RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);
+EmbeXrpcRawData recData;
+GetStudentInfoFormStudentId_Response response;
+ResponseState result=RpcClientObject->Wait(GetStudentInfoFormStudentId_Request_ServiceId,&recData,&response);
+if(result==ResponseState_SidError)
+{
+RpcClientObject->porter->Free(recData.Data);
+response.State=ResponseState_SidError;
 }
-Option<StudentArray_t> GetStudentsInfoFormAge()
+else if(result==ResponseState_Ok)
+{
+RpcClientObject->porter->Free(recData.Data);
+response.State=ResponseState_Ok;
+}
+else if(result==ResponseState_Timeout)
+{
+response.State=ResponseState_Timeout;
+}
+return response;
+}
+void Free_GetStudentInfoFormStudentId(GetStudentInfoFormStudentId_Response *response)
+{
+if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
+{
+GetStudentInfoFormStudentId_Response_Type.Free(response);
+}
+}
+GetStudentsInfoFormAge_Response GetStudentsInfoFormAge()
 {
 //write serialization code:GetStudentsInfoFormAge()
 GetStudentsInfoFormAge_Request sendData;
+RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);
+RpcClientObject->BufManager.Reset();
 GetStudentsInfoFormAge_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);
+RpcClientObject->Send(GetStudentsInfoFormAge_Request_ServiceId,RpcClientObject->BufManager.Index,RpcClientObject->BufManager.Buf);
+RpcClientObject->BufManager.Reset();
+RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);
+EmbeXrpcRawData recData;
+GetStudentsInfoFormAge_Response response;
+ResponseState result=RpcClientObject->Wait(GetStudentsInfoFormAge_Request_ServiceId,&recData,&response);
+if(result==ResponseState_SidError)
+{
+RpcClientObject->porter->Free(recData.Data);
+response.State=ResponseState_SidError;
+}
+else if(result==ResponseState_Ok)
+{
+RpcClientObject->porter->Free(recData.Data);
+response.State=ResponseState_Ok;
+}
+else if(result==ResponseState_Timeout)
+{
+response.State=ResponseState_Timeout;
+}
+return response;
+}
+void Free_GetStudentsInfoFormAge(GetStudentsInfoFormAge_Response *response)
+{
+if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
+{
+GetStudentsInfoFormAge_Response_Type.Free(response);
+}
 }
 void Test()
 {
 //write serialization code:Test()
 Test_Request sendData;
+RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);
+RpcClientObject->BufManager.Reset();
 Test_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);
+RpcClientObject->Send(Test_Request_ServiceId,RpcClientObject->BufManager.Index,RpcClientObject->BufManager.Buf);
+RpcClientObject->BufManager.Reset();
+RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);
 }
 };

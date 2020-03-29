@@ -12,11 +12,13 @@
  };
  enum ReceiveType_t
  {
+     ReceiveType_Request,
 	 ReceiveType_Response,
 	 ReceiveType_Delegate,
  };
- struct DeserializeMap
+ struct MessageMap
  {
+     const char* Name;
 	 uint32_t Sid;
 	 ReceiveType_t ReceiveType;
 	 IType* MessageType;
@@ -30,13 +32,7 @@
  };
 
 typedef void (*SendPack_t)(uint32_t serviceId, uint32_t dataLen, uint8_t* data);
-template<class T>
-class Option
-{
-public :
-    ResponseState ResponseState;
-    T Value;
-};
+
 class IDelegate
 {
 public:

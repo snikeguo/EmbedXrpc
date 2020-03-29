@@ -7,22 +7,65 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpcIdlParser
 {
+    public enum ReceiveType_t
+    {
+        ReceiveType_Request,
+        ReceiveType_Response,
+        ReceiveType_Delegate,
+    };
+    public class MessageMap
+    {
+        public string Name { get; set; }
+        public string ServiesId { get; set; }
+        public ReceiveType_t ReceiveType { get; set; }
+
+        public string IType { get; set; }
+
+    }
     public class CppCodeGenerater : ICodeGenerater
     {
 
         private static Dictionary<string, string> ReplaceDic = new Dictionary<string, string>();
-        
+        private Dictionary<ReceiveType_t,List<MessageMap>> messageMaps = new Dictionary<ReceiveType_t, List<MessageMap>>();
+        int ServiceId = 0x10;
+        public void EmitServiceIdCode(StreamWriter sw, string defineName, ReceiveType_t receiveType, string itype)
+        {
+
+            sw.WriteLine($"#define {defineName}_ServiceId {ServiceId}");
+
+            MessageMap m = new MessageMap();
+            m.Name = defineName;
+            m.ServiesId = $"{defineName}_ServiceId";
+            m.ReceiveType = receiveType;
+            m.IType = "&"+itype+"_Type";
+            if (messageMaps.ContainsKey(receiveType) == false)
+            {
+                messageMaps.Add(receiveType, new List<MessageMap>());
+            }
+            messageMaps[receiveType].Add(m);
+
+            ServiceId++;
+
+            
+        }
         public void CodeGen(IdlInfo idlInfo)
         {
             Console.WriteLine("cpp code gen...");
             var outputattr = idlInfo.GenerationOptionParameterAttribute;
-            cppStreamWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
-            cppStreamWriter.WriteLine("#include\"EmbedXrpcCommon.h\"");
-            cppStreamWriter.WriteLine("#include\"EmbedXrpcClientObject.h\"");
-            cppStreamWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+            cpphStreamWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
+            cpphStreamWriter.WriteLine("#include\"EmbedXrpcCommon.h\"");
+            cpphStreamWriter.WriteLine("#include\"EmbedXrpcClientObject.h\"");
+            cpphStreamWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
-            cppStreamWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
-            cppStreamWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
+            cpphStreamWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            cpphStreamWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
+
+
+            cppcStreamWriter = new StreamWriter(outputattr.OutPutPath + outputattr.OutPutFileName + ".cpp", false, Encoding.UTF8);
+            cppcStreamWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
+            cppcStreamWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            cppcStreamWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
+
             //fbsStreamWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".fbs", false, Encoding.ASCII);
             //fbsStreamWriter.WriteLine("namespace EmbedXrpc;");
 
@@ -56,6 +99,8 @@ namespace EmbedXrpcIdlParser
             SerializeHWriter.WriteLine("#ifndef offsetof");
             SerializeHWriter.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
             SerializeHWriter.WriteLine("#endif");
+
+            ServiceId = 0x10;
             foreach (var em in idlInfo.TargetEnums)
             {
                 //EmitFbsEnum(em);
@@ -85,6 +130,9 @@ namespace EmbedXrpcIdlParser
                     targetStruct.TargetFields,
                     SerializeCWriter,
                     SerializeHWriter);
+
+                EmitServiceIdCode(SerializeHWriter, targetStruct.Name, ReceiveType_t.ReceiveType_Delegate, targetStruct.Name);//生成 ServiceID 宏定义
+
             }
 
             foreach (var ifs in idlInfo.TargetInterfaces)
@@ -96,8 +144,11 @@ namespace EmbedXrpcIdlParser
 
             //fbsStreamWriter.WriteLine(FbsHelper.EmitPackageTable().ToString());
 
-            cppStreamWriter.Flush();
-            cppStreamWriter.Close();
+            cpphStreamWriter.Flush();
+            cpphStreamWriter.Close();
+
+            cppcStreamWriter.Flush();
+            cppcStreamWriter.Close();
 
             //fbsStreamWriter.Flush();
             //fbsStreamWriter.Close();
@@ -113,8 +164,8 @@ namespace EmbedXrpcIdlParser
             SerializeHWriter.Flush();
             SerializeHWriter.Close();
         }
-        private StreamWriter cppStreamWriter;
-        //private StreamWriter fbsStreamWriter;
+        private StreamWriter cpphStreamWriter;
+        private StreamWriter cppcStreamWriter;
         private StreamWriter SerializeCWriter;
         private StreamWriter SerializeHWriter;
         public static string IdlType2CppType(TargetField field)
@@ -147,19 +198,19 @@ namespace EmbedXrpcIdlParser
 
         public void EmitEnum(TargetEnum targetEnum)
         {
-            cppStreamWriter.WriteLine("typedef enum _" + targetEnum.Name);
-            cppStreamWriter.WriteLine("{");
+            cpphStreamWriter.WriteLine("typedef enum _" + targetEnum.Name);
+            cpphStreamWriter.WriteLine("{");
             foreach (var ev in targetEnum.TargetEnumValues)
             {
-                cppStreamWriter.WriteLine(ev.Description + " = " + ev.Value.ToString() + ",");
+                cpphStreamWriter.WriteLine(ev.Description + " = " + ev.Value.ToString() + ",");
             }
-            cppStreamWriter.WriteLine("}" + targetEnum.Name + ";");
+            cpphStreamWriter.WriteLine("}" + targetEnum.Name + ";");
         }
         
         public void EmitStruct(TargetStruct targetStruct)
         {
-            cppStreamWriter.WriteLine("typedef struct _" + targetStruct.Name);
-            cppStreamWriter.WriteLine("{");
+            cpphStreamWriter.WriteLine("typedef struct _" + targetStruct.Name);
+            cpphStreamWriter.WriteLine("{");
             foreach (var field in targetStruct.TargetFields)
             {
                 string name = field.Name;
@@ -170,15 +221,15 @@ namespace EmbedXrpcIdlParser
                     name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                 }
 
-                cppStreamWriter.WriteLine(cppType + " " + name + ";");
+                cpphStreamWriter.WriteLine(cppType + " " + name + ";");
 
             }
-            cppStreamWriter.WriteLine("}" + targetStruct.Name + ";");
+            cpphStreamWriter.WriteLine("}" + targetStruct.Name + ";");
         }
 
         public void EmitDelegate(TargetDelegate targetDelegate)
         {
-            cppStreamWriter.Write("typedef void (*" + targetDelegate.MethodName + ")(");
+            cpphStreamWriter.Write("typedef void (*" + targetDelegate.MethodName + ")(");
             for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
             {
                 var field = targetDelegate.TargetFields[i];
@@ -189,13 +240,13 @@ namespace EmbedXrpcIdlParser
                     name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                 }
 
-                cppStreamWriter.Write(cppType + " " + name);
+                cpphStreamWriter.Write(cppType + " " + name);
                 if (i + 1 < targetDelegate.TargetFields.Count)
                 {
-                    cppStreamWriter.Write(",");
+                    cpphStreamWriter.Write(",");
                 }
             }
-            cppStreamWriter.WriteLine(");");
+            cpphStreamWriter.WriteLine(");");
 
         }
         public void EmitClientInterface(TargetInterface targetInterface)
@@ -212,41 +263,68 @@ namespace EmbedXrpcIdlParser
                     SerializeHWriter);
                 EmitStruct(targetStructRequest);
 
-                if(service.ReturnValue!=null)
+                EmitServiceIdCode(SerializeHWriter, targetStructRequest.Name, ReceiveType_t.ReceiveType_Request, targetStructRequest.Name);//生成 ServiceID 宏定义
+
+                if (service.ReturnValue!=null)
                 {
                     TargetStruct targetStructResponse = new TargetStruct();
                     targetStructResponse.Name = service.ServiceName + "_Response";
+
+                    TargetField ts = new TargetField();
+                    ts.Name = "State";
+                    ts.IdlType = "ResponseState";
+                    ts.IsArray = false;
+                    ts.Enum = new TargetEnum() { IntType = "byte", Name = "ResponseState"};
+                    ts.MaxCountAttribute = null;
+                    targetStructResponse.TargetFields.Add(ts);
+
                     TargetField returnValue = new TargetField();
                     returnValue.Name = "ReturnValue";
                     returnValue.IdlType = service.ReturnValue.IdlType;
                     returnValue.IsArray = false;
                     returnValue.MaxCountAttribute = null;
                     targetStructResponse.TargetFields.Add(returnValue);
+
+                    
+
                     EmbedXrpcSerializationHelper.EmitStruct(targetStructResponse.Name,
                         targetStructResponse.TargetFields,
                         SerializeCWriter,
                         SerializeHWriter);
+
                     EmitStruct(targetStructResponse);
+
+                    EmitServiceIdCode(SerializeHWriter, targetStructResponse.Name, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);//生成 ServiceID 宏定义
                 }
                 
             }
-            cppStreamWriter.WriteLine("class " + targetInterface.Name + "ClientImpl");
-            cppStreamWriter.WriteLine("{\npublic:\nEmbedXrpcClientObject *RpcClientObject=nullptr;");
-            cppStreamWriter.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcClientObject *rpcobj)");
-            cppStreamWriter.WriteLine("{\nthis->RpcClientObject=rpcobj;");
-            foreach (var service in targetInterface.Services)
+
+            SerializeCWriter.WriteLine($"MessageMap RequestMessages[]=");
+            SerializeCWriter.WriteLine("{");
+            foreach (var message in messageMaps[ReceiveType_t.ReceiveType_Request])
             {
-                cppStreamWriter.WriteLine("RpcClientObject->ServicesName.push_back(\"" + targetInterface.Name + "." + service.ServiceName + "\");");
+                SerializeCWriter.Write("{");
+                SerializeCWriter.Write("\"{0}\",{1},{2},{3}", message.Name, message.ServiesId, "ReceiveType_Request", message.IType);
+                SerializeCWriter.WriteLine("},");
             }
-            cppStreamWriter.WriteLine("}");
+            SerializeCWriter.WriteLine("};");
+
+            SerializeHWriter.WriteLine($"extern MessageMap RequestMessages[];");
+
+            cpphStreamWriter.WriteLine("class " + targetInterface.Name + "ClientImpl");
+            cpphStreamWriter.WriteLine("{\npublic:\nEmbedXrpcClientObject *RpcClientObject=nullptr;");
+            cpphStreamWriter.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcClientObject *rpcobj)");
+            cpphStreamWriter.WriteLine("{\nthis->RpcClientObject=rpcobj;");
+
+            cpphStreamWriter.WriteLine("}");
 
             foreach (var service in targetInterface.Services)
             {
                 if(service.ReturnValue!=null)
-                    cppStreamWriter.Write("Option<" + service.ReturnValue.IdlType + "> " + service.ServiceName + "(");
+                    cpphStreamWriter.Write($"{service.ServiceName}_Response {service.ServiceName}(");
                 else
                 {
-                    cppStreamWriter.Write("void " + service.ServiceName + "(");
+                    cpphStreamWriter.Write("void " + service.ServiceName + "(");
                 }
                 string temp_fileds = string.Empty;
                 for (int i = 0; i < service.TargetFields.Count; i++)
@@ -262,40 +340,73 @@ namespace EmbedXrpcIdlParser
                         name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                     }
 
-                    cppStreamWriter.Write(cppType + " " + name);
+                    cpphStreamWriter.Write(cppType + " " + name);
                     if (i + 1 < service.TargetFields.Count)
                     {
-                        cppStreamWriter.Write(",");
+                        cpphStreamWriter.Write(",");
                     }
                 }
-                cppStreamWriter.WriteLine(")\n{");
+                cpphStreamWriter.WriteLine(")\n{");
 
-                cppStreamWriter.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
+                cpphStreamWriter.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
-                cppStreamWriter.WriteLine($"{service.ServiceName}_Request sendData;");
+                cpphStreamWriter.WriteLine($"{service.ServiceName}_Request sendData;");
+
+                cpphStreamWriter.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
+                cpphStreamWriter.WriteLine("RpcClientObject->BufManager.Reset();");
                 foreach (var field in service.TargetFields)
                 {
                     if(field.IsArray==true&&field.MaxCountAttribute.IsFixed==true)
                     {
                         string arrayelementtype= field.IdlType.Replace("[","").Replace("]","");
-                        cppStreamWriter.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
+                        cpphStreamWriter.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
                     }
                     else
                     {
-                        cppStreamWriter.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                        cpphStreamWriter.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
                     }
                     
                 }
-                cppStreamWriter.WriteLine($"{service.ServiceName}_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);");
+                cpphStreamWriter.WriteLine($"{service.ServiceName}_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);");
+                cpphStreamWriter.WriteLine($"RpcClientObject->Send({service.ServiceName}_Request_ServiceId,RpcClientObject->BufManager.Index,RpcClientObject->BufManager.Buf);");
+                cpphStreamWriter.WriteLine("RpcClientObject->BufManager.Reset();");
+                cpphStreamWriter.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);");
+
+                if (service.ReturnValue != null)
+                {
+                    cpphStreamWriter.WriteLine($"EmbeXrpcRawData recData;\n"+
+                                                $"{service.ServiceName}_Response response;\n" +
+                                               $"ResponseState result=RpcClientObject->Wait({service.ServiceName}_Request_ServiceId,&recData,&response);");
+                    cpphStreamWriter.WriteLine("if(result==ResponseState_SidError)\n{");
+                    cpphStreamWriter.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_SidError;");
+                    cpphStreamWriter.WriteLine("}");
+                    cpphStreamWriter.WriteLine("else if(result==ResponseState_Ok)\n{");
+                    cpphStreamWriter.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_Ok;");
+                    cpphStreamWriter.WriteLine("}");
+                    cpphStreamWriter.WriteLine("else if(result==ResponseState_Timeout)\n{");
+                    cpphStreamWriter.WriteLine($"response.State=ResponseState_Timeout;");
+                    cpphStreamWriter.WriteLine("}\nreturn response;");
+                }
+
                 //todo
                 //1.serialize  service.name to buf
                 //2.serialize fields to buf
                 //3.call rpc->send(buff);
 
-                cppStreamWriter.WriteLine("}");
+                cpphStreamWriter.WriteLine("}");
+
+                if (service.ReturnValue != null)
+                {
+                    cpphStreamWriter.WriteLine("void Free_" + service.ServiceName +
+                        $"({service.ServiceName}_Response *response)");
+                    cpphStreamWriter.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
+                    cpphStreamWriter.WriteLine($"{service.ServiceName}_Response_Type.Free(response);");
+                    cpphStreamWriter.WriteLine("}\n}");
+                }
+                
             }
 
-            cppStreamWriter.WriteLine("};");
+            cpphStreamWriter.WriteLine("};");
 
         }
     }

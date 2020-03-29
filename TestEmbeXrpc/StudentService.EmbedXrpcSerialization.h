@@ -45,21 +45,30 @@ extern ObjectType StudentArray_t_Type;
 extern ObjectField BroadcastDataTimeStruct_Field_t;
 extern ObjectType BroadcastDataTimeStruct_Type;
 
+#define BroadcastDataTimeStruct_ServiceId 16
 extern Uint8Field GetStudentInfoFormStudentId_Request_Field_StudentIdLen;
 extern ArrayField GetStudentInfoFormStudentId_Request_Field_StudentId;
 extern Int32Field GetStudentInfoFormStudentId_Request_Field_arg2;
 extern Int32Field GetStudentInfoFormStudentId_Request_Field_arg3;
 extern ObjectType GetStudentInfoFormStudentId_Request_Type;
 
+#define GetStudentInfoFormStudentId_Request_ServiceId 17
+extern Uint8Field GetStudentInfoFormStudentId_Response_Field_State;
 extern ObjectField GetStudentInfoFormStudentId_Response_Field_ReturnValue;
 extern ObjectType GetStudentInfoFormStudentId_Response_Type;
 
+#define GetStudentInfoFormStudentId_Response_ServiceId 18
 extern ObjectType GetStudentsInfoFormAge_Request_Type;
 
+#define GetStudentsInfoFormAge_Request_ServiceId 19
+extern Uint8Field GetStudentsInfoFormAge_Response_Field_State;
 extern ObjectField GetStudentsInfoFormAge_Response_Field_ReturnValue;
 extern ObjectType GetStudentsInfoFormAge_Response_Type;
 
+#define GetStudentsInfoFormAge_Response_ServiceId 20
 extern ObjectType Test_Request_Type;
 
+#define Test_Request_ServiceId 21
+extern MessageMap RequestMessages[];
 
 #endif

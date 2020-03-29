@@ -72,7 +72,7 @@ struct StudentArray_t
     byte StudentIdLen;
 
     //[FieldIndex(1)]
-    [MaxCount(IsFixed = true, MaxCount = 64, LenFieldName = "StudentIdLen")]
+    [MaxCount(IsFixed = true, MaxCount = 2, LenFieldName = "StudentIdLen")]
     Student_t[] Students;
 }
 delegate void BroadcastDataTime(DateTime_t t);

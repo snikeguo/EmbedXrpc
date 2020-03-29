@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="StudentService.cpp" />
     <ClCompile Include="StudentService.EmbedXrpcSerialization.cpp" />
     <ClCompile Include="Win32EmbedXrpcPort.cpp" />
   </ItemGroup>

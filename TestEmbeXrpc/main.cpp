@@ -6,6 +6,7 @@ using namespace std;
 uint8_t ClientBuf[1024];
 EmbedXrpcClientObject* Client;
 Win32EmbedXrpcPort Win32Port;
+
 int main()
 {
 	SerializationManager Manager;
@@ -54,7 +55,12 @@ int main()
 
 	Client->Init();
 
-	cin.get();
+	IMyInterfaceClientImpl interfaceImpl(Client);
+
+	auto response = interfaceImpl.GetStudentInfoFormStudentId(0, nullptr, 1, 2);
+	//your code...
+	interfaceImpl.Free_GetStudentInfoFormStudentId(&response);
+
 	return 0;
 }
 

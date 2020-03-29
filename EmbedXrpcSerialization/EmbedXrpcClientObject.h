@@ -7,7 +7,6 @@
 class EmbedXrpcClientObject
 {
 public:
-	std::list<std::string> ServicesName;
 	SerializationManager BufManager;
 	uint32_t TimeOut;
 	SendPack_t Send;
@@ -18,7 +17,7 @@ public:
 	EmbeXrpc_Thread_t ServiceThreadHandle;
 
 	uint32_t DeserializeMapsCount;
-	DeserializeMap* DeserializeMaps;
+	MessageMap* MessageMaps;
 
 	uint32_t DelegateCount;
 	IDelegate* Delegates;
@@ -28,7 +27,7 @@ public:
 		uint32_t bufLen,
 		IEmbeXrpcPort *port,
 		uint32_t deserializeMapsCount,
-		DeserializeMap* deserializeMaps,
+		MessageMap* messageMaps,
 		uint32_t delegateCount,
 		IDelegate *dels)
 	{
@@ -38,7 +37,7 @@ public:
 		BufManager.Reset();
 		porter = port;
 		DeserializeMapsCount = deserializeMapsCount;
-		DeserializeMaps = deserializeMaps;
+		MessageMaps = messageMaps;
 		DelegateCount = delegateCount;
 		Delegates = dels;
 	}
@@ -54,7 +53,7 @@ public:
 		EmbeXrpcRawData raw;
 		for (uint32_t i=0;i< DeserializeMapsCount; i++)
 		{
-			auto iter = &DeserializeMaps[i];
+			auto iter = &MessageMaps[i];
 			if (iter->Sid == serviceId)
 			{		
 				raw.Sid = serviceId;
@@ -97,21 +96,19 @@ public:
 	}
 	/*
 	send request;//如果返回值是void 那么直接生成返回代码即可。否则继续往下走。
-	EmbeXrpcResponseRawData recData;
-	auto result=rpcobj->Wait(sid,&recData,&response);
+	EmbeXrpcRawData recData;
+	Option<responseType> ret;
+	auto result=rpcobj->Wait(sid,&recData,&ret.Value);
 	if(result==ResponseState_SidError)
 	{
 		porter->Free(recData.Data);
-		Option<responseType> ret;
 		ret.ResponseState=ResponseState_SidError;
 		return ret;
 	}
 	else if(result==ResponseState_Ok)
 	{
 		porter->Free(recData.Data);
-		Option<responseType> ret;
 		ret.ResponseState=ResponseState_Ok;
-		ret.Value=response;
 		return ret;
 	}
 	*/

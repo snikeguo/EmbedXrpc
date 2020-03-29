@@ -27,6 +27,9 @@
     <ClCompile Include="Win32EmbedXrpcPort.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="StudentService.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StudentService.EmbedXrpcSerialization.h">

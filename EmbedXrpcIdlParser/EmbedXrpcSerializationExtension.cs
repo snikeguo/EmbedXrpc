@@ -202,6 +202,7 @@ namespace EmbedXrpcIdlParser
             cfilewriter.WriteLine(cfilestringBuilder.ToString());
             hfilewriter.WriteLine(hfilestringBuilder.ToString());
         }
+        
     }
     public static class TargetStructEmbedXrpcSerializationExtension
     {

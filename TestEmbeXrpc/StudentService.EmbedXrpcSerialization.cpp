@@ -82,21 +82,31 @@ IField* GetStudentInfoFormStudentId_RequestDesc []=
 };
 ObjectType GetStudentInfoFormStudentId_Request_Type(sizeof(GetStudentInfoFormStudentId_RequestDesc)/sizeof(IField*),GetStudentInfoFormStudentId_RequestDesc);
 
+Uint8Field GetStudentInfoFormStudentId_Response_Field_State("GetStudentInfoFormStudentId_Response.State",offsetof(GetStudentInfoFormStudentId_Response,State));
 ObjectField GetStudentInfoFormStudentId_Response_Field_ReturnValue("GetStudentInfoFormStudentId_Response.ReturnValue",sizeof(Student_tDesc)/sizeof(IField*),Student_tDesc,offsetof(GetStudentInfoFormStudentId_Response,ReturnValue));
 IField* GetStudentInfoFormStudentId_ResponseDesc []=
 {
+&GetStudentInfoFormStudentId_Response_Field_State,
 &GetStudentInfoFormStudentId_Response_Field_ReturnValue,
 };
 ObjectType GetStudentInfoFormStudentId_Response_Type(sizeof(GetStudentInfoFormStudentId_ResponseDesc)/sizeof(IField*),GetStudentInfoFormStudentId_ResponseDesc);
 
 ObjectType GetStudentsInfoFormAge_Request_Type(0,nullptr);
 
+Uint8Field GetStudentsInfoFormAge_Response_Field_State("GetStudentsInfoFormAge_Response.State",offsetof(GetStudentsInfoFormAge_Response,State));
 ObjectField GetStudentsInfoFormAge_Response_Field_ReturnValue("GetStudentsInfoFormAge_Response.ReturnValue",sizeof(StudentArray_tDesc)/sizeof(IField*),StudentArray_tDesc,offsetof(GetStudentsInfoFormAge_Response,ReturnValue));
 IField* GetStudentsInfoFormAge_ResponseDesc []=
 {
+&GetStudentsInfoFormAge_Response_Field_State,
 &GetStudentsInfoFormAge_Response_Field_ReturnValue,
 };
 ObjectType GetStudentsInfoFormAge_Response_Type(sizeof(GetStudentsInfoFormAge_ResponseDesc)/sizeof(IField*),GetStudentsInfoFormAge_ResponseDesc);
 
 ObjectType Test_Request_Type(0,nullptr);
 
+MessageMap RequestMessages[]=
+{
+{"GetStudentInfoFormStudentId_Request",GetStudentInfoFormStudentId_Request_ServiceId,ReceiveType_Request,&GetStudentInfoFormStudentId_Request_Type},
+{"GetStudentsInfoFormAge_Request",GetStudentsInfoFormAge_Request_ServiceId,ReceiveType_Request,&GetStudentsInfoFormAge_Request_Type},
+{"Test_Request",Test_Request_ServiceId,ReceiveType_Request,&Test_Request_Type},
+};
