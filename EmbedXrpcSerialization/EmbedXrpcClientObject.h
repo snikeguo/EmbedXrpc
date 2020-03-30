@@ -8,7 +8,13 @@
 class EmbedXrpcClientObject
 {
 public:
-	SerializationManager BufManager;
+	//SerializationManager BufManager;
+
+
+	uint8_t *Buffer;
+	uint32_t BufferLen;
+
+
 	uint32_t TimeOut;
 	SendPack_t Send;
 	IEmbeXrpcPort* porter;
@@ -33,9 +39,8 @@ public:
 		IDelegate *dels)
 	{
 		TimeOut = timeOut;
-		BufManager.Buf = buf;
-		BufManager.BufferLen = bufLen;
-		BufManager.Reset();
+		Buffer = buf;
+		BufferLen = bufLen;
 		porter = port;
 		DeserializeMapsCount = deserializeMapsCount;
 		MessageMaps = messageMaps;
@@ -122,12 +127,19 @@ public:
 		{
 			return ResponseState_Timeout;
 		}
+		ResponseState ret;
 		if (sid != recData->Sid)
 		{
-			return ResponseState_SidError;
+			ret=ResponseState_SidError;
 		}
-		recData->MessageType->Deserialize(BufManager, response);
-		return ResponseState_Ok;
+		SerializationManager rsm;
+		rsm.Reset();
+		rsm.Buf = recData->Data;
+		rsm.BufferLen = recData->DataLen;
+		recData->MessageType->Deserialize(rsm, response);
+		ret = ResponseState_Ok;
+		porter->Free(recData);
+		return ret;
 	}
 	
 };

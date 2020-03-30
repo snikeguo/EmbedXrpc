@@ -1,16 +1,14 @@
 #include <iostream>
 #include "StudentService.Client.h"
+#include "StudentService.Server.h"
 #include "Win32EmbedXrpcPort.h"
 using namespace std;
 
 uint8_t ClientBuf[1024];
 EmbedXrpcClientObject* Client;
 Win32EmbedXrpcPort Win32Port;
-int main()
-{
 
-}
-#if 0
+#if 1
 int main()
 {
 	SerializationManager Manager;
@@ -69,4 +67,9 @@ int main()
 }
 
 
+#else
+int main()
+{
+
+}
 #endif

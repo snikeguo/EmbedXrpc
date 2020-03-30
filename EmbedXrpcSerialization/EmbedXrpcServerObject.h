@@ -9,7 +9,10 @@ class EmbedXrpcServerObject
 {
 public:
 	std::list<std::string> ServicesName;
-	SerializationManager BufManager;
+
+	uint8_t* Buffer;
+	uint32_t BufferLen;
+
 	uint32_t TimeOut;
 	SendPack_t Send;
 	IEmbeXrpcPort* porter;
@@ -23,9 +26,8 @@ public:
 	EmbedXrpcServerObject(uint32_t timeOut, uint8_t* buf, uint32_t bufLen, IEmbeXrpcPort* port, uint32_t serviceCount, IService* services)
 	{
 		TimeOut = timeOut;
-		BufManager.Buf = buf;
-		BufManager.BufferLen = bufLen;
-		BufManager.Reset();
+		Buffer = buf;
+		BufferLen = bufLen;
 		porter = port;
 		ServiceCount = serviceCount;
 		Services = services;
@@ -54,16 +56,23 @@ public:
 			{
 				if (obj->Services[i].Sid == recData.Sid)
 				{
-					obj->BufManager.Reset();
+					
 					SerializationManager rsm;
+					SerializationManager sendsm;
 					rsm.Reset();
 					rsm.Buf = recData.Data;
 					rsm.BufferLen = recData.DataLen;
-					obj->Services[i].Invoke(rsm, obj->BufManager);
-					if (obj->BufManager.Index > 0)//
-						obj->Send(recData.Sid, obj->BufManager.Index, obj->BufManager.Buf);
+
+					sendsm.Reset();
+					sendsm.Buf = obj->Buffer;
+					sendsm.BufferLen = obj->BufferLen;
+
+					obj->Services[i].Invoke(rsm, sendsm);
+
+					if (sendsm.Index > 0)//
+						obj->Send(recData.Sid, sendsm.Index, sendsm.Buf);
 					obj->porter->Free(recData.Data);
-					obj->BufManager.Reset();
+
 				}
 			}
 		}
