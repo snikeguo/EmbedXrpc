@@ -41,5 +41,11 @@
     <ClInclude Include="Win32EmbedXrpcPort.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StudentService.Client.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="StudentService.Server.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

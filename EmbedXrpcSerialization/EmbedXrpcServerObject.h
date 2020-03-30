@@ -4,6 +4,7 @@
 #include <iostream>
 #include <list>
 #include "EmbedXrpcCommon.h"
+#include "EmbedSerialization.h"
 class EmbedXrpcServerObject
 {
 public:
@@ -31,14 +32,15 @@ public:
 	}
 	void Init()
 	{
-		ServiceThreadHandle = porter->CreateThread("ServiceThread");
+		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread);
 		BufMutexHandle = porter->CreateMutex("BufMutex");
 		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), 10);
 
 		porter->ThreadStart(ServiceThreadHandle);
 	}
-	static void ServiceThread(EmbedXrpcServerObject* obj)
+	static void ServiceThread(void* arg)
 	{
+		EmbedXrpcServerObject* obj = (EmbedXrpcServerObject*)arg;
 		EmbeXrpcRawData recData;
 		uint32_t i = 0;
 		for (;;)
@@ -53,7 +55,11 @@ public:
 				if (obj->Services[i].Sid == recData.Sid)
 				{
 					obj->BufManager.Reset();
-					 obj->Services[i].Invoke(obj->BufManager, *recData.MessageType, recData.Data, recData.DataLen);
+					SerializationManager rsm;
+					rsm.Reset();
+					rsm.Buf = recData.Data;
+					rsm.BufferLen = recData.DataLen;
+					obj->Services[i].Invoke(rsm, obj->BufManager);
 					if (obj->BufManager.Index > 0)//
 						obj->Send(recData.Sid, obj->BufManager.Index, obj->BufManager.Buf);
 					obj->porter->Free(recData.Data);

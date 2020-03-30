@@ -52,53 +52,70 @@ namespace EmbedXrpcIdlParser
         {
             Console.WriteLine("cpp code gen...");
             var outputattr = idlInfo.GenerationOptionParameterAttribute;
-            cpphStreamWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
-            cpphStreamWriter.WriteLine("#include\"EmbedXrpcCommon.h\"");
-            cpphStreamWriter.WriteLine("#include\"EmbedXrpcClientObject.h\"");
-            cpphStreamWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+            CommonHsw = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
+            CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_H");
+            CommonHsw.WriteLine($"#define {outputattr.OutPutFileName}_H");
+            CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
+            CommonHsw.WriteLine("#include\"EmbedSerialization.h\"");
+            if(idlInfo.TargetDelegates.Count>0||idlInfo.TargetInterfaces.Count>0)
+                CommonHsw.WriteLine("#include\"EmbedXrpcCommon.h\"");
 
-            cpphStreamWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
-            cpphStreamWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
+            CommonHsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            CommonHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
 
-            cppcStreamWriter = new StreamWriter(outputattr.OutPutPath + outputattr.OutPutFileName + ".cpp", false, Encoding.UTF8);
-            cppcStreamWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
-            cppcStreamWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
-            cppcStreamWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
+            CommonCsw = new StreamWriter(outputattr.OutPutPath + outputattr.OutPutFileName + ".cpp", false, Encoding.UTF8);
+            CommonCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
+            CommonCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            CommonCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
             //fbsStreamWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".fbs", false, Encoding.ASCII);
             //fbsStreamWriter.WriteLine("namespace EmbedXrpc;");
 
 
 
-            SerializeCWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, Encoding.UTF8);
+            SerializeCsw = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, Encoding.UTF8);
 
-            SerializeCWriter.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
-            SerializeCWriter.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
-            SerializeCWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
-            SerializeCWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
+            SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
+            SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+            SerializeCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            SerializeCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
-            SerializeHWriter = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
-            SerializeHWriter.WriteLine($"#ifndef {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
-            SerializeHWriter.WriteLine($"#define {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
+            SerializeHsw = new StreamWriter(outputattr.OutPutPath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
+            SerializeHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
+            SerializeHsw.WriteLine($"#define {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
 
-            SerializeHWriter.WriteLine("\n//auto code gen ! DO NOT modify this file!");
-            SerializeHWriter.WriteLine("//自动代码生成,请不要修改本文件!\n");
+            SerializeHsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            SerializeHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
-            SerializeHWriter.WriteLine("//EmbedXrpc Code gen .By snikeguo.e-mail:snikeguo@foxmail.com");
-            SerializeHWriter.WriteLine("//关于snikeguo作者:92年生人,热爱技术,底层功底扎实.深入理解C语言底层到汇编层，单片机从外设/裸机到OS均有涉猎");
-            SerializeHWriter.WriteLine("//上位机专注于C# 界面库熟悉WPF.服务器专注于dotnet core");
-            SerializeHWriter.WriteLine("//行业经验：汽车电子.独自完成UDS(包括FBL)协议栈  GBT27930-2015(SAE J1939)协议栈等");
-            SerializeHWriter.WriteLine("//熟悉BMS业务逻辑,有一套自己稳定出货的BMS软件/硬件/上位机/服务器/USB转CAN&CANFD");
-            SerializeHWriter.WriteLine("//TITLE:高级嵌入式软件工程师.软件架构师");
-            SerializeHWriter.WriteLine("//微信:snikeguo.有好的职位推荐请加");
+            SerializeHsw.WriteLine("//EmbedXrpc Code gen .By snikeguo.e-mail:snikeguo@foxmail.com");
+            SerializeHsw.WriteLine("//关于snikeguo作者:92年生人,热爱技术,底层功底扎实.深入理解C语言底层到汇编层，单片机从外设/裸机到OS均有涉猎");
+            SerializeHsw.WriteLine("//上位机专注于C# 界面库熟悉WPF.服务器专注于dotnet core");
+            SerializeHsw.WriteLine("//行业经验：汽车电子.独自完成UDS(包括FBL)协议栈  GBT27930-2015(SAE J1939)协议栈等");
+            SerializeHsw.WriteLine("//熟悉BMS业务逻辑,有一套自己稳定出货的BMS软件/硬件/上位机/服务器/USB转CAN&CANFD");
+            SerializeHsw.WriteLine("//TITLE:高级嵌入式软件工程师.软件架构师");
+            SerializeHsw.WriteLine("//微信:snikeguo.有好的职位推荐请加");
 
             //EmbedXrpcSerializationHFileStreamWriter.WriteLine("#include\"EmbedXrpcSerialization.h\"");
             //D:\VSProject\EmbedXrpcIdlParser\EmbedXrpcSerialization
-            SerializeHWriter.WriteLine("#include\"EmbedSerialization.h\"");
-            SerializeHWriter.WriteLine("#ifndef offsetof");
-            SerializeHWriter.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
-            SerializeHWriter.WriteLine("#endif");
+            
+            SerializeHsw.WriteLine("#ifndef offsetof");
+            SerializeHsw.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
+            SerializeHsw.WriteLine("#endif");
+
+            ClientHsw = new StreamWriter(outputattr.OutPutPath + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
+            ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_Client_H");
+            ClientHsw.WriteLine($"#define {outputattr.OutPutFileName}_Client_H");
+            ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
+            ClientHsw.WriteLine("#include\"EmbedXrpcClientObject.h\"");
+            ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+
+            ServerHsw = new StreamWriter(outputattr.OutPutPath + outputattr.OutPutFileName + ".Server.h", false, Encoding.UTF8);
+            ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_Server_H");
+            ServerHsw.WriteLine($"#define {outputattr.OutPutFileName}_Server_H");
+            ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
+            ServerHsw.WriteLine("#include\"EmbedXrpcServerObject.h\"");
+            ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
             ServiceId = 0x10;
             foreach (var em in idlInfo.TargetEnums)
@@ -113,8 +130,8 @@ namespace EmbedXrpcIdlParser
                 //fbsStreamWriter.WriteLine(stru.ToFbs().ToString());
                 EmbedXrpcSerializationHelper.EmitStruct(stru.Name, 
                     stru.TargetFields,
-                    SerializeCWriter, 
-                    SerializeHWriter);
+                    SerializeCsw, 
+                    SerializeHsw);
                 EmitStruct(stru);
             }
 
@@ -128,10 +145,10 @@ namespace EmbedXrpcIdlParser
                 EmitDelegate(del);
                 EmbedXrpcSerializationHelper.EmitStruct(targetStruct.Name,
                     targetStruct.TargetFields,
-                    SerializeCWriter,
-                    SerializeHWriter);
+                    SerializeCsw,
+                    SerializeHsw);
 
-                EmitServiceIdCode(SerializeHWriter, targetStruct.Name, ReceiveType_t.ReceiveType_Delegate, targetStruct.Name);//生成 ServiceID 宏定义
+                EmitServiceIdCode(SerializeHsw, targetStruct.Name, ReceiveType_t.ReceiveType_Delegate, targetStruct.Name);//生成 ServiceID 宏定义
 
             }
 
@@ -143,31 +160,41 @@ namespace EmbedXrpcIdlParser
             }
 
             //fbsStreamWriter.WriteLine(FbsHelper.EmitPackageTable().ToString());
+            CommonHsw.WriteLine("\n#endif");
+            CommonHsw.Flush();
+            CommonHsw.Close();
 
-            cpphStreamWriter.Flush();
-            cpphStreamWriter.Close();
-
-            cppcStreamWriter.Flush();
-            cppcStreamWriter.Close();
+            CommonCsw.Flush();
+            CommonCsw.Close();
 
             //fbsStreamWriter.Flush();
             //fbsStreamWriter.Close();
             //FbsHelper.GenerateSerializationCode(outputattr.OutPutPath+outputattr.OutPutFileName + ".fbs");
 
-            SerializeCWriter.Flush();
-            SerializeCWriter.Close();
+            SerializeCsw.Flush();
+            SerializeCsw.Close();
 
             
 
-            SerializeHWriter.WriteLine("\n#endif");
+            SerializeHsw.WriteLine("\n#endif");
 
-            SerializeHWriter.Flush();
-            SerializeHWriter.Close();
+            SerializeHsw.Flush();
+            SerializeHsw.Close();
+
+            ClientHsw.WriteLine("\n#endif");
+            ClientHsw.Flush();
+            ClientHsw.Close();
+
+            ServerHsw.WriteLine("\n#endif");
+            ServerHsw.Flush();
+            ServerHsw.Close();
         }
-        private StreamWriter cpphStreamWriter;
-        private StreamWriter cppcStreamWriter;
-        private StreamWriter SerializeCWriter;
-        private StreamWriter SerializeHWriter;
+        private StreamWriter CommonHsw;
+        private StreamWriter CommonCsw;
+        private StreamWriter ClientHsw;
+        private StreamWriter ServerHsw;
+        private StreamWriter SerializeCsw;
+        private StreamWriter SerializeHsw;
         public static string IdlType2CppType(TargetField field)
         {
             string cppType = field.IdlType;
@@ -198,19 +225,19 @@ namespace EmbedXrpcIdlParser
 
         public void EmitEnum(TargetEnum targetEnum)
         {
-            cpphStreamWriter.WriteLine("typedef enum _" + targetEnum.Name);
-            cpphStreamWriter.WriteLine("{");
+            CommonHsw.WriteLine("typedef enum _" + targetEnum.Name);
+            CommonHsw.WriteLine("{");
             foreach (var ev in targetEnum.TargetEnumValues)
             {
-                cpphStreamWriter.WriteLine(ev.Description + " = " + ev.Value.ToString() + ",");
+                CommonHsw.WriteLine(ev.Description + " = " + ev.Value.ToString() + ",");
             }
-            cpphStreamWriter.WriteLine("}" + targetEnum.Name + ";");
+            CommonHsw.WriteLine("}" + targetEnum.Name + ";");
         }
         
         public void EmitStruct(TargetStruct targetStruct)
         {
-            cpphStreamWriter.WriteLine("typedef struct _" + targetStruct.Name);
-            cpphStreamWriter.WriteLine("{");
+            CommonHsw.WriteLine("typedef struct _" + targetStruct.Name);
+            CommonHsw.WriteLine("{");
             foreach (var field in targetStruct.TargetFields)
             {
                 string name = field.Name;
@@ -221,15 +248,15 @@ namespace EmbedXrpcIdlParser
                     name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                 }
 
-                cpphStreamWriter.WriteLine(cppType + " " + name + ";");
+                CommonHsw.WriteLine(cppType + " " + name + ";");
 
             }
-            cpphStreamWriter.WriteLine("}" + targetStruct.Name + ";");
+            CommonHsw.WriteLine("}" + targetStruct.Name + ";");
         }
 
         public void EmitDelegate(TargetDelegate targetDelegate)
         {
-            cpphStreamWriter.Write("typedef void (*" + targetDelegate.MethodName + ")(");
+            CommonHsw.Write("typedef void (*" + targetDelegate.MethodName + ")(");
             for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
             {
                 var field = targetDelegate.TargetFields[i];
@@ -240,14 +267,124 @@ namespace EmbedXrpcIdlParser
                     name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                 }
 
-                cpphStreamWriter.Write(cppType + " " + name);
+                CommonHsw.Write(cppType + " " + name);
                 if (i + 1 < targetDelegate.TargetFields.Count)
                 {
-                    cpphStreamWriter.Write(",");
+                    CommonHsw.Write(",");
                 }
             }
-            cpphStreamWriter.WriteLine(");");
+            CommonHsw.WriteLine(");");
 
+            //生成客户端 delegate代码
+            ClientHsw.WriteLine($"class {targetDelegate.MethodName}ClientImpl:public IDelegate");
+            ClientHsw.WriteLine("{\npublic:");
+            ClientHsw.WriteLine($"uint32_t Sid=0;");//delegate 的sid保留
+
+            ClientHsw.Write($"void {targetDelegate.MethodName}(");
+
+            var temp_fileds = string.Empty;
+            for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
+            {
+                var field = targetDelegate.TargetFields[i];
+                string name = field.Name;
+                temp_fileds += name + ",";
+
+                string cppType = IdlType2CppType(field);
+
+                if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                {
+                    name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
+                }
+
+                ClientHsw.Write(cppType + " " + name);
+                if (i + 1 < targetDelegate.TargetFields.Count)
+                {
+                    ClientHsw.Write(",");
+                }
+            }
+            ClientHsw.WriteLine(");");
+
+            //code gen invoke
+            ClientHsw.WriteLine("void Invoke(SerializationManager &recManager)\n{");
+            ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct request;");
+            //ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
+            ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
+
+            ClientHsw.Write($"{targetDelegate.MethodName}(");
+            for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
+            {
+                var par = targetDelegate.TargetFields[i];
+                ClientHsw.Write($"request.{par.Name}");
+                if (i + 1 < targetDelegate.TargetFields.Count)
+                {
+                    ClientHsw.Write(",");
+                }
+            }
+            ClientHsw.WriteLine(");");//生成调用目标函数。
+            ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
+            //ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);");
+            ClientHsw.WriteLine("}");//函数生成完毕
+
+            ClientHsw.WriteLine("};");//end class
+
+            //生成服务端代码
+            ServerHsw.WriteLine("class " + targetDelegate.MethodName + "Delegate");
+            ServerHsw.WriteLine("{\npublic:\nEmbedXrpcServerObject *RpcServerObject=nullptr;");
+            ServerHsw.WriteLine(targetDelegate.MethodName + "Delegate" + "(EmbedXrpcServerObject *rpcobj)");
+            ServerHsw.WriteLine("{\nthis->RpcServerObject=rpcobj;");
+            ServerHsw.WriteLine("}");
+            ServerHsw.WriteLine($"uint32_t Sid={targetDelegate.MethodName}Struct_ServiceId;");
+
+            ServerHsw.Write($"void  Invoke(");
+
+            temp_fileds = string.Empty;
+            for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
+            {
+                var field = targetDelegate.TargetFields[i];
+                string name = field.Name;
+                temp_fileds += name + ",";
+
+                string cppType = IdlType2CppType(field);
+
+                if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                {
+                    name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
+                }
+
+                ServerHsw.Write(cppType + " " + name);
+                if (i + 1 < targetDelegate.TargetFields.Count)
+                {
+                    ServerHsw.Write(",");
+                }
+            }
+            ServerHsw.WriteLine("){");//函数名
+
+            //函数实现
+            ServerHsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
+            ServerHsw.WriteLine($"{targetDelegate.MethodName}Struct sendData;");
+            ServerHsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->BufMutexHandle, 100);");
+            ServerHsw.WriteLine("RpcServerObject->BufManager.Reset();");
+            foreach (var field in targetDelegate.TargetFields)
+            {
+                if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                {
+                    string arrayelementtype = field.IdlType.Replace("[", "").Replace("]", "");
+                    ServerHsw.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
+                }
+                else
+                {
+                    ServerHsw.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                }
+
+            }
+            ServerHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(RpcServerObject->BufManager,0,&sendData);");
+            ServerHsw.WriteLine($"RpcServerObject->Send({targetDelegate.MethodName}Struct_ServiceId,RpcServerObject->BufManager.Index,RpcServerObject->BufManager.Buf);");
+            ServerHsw.WriteLine("RpcServerObject->BufManager.Reset();");
+            ServerHsw.WriteLine("RpcServerObject->porter->ReleaseMutex(RpcServerObject->BufMutexHandle);");
+            ServerHsw.WriteLine("}");//class end
+
+
+            ServerHsw.WriteLine("};");//class end
         }
         public void EmitClientInterface(TargetInterface targetInterface)
         {
@@ -259,16 +396,17 @@ namespace EmbedXrpcIdlParser
                 targetStructRequest.TargetFields.AddRange(service.TargetFields);
                 EmbedXrpcSerializationHelper.EmitStruct(targetStructRequest.Name,
                     targetStructRequest.TargetFields,
-                    SerializeCWriter,
-                    SerializeHWriter);
+                    SerializeCsw,
+                    SerializeHsw);
                 EmitStruct(targetStructRequest);
 
-                EmitServiceIdCode(SerializeHWriter, targetStructRequest.Name, ReceiveType_t.ReceiveType_Request, targetStructRequest.Name);//生成 ServiceID 宏定义
+                EmitServiceIdCode(SerializeHsw, targetStructRequest.Name, ReceiveType_t.ReceiveType_Request, targetStructRequest.Name);//生成 ServiceID 宏定义
 
+                TargetStruct targetStructResponse = new TargetStruct();
+                targetStructResponse.Name = service.ServiceName + "_Response";
                 if (service.ReturnValue!=null)
                 {
-                    TargetStruct targetStructResponse = new TargetStruct();
-                    targetStructResponse.Name = service.ServiceName + "_Response";
+                   
 
                     TargetField ts = new TargetField();
                     ts.Name = "State";
@@ -289,42 +427,45 @@ namespace EmbedXrpcIdlParser
 
                     EmbedXrpcSerializationHelper.EmitStruct(targetStructResponse.Name,
                         targetStructResponse.TargetFields,
-                        SerializeCWriter,
-                        SerializeHWriter);
+                        SerializeCsw,
+                        SerializeHsw);
 
                     EmitStruct(targetStructResponse);
 
-                    EmitServiceIdCode(SerializeHWriter, targetStructResponse.Name, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);//生成 ServiceID 宏定义
+                    
                 }
-                
+                EmitServiceIdCode(SerializeHsw, targetStructResponse.Name, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);//生成 ServiceID 宏定义
+
             }
 
-            SerializeCWriter.WriteLine($"MessageMap RequestMessages[]=");
-            SerializeCWriter.WriteLine("{");
+            SerializeCsw.WriteLine($"MessageMap RequestMessages[]=");
+            SerializeCsw.WriteLine("{");
             foreach (var message in messageMaps[ReceiveType_t.ReceiveType_Request])
             {
-                SerializeCWriter.Write("{");
-                SerializeCWriter.Write("\"{0}\",{1},{2},{3}", message.Name, message.ServiesId, "ReceiveType_Request", message.IType);
-                SerializeCWriter.WriteLine("},");
+                SerializeCsw.Write("{");
+                SerializeCsw.Write("\"{0}\",{1},{2},{3}", message.Name, message.ServiesId, "ReceiveType_Request", message.IType);
+                SerializeCsw.WriteLine("},");
             }
-            SerializeCWriter.WriteLine("};");
+            SerializeCsw.WriteLine("};");
 
-            SerializeHWriter.WriteLine($"extern MessageMap RequestMessages[];");
+            SerializeHsw.WriteLine($"extern MessageMap RequestMessages[];");
 
-            cpphStreamWriter.WriteLine("class " + targetInterface.Name + "ClientImpl");
-            cpphStreamWriter.WriteLine("{\npublic:\nEmbedXrpcClientObject *RpcClientObject=nullptr;");
-            cpphStreamWriter.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcClientObject *rpcobj)");
-            cpphStreamWriter.WriteLine("{\nthis->RpcClientObject=rpcobj;");
+            //这里生产client 部分代码
+            ClientHsw.WriteLine("class " + targetInterface.Name + "ClientImpl");
+            ClientHsw.WriteLine("{\npublic:\nEmbedXrpcClientObject *RpcClientObject=nullptr;");
+            ClientHsw.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcClientObject *rpcobj)");
+            ClientHsw.WriteLine("{\nthis->RpcClientObject=rpcobj;");
 
-            cpphStreamWriter.WriteLine("}");
+            ClientHsw.WriteLine("}");
+
 
             foreach (var service in targetInterface.Services)
             {
                 if(service.ReturnValue!=null)
-                    cpphStreamWriter.Write($"{service.ServiceName}_Response {service.ServiceName}(");
+                    ClientHsw.Write($"{service.ServiceName}_Response {service.ServiceName}(");
                 else
                 {
-                    cpphStreamWriter.Write("void " + service.ServiceName + "(");
+                    ClientHsw.Write("void " + service.ServiceName + "(");
                 }
                 string temp_fileds = string.Empty;
                 for (int i = 0; i < service.TargetFields.Count; i++)
@@ -340,73 +481,129 @@ namespace EmbedXrpcIdlParser
                         name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                     }
 
-                    cpphStreamWriter.Write(cppType + " " + name);
+                    ClientHsw.Write(cppType + " " + name);
                     if (i + 1 < service.TargetFields.Count)
                     {
-                        cpphStreamWriter.Write(",");
+                        ClientHsw.Write(",");
                     }
                 }
-                cpphStreamWriter.WriteLine(")\n{");
+                ClientHsw.WriteLine(")\n{");
 
-                cpphStreamWriter.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
+                ClientHsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
-                cpphStreamWriter.WriteLine($"{service.ServiceName}_Request sendData;");
+                ClientHsw.WriteLine($"{service.ServiceName}_Request sendData;");
 
-                cpphStreamWriter.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
-                cpphStreamWriter.WriteLine("RpcClientObject->BufManager.Reset();");
+                ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
+                ClientHsw.WriteLine("RpcClientObject->BufManager.Reset();");
                 foreach (var field in service.TargetFields)
                 {
                     if(field.IsArray==true&&field.MaxCountAttribute.IsFixed==true)
                     {
                         string arrayelementtype= field.IdlType.Replace("[","").Replace("]","");
-                        cpphStreamWriter.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
+                        ClientHsw.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
                     }
                     else
                     {
-                        cpphStreamWriter.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                        ClientHsw.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
                     }
                     
                 }
-                cpphStreamWriter.WriteLine($"{service.ServiceName}_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);");
-                cpphStreamWriter.WriteLine($"RpcClientObject->Send({service.ServiceName}_Request_ServiceId,RpcClientObject->BufManager.Index,RpcClientObject->BufManager.Buf);");
-                cpphStreamWriter.WriteLine("RpcClientObject->BufManager.Reset();");
-                cpphStreamWriter.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);");
+                ClientHsw.WriteLine($"{service.ServiceName}_Request_Type.Serialize(RpcClientObject->BufManager,0,&sendData);");
+                ClientHsw.WriteLine($"RpcClientObject->Send({service.ServiceName}_Request_ServiceId,RpcClientObject->BufManager.Index,RpcClientObject->BufManager.Buf);");
+                ClientHsw.WriteLine("RpcClientObject->BufManager.Reset();");
+                ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);");
 
                 if (service.ReturnValue != null)
                 {
-                    cpphStreamWriter.WriteLine($"EmbeXrpcRawData recData;\n"+
+                    ClientHsw.WriteLine($"EmbeXrpcRawData recData;\n"+
                                                 $"{service.ServiceName}_Response response;\n" +
                                                $"ResponseState result=RpcClientObject->Wait({service.ServiceName}_Request_ServiceId,&recData,&response);");
-                    cpphStreamWriter.WriteLine("if(result==ResponseState_SidError)\n{");
-                    cpphStreamWriter.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_SidError;");
-                    cpphStreamWriter.WriteLine("}");
-                    cpphStreamWriter.WriteLine("else if(result==ResponseState_Ok)\n{");
-                    cpphStreamWriter.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_Ok;");
-                    cpphStreamWriter.WriteLine("}");
-                    cpphStreamWriter.WriteLine("else if(result==ResponseState_Timeout)\n{");
-                    cpphStreamWriter.WriteLine($"response.State=ResponseState_Timeout;");
-                    cpphStreamWriter.WriteLine("}\nreturn response;");
+                    ClientHsw.WriteLine("if(result==ResponseState_SidError)\n{");
+                    ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_SidError;");
+                    ClientHsw.WriteLine("}");
+                    ClientHsw.WriteLine("else if(result==ResponseState_Ok)\n{");
+                    ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_Ok;");
+                    ClientHsw.WriteLine("}");
+                    ClientHsw.WriteLine("else if(result==ResponseState_Timeout)\n{");
+                    ClientHsw.WriteLine($"response.State=ResponseState_Timeout;");
+                    ClientHsw.WriteLine("}\nreturn response;");
                 }
 
-                //todo
-                //1.serialize  service.name to buf
-                //2.serialize fields to buf
-                //3.call rpc->send(buff);
-
-                cpphStreamWriter.WriteLine("}");
+                ClientHsw.WriteLine("}");
 
                 if (service.ReturnValue != null)
                 {
-                    cpphStreamWriter.WriteLine("void Free_" + service.ServiceName +
+                    ClientHsw.WriteLine("void Free_" + service.ServiceName +
                         $"({service.ServiceName}_Response *response)");
-                    cpphStreamWriter.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
-                    cpphStreamWriter.WriteLine($"{service.ServiceName}_Response_Type.Free(response);");
-                    cpphStreamWriter.WriteLine("}\n}");
+                    ClientHsw.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
+                    ClientHsw.WriteLine($"{service.ServiceName}_Response_Type.Free(response);");
+                    ClientHsw.WriteLine("}\n}");
                 }
-                
+
+                //生成Server端代码
+                ServerHsw.WriteLine($"class {service.ServiceName}Service:public IService");
+                ServerHsw.WriteLine("{\npublic:");
+                ServerHsw.WriteLine($"uint32_t Sid={service.ServiceName}_Response_ServiceId;");
+
+                string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response";
+                ServerHsw.Write($"{returnType} {service.ServiceName}(");
+
+                temp_fileds = string.Empty;
+                for (int i = 0; i < service.TargetFields.Count; i++)
+                {
+                    var field = service.TargetFields[i];
+                    string name = field.Name;
+                    temp_fileds += name + ",";
+
+                    string cppType = IdlType2CppType(field);
+
+                    if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                    {
+                        name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
+                    }
+
+                    ServerHsw.Write(cppType + " " + name);
+                    if (i + 1 < service.TargetFields.Count)
+                    {
+                        ServerHsw.Write(",");
+                    }
+                }
+                ServerHsw.WriteLine(");");
+
+                //code gen invoke
+                ServerHsw.WriteLine("void Invoke(SerializationManager &recManager, SerializationManager& sendManager)\n{");
+
+                ServerHsw.WriteLine($"{service.ServiceName}_Request request;");
+                ServerHsw.WriteLine($"{service.ServiceName}_Request_Type.Deserialize(recManager,&request);");
+
+                if (service.ReturnValue != null)
+                    ServerHsw.Write($"{service.ServiceName}_Response returnValue=");
+                ServerHsw.Write($"{service.ServiceName}(");
+                for (int i = 0; i < service.TargetFields.Count; i++)
+                {
+                    var par= service.TargetFields[i];
+                    ServerHsw.Write($"request.{par.Name}");
+                    if (i + 1 < service.TargetFields.Count)
+                    {
+                        ServerHsw.Write(",");
+                    }
+                }
+                ServerHsw.WriteLine(");");//生成调用目标函数。
+
+                ServerHsw.WriteLine($"{service.ServiceName}_Request_Type.Free(&request);");//free
+
+                if (service.ReturnValue!=null)
+                {
+                    ServerHsw.WriteLine($"{service.ServiceName}_Response_Type.Serialize(sendManager,0,&returnValue);");//生成返回值序列化
+                }
+
+                ServerHsw.WriteLine("}");
+
+
+                ServerHsw.WriteLine("};");
             }
 
-            cpphStreamWriter.WriteLine("};");
+            ClientHsw.WriteLine("};");
 
         }
     }

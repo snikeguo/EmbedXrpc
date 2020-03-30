@@ -9,10 +9,7 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpcIdlParser
 {
-    public class TargetType
-    {
-        public List<TargetType> SubTargetTypes { get; set; } = new List<TargetType>();
-    }
+
     public static class StringExtensions
     {
         public static int GetCharCount(this string t, char a)

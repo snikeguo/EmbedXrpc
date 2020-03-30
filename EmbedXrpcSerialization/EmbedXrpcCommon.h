@@ -1,8 +1,7 @@
 #ifndef EmbedXrpcCommon_H
 #define EmbedXrpcCommon_H
 
-#include "EmbedSerializationBaseType.h"
-#include "EmbedSerialization.h"
+
 #include "EmbedXrpc.Port.h"
  enum ResponseState
  {
@@ -37,7 +36,7 @@ class IDelegate
 {
 public:
     uint32_t Sid;
-    virtual void Invoke(uint8_t* data, uint32_t len)=0;
+    virtual void Invoke(SerializationManager& recManager)=0;
 };
 
 
@@ -45,6 +44,6 @@ class IService
 {
 public:
 	uint32_t Sid;
-	virtual void Invoke(SerializationManager &manager,IType &type,uint8_t* data, uint32_t len) = 0;
+	virtual void Invoke(SerializationManager &recManager, SerializationManager& sendManager) = 0;
 };
 #endif

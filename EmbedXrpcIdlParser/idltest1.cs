@@ -1,6 +1,6 @@
 ﻿using System;
 using EmbedXrpcIdlParser;
-
+#if false
 enum Sex_t:byte
 {
     Man,
@@ -99,7 +99,12 @@ interface IMyInterface
 
     void Test();
 }
-
+#endif
+interface IMyInterface
+{
+    UInt16 GetValue();
+    void SetValue(UInt16 v);
+}
 [GenerationOptionParameter(OutPutFileName= "StudentService",OutPutPath = @"D:\VSProject\EmbedXrpcIdlParser\TestEmbeXrpc\")]
 public struct GenerationOption
 {

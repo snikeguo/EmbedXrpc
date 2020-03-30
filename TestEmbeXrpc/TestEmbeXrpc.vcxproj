@@ -26,8 +26,10 @@
     <ClCompile Include="Win32EmbedXrpcPort.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StudentService.Client.h" />
     <ClInclude Include="StudentService.EmbedXrpcSerialization.h" />
     <ClInclude Include="StudentService.h" />
+    <ClInclude Include="StudentService.Server.h" />
     <ClInclude Include="Win32EmbedXrpcPort.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

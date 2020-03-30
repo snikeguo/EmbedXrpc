@@ -4,6 +4,7 @@
 #include <iostream>
 #include <list>
 #include "EmbedXrpcCommon.h"
+#include "EmbedSerialization.h"
 class EmbedXrpcClientObject
 {
 public:
@@ -87,8 +88,11 @@ public:
 			{
 				if (obj->Delegates[i].Sid == recData.Sid)
 				{
-					obj->Delegates[i].Invoke(recData.Data, recData.DataLen);
-
+					SerializationManager rsm;
+					rsm.Reset();
+					rsm.Buf = recData.Data;
+					rsm.BufferLen = recData.DataLen;
+					obj->Delegates[i].Invoke(rsm);
 					obj->porter->Free(recData.Data);
 				}
 			}
