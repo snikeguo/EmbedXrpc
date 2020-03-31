@@ -30,6 +30,18 @@
     <ClCompile Include="StudentService.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="client.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Client\StudentService.Client.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Server\StudentService.Server.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StudentService.EmbedXrpcSerialization.h">
@@ -41,10 +53,10 @@
     <ClInclude Include="Win32EmbedXrpcPort.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="StudentService.Client.h">
+    <ClInclude Include="Client\StudentService.Client.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="StudentService.Server.h">
+    <ClInclude Include="Server\StudentService.Server.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

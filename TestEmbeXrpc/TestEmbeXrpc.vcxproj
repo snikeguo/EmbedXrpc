@@ -20,16 +20,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
+    <ClCompile Include="client.cpp" />
+    <ClCompile Include="Client\StudentService.Client.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="Server\StudentService.Server.cpp" />
     <ClCompile Include="StudentService.cpp" />
     <ClCompile Include="StudentService.EmbedXrpcSerialization.cpp" />
     <ClCompile Include="Win32EmbedXrpcPort.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="StudentService.Client.h" />
+    <ClInclude Include="Client\StudentService.Client.h" />
+    <ClInclude Include="Server\StudentService.Server.h" />
     <ClInclude Include="StudentService.EmbedXrpcSerialization.h" />
     <ClInclude Include="StudentService.h" />
-    <ClInclude Include="StudentService.Server.h" />
     <ClInclude Include="Win32EmbedXrpcPort.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -85,7 +89,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../EmbedXrpcSerialization;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;.;./Server;./Client;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

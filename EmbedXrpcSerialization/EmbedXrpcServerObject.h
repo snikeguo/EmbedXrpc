@@ -20,17 +20,17 @@ public:
 	EmbeXrpc_Mutex_t BufMutexHandle;
 	EmbeXrpc_Queue_t RequestQueueHandle;
 
-	uint32_t ServiceCount;
-	IService* Services;
+	uint32_t MessageMapCount;
+	RequestMessageMap* MessageMaps;
 
-	EmbedXrpcServerObject(uint32_t timeOut, uint8_t* buf, uint32_t bufLen, IEmbeXrpcPort* port, uint32_t serviceCount, IService* services)
+	EmbedXrpcServerObject(uint32_t timeOut, uint8_t* buf, uint32_t bufLen, IEmbeXrpcPort* port, uint32_t messageMapCount, RequestMessageMap* messageMaps)
 	{
 		TimeOut = timeOut;
 		Buffer = buf;
 		BufferLen = bufLen;
 		porter = port;
-		ServiceCount = serviceCount;
-		Services = services;
+		MessageMapCount = messageMapCount;
+		MessageMaps = messageMaps;
 	}
 	void Init()
 	{
@@ -52,9 +52,9 @@ public:
 				continue;
 			}
 
-			for (i = 0; i < obj->ServiceCount; i++)
+			for (i = 0; i < obj->MessageMapCount; i++)
 			{
-				if (obj->Services[i].Sid == recData.Sid)
+				if (obj->MessageMaps[i].Service->Sid == recData.Sid)
 				{
 					
 					SerializationManager rsm;
@@ -67,7 +67,7 @@ public:
 					sendsm.Buf = obj->Buffer;
 					sendsm.BufferLen = obj->BufferLen;
 
-					obj->Services[i].Invoke(rsm, sendsm);
+					obj->MessageMaps[i].Service->Invoke(rsm, sendsm);
 
 					if (sendsm.Index > 0)//
 						obj->Send(recData.Sid, sendsm.Index, sendsm.Buf);

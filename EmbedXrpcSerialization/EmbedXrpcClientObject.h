@@ -14,7 +14,6 @@ public:
 	uint8_t *Buffer;
 	uint32_t BufferLen;
 
-
 	uint32_t TimeOut;
 	SendPack_t Send;
 	IEmbeXrpcPort* porter;
@@ -23,29 +22,23 @@ public:
 	EmbeXrpc_Queue_t ResponseMessageQueueHandle;
 	EmbeXrpc_Thread_t ServiceThreadHandle;
 
-	uint32_t DeserializeMapsCount;
-	MessageMap* MessageMaps;
+	uint32_t MessageMapsCount;
+	ResponseDelegateMessageMap* MessageMaps;
 
-	uint32_t DelegateCount;
-	IDelegate* Delegates;
-	
 	EmbedXrpcClientObject(uint32_t timeOut,
 		uint8_t* buf,
 		uint32_t bufLen,
 		IEmbeXrpcPort *port,
-		uint32_t deserializeMapsCount,
-		MessageMap* messageMaps,
-		uint32_t delegateCount,
-		IDelegate *dels)
+		uint32_t messageMapsCount,
+		ResponseDelegateMessageMap* messageMaps)
 	{
 		TimeOut = timeOut;
 		Buffer = buf;
 		BufferLen = bufLen;
 		porter = port;
-		DeserializeMapsCount = deserializeMapsCount;
+		MessageMapsCount = messageMapsCount;
 		MessageMaps = messageMaps;
-		DelegateCount = delegateCount;
-		Delegates = dels;
+
 	}
 	void Init()
 	{
@@ -57,13 +50,14 @@ public:
 	void ReceivedMessage(uint32_t serviceId, uint8_t* data, uint32_t dataLen)
 	{
 		EmbeXrpcRawData raw;
-		for (uint32_t i=0;i< DeserializeMapsCount; i++)
+
+		for (uint32_t i=0;i< MessageMapsCount; i++)
 		{
 			auto iter = &MessageMaps[i];
-			if (iter->Sid == serviceId)
+			if (iter->Delegate->Sid== serviceId)
 			{		
 				raw.Sid = serviceId;
-				raw.MessageType = iter->MessageType;
+				//raw.MessageType = iter->MessageType;
 				raw.Data =(uint8_t *) porter->Malloc(dataLen);
 				porter->Memcpy(raw.Data, data, dataLen);
 				raw.DataLen = dataLen;
@@ -89,56 +83,40 @@ public:
 			{
 				continue;
 			}
-			for (i = 0; i < obj->DelegateCount; i++)
+			for (i = 0; i < obj->MessageMapsCount; i++)
 			{
-				if (obj->Delegates[i].Sid == recData.Sid)
+				if (obj->MessageMaps[i].Delegate->Sid == recData.Sid)
 				{
 					SerializationManager rsm;
 					rsm.Reset();
 					rsm.Buf = recData.Data;
 					rsm.BufferLen = recData.DataLen;
-					obj->Delegates[i].Invoke(rsm);
+					obj->MessageMaps[i].Delegate->Invoke(rsm);
 					obj->porter->Free(recData.Data);
 				}
 			}
 		}
 	}
-	/*
-	send request;//如果返回值是void 那么直接生成返回代码即可。否则继续往下走。
-	EmbeXrpcRawData recData;
-	Option<responseType> ret;
-	auto result=rpcobj->Wait(sid,&recData,&ret.Value);
-	if(result==ResponseState_SidError)
+
+	ResponseState Wait(uint32_t sid, IType *type,void * response)
 	{
-		porter->Free(recData.Data);
-		ret.ResponseState=ResponseState_SidError;
-		return ret;
-	}
-	else if(result==ResponseState_Ok)
-	{
-		porter->Free(recData.Data);
-		ret.ResponseState=ResponseState_Ok;
-		return ret;
-	}
-	*/
-	ResponseState Wait(uint32_t sid, EmbeXrpcRawData* recData,void * response)
-	{
-		if (porter->ReceiveQueue(ResponseMessageQueueHandle, recData, sizeof(EmbeXrpcRawData), TimeOut) != QueueState_OK)
+		EmbeXrpcRawData recData;
+		if (porter->ReceiveQueue(ResponseMessageQueueHandle, &recData, sizeof(EmbeXrpcRawData), TimeOut) != QueueState_OK)
 		{
 			return ResponseState_Timeout;
 		}
 		ResponseState ret;
-		if (sid != recData->Sid)
+		if (sid != recData.Sid)
 		{
 			ret=ResponseState_SidError;
 		}
 		SerializationManager rsm;
 		rsm.Reset();
-		rsm.Buf = recData->Data;
-		rsm.BufferLen = recData->DataLen;
-		recData->MessageType->Deserialize(rsm, response);
+		rsm.Buf = recData.Data;
+		rsm.BufferLen = recData.DataLen;
+		type->Deserialize(rsm, response);
 		ret = ResponseState_Ok;
-		porter->Free(recData);
+		porter->Free(recData.Data);
 		return ret;
 	}
 	

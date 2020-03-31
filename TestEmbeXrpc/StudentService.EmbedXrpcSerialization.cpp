@@ -104,9 +104,3 @@ ObjectType GetStudentsInfoFormAge_Response_Type(sizeof(GetStudentsInfoFormAge_Re
 
 ObjectType Test_Request_Type(0,nullptr);
 
-MessageMap RequestMessages[]=
-{
-{"GetStudentInfoFormStudentId",GetStudentInfoFormStudentId_ServiceId,ReceiveType_Request,&GetStudentInfoFormStudentId_Request_Type},
-{"GetStudentsInfoFormAge",GetStudentsInfoFormAge_ServiceId,ReceiveType_Request,&GetStudentsInfoFormAge_Request_Type},
-{"Test",Test_ServiceId,ReceiveType_Request,&Test_Request_Type},
-};

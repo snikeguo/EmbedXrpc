@@ -66,6 +66,5 @@ extern ObjectType GetStudentsInfoFormAge_Response_Type;
 extern ObjectType Test_Request_Type;
 
 #define Test_ServiceId 19
-extern MessageMap RequestMessages[];
 
 #endif

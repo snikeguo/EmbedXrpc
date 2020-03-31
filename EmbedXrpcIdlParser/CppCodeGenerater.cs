@@ -26,24 +26,22 @@ namespace EmbedXrpcIdlParser
     {
 
         private static Dictionary<string, string> ReplaceDic = new Dictionary<string, string>();
-        private Dictionary<ReceiveType_t,List<MessageMap>> messageMaps = new Dictionary<ReceiveType_t, List<MessageMap>>();
+        private List<MessageMap> messageMaps = new List<MessageMap>();
         int ServiceId = 0x10;
-        public void EmitServiceIdCode(StreamWriter sw, string defineName, ReceiveType_t receiveType, string itype)
+
+        public void AddMessageMap(string defineName, ReceiveType_t receiveType, string itype)
         {
-
-            sw.WriteLine($"#define {defineName}_ServiceId {ServiceId}");
-
             MessageMap m = new MessageMap();
             m.Name = defineName;
             m.ServiesId = $"{defineName}_ServiceId";
             m.ReceiveType = receiveType;
-            m.IType = "&"+itype+"_Type";
-            if (messageMaps.ContainsKey(receiveType) == false)
-            {
-                messageMaps.Add(receiveType, new List<MessageMap>());
-            }
-            messageMaps[receiveType].Add(m);
+            m.IType = "&" + itype + "_Type";
+            messageMaps.Add(m);
+        }
+        public void EmitServiceIdCode(StreamWriter sw, string defineName, ReceiveType_t receiveType, string itype)
+        {
 
+            sw.WriteLine($"#define {defineName}_ServiceId {ServiceId}");
             ServiceId++;
 
             
@@ -103,19 +101,33 @@ namespace EmbedXrpcIdlParser
             SerializeHsw.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
             SerializeHsw.WriteLine("#endif");
 
-            ClientHsw = new StreamWriter(outputattr.OutPutPath + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
+            if (Directory.Exists(outputattr.OutPutPath + "Client") == false)
+                Directory.CreateDirectory(outputattr.OutPutPath + "Client");
+
+            if (Directory.Exists(outputattr.OutPutPath + "Server") == false)
+                Directory.CreateDirectory(outputattr.OutPutPath + "Server");
+
+
+            ClientHsw = new StreamWriter(outputattr.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
             ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_Client_H");
             ClientHsw.WriteLine($"#define {outputattr.OutPutFileName}_Client_H");
             ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
             ClientHsw.WriteLine("#include\"EmbedXrpcClientObject.h\"");
             ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
-            ServerHsw = new StreamWriter(outputattr.OutPutPath + outputattr.OutPutFileName + ".Server.h", false, Encoding.UTF8);
+            ClientCsw = new StreamWriter(outputattr.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.cpp", false, Encoding.UTF8);
+            ClientCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Client.h\"");
+
+
+            ServerHsw = new StreamWriter(outputattr.OutPutPath+"Server/" + outputattr.OutPutFileName + ".Server.h", false, Encoding.UTF8);
             ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_Server_H");
             ServerHsw.WriteLine($"#define {outputattr.OutPutFileName}_Server_H");
             ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
             ServerHsw.WriteLine("#include\"EmbedXrpcServerObject.h\"");
             ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+
+            ServerCsw = new StreamWriter(outputattr.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.cpp", false, Encoding.UTF8);
+            ServerCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Server.h\"");
 
             ServiceId = 0x10;
             foreach (var em in idlInfo.TargetEnums)
@@ -147,7 +159,7 @@ namespace EmbedXrpcIdlParser
                     targetStruct.TargetFields,
                     SerializeCsw,
                     SerializeHsw);
-
+                AddMessageMap(del.MethodName, ReceiveType_t.ReceiveType_Delegate, del.MethodName);
                 EmitServiceIdCode(SerializeHsw, targetStruct.Name, ReceiveType_t.ReceiveType_Delegate, targetStruct.Name);//生成 ServiceID 宏定义
 
             }
@@ -188,11 +200,19 @@ namespace EmbedXrpcIdlParser
             ServerHsw.WriteLine("\n#endif");
             ServerHsw.Flush();
             ServerHsw.Close();
+
+            ClientCsw.Flush();
+            ClientCsw.Close();
+
+            ServerCsw.Flush();
+            ServerCsw.Close();
         }
         private StreamWriter CommonHsw;
         private StreamWriter CommonCsw;
         private StreamWriter ClientHsw;
+        private StreamWriter ClientCsw;
         private StreamWriter ServerHsw;
+        private StreamWriter ServerCsw;
         private StreamWriter SerializeCsw;
         private StreamWriter SerializeHsw;
         public static string IdlType2CppType(TargetField field)
@@ -326,6 +346,7 @@ namespace EmbedXrpcIdlParser
             ClientHsw.WriteLine("}");//函数生成完毕
 
             ClientHsw.WriteLine("};");//end class
+            ClientCsw.WriteLine($"{targetDelegate.MethodName}ClientImpl {targetDelegate.MethodName}ClientImplInstance;");//创建一个委托实例
 
             //生成服务端代码
             ServerHsw.WriteLine("class " + targetDelegate.MethodName + "Delegate");
@@ -402,15 +423,13 @@ namespace EmbedXrpcIdlParser
                     SerializeCsw,
                     SerializeHsw);
                 EmitStruct(targetStructRequest);
-
+                AddMessageMap(service.ServiceName, ReceiveType_t.ReceiveType_Request, targetStructRequest.Name);
                 EmitServiceIdCode(SerializeHsw, service.ServiceName, ReceiveType_t.ReceiveType_Request, targetStructRequest.Name);//生成 ServiceID 宏定义
 
                 TargetStruct targetStructResponse = new TargetStruct();
                 targetStructResponse.Name = service.ServiceName + "_Response";
                 if (service.ReturnValue!=null)
-                {
-                   
-
+                {           
                     TargetField ts = new TargetField();
                     ts.Name = "State";
                     ts.IdlType = "ResponseState";
@@ -426,8 +445,6 @@ namespace EmbedXrpcIdlParser
                     returnValue.MaxCountAttribute = null;
                     targetStructResponse.TargetFields.Add(returnValue);
 
-                    
-
                     EmbedXrpcSerializationHelper.EmitStruct(targetStructResponse.Name,
                         targetStructResponse.TargetFields,
                         SerializeCsw,
@@ -435,23 +452,12 @@ namespace EmbedXrpcIdlParser
 
                     EmitStruct(targetStructResponse);
 
-                    
+                    AddMessageMap(service.ServiceName, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);
                 }
                 //EmitServiceIdCode(SerializeHsw, targetStructResponse.Name, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);//生成 ServiceID 宏定义
 
             }
-
-            SerializeCsw.WriteLine($"MessageMap RequestMessages[]=");
-            SerializeCsw.WriteLine("{");
-            foreach (var message in messageMaps[ReceiveType_t.ReceiveType_Request])
-            {
-                SerializeCsw.Write("{");
-                SerializeCsw.Write("\"{0}\",{1},{2},{3}", message.Name, message.ServiesId, "ReceiveType_Request", message.IType);
-                SerializeCsw.WriteLine("},");
-            }
-            SerializeCsw.WriteLine("};");
-
-            SerializeHsw.WriteLine($"extern MessageMap RequestMessages[];");
+            
 
             //这里生产client 部分代码
             ClientHsw.WriteLine("class " + targetInterface.Name + "ClientImpl");
@@ -460,6 +466,7 @@ namespace EmbedXrpcIdlParser
             ClientHsw.WriteLine("{\nthis->RpcClientObject=rpcobj;");
 
             ClientHsw.WriteLine("}");
+            
 
 
             foreach (var service in targetInterface.Services)
@@ -523,9 +530,8 @@ namespace EmbedXrpcIdlParser
 
                 if (service.ReturnValue != null)
                 {
-                    ClientHsw.WriteLine($"EmbeXrpcRawData recData;\n"+
-                                                $"{service.ServiceName}_Response response;\n" +
-                                               $"ResponseState result=RpcClientObject->Wait({service.ServiceName}_ServiceId,&recData,&response);");
+                    ClientHsw.WriteLine($"{service.ServiceName}_Response response;\n" +
+                                       $"ResponseState result=RpcClientObject->Wait({service.ServiceName}_ServiceId,&{service.ServiceName}_Response_Type,&response);");
                     ClientHsw.WriteLine("if(result==ResponseState_SidError)\n{");
                     //ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_SidError;");
                     ClientHsw.WriteLine($"response.State=ResponseState_SidError;");
@@ -549,6 +555,7 @@ namespace EmbedXrpcIdlParser
                     ClientHsw.WriteLine($"{service.ServiceName}_Response_Type.Free(response);");
                     ClientHsw.WriteLine("}\n}");
                 }
+                
 
                 //生成Server端代码
                 ServerHsw.WriteLine($"class {service.ServiceName}Service:public IService");
@@ -612,10 +619,48 @@ namespace EmbedXrpcIdlParser
 
 
                 ServerHsw.WriteLine("};");
+
+                ServerCsw.WriteLine($"{service.ServiceName}Service {service.ServiceName}ServiceInstance;");//创建一个service实例
             }
+            ClientHsw.WriteLine("};"); //client interface end class
 
-            ClientHsw.WriteLine("};");
+            //生成request Service 数组
+            ServerCsw.WriteLine($"RequestMessageMap RequestMessages[]=");
+            int RequestMessagesCount = 0;
+            ServerCsw.WriteLine("{");
+            foreach (var message in messageMaps)
+            {
+                if (message.ReceiveType == ReceiveType_t.ReceiveType_Request)
+                {
+                    RequestMessagesCount++;
+                    ServerCsw.Write("{");
+                    ServerCsw.Write("\"{0}\",&{1}ServiceInstance", message.Name, message.Name);
+                    ServerCsw.WriteLine("},");
+                }
 
+            }
+            ServerCsw.WriteLine("};");
+            ServerHsw.WriteLine($"extern RequestMessageMap RequestMessages[{RequestMessagesCount}];");
+
+            //生成Response\Delegate service 数组
+            ClientCsw.WriteLine($"ResponseDelegateMessageMap ResponseDelegateMessages[]=");
+            int ResponseDelegateMessagesCount = 0;
+            ClientCsw.WriteLine("{");
+            foreach (var message in messageMaps)
+            {
+                if (message.ReceiveType == ReceiveType_t.ReceiveType_Delegate)
+                {
+                    ResponseDelegateMessagesCount++;
+                    ClientCsw.Write("{");
+                    ClientCsw.Write("\"{0}\",{1},&{2}ClientImplInstance", message.Name, message.ReceiveType.ToString(), message.Name);
+                    ClientCsw.WriteLine("},");
+                }
+
+            }
+            ClientCsw.WriteLine("};");
+            ClientHsw.WriteLine($"extern ResponseDelegateMessageMap ResponseDelegateMessages[{ResponseDelegateMessagesCount}];");
+            
         }
+
     }
 }
