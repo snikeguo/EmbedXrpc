@@ -26,7 +26,7 @@ extern Int32Field Student_t_Field_Age;
 extern ArrayField Student_t_Field_Name;
 extern Uint8Field Student_t_Field_StudentIdLen;
 extern ArrayField Student_t_Field_StudentId;
-extern Uint8Field Student_t_Field_Sex;
+extern Uint32Field Student_t_Field_Sex;
 extern ObjectType Student_t_Type;
 
 extern Int32Field DateTime_t_Field_Year;
@@ -44,7 +44,7 @@ extern ObjectType StudentArray_t_Type;
 extern ObjectField BroadcastDataTimeStruct_Field_t;
 extern ObjectType BroadcastDataTimeStruct_Type;
 
-#define BroadcastDataTimeStruct_ServiceId 16
+#define BroadcastDataTime_ServiceId 16
 extern Uint8Field GetStudentInfoFormStudentId_Request_Field_StudentIdLen;
 extern ArrayField GetStudentInfoFormStudentId_Request_Field_StudentId;
 extern Int32Field GetStudentInfoFormStudentId_Request_Field_arg2;

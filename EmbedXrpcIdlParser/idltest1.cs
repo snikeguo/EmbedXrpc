@@ -1,7 +1,7 @@
 ﻿using System;
 using EmbedXrpcIdlParser;
 #if true
-enum Sex_t:byte
+enum Sex_t:UInt32
 {
     Man,
     Woman

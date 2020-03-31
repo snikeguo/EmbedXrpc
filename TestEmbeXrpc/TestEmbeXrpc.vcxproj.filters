@@ -37,10 +37,10 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Client\StudentService.Client.cpp">
-      <Filter>头文件</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Server\StudentService.Server.cpp">
-      <Filter>头文件</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +57,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Server\StudentService.Server.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockingQueue.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

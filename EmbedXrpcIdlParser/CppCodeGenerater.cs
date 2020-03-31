@@ -16,7 +16,7 @@ namespace EmbedXrpcIdlParser
     public class MessageMap
     {
         public string Name { get; set; }
-        public string ServiesId { get; set; }
+        public string ServiceId { get; set; }
         public ReceiveType_t ReceiveType { get; set; }
 
         public string IType { get; set; }
@@ -33,7 +33,7 @@ namespace EmbedXrpcIdlParser
         {
             MessageMap m = new MessageMap();
             m.Name = defineName;
-            m.ServiesId = $"{defineName}_ServiceId";
+            m.ServiceId = $"{defineName}_ServiceId";
             m.ReceiveType = receiveType;
             m.IType = "&" + itype + "_Type";
             messageMaps.Add(m);
@@ -160,7 +160,7 @@ namespace EmbedXrpcIdlParser
                     SerializeCsw,
                     SerializeHsw);
                 AddMessageMap(del.MethodName, ReceiveType_t.ReceiveType_Delegate, del.MethodName);
-                EmitServiceIdCode(SerializeHsw, targetStruct.Name, ReceiveType_t.ReceiveType_Delegate, targetStruct.Name);//生成 ServiceID 宏定义
+                EmitServiceIdCode(SerializeHsw, del.MethodName, ReceiveType_t.ReceiveType_Delegate, del.MethodName);//生成 ServiceID 宏定义
 
             }
 
@@ -276,6 +276,7 @@ namespace EmbedXrpcIdlParser
 
         public void EmitDelegate(TargetDelegate targetDelegate)
         {
+            /*
             CommonHsw.Write("typedef void (*" + targetDelegate.MethodName + ")(");
             for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
             {
@@ -294,11 +295,11 @@ namespace EmbedXrpcIdlParser
                 }
             }
             CommonHsw.WriteLine(");");
-
+            */
             //生成客户端 delegate代码
             ClientHsw.WriteLine($"class {targetDelegate.MethodName}ClientImpl:public IDelegate");
             ClientHsw.WriteLine("{\npublic:");
-            ClientHsw.WriteLine($"uint32_t Sid=0;");//delegate 的sid保留
+            ClientHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
 
             ClientHsw.Write($"void {targetDelegate.MethodName}(");
 
@@ -354,7 +355,7 @@ namespace EmbedXrpcIdlParser
             ServerHsw.WriteLine(targetDelegate.MethodName + "Delegate" + "(EmbedXrpcServerObject *rpcobj)");
             ServerHsw.WriteLine("{\nthis->RpcServerObject=rpcobj;");
             ServerHsw.WriteLine("}");
-            ServerHsw.WriteLine($"uint32_t Sid={targetDelegate.MethodName}Struct_ServiceId;");
+            ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
 
             ServerHsw.Write($"void  Invoke(");
 
@@ -402,7 +403,7 @@ namespace EmbedXrpcIdlParser
 
             }
             ServerHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&sendData);");
-            ServerHsw.WriteLine($"RpcServerObject->Send({targetDelegate.MethodName}Struct_ServiceId,sm.Index,sm.Buf);");
+            ServerHsw.WriteLine($"RpcServerObject->Send({targetDelegate.MethodName}_ServiceId,sm.Index,sm.Buf);");
             ServerHsw.WriteLine("sm.Reset();");
             ServerHsw.WriteLine("RpcServerObject->porter->ReleaseMutex(RpcServerObject->BufMutexHandle);");
             ServerHsw.WriteLine("}");//function end
@@ -560,7 +561,7 @@ namespace EmbedXrpcIdlParser
                 //生成Server端代码
                 ServerHsw.WriteLine($"class {service.ServiceName}Service:public IService");
                 ServerHsw.WriteLine("{\npublic:");
-                ServerHsw.WriteLine($"uint32_t Sid={service.ServiceName}_ServiceId;");
+                ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
 
                 string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response";
                 ServerHsw.Write($"{returnType} {service.ServiceName}(");
@@ -647,15 +648,21 @@ namespace EmbedXrpcIdlParser
             int ResponseDelegateMessagesCount = 0;
             ClientCsw.WriteLine("{");
             foreach (var message in messageMaps)
-            {
+            {           
                 if (message.ReceiveType == ReceiveType_t.ReceiveType_Delegate)
                 {
                     ResponseDelegateMessagesCount++;
                     ClientCsw.Write("{");
-                    ClientCsw.Write("\"{0}\",{1},&{2}ClientImplInstance", message.Name, message.ReceiveType.ToString(), message.Name);
+                    ClientCsw.Write("\"{0}\",{1},{2},&{3}ClientImplInstance", message.Name,message.ServiceId, "ReceiveType_Delegate", message.Name);
                     ClientCsw.WriteLine("},");
                 }
-
+                else if (message.ReceiveType == ReceiveType_t.ReceiveType_Response)
+                {
+                    ResponseDelegateMessagesCount++;
+                    ClientCsw.Write("{");
+                    ClientCsw.Write("\"{0}\",{1},{2},nullptr", message.Name, message.ServiceId, "ReceiveType_Response");
+                    ClientCsw.WriteLine("},");
+                }
             }
             ClientCsw.WriteLine("};");
             ClientHsw.WriteLine($"extern ResponseDelegateMessageMap ResponseDelegateMessages[{ResponseDelegateMessagesCount}];");

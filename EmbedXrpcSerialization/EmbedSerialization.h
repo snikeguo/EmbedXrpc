@@ -12,7 +12,7 @@
 #endif
 #define MALLOC	malloc
 #define FREE	free
-#define Debug  printf
+#define Debug  
 typedef  uint32_t ptr_t;
 /*
 ”√¿¥≤‚ ‘

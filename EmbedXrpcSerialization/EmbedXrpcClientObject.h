@@ -25,13 +25,16 @@ public:
 	uint32_t MessageMapsCount;
 	ResponseDelegateMessageMap* MessageMaps;
 
-	EmbedXrpcClientObject(uint32_t timeOut,
+	EmbedXrpcClientObject(
+		SendPack_t send,
+		uint32_t timeOut,
 		uint8_t* buf,
 		uint32_t bufLen,
 		IEmbeXrpcPort *port,
 		uint32_t messageMapsCount,
 		ResponseDelegateMessageMap* messageMaps)
 	{
+		Send = send;
 		TimeOut = timeOut;
 		Buffer = buf;
 		BufferLen = bufLen;
@@ -42,23 +45,26 @@ public:
 	}
 	void Init()
 	{
-		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread);
+		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread,this);
 		BufMutexHandle = porter->CreateMutex("BufMutex");
 		DelegateMessageQueueHandle = porter->CreateQueue("DelegateMessageQueueHandle",sizeof(EmbeXrpcRawData),10);
+		ResponseMessageQueueHandle = porter->CreateQueue("ResponseMessageQueueHandle", sizeof(EmbeXrpcRawData), 10);
 		porter->ThreadStart(ServiceThreadHandle);
 	}
-	void ReceivedMessage(uint32_t serviceId, uint8_t* data, uint32_t dataLen)
+	void ReceivedMessage(uint32_t serviceId, uint32_t dataLen, uint8_t* data)
 	{
 		EmbeXrpcRawData raw;
 
 		for (uint32_t i=0;i< MessageMapsCount; i++)
 		{
 			auto iter = &MessageMaps[i];
-			if (iter->Delegate->Sid== serviceId)
+			if (iter->Sid== serviceId)
 			{		
 				raw.Sid = serviceId;
 				//raw.MessageType = iter->MessageType;
 				raw.Data =(uint8_t *) porter->Malloc(dataLen);
+				XrpcDebug("Client ReceivedMessage  Malloc :0x%x,size:%d\n",(uint32_t) raw.Data, dataLen);
+
 				porter->Memcpy(raw.Data, data, dataLen);
 				raw.DataLen = dataLen;
 				if (iter->ReceiveType == ReceiveType_Response)
@@ -85,16 +91,17 @@ public:
 			}
 			for (i = 0; i < obj->MessageMapsCount; i++)
 			{
-				if (obj->MessageMaps[i].Delegate->Sid == recData.Sid)
+				if( (obj->MessageMaps[i].ReceiveType== ReceiveType_Delegate)&&(obj->MessageMaps[i].Delegate->GetSid() == recData.Sid))
 				{
 					SerializationManager rsm;
 					rsm.Reset();
 					rsm.Buf = recData.Data;
 					rsm.BufferLen = recData.DataLen;
 					obj->MessageMaps[i].Delegate->Invoke(rsm);
-					obj->porter->Free(recData.Data);
 				}
 			}
+			obj->porter->Free(recData.Data);
+			XrpcDebug("Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
 	}
 

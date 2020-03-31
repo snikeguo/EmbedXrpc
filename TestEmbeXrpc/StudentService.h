@@ -47,7 +47,6 @@ typedef struct _BroadcastDataTimeStruct
 {
 DateTime_t t;
 }BroadcastDataTimeStruct;
-typedef void (*BroadcastDataTime)(DateTime_t t);
 typedef struct _GetStudentInfoFormStudentId_Request
 {
 Byte StudentIdLen;

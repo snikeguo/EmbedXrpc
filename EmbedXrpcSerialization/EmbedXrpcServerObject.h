@@ -23,8 +23,9 @@ public:
 	uint32_t MessageMapCount;
 	RequestMessageMap* MessageMaps;
 
-	EmbedXrpcServerObject(uint32_t timeOut, uint8_t* buf, uint32_t bufLen, IEmbeXrpcPort* port, uint32_t messageMapCount, RequestMessageMap* messageMaps)
+	EmbedXrpcServerObject(SendPack_t send, uint32_t timeOut, uint8_t* buf, uint32_t bufLen, IEmbeXrpcPort* port, uint32_t messageMapCount, RequestMessageMap* messageMaps)
 	{
+		Send = send;
 		TimeOut = timeOut;
 		Buffer = buf;
 		BufferLen = bufLen;
@@ -34,7 +35,7 @@ public:
 	}
 	void Init()
 	{
-		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread);
+		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread,this);
 		BufMutexHandle = porter->CreateMutex("BufMutex");
 		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), 10);
 
@@ -47,14 +48,13 @@ public:
 		uint32_t i = 0;
 		for (;;)
 		{
-			if (obj->porter->ReceiveQueue(obj->RequestQueueHandle, &recData, sizeof(EmbeXrpcRawData), WAIT_FOREVER) != QueueState_OK)
+			if (obj->porter->ReceiveQueue(obj->RequestQueueHandle, &recData, sizeof(EmbeXrpcRawData), 1) != QueueState_OK)
 			{
 				continue;
 			}
-
 			for (i = 0; i < obj->MessageMapCount; i++)
 			{
-				if (obj->MessageMaps[i].Service->Sid == recData.Sid)
+				if (obj->MessageMaps[i].Service->GetSid() == recData.Sid)
 				{
 					
 					SerializationManager rsm;
@@ -71,10 +71,10 @@ public:
 
 					if (sendsm.Index > 0)//
 						obj->Send(recData.Sid, sendsm.Index, sendsm.Buf);
-					obj->porter->Free(recData.Data);
-
 				}
 			}
+			obj->porter->Free(recData.Data);
+			XrpcDebug("Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
 	}
 };

@@ -18,7 +18,7 @@
  class IDelegate
  {
  public:
-	 uint32_t Sid;
+     virtual uint32_t GetSid() = 0;
 	 virtual void Invoke(SerializationManager& recManager) = 0;
  };
 
@@ -26,7 +26,7 @@
  class IService
  {
  public:
-	 uint32_t Sid;
+     virtual uint32_t GetSid() = 0;
 	 virtual void Invoke(SerializationManager& recManager, SerializationManager& sendManager) = 0;
  };
  struct RequestMessageMap
@@ -37,6 +37,7 @@
  struct ResponseDelegateMessageMap
  {
      const char* Name;
+     uint32_t Sid;//有可能是Response/Delegate
      ReceiveType_t ReceiveType;
      IDelegate* Delegate;
  };

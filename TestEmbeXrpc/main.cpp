@@ -66,8 +66,19 @@ int main()
 
 
 #else
+
+#include "BlockingQueue.h"
+
+extern void ServerInit();
+extern void ServerTest();
+extern void ClientInit();
+extern void ClientTest();
 int main()
 {
-
+	ServerInit();
+	ClientInit();
+	ClientTest();
+	ServerTest();
+	cin.get();
 }
 #endif
