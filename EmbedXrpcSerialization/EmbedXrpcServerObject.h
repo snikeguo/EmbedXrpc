@@ -41,6 +41,19 @@ public:
 
 		porter->ThreadStart(ServiceThreadHandle);
 	}
+
+	void ReceivedMessage(uint32_t serviceId, uint32_t dataLen, uint8_t* data)
+	{
+		EmbeXrpcRawData raw;
+		raw.Sid = serviceId;
+		raw.Data = (uint8_t*)porter->Malloc(dataLen);
+		XrpcDebug("Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
+		porter->Memcpy(raw.Data, data, dataLen);
+		raw.DataLen = dataLen;
+		porter->SendQueue(RequestQueueHandle, &raw, sizeof(EmbeXrpcRawData));
+
+	}
+
 	static void ServiceThread(void* arg)
 	{
 		EmbedXrpcServerObject* obj = (EmbedXrpcServerObject*)arg;

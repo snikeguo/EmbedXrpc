@@ -9,18 +9,7 @@ extern EmbedXrpcServerObject ServerRpcObject;
 
 static void ClientSend(uint32_t sid, uint32_t dataLen, uint8_t* data)
 {
-    EmbeXrpcRawData rd;
-    
-    
-    rd.Data = (uint8_t*)ServerRpcObject.porter->Malloc(dataLen);
-    XrpcDebug("ClientSend Malloc 0x%x,size:%d\n", (uint32_t)rd.Data, dataLen);
-
-
-    ServerRpcObject.porter->Memcpy(rd.Data, data, dataLen);
-
-    rd.DataLen = dataLen;
-    rd.Sid = sid;
-    ServerRpcObject.porter->SendQueue(ServerRpcObject.RequestQueueHandle, &rd,sizeof(EmbeXrpcRawData));
+    ServerRpcObject.ReceivedMessage(sid, dataLen, data);
 }
 EmbedXrpcClientObject ClientRpcObject(
     ClientSend,
