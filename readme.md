@@ -1,4 +1,5 @@
-# mbedRpc 用户手册
+# EmbedRpc 用户手册
+#### [视频教程](https://v.qq.com/x/page/v0943tykmh8.html)
 #### 应用场景：单片机近距离Client/Server交互场景（USB、串口、CAN（如J1939 、ISO15765协议等），）只要是流协议都支持
 ## 用户使用步骤
 1.用vs2019 打开EmbedXrpcIdlParser.sln编译好。
