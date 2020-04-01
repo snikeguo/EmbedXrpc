@@ -77,8 +77,9 @@ int main()
 {
 	ServerInit();
 	ClientInit();
-	ClientTest();
-	ServerTest();
+	std::thread clientThread([] {ClientTest(); });
+	std::thread ServerThread([] {ServerTest(); });
+	
 	cin.get();
 }
 #endif

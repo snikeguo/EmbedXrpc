@@ -20,21 +20,17 @@ EmbedXrpcServerObject ServerRpcObject(ServerSend,
 
 BroadcastDataTimeDelegate BroadcastDataTimeProxy(&ServerRpcObject);
 
-GetStudentInfoFormStudentId_Response GetStudentInfoFormStudentIdService::GetStudentInfoFormStudentId(Byte StudentIdLen, Byte StudentId[100], Int32 arg2, Int32 arg3)
+void GetStudentInfoFormStudentIdService::GetStudentInfoFormStudentId(Byte StudentIdLen, Byte StudentId[100], Int32 arg2, Int32 arg3)
 {
-	GetStudentInfoFormStudentId_Response x;
-	x.ReturnValue.Age = 1;
-	return x;
+	Response.ReturnValue.Age = 1;
 }
-GetStudentsInfoFormAge_Response GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
+void GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
 {
-	GetStudentsInfoFormAge_Response x;
-	memset(&x, 0x0, sizeof(GetStudentsInfoFormAge_Response));
-	x.ReturnValue.StudentIdLen = 1;
-	x.ReturnValue.Students[0].Age = 2;
-	x.ReturnValue.Students[0].Name =(uint8_t *) "123";
-	x.ReturnValue.Students[0].Sex = Woman;
-	return x;
+	memset(&Response, 0x0, sizeof(GetStudentsInfoFormAge_Response));
+	Response.ReturnValue.StudentIdLen = 1;
+	Response.ReturnValue.Students[0].Age = 2;
+	Response.ReturnValue.Students[0].Name =(uint8_t *) "123";
+	Response.ReturnValue.Students[0].Sex = Woman;
 }
 void TestService::Test()
 {
@@ -46,10 +42,24 @@ void ServerInit()
 }
 #include<chrono>//给演示
 #include <thread>
+#include <time.h>
 void ServerTest()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//延时3秒，先让客户端测试
+	
 	DateTime_t t;
-	t.Day = 2;
-	//BroadcastDataTimeProxy.Invoke(t);
+
+	while (true)
+	{
+		auto now_time =time(NULL);
+		tm* t_tm = localtime(&now_time);
+		t.Day = t_tm->tm_mday;
+		t.Hour = t_tm->tm_hour;
+		t.Min = t_tm->tm_min;
+		t.Month = t_tm->tm_mon + 1;
+		t.Sec = t_tm->tm_sec;
+		t.Year = t_tm->tm_year+1900;
+		BroadcastDataTimeProxy.Invoke(t);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+	
 }

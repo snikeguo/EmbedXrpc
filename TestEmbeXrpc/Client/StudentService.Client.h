@@ -10,7 +10,7 @@ uint32_t GetSid(){return BroadcastDataTime_ServiceId;}
 void BroadcastDataTime(DateTime_t t);
 void Invoke(SerializationManager &recManager)
 {
-BroadcastDataTimeStruct request;
+static BroadcastDataTimeStruct request;
 BroadcastDataTimeStruct_Type.Deserialize(recManager,&request);
 BroadcastDataTime(request.t);
 BroadcastDataTimeStruct_Type.Free(&request);
@@ -24,10 +24,10 @@ IMyInterfaceClientImpl(EmbedXrpcClientObject *rpcobj)
 {
 this->RpcClientObject=rpcobj;
 }
-GetStudentInfoFormStudentId_Response GetStudentInfoFormStudentId(Byte StudentIdLen,Byte StudentId[100],Int32 arg2,Int32 arg3)
+GetStudentInfoFormStudentId_Response& GetStudentInfoFormStudentId(Byte StudentIdLen,Byte StudentId[100],Int32 arg2,Int32 arg3)
 {
 //write serialization code:GetStudentInfoFormStudentId(StudentIdLen,StudentId,arg2,arg3,)
-GetStudentInfoFormStudentId_Request sendData;
+static GetStudentInfoFormStudentId_Request sendData;
 RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);
 SerializationManager sm;
 sm.Reset();
@@ -41,7 +41,7 @@ GetStudentInfoFormStudentId_Request_Type.Serialize(sm,0,&sendData);
 RpcClientObject->Send(GetStudentInfoFormStudentId_ServiceId,sm.Index,sm.Buf);
 sm.Reset();
 RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);
-GetStudentInfoFormStudentId_Response response;
+static GetStudentInfoFormStudentId_Response response;
 ResponseState result=RpcClientObject->Wait(GetStudentInfoFormStudentId_ServiceId,&GetStudentInfoFormStudentId_Response_Type,&response);
 if(result==ResponseState_SidError)
 {
@@ -64,10 +64,10 @@ if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
 GetStudentInfoFormStudentId_Response_Type.Free(response);
 }
 }
-GetStudentsInfoFormAge_Response GetStudentsInfoFormAge()
+GetStudentsInfoFormAge_Response& GetStudentsInfoFormAge()
 {
 //write serialization code:GetStudentsInfoFormAge()
-GetStudentsInfoFormAge_Request sendData;
+static GetStudentsInfoFormAge_Request sendData;
 RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);
 SerializationManager sm;
 sm.Reset();
@@ -77,7 +77,7 @@ GetStudentsInfoFormAge_Request_Type.Serialize(sm,0,&sendData);
 RpcClientObject->Send(GetStudentsInfoFormAge_ServiceId,sm.Index,sm.Buf);
 sm.Reset();
 RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);
-GetStudentsInfoFormAge_Response response;
+static GetStudentsInfoFormAge_Response response;
 ResponseState result=RpcClientObject->Wait(GetStudentsInfoFormAge_ServiceId,&GetStudentsInfoFormAge_Response_Type,&response);
 if(result==ResponseState_SidError)
 {
@@ -103,7 +103,7 @@ GetStudentsInfoFormAge_Response_Type.Free(response);
 void Test()
 {
 //write serialization code:Test()
-Test_Request sendData;
+static Test_Request sendData;
 RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);
 SerializationManager sm;
 sm.Reset();

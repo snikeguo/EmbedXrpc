@@ -24,19 +24,25 @@ IMyInterfaceClientImpl Client(&ClientRpcObject);
 
 void BroadcastDataTimeClientImpl::BroadcastDataTime(DateTime_t t)
 {
-    std::cout << "client:Day " << t.Day << std::endl;
+    printf("client %4d-%2d-%2d  %2d:%2d:%2d\n", t.Year, t.Month, t.Day, t.Hour, t.Min, t.Sec);
 }
 
 void ClientInit()
 {
     ClientRpcObject.Init();
 }
+#include<chrono>//ИјбнЪО
+#include <thread>
 void ClientTest()
 {
-
-    //Client.Test();
-    std::cout << "client:GetStudentsInfoFormAge"<< std::endl;
-    GetStudentsInfoFormAge_Response x = Client.GetStudentsInfoFormAge();
-    //your code
-    Client.Free_GetStudentsInfoFormAge(&x);
+    while (true)
+    {
+		Client.Test();
+		std::cout << "client:GetStudentsInfoFormAge" << std::endl;
+		GetStudentsInfoFormAge_Response x = Client.GetStudentsInfoFormAge();
+		//your code
+		Client.Free_GetStudentsInfoFormAge(&x);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+   
 }

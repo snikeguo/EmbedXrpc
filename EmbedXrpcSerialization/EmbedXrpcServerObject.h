@@ -76,6 +76,7 @@ public:
 					rsm.Buf = recData.Data;
 					rsm.BufferLen = recData.DataLen;
 
+					obj->porter->TakeMutex(obj->BufMutexHandle, WAIT_FOREVER);
 					sendsm.Reset();
 					sendsm.Buf = obj->Buffer;
 					sendsm.BufferLen = obj->BufferLen;
@@ -84,6 +85,7 @@ public:
 
 					if (sendsm.Index > 0)//
 						obj->Send(recData.Sid, sendsm.Index, sendsm.Buf);
+					obj->porter->ReleaseMutex(obj->BufMutexHandle);
 				}
 			}
 			obj->porter->Free(recData.Data);

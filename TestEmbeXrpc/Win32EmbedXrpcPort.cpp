@@ -78,12 +78,12 @@ QueueState Win32EmbedXrpcPort::SendQueue(EmbeXrpc_Queue_t queue, void* item, uin
 void* Win32EmbedXrpcPort::Malloc(uint32_t size)
 {
 	auto x=malloc(size);
-	std::cout << "malloc ptr:	"<<std::hex<<x<<"	size:	" << size << std::endl;
+	//std::cout << "malloc ptr:	"<<std::hex<<x<<"	size:	" << size << std::endl;
 	return x;
 }
 void Win32EmbedXrpcPort::Free(void* ptr)
 {
-	std::cout << "free ptr:	" << std::hex << ptr  << std::endl;
+	//std::cout << "free ptr:	" << std::hex << ptr  << std::endl;
 }
 void Win32EmbedXrpcPort::Memcpy(void* d, const void* s, uint32_t size)
 {

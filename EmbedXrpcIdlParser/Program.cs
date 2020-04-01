@@ -12,7 +12,7 @@ namespace EmbedXrpcIdlParser
     {
         static void Main(string[] args)
         {
-#if false
+#if true
             IdlInfo idlInfo = new IdlInfo();
             idlInfo.Parse("idltest1.cs");
             CppCodeGenerater cpp = new CppCodeGenerater();

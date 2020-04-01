@@ -327,7 +327,7 @@ namespace EmbedXrpcIdlParser
 
             //code gen invoke
             ClientHsw.WriteLine("void Invoke(SerializationManager &recManager)\n{");
-            ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct request;");
+            ClientHsw.WriteLine($"static {targetDelegate.MethodName}Struct request;");
             //ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
             ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
 
@@ -383,7 +383,7 @@ namespace EmbedXrpcIdlParser
 
             //函数实现
             ServerHsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
-            ServerHsw.WriteLine($"{targetDelegate.MethodName}Struct sendData;");
+            ServerHsw.WriteLine($"static {targetDelegate.MethodName}Struct sendData;");
             ServerHsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->BufMutexHandle, 100);");
             ServerHsw.WriteLine("SerializationManager sm;\n" +
                     "sm.Reset();\n" +
@@ -473,7 +473,7 @@ namespace EmbedXrpcIdlParser
             foreach (var service in targetInterface.Services)
             {
                 if(service.ReturnValue!=null)
-                    ClientHsw.Write($"{service.ServiceName}_Response {service.ServiceName}(");
+                    ClientHsw.Write($"{service.ServiceName}_Response& {service.ServiceName}(");
                 else
                 {
                     ClientHsw.Write("void " + service.ServiceName + "(");
@@ -502,7 +502,7 @@ namespace EmbedXrpcIdlParser
 
                 ClientHsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
-                ClientHsw.WriteLine($"{service.ServiceName}_Request sendData;");
+                ClientHsw.WriteLine($"static {service.ServiceName}_Request sendData;");
 
                 ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
 
@@ -531,7 +531,7 @@ namespace EmbedXrpcIdlParser
 
                 if (service.ReturnValue != null)
                 {
-                    ClientHsw.WriteLine($"{service.ServiceName}_Response response;\n" +
+                    ClientHsw.WriteLine($"static {service.ServiceName}_Response response;\n" +
                                        $"ResponseState result=RpcClientObject->Wait({service.ServiceName}_ServiceId,&{service.ServiceName}_Response_Type,&response);");
                     ClientHsw.WriteLine("if(result==ResponseState_SidError)\n{");
                     //ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_SidError;");
@@ -563,7 +563,10 @@ namespace EmbedXrpcIdlParser
                 ServerHsw.WriteLine("{\npublic:");
                 ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
 
-                string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response";
+                //string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response& ";
+                if (service.ReturnValue != null)
+                    ServerHsw.WriteLine($"{service.ServiceName}_Response Response;");
+                string returnType = "void";
                 ServerHsw.Write($"{returnType} {service.ServiceName}(");
 
                 temp_fileds = string.Empty;
@@ -591,11 +594,11 @@ namespace EmbedXrpcIdlParser
                 //code gen invoke
                 ServerHsw.WriteLine("void Invoke(SerializationManager &recManager, SerializationManager& sendManager)\n{");
 
-                ServerHsw.WriteLine($"{service.ServiceName}_Request request;");
+                ServerHsw.WriteLine($"static {service.ServiceName}_Request request;");
                 ServerHsw.WriteLine($"{service.ServiceName}_Request_Type.Deserialize(recManager,&request);");
 
-                if (service.ReturnValue != null)
-                    ServerHsw.Write($"{service.ServiceName}_Response returnValue=");
+                //if (service.ReturnValue != null)
+                //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");
                 ServerHsw.Write($"{service.ServiceName}(");
                 for (int i = 0; i < service.TargetFields.Count; i++)
                 {
@@ -612,8 +615,8 @@ namespace EmbedXrpcIdlParser
 
                 if (service.ReturnValue!=null)
                 {
-                    ServerHsw.WriteLine($"{service.ServiceName}_Response_Type.Serialize(sendManager,0,&returnValue);");//生成返回值序列化
-                    ServerHsw.WriteLine($"{service.ServiceName}_Response_Type.Free(&returnValue);");//生成返回值序列化
+                    ServerHsw.WriteLine($"{service.ServiceName}_Response_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
+                    ServerHsw.WriteLine($"{service.ServiceName}_Response_Type.Free(&Response);");//生成返回值序列化
                 }
 
                 ServerHsw.WriteLine("}");
