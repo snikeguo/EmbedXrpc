@@ -8,7 +8,6 @@
 class EmbedXrpcServerObject
 {
 public:
-	std::list<std::string> ServicesName;
 
 	uint8_t* Buffer;
 	uint32_t BufferLen;
