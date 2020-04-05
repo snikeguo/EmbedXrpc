@@ -1,6 +1,6 @@
 ﻿@using  RazorLight
 @using System
-@using System.Collections.Generic 
+@using System.Collections.Generic
 @using EmbedXrpcIdlParser
 @inherits TemplatePage<IdlInfo>
 @{
@@ -9,14 +9,14 @@
 }
 <h1 using EmbedXrpc; />
 <h1 using System; />
-<h1 // auto code gen ! DO NOT modify this file! create time @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");/>
+<h1 // auto code gen ! DO NOT modify this file! create time @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") ; />
 <h1 namespace @idlInfo.GenerationOptionParameterAttribute.OutPutFileName />
 <h1 { />
 @{
     var ens = idlInfo.TargetEnums;
     foreach (var enu in ens)
     {
-        <h1 public enum @enu.Name />
+        <h1 public enum @enu.Name :@enu.IntType />
         <h1 { />
         foreach (var ev in enu.TargetEnumValues)
         {
@@ -185,7 +185,7 @@
             <h1 public override UInt32 GetSid(){ return @(service.ServiceName + "_ServiceId") ; } />
             if (service.ReturnValue != null)
             {
-            <h1 private @(service.ServiceName + "_Response Response") = new  @(service.ServiceName + "_Response()");/>
+                <h1 private @(service.ServiceName + "_Response Response")=new @(service.ServiceName + "_Response()") ; />
             }
             <h1 public override void Invoke(SerializationManager recManager, SerializationManager sendManager) />
             <h1 { />
@@ -219,7 +219,7 @@
         }
         foreach (var service in interf.Services)
         {
-            string responseInfoattr = "[ResponseInfo(Name=\"" + service.ServiceName + "\",ServiceId="+service.ServiceId.ToString()+")]";
+            string responseInfoattr = "[ResponseInfo(Name=\"" + service.ServiceName + "\",ServiceId=" + service.ServiceId.ToString() + ")]";
             <h1 @responseInfoattr />
         }
 
@@ -264,8 +264,12 @@
             <h1 Client.Send ( @(service.ServiceName + "_ServiceId") , sm.Index,sm.Data.ToArray() ); />
             if (service.ReturnValue != null)
             {
-                <h1 @(service.ServiceName + "_Response response;") />
+                <h1 @(service.ServiceName + "_Response response")=new @(service.ServiceName + "_Response()") ; />
                 <h1 ResponseState result=@("Client.Wait<"+service.ServiceName+ "_Response>(") @(service.ServiceName + "_ServiceId, out response);") />
+                <h1 if(response @("==null")) />
+                <h1 { />
+                    <h1 response=new @(service.ServiceName + "_Response()") ; />
+                <h1 } />
                 <h1 response.State=result; />
                 <h1 return response; />
             }

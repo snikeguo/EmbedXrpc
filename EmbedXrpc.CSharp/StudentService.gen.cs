@@ -1,9 +1,9 @@
  using EmbedXrpc; 
  using System; 
- // auto code gen ! DO NOT modify this file! create time 2020-04-05 21:37:05.296;
+ // auto code gen ! DO NOT modify this file! create time 2020-04-05 22:57:07.614 ; 
  namespace StudentService 
  { 
-         public enum Sex_t 
+         public enum Sex_t :UInt16 
          { 
              Man= 0, 
              Woman= 1, 
@@ -104,7 +104,7 @@
              { 
              public static readonly UInt32 GetStudentInfoFormStudentId_ServiceId=17; 
              public override UInt32 GetSid(){ return GetStudentInfoFormStudentId_ServiceId ; } 
-             private GetStudentInfoFormStudentId_Response Response = new  GetStudentInfoFormStudentId_Response();
+                 private GetStudentInfoFormStudentId_Response Response=new GetStudentInfoFormStudentId_Response() ; 
              public override void Invoke(SerializationManager recManager, SerializationManager sendManager) 
              { 
              GetStudentInfoFormStudentId_Request request = Serialization.Deserialize <GetStudentInfoFormStudentId_Request>(recManager); 
@@ -118,7 +118,7 @@
              { 
              public static readonly UInt32 GetStudentsInfoFormAge_ServiceId=18; 
              public override UInt32 GetSid(){ return GetStudentsInfoFormAge_ServiceId ; } 
-             private GetStudentsInfoFormAge_Response Response = new  GetStudentsInfoFormAge_Response();
+                 private GetStudentsInfoFormAge_Response Response=new GetStudentsInfoFormAge_Response() ; 
              public override void Invoke(SerializationManager recManager, SerializationManager sendManager) 
              { 
              GetStudentsInfoFormAge_Request request = Serialization.Deserialize <GetStudentsInfoFormAge_Request>(recManager); 
@@ -158,8 +158,12 @@
              SerializationManager sm=new SerializationManager(); 
              Serialization.Serialize(sm, request); 
              Client.Send ( GetStudentInfoFormStudentId_ServiceId , sm.Index,sm.Data.ToArray() ); 
-                 GetStudentInfoFormStudentId_Response response; 
+                 GetStudentInfoFormStudentId_Response response=new GetStudentInfoFormStudentId_Response() ; 
                  ResponseState result=Client.Wait<GetStudentInfoFormStudentId_Response>( GetStudentInfoFormStudentId_ServiceId, out response); 
+                 if(response ==null) 
+                 { 
+                     response=new GetStudentInfoFormStudentId_Response() ; 
+                 } 
                  response.State=result; 
                  return response; 
              } 
@@ -170,8 +174,12 @@
              SerializationManager sm=new SerializationManager(); 
              Serialization.Serialize(sm, request); 
              Client.Send ( GetStudentsInfoFormAge_ServiceId , sm.Index,sm.Data.ToArray() ); 
-                 GetStudentsInfoFormAge_Response response; 
+                 GetStudentsInfoFormAge_Response response=new GetStudentsInfoFormAge_Response() ; 
                  ResponseState result=Client.Wait<GetStudentsInfoFormAge_Response>( GetStudentsInfoFormAge_ServiceId, out response); 
+                 if(response ==null) 
+                 { 
+                     response=new GetStudentsInfoFormAge_Response() ; 
+                 } 
                  response.State=result; 
                  return response; 
              } 

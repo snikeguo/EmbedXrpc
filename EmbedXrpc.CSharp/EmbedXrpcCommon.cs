@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpc
 {
-    public enum ResponseState
+    public enum ResponseState:UInt32
     {
         Ok,
         Timeout,

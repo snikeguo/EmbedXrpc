@@ -152,6 +152,10 @@ namespace EmbedXrpc
                 var vt = field.PropertyType;
                 if(vt.IsArray==false)
                 {
+                    if (vt.IsEnum == true)
+                    {
+                        vt = vt.GetEnumUnderlyingType();
+                    }
                     if (vt==typeof(byte))
                     {
                         field.SetValue(s, Convert.ToByte(FromBytes(sm, 1)));
@@ -221,6 +225,16 @@ namespace EmbedXrpc
             }
             return s;
         }
+        private static object[] ConvertArray(Array arr)
+        {
+            int lb = arr.GetLowerBound(0);
+            var ret = new object[arr.GetUpperBound(0) - lb + 1];
+            for (int ix = 0; ix < ret.Length; ++ix)
+            {
+                ret[ix] = arr.GetValue(ix + lb);
+            }
+            return ret;
+        }
         public static void Serialize(SerializationManager sm, object s)
         {
             Type st = s.GetType();
@@ -231,6 +245,10 @@ namespace EmbedXrpc
                 var vt = v.GetType();
                 if(vt.IsArray==false)
                 {
+                    if(vt.IsEnum==true)
+                    {
+                        vt = vt.GetEnumUnderlyingType();
+                    }
                     if (vt==typeof(byte))
                     {
                         ToBytes(sm, (byte)v);
@@ -270,7 +288,8 @@ namespace EmbedXrpc
                 }
                 else
                 {
-                    object[] arrayValue = (object[])v;
+                    //object[] arrayValue = (object[])v;
+                    object[] arrayValue = ConvertArray(v as Array);
                     ArrayPropertyAttribute att= field.GetCustomAttribute<ArrayPropertyAttribute>();
                     if(att==null)
                     {
