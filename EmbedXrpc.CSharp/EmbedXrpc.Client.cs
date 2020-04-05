@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +17,53 @@ namespace EmbedXrpc
         private Win32Queue<EmbeXrpcRawData> ResponseMessageQueueHandle = new Win32Queue<EmbeXrpcRawData>(10);
         private ResponseDelegateMessageMap[] MessageMaps { get; set; }
 
-        private Send send;
+        public Send Send;
+
+        public Client(UInt32 timeout, Send send, Assembly assembly)
+        {
+            var types = assembly.GetTypes();
+
+            List<ResponseDelegateMessageMap>  maps=new List<ResponseDelegateMessageMap>();
+            foreach (var type in types)
+            {
+                var ResponseInfoAttrs = type.GetCustomAttributes<ResponseInfoAttribute>();
+                if (ResponseInfoAttrs != null)
+                {
+                    foreach (var resInfoAttr in ResponseInfoAttrs)
+                    {
+                        ResponseDelegateMessageMap map = new ResponseDelegateMessageMap();
+                        map.Name = resInfoAttr.Name;
+                        map.ReceiveType = ReceiveType.Response;
+                        map.Delegate = null;
+                        map.Sid = resInfoAttr.ServiceId;
+                        
+                        maps.Add(map);
+                    }
+                }
+
+                var DelAttr = type.GetCustomAttribute<DelegateInfoAttribute>();
+                if(DelAttr!=null)
+                {
+                    ResponseDelegateMessageMap map = new ResponseDelegateMessageMap();
+                    map.Name = DelAttr.Name;
+                    map.ReceiveType = ReceiveType.Delegate;
+                    map.Delegate = (IDelegate)Assembly.GetExecutingAssembly().CreateInstance(type.FullName);
+                    map.Sid = map.Delegate.GetSid();
+                    maps.Add(map);
+                }
+            }
+
+            TimeOut = timeout;
+            this.Send = send;
+            MessageMaps = maps.ToArray();
+
+            ServiceThreadHandle = new Thread(ServiceThread);
+            ServiceThreadHandle.IsBackground = true;
+        }
         public Client(UInt32 timeout,Send send, ResponseDelegateMessageMap[] maps)
         {
             TimeOut = timeout;
-            this.send = send;
+            this.Send = send;
             MessageMaps = maps;
 
             ServiceThreadHandle = new Thread(ServiceThread);
@@ -36,10 +79,10 @@ namespace EmbedXrpc
         {
             ServiceThreadHandle.Abort();
         }
-        ResponseState Wait<T>(UInt32 sid)
+        public ResponseState Wait<T>(UInt32 sid,out T response)
         {
             EmbeXrpcRawData recData;
-            T response = default(T);
+            response = default(T);
             Type res_t =typeof(T);
             if (ResponseMessageQueueHandle.Receive(out recData, TimeOut)!= QueueStatus.OK)
             {

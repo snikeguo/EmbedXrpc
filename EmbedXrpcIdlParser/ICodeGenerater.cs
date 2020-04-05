@@ -1,4 +1,5 @@
-﻿using CSScriptLibrary;
+﻿
+using CSScriptLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +26,7 @@ namespace EmbedXrpcIdlParser
             return cnt;
         }
     }
+    [Serializable]
     public class TargetField
     {
         public string IdlType { get; set; }
@@ -47,6 +49,7 @@ namespace EmbedXrpcIdlParser
         }
         
     }
+    [Serializable]
     public class TargetReturnValue
     {
         public string IdlType { get; set; }
@@ -58,11 +61,13 @@ namespace EmbedXrpcIdlParser
             return sb.ToString();
         }
     }
+    [Serializable]
     public class TargetEnumValue
     {
         public int Value { get; set; }
         public string Description { get; set; }
     }
+    [Serializable]
     public class TargetEnum
     {
         /// <summary>
@@ -83,6 +88,7 @@ namespace EmbedXrpcIdlParser
             return sb.ToString();
         }
     }
+    [Serializable]
     public class TargetStruct
     {
         public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
@@ -102,13 +108,15 @@ namespace EmbedXrpcIdlParser
         }
     }
 
-
+    [Serializable]
     public class TargetService
     {
         public TargetReturnValue ReturnValue { get; set; }
         public string ServiceName { get; set; }
 
         public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
+
+        public int ServiceId { get; internal set; }
 
         public override string ToString()
         {
@@ -121,6 +129,7 @@ namespace EmbedXrpcIdlParser
             return sb.ToString();
         }
     }
+    [Serializable]
     public class TargetInterface
     {
         public string Name { get; set; }
@@ -136,8 +145,10 @@ namespace EmbedXrpcIdlParser
             return sb.ToString();
         }
     }
+    [Serializable]
     public class TargetDelegate
     {
+        public int ServiceId { get; internal set; }
         public string MethodName { get; set; }
         public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
         public override string ToString()
@@ -151,6 +162,7 @@ namespace EmbedXrpcIdlParser
             return sb.ToString();
         }
     }
+    [Serializable]
     public class IdlInfo
     {
         public List<TargetEnum> TargetEnums { get; set; } = new List<TargetEnum>();
@@ -184,8 +196,9 @@ namespace EmbedXrpcIdlParser
         }
         public void Parse(string file)
         {
+            int ServiceId = 0x10;
             Console.WriteLine("parse :{0}...", file);
-            using (SimpleAsmProbing.For(Assembly.GetExecutingAssembly().Location.GetDirName()))
+            //using (SimpleAsmProbing.For(Assembly.GetExecutingAssembly().Location.GetDirName()))
             {
                 Assembly assembly = CSScript.Evaluator.CompileCode(File.ReadAllText(file));
                 var types = assembly.GetTypes();
@@ -249,7 +262,8 @@ namespace EmbedXrpcIdlParser
                         foreach (var service in services)
                         {
                             TargetService targetService = new TargetService();
-
+                            targetService.ServiceId = ServiceId;
+                            ServiceId++;
                             var mt = (service as MethodInfo);
                             Type rt = mt.ReturnType;
                             if(rt.Name!="Void")
@@ -306,6 +320,8 @@ namespace EmbedXrpcIdlParser
                             throw new NullReferenceException("invokemi is null");
                         }
                         TargetDelegate targetDelegate = new TargetDelegate();
+                        targetDelegate.ServiceId = ServiceId;
+                        ServiceId++;
                         targetDelegate.MethodName = type.Name;
                         var pars = invokemi.GetParameters();
                         foreach (var par in pars)

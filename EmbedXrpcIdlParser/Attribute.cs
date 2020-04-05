@@ -17,6 +17,7 @@ namespace EmbedXrpcIdlParser
     }
 #endif   
     [AttributeUsage(AttributeTargets.Field|AttributeTargets.ReturnValue | AttributeTargets.Parameter, Inherited = false, AllowMultiple = true)]
+    [Serializable]
     public sealed class MaxCountAttribute : Attribute
     {
 
@@ -27,6 +28,7 @@ namespace EmbedXrpcIdlParser
     }
 
     [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
+    [Serializable]
     public sealed class GenerationOptionParameterAttribute : Attribute
     {
         public string OutPutFileName { get; set; } = "idl_gen";

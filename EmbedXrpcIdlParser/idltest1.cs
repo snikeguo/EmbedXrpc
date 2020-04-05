@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma  warning disable 0169
+using System;
 using EmbedXrpcIdlParser;
 #if true
 enum Sex_t:UInt32
@@ -106,7 +107,7 @@ interface IMyInterface
     void SetValue(UInt16 v);
 }
 #endif
-[GenerationOptionParameter(OutPutFileName= "StudentService",OutPutPath = @"D:\VSProject\EmbedXrpcIdlParser\TestEmbeXrpc\")]
+[GenerationOptionParameter(OutPutFileName= "StudentService",OutPutPath = @"D:\VSProject\EmbedXrpcIdlParser\EmbedXrpc.CSharp\")]
 public struct GenerationOption
 {
 

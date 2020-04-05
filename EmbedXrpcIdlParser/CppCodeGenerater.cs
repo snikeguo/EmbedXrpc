@@ -27,7 +27,7 @@ namespace EmbedXrpcIdlParser
 
         private static Dictionary<string, string> ReplaceDic = new Dictionary<string, string>();
         private List<MessageMap> messageMaps = new List<MessageMap>();
-        int ServiceId = 0x10;
+        //int ServiceId = 0x10;
 
         public void AddMessageMap(string defineName, ReceiveType_t receiveType, string itype)
         {
@@ -38,13 +38,9 @@ namespace EmbedXrpcIdlParser
             m.IType = "&" + itype + "_Type";
             messageMaps.Add(m);
         }
-        public void EmitServiceIdCode(StreamWriter sw, string defineName, ReceiveType_t receiveType, string itype)
+        public void EmitServiceIdCode(StreamWriter sw, string defineName, int ServiceId)
         {
-
             sw.WriteLine($"#define {defineName}_ServiceId {ServiceId}");
-            ServiceId++;
-
-            
         }
         public void CodeGen(IdlInfo idlInfo)
         {
@@ -129,7 +125,6 @@ namespace EmbedXrpcIdlParser
             ServerCsw = new StreamWriter(outputattr.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.cpp", false, Encoding.UTF8);
             ServerCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Server.h\"");
 
-            ServiceId = 0x10;
             foreach (var em in idlInfo.TargetEnums)
             {
                 //EmitFbsEnum(em);
@@ -160,7 +155,7 @@ namespace EmbedXrpcIdlParser
                     SerializeCsw,
                     SerializeHsw);
                 AddMessageMap(del.MethodName, ReceiveType_t.ReceiveType_Delegate, del.MethodName);
-                EmitServiceIdCode(SerializeHsw, del.MethodName, ReceiveType_t.ReceiveType_Delegate, del.MethodName);//生成 ServiceID 宏定义
+                EmitServiceIdCode(SerializeHsw, del.MethodName, del.ServiceId);//生成 ServiceID 宏定义
 
             }
 
@@ -425,7 +420,7 @@ namespace EmbedXrpcIdlParser
                     SerializeHsw);
                 EmitStruct(targetStructRequest);
                 AddMessageMap(service.ServiceName, ReceiveType_t.ReceiveType_Request, targetStructRequest.Name);
-                EmitServiceIdCode(SerializeHsw, service.ServiceName, ReceiveType_t.ReceiveType_Request, targetStructRequest.Name);//生成 ServiceID 宏定义
+                EmitServiceIdCode(SerializeHsw, service.ServiceName, service.ServiceId);//生成 ServiceID 宏定义
 
                 TargetStruct targetStructResponse = new TargetStruct();
                 targetStructResponse.Name = service.ServiceName + "_Response";

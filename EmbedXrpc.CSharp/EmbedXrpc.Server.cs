@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,17 +15,41 @@ namespace EmbedXrpc
         private Thread ServiceThreadHandle;
         private Win32Queue<EmbeXrpcRawData> RequestQueueHandle=new Win32Queue<EmbeXrpcRawData>(10);
         private RequestMessageMap[] MessageMaps;
-        private Send send;
+        public Send Send;
+        public Server(UInt32 timeout, Send send, Assembly assembly)
+        {
+            var types = assembly.GetTypes();
+
+            List<RequestMessageMap> maps = new List<RequestMessageMap>();
+            foreach (var type in types)
+            {             
+                var serviceInfoAttr = type.GetCustomAttribute<ServiceInfoAttribute>();
+                if (serviceInfoAttr != null)
+                {
+                    RequestMessageMap map = new RequestMessageMap();
+                    map.Name = serviceInfoAttr.Name;
+                    map.Service = (IService)Assembly.GetExecutingAssembly().CreateInstance(type.FullName);
+                    maps.Add(map);
+                }
+            }
+
+            TimeOut = timeout;
+            Send = send;
+            MessageMaps = maps.ToArray();
+
+            ServiceThreadHandle = new Thread(ServiceThread);
+            ServiceThreadHandle.IsBackground = true;
+        }
         public Server(UInt32 timeout, Send send, RequestMessageMap[] maps)
         {
             TimeOut = timeout;
-            this.send = send;
+            Send = send;
             MessageMaps = maps;
 
             ServiceThreadHandle = new Thread(ServiceThread);
             ServiceThreadHandle.IsBackground = true;
         }
-        void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset, byte[] data)
+        public void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset, byte[] data)
         {
             EmbeXrpcRawData raw=new EmbeXrpcRawData();
             raw.Sid = serviceId;
@@ -68,7 +93,7 @@ namespace EmbedXrpc
                                 sendsm.Data = new List<byte>();
                                 MessageMaps[i].Service.Invoke(rsm, sendsm);
                                 if (sendsm.Index > 0)//
-                                    send(recData.Sid, (UInt32)sendsm.Index, sendsm.Data.ToArray());
+                                    Send(recData.Sid, sendsm.Index, sendsm.Data.ToArray());
                             }
                         }
                     }

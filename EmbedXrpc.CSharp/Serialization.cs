@@ -10,6 +10,10 @@ namespace EmbedXrpc
     public class SerializationManager
     {
         private List<byte> data = new List<byte>();
+        public SerializationManager()
+        {
+
+        }
         public List<byte> Data
         {
             get
@@ -154,7 +158,7 @@ namespace EmbedXrpc
                     }
                     else if (vt == typeof(sbyte))
                     {
-                        field.SetValue(s, Convert.ToSByte(FromBytes(sm, 2)));
+                        field.SetValue(s, Convert.ToSByte(FromBytes(sm, 1)));
                     }
                     else if (vt == typeof(UInt16) )
                     {
@@ -197,14 +201,17 @@ namespace EmbedXrpc
                     var lenfield = from lf in pros
                                    where lf.Name == att.LenFieldName
                                    select lf;
-
-                    //执行到这一步的时候 len字段的值必须被设置好(也就是说必须被反序列化完毕)
-                    //从编写IDL文件方面来说，len字段必须放到array字段的前面;
-                    var len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                    Int64 len = 1;
+                    if (lenfield.ToList().Count != 0)
+                    {
+                        //执行到这一步的时候 len字段的值必须被设置好(也就是说必须被反序列化完毕)
+                        //从编写IDL文件方面来说，len字段必须放到array字段的前面;
+                        len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                    }
                     var arrayfield = Array.CreateInstance(vt.GetElementType(), len);
                     for (Int64 i = 0; i < len; i++)
                     {
-                        var item=Assembly.GetExecutingAssembly().CreateInstance(vt.FullName.Replace("[]", string.Empty));
+                        var item=Assembly.GetExecutingAssembly().CreateInstance(vt.GetElementType().FullName);
                         item=Deserialize(vt.GetElementType(),sm);
                         arrayfield.SetValue(item, i);
                     }
@@ -272,7 +279,11 @@ namespace EmbedXrpc
                     var lenfield = from lf in pros 
                                    where lf.Name == att.LenFieldName 
                                    select lf;
-                    var len =Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                    Int64 len = 1;
+                    if (lenfield.ToList().Count != 0)
+                    {
+                        len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                    }
                     for(Int64 i=0;i<len;i++)
                     {
                         var aev = arrayValue[i];
