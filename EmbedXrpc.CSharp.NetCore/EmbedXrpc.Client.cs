@@ -18,11 +18,11 @@ namespace EmbedXrpc
         private ResponseDelegateMessageMap[] MessageMaps { get; set; }
 
         public Send Send;
-
+        private Assembly Assembly;
         public Client(UInt32 timeout, Send send, Assembly assembly)
         {
             var types = assembly.GetTypes();
-
+            Assembly = assembly;
             List<ResponseDelegateMessageMap>  maps=new List<ResponseDelegateMessageMap>();
             foreach (var type in types)
             {
@@ -47,7 +47,8 @@ namespace EmbedXrpc
                     ResponseDelegateMessageMap map = new ResponseDelegateMessageMap();
                     map.Name = DelAttr.Name;
                     map.ReceiveType = ReceiveType.Delegate;
-                    map.Delegate = (IDelegate)Assembly.GetExecutingAssembly().CreateInstance(type.FullName);
+                    var v = assembly.CreateInstance(type.FullName);
+                    map.Delegate = (IDelegate)assembly.CreateInstance(type.FullName);
                     map.Sid = map.Delegate.GetSid();
                     maps.Add(map);
                 }
@@ -60,16 +61,7 @@ namespace EmbedXrpc
             ServiceThreadHandle = new Thread(ServiceThread);
             ServiceThreadHandle.IsBackground = true;
         }
-        public Client(UInt32 timeout,Send send, ResponseDelegateMessageMap[] maps)
-        {
-            TimeOut = timeout;
-            this.Send = send;
-            MessageMaps = maps;
-
-            ServiceThreadHandle = new Thread(ServiceThread);
-            ServiceThreadHandle.IsBackground = true;
-
-        }
+        
         private Thread ServiceThreadHandle;
         public void Start()
         {
@@ -96,7 +88,8 @@ namespace EmbedXrpc
             SerializationManager rsm=new SerializationManager();
             rsm.Reset();
             rsm.Data = new List<byte>(recData.Data);
-            response = (T)Serialization.Deserialize(res_t, rsm);
+            Serialization serialization = new Serialization(Assembly);
+            response = (T)serialization.Deserialize(res_t, rsm);
             return ResponseState.Ok;
         }
         public void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset,byte[] data)

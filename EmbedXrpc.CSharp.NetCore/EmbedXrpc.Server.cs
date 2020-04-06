@@ -16,10 +16,11 @@ namespace EmbedXrpc
         private Win32Queue<EmbeXrpcRawData> RequestQueueHandle=new Win32Queue<EmbeXrpcRawData>(10);
         private RequestMessageMap[] MessageMaps;
         public Send Send;
+        private Assembly Assembly;
         public Server(UInt32 timeout, Send send, Assembly assembly)
         {
             var types = assembly.GetTypes();
-
+            Assembly = assembly;
             List<RequestMessageMap> maps = new List<RequestMessageMap>();
             foreach (var type in types)
             {             
@@ -28,7 +29,7 @@ namespace EmbedXrpc
                 {
                     RequestMessageMap map = new RequestMessageMap();
                     map.Name = serviceInfoAttr.Name;
-                    map.Service = (IService)Assembly.GetExecutingAssembly().CreateInstance(type.FullName);
+                    map.Service = (IService)assembly.CreateInstance(type.FullName);
                     maps.Add(map);
                 }
             }
@@ -40,15 +41,7 @@ namespace EmbedXrpc
             ServiceThreadHandle = new Thread(ServiceThread);
             ServiceThreadHandle.IsBackground = true;
         }
-        public Server(UInt32 timeout, Send send, RequestMessageMap[] maps)
-        {
-            TimeOut = timeout;
-            Send = send;
-            MessageMaps = maps;
-
-            ServiceThreadHandle = new Thread(ServiceThread);
-            ServiceThreadHandle.IsBackground = true;
-        }
+        
         public void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset, byte[] data)
         {
             EmbeXrpcRawData raw=new EmbeXrpcRawData();

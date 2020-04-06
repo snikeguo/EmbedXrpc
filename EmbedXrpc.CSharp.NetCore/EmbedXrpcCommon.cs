@@ -50,7 +50,7 @@ namespace EmbedXrpc
         public UInt32 DataLen { get; set; }
     }
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    sealed class DelegateInfoAttribute : Attribute
+    public sealed class DelegateInfoAttribute : Attribute
     {
         public DelegateInfoAttribute()
         {
@@ -59,7 +59,7 @@ namespace EmbedXrpc
     }
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    sealed class ServiceInfoAttribute : Attribute
+    public sealed class ServiceInfoAttribute : Attribute
     {
         public ServiceInfoAttribute()
         {
@@ -69,7 +69,7 @@ namespace EmbedXrpc
     }
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    sealed class ResponseInfoAttribute : Attribute
+    public sealed class ResponseInfoAttribute : Attribute
     {
        
         public ResponseInfoAttribute()

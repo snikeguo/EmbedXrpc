@@ -5,7 +5,8 @@ using EmbedXrpcIdlParser;
 enum Sex_t:UInt32
 {
     Man,
-    Woman
+    Woman,
+    HHHH,
 }
 struct Result_t
 {
@@ -47,7 +48,7 @@ struct  Student_t
 
     //[FieldIndex(6)]
     [MaxCount(IsFixed = true, MaxCount = 100, LenFieldName = "StudentIdLen")]
-    Int16[] StudentId;
+    byte[] StudentId;
 
     //[FieldIndex(7)]
     Sex_t Sex;
@@ -107,7 +108,8 @@ interface IMyInterface
     void SetValue(UInt16 v);
 }
 #endif
-[GenerationOptionParameter(OutPutFileName= "StudentService",OutPutPath = @"D:\VSProject\EmbedXrpcIdlParser\EmbedXrpc.CSharp\")]
+//[GenerationOptionParameter(OutPutFileName= "StudentService")]
+[GenerationOptionParameter(OutPutFileName = "StudentService")]
 public struct GenerationOption
 {
 

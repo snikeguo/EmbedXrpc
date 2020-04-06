@@ -1,14 +1,16 @@
-﻿@using  RazorLight
+﻿@using RazorLight
 @using System
 @using System.Collections.Generic
 @using EmbedXrpcIdlParser
-@inherits TemplatePage<IdlInfo>
+@inherits TemplatePage<CsCodeGenerater>
 @{
-    IdlInfo idlInfo = (IdlInfo)this.Model;
+    IdlInfo idlInfo = this.Model.IdlInfo;
+    GenType genType = this.Model.GenType;
     DisableEncoding = true;
 }
 <h1 using EmbedXrpc; />
 <h1 using System; />
+<h1 using System.Reflection;/>
 <h1 // auto code gen ! DO NOT modify this file! create time @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") ; />
 <h1 namespace @idlInfo.GenerationOptionParameterAttribute.OutPutFileName />
 <h1 { />
@@ -40,7 +42,27 @@
 
                 <h1 @v />
             }
-            <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+            if (field.IsArray == true)
+            {
+                var lenField = IdlInfo.GetArrayLenField(stru.TargetFields, field);
+                int lenv = 0;
+                if (lenField == null)
+                {
+                    lenv = 1;
+                }
+                <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.ElementType  } [ @lenv ]; />
+            }
+            else
+            {
+                if (field.IsBaseValueType == true)
+                {
+                    <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                }
+                else
+                {
+                    <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.IdlType  } (); />
+                }
+            }
         }
         <h1 } />
     }
@@ -61,70 +83,99 @@
 
                 <h1 @v />
             }
-            <h1 public @field.IdlType @(field.Name + "{get;set;}") />
-        }
-        <h1 } />
-        string delattr = "[DelegateInfo(Name=\"" + del.MethodName + "\")]";
-        <h1 @delattr />
-        <h1 public partial class @(del.MethodName + "ClientImpl") :IDelegate />
-        <h1 { />
-        <h1 @("public static readonly UInt32 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
-        <h1 public override UInt32 GetSid(){ return @(del.MethodName + "_ServiceId") ; } />
-        <h1 public override void Invoke(SerializationManager recManager) />
-        <h1 { />
-        string s = del.MethodName + "Struct request = Serialization.Deserialize <" + del.MethodName + "Struct>(recManager);";
-        <h1 @s />
-        string pars = string.Empty;
-        string externstr = string.Empty;
-        for (int pi = 0; pi < del.TargetFields.Count; pi++)
-        {
-            var par = del.TargetFields[pi];
-            pars += "request." + par.Name;
-            externstr += par.IdlType + " " + par.Name;
-            if (pi + 1 < del.TargetFields.Count)
+            if (field.IsArray == true)
             {
-                pars += ",";
-                externstr += ",";
+                var lenField = IdlInfo.GetArrayLenField(stru.TargetFields, field);
+                int lenv = 0;
+                if (lenField == null)
+                {
+                    lenv = 1;
+                }
+                <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.ElementType  } [ @lenv ]; />
             }
-
-        }
-        <h1 @(del.MethodName + "(" + pars + ");") />
-        <h1 } />
-        <h1 //public void @(del.MethodName + "(" + externstr + ");") />
-        <h1 } />
-
-        <h1 public class @(del.MethodName + "Delegate") />
-        <h1 { />
-        <h1 private EmbedXrpc.Server Server; />
-        <h1 public @(del.MethodName + "Delegate(EmbedXrpc.Server server)") />
-        <h1 { Server=server; } />
-        <h1 @("public static readonly UInt32 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
-
-        pars = string.Empty;
-        for (int pi = 0; pi < del.TargetFields.Count; pi++)
-        {
-            var par = del.TargetFields[pi];
-            pars += par.IdlType + " " + par.Name;
-            if (pi + 1 < del.TargetFields.Count)
+            else
             {
-                pars += ",";
+                if (field.IsBaseValueType == true)
+                {
+                    <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                }
+                else
+                {
+                    <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.IdlType  } (); />
+                }
             }
-
         }
-        <h1 public void @(del.MethodName + "(") @(pars + ")") />
-        <h1 { />
-        <h1 @(del.MethodName + "Struct request")=new @(del.MethodName + "Struct();") />
-        for (int pi = 0; pi < del.TargetFields.Count; pi++)
+        <h1 } />
+        if (genType == GenType.Client || genType == GenType.All)
         {
-            var par = del.TargetFields[pi];
-            string setvalue = "request." + par.Name + "=" + par.Name + ";";
-            <h1 @setvalue />
+            string delattr = "[DelegateInfo(Name=\"" + del.MethodName + "\")]";
+            <h1 @delattr />
+            <h1 public partial class @(del.MethodName + "ClientImpl") :IDelegate />
+            <h1 { />
+            <h1 @("public static readonly UInt32 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
+            <h1 public override UInt32 GetSid(){ return @(del.MethodName + "_ServiceId") ; } />
+            <h1 public override void Invoke(SerializationManager recManager) />
+            <h1 { />
+            <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
+            string s = del.MethodName + "Struct request = serialization.Deserialize <" + del.MethodName + "Struct>(recManager);";
+            <h1 @s />
+            string pars = string.Empty;
+            string externstr = string.Empty;
+            for (int pi = 0; pi < del.TargetFields.Count; pi++)
+            {
+                var par = del.TargetFields[pi];
+                pars += "request." + par.Name;
+                externstr += par.IdlType + " " + par.Name;
+                if (pi + 1 < del.TargetFields.Count)
+                {
+                    pars += ",";
+                    externstr += ",";
+                }
+
+            }
+            <h1 @(del.MethodName + "(" + pars + ");") />
+            <h1 } />
+            <h1 //public void @(del.MethodName + "(" + externstr + ");") />
+            <h1 } />
         }
-        <h1 SerializationManager sm=new SerializationManager(); />
-        <h1 Serialization.Serialize(sm, request); />
-        <h1 Server.Send ( @(del.MethodName + "_ServiceId") , sm.Index,sm.Data.ToArray() ); />
-        <h1 } />
-        <h1 } />
+
+        if (genType == GenType.Server || genType == GenType.All)
+        {
+            <h1 public class @(del.MethodName + "Delegate") />
+            <h1 { />
+            <h1 private EmbedXrpc.Server Server; />
+            <h1 public @(del.MethodName + "Delegate(EmbedXrpc.Server server)") />
+            <h1 { Server=server; } />
+            <h1 @("public static readonly UInt32 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
+
+            var pars = string.Empty;
+            for (int pi = 0; pi < del.TargetFields.Count; pi++)
+            {
+                var par = del.TargetFields[pi];
+                pars += par.IdlType + " " + par.Name;
+                if (pi + 1 < del.TargetFields.Count)
+                {
+                    pars += ",";
+                }
+
+            }
+            <h1 public void @(del.MethodName + "(") @(pars + ")") />
+            <h1 { />
+            <h1 @(del.MethodName + "Struct request")=new @(del.MethodName + "Struct();") />
+            for (int pi = 0; pi < del.TargetFields.Count; pi++)
+            {
+                var par = del.TargetFields[pi];
+                string setvalue = "request." + par.Name + "=" + par.Name + ";";
+                <h1 @setvalue />
+            }
+            <h1 SerializationManager sm=new SerializationManager(); />
+            <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
+            <h1 serialization.Serialize(sm, request); />
+            <h1 Server.Send ( @(del.MethodName + "_ServiceId") , sm.Index,sm.Data.ToArray() ); />
+            <h1 } />
+            <h1 } />
+        }
+
     }
 
     var interfaces = idlInfo.TargetInterfaces;
@@ -146,7 +197,27 @@
 
                     <h1 @v />
                 }
-                <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                if (field.IsArray == true)
+                {
+                    var lenField = IdlInfo.GetArrayLenField(stru.TargetFields, field);
+                    int lenv = 0;
+                    if (lenField == null)
+                    {
+                        lenv = 1;
+                    }
+                    <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.ElementType  } [ @lenv ]; />
+                }
+                else
+                {
+                    if (field.IsBaseValueType == true)
+                    {
+                        <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                    }
+                    else
+                    {
+                        <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.IdlType  } (); />
+                    }
+                }
             }
             <h1 } />
 
@@ -176,106 +247,114 @@
 
         foreach (var service in interf.Services)
         {
-            string serviceattr = "[ServiceInfo(Name=\"" + service.ServiceName + "\")]";
-            <h1 @serviceattr />
-            <h1 public partial class @(service.ServiceName + "Service") :IService />
-            <h1 { />
-            <h1 @("public static readonly UInt32 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
-
-            <h1 public override UInt32 GetSid(){ return @(service.ServiceName + "_ServiceId") ; } />
-            if (service.ReturnValue != null)
+            if (genType == GenType.Server || genType == GenType.All)
             {
-                <h1 private @(service.ServiceName + "_Response Response")=new @(service.ServiceName + "_Response()") ; />
-            }
-            <h1 public override void Invoke(SerializationManager recManager, SerializationManager sendManager) />
-            <h1 { />
-
-            string s = service.ServiceName + "_Request request = Serialization.Deserialize <" + service.ServiceName + "_Request>(recManager);";
-            <h1 @s />
-            string pars = string.Empty;
-            string externstr = string.Empty;
-            for (int pi = 0; pi < service.TargetFields.Count; pi++)
-            {
-                var par = service.TargetFields[pi];
-                pars += "request." + par.Name;
-                externstr += par.IdlType + " " + par.Name;
-                if (pi + 1 < service.TargetFields.Count)
-                {
-                    pars += ",";
-                    externstr += ",";
-                }
-
-            }
-            <h1 @(service.ServiceName + "(" + pars + ");") />
-
-            if (service.ReturnValue != null)
-            {
-                <h1 Serialization.Serialize(sendManager, Response); />
-            }
-
-            <h1 } />
-            <h1 //public void @(service.ServiceName + "(" + externstr + ");") />
-            <h1 } />
-        }
-        foreach (var service in interf.Services)
-        {
-            string responseInfoattr = "[ResponseInfo(Name=\"" + service.ServiceName + "\",ServiceId=" + service.ServiceId.ToString() + ")]";
-            <h1 @responseInfoattr />
-        }
-
-        <h1 public class @(interf.Name + "ClientImpl") />
-        <h1 { />
-        <h1 private EmbedXrpc.Client Client=null; />
-        <h1 public @(interf.Name + "ClientImpl(EmbedXrpc.Client client)") />
-        <h1 { Client=client;} />
-
-        foreach (var service in interf.Services)
-        {
-            <h1 @("public static readonly UInt32 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
-            string pars = string.Empty;
-            for (int pi = 0; pi < service.TargetFields.Count; pi++)
-            {
-                var par = service.TargetFields[pi];
-                pars += par.IdlType + " " + par.Name;
-                if (pi + 1 < service.TargetFields.Count)
-                {
-                    pars += ",";
-                }
-
-            }
-            if (service.ReturnValue != null)
-            {
-                <h1 public @(service.ServiceName + "_Response") @(service.ServiceName + "(") @(pars + ")") />
-            }
-            else
-            {
-                <h1 public void @(service.ServiceName + "(") @(pars + ")") />
-            }
-            <h1 { />
-            <h1 @(service.ServiceName + "_Request request")=new @(service.ServiceName + "_Request ();") />
-            for (int pi = 0; pi < service.TargetFields.Count; pi++)
-            {
-                var par = service.TargetFields[pi];
-                string setvalue = "request." + par.Name + "=" + par.Name + ";";
-                <h1 @setvalue />
-            }
-            <h1 SerializationManager sm=new SerializationManager(); />
-            <h1 Serialization.Serialize(sm, request); />
-            <h1 Client.Send ( @(service.ServiceName + "_ServiceId") , sm.Index,sm.Data.ToArray() ); />
-            if (service.ReturnValue != null)
-            {
-                <h1 @(service.ServiceName + "_Response response")=new @(service.ServiceName + "_Response()") ; />
-                <h1 ResponseState result=@("Client.Wait<"+service.ServiceName+ "_Response>(") @(service.ServiceName + "_ServiceId, out response);") />
-                <h1 if(response @("==null")) />
+                string serviceattr = "[ServiceInfo(Name=\"" + service.ServiceName + "\")]";
+                <h1 @serviceattr />
+                <h1 public partial class @(service.ServiceName + "Service") :IService />
                 <h1 { />
-                    <h1 response=new @(service.ServiceName + "_Response()") ; />
+                <h1 @("public static readonly UInt32 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
+
+                <h1 public override UInt32 GetSid(){ return @(service.ServiceName + "_ServiceId") ; } />
+                if (service.ReturnValue != null)
+                {
+                    <h1 private @(service.ServiceName + "_Response Response")=new @(service.ServiceName + "_Response()") ; />
+                }
+                <h1 public override void Invoke(SerializationManager recManager, SerializationManager sendManager) />
+                <h1 { />
+                <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
+                string s = service.ServiceName + "_Request request = serialization.Deserialize <" + service.ServiceName + "_Request>(recManager);";
+                <h1 @s />
+                string pars = string.Empty;
+                string externstr = string.Empty;
+                for (int pi = 0; pi < service.TargetFields.Count; pi++)
+                {
+                    var par = service.TargetFields[pi];
+                    pars += "request." + par.Name;
+                    externstr += par.IdlType + " " + par.Name;
+                    if (pi + 1 < service.TargetFields.Count)
+                    {
+                        pars += ",";
+                        externstr += ",";
+                    }
+
+                }
+                <h1 @(service.ServiceName + "(" + pars + ");") />
+
+                if (service.ReturnValue != null)
+                {
+                    <h1 // Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
+                    <h1 serialization.Serialize(sendManager, Response); />
+                }
+
                 <h1 } />
-                <h1 response.State=result; />
-                <h1 return response; />
+                <h1 //public void @(service.ServiceName + "(" + externstr + ");") />
+                <h1 } />
+            }
+
+        }
+        if (genType == GenType.Client || genType == GenType.All)
+        {
+            foreach (var service in interf.Services)
+            {
+                string responseInfoattr = "[ResponseInfo(Name=\"" + service.ServiceName + "\",ServiceId=" + service.ServiceId.ToString() + ")]";
+                <h1 @responseInfoattr />
+            }
+            <h1 public class @(interf.Name + "ClientImpl") />
+            <h1 { />
+            <h1 private EmbedXrpc.Client Client=null; />
+            <h1 public @(interf.Name + "ClientImpl(EmbedXrpc.Client client)") />
+            <h1 { Client=client;} />
+
+            foreach (var service in interf.Services)
+            {
+                <h1 @("public static readonly UInt32 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
+                string pars = string.Empty;
+                for (int pi = 0; pi < service.TargetFields.Count; pi++)
+                {
+                    var par = service.TargetFields[pi];
+                    pars += par.IdlType + " " + par.Name;
+                    if (pi + 1 < service.TargetFields.Count)
+                    {
+                        pars += ",";
+                    }
+
+                }
+                if (service.ReturnValue != null)
+                {
+                    <h1 public @(service.ServiceName + "_Response") @(service.ServiceName + "(") @(pars + ")") />
+                }
+                else
+                {
+                    <h1 public void @(service.ServiceName + "(") @(pars + ")") />
+                }
+                <h1 { />
+                <h1 @(service.ServiceName + "_Request request")=new @(service.ServiceName + "_Request ();") />
+                for (int pi = 0; pi < service.TargetFields.Count; pi++)
+                {
+                    var par = service.TargetFields[pi];
+                    string setvalue = "request." + par.Name + "=" + par.Name + ";";
+                    <h1 @setvalue />
+                }
+                <h1 SerializationManager sm=new SerializationManager(); />
+                <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
+                <h1 serialization.Serialize(sm, request); />
+                <h1 Client.Send ( @(service.ServiceName + "_ServiceId") , sm.Index,sm.Data.ToArray() ); />
+                if (service.ReturnValue != null)
+                {
+                    <h1 @(service.ServiceName + "_Response response")=new @(service.ServiceName + "_Response()") ; />
+                    <h1 ResponseState result=@("Client.Wait<"+service.ServiceName+ "_Response>(") @(service.ServiceName + "_ServiceId, out response);") />
+                    <h1 if(response @("==null") ) />
+                    <h1 { />
+                    <h1 response=new @(service.ServiceName + "_Response()") ; />
+                    <h1 } />
+                    <h1 response.State=result; />
+                    <h1 return response; />
+                }
+                <h1 } />
             }
             <h1 } />
         }
-        <h1 } />
     }
 }
 <h1 } />

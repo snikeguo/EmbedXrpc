@@ -32,6 +32,10 @@ namespace EmbedXrpcIdlParser
         public string IdlType { get; set; }
         public string Name { get; set; }
         public bool IsArray { get; set; }
+
+        public bool IsBaseValueType { get; set; }
+
+        public string ElementType { get; set; }
         public TargetEnum Enum { get; set; }
         //public FieldIndexAttribute FieldIndexAttribute { get; set; }
         public MaxCountAttribute MaxCountAttribute { get; set; }
@@ -194,6 +198,46 @@ namespace EmbedXrpcIdlParser
             }
             return null;
         }
+        private  bool IsBaseValueType(Type t)
+        {
+            if(t.IsEnum==true)
+            {
+                return true;
+            }
+            if(t==typeof(byte))
+            {
+                return true;
+            }
+            if (t == typeof(sbyte))
+            {
+                return true;
+            }
+            if (t == typeof(UInt16))
+            {
+                return true;
+            }
+            if (t == typeof(Int16))
+            {
+                return true;
+            }
+            if (t == typeof(UInt32))
+            {
+                return true;
+            }
+            if (t == typeof(Int32))
+            {
+                return true;
+            }
+            if (t == typeof(UInt64))
+            {
+                return true;
+            }
+            if (t == typeof(Int64))
+            {
+                return true;
+            }
+            return false;
+        }
         public void Parse(string file)
         {
             int ServiceId = 0x10;
@@ -239,9 +283,11 @@ namespace EmbedXrpcIdlParser
                                 targetField.IsArray = field.FieldType.IsArray;
                                 targetField.IdlType = field.FieldType.Name;
                                 targetField.Name = field.Name;
+                                targetField.IsBaseValueType = IsBaseValueType(field.FieldType);
                                 if (targetField.IsArray == true)
                                 {
                                     targetField.MaxCountAttribute = field.GetCustomAttribute<MaxCountAttribute>();
+                                    targetField.ElementType = field.FieldType.GetElementType().Name;
                                 }
                                 if (field.FieldType.IsEnum == true)
                                 {
@@ -289,9 +335,11 @@ namespace EmbedXrpcIdlParser
                                 if (field.IsArray == true)
                                 {
                                     field.MaxCountAttribute = par.GetCustomAttribute<MaxCountAttribute>();
+                                    field.ElementType = par.ParameterType.GetElementType().Name;
                                 }
                                 field.IdlType = par.ParameterType.Name;
                                 field.Name = par.Name;
+                                field.IsBaseValueType = IsBaseValueType(par.ParameterType);
                                 if (par.ParameterType.IsEnum == true)
                                 {
                                     field.Enum = GetTargetEnum(field.IdlType);
@@ -332,9 +380,11 @@ namespace EmbedXrpcIdlParser
                             if (field.IsArray == true)
                             {
                                 field.MaxCountAttribute = par.GetCustomAttribute<MaxCountAttribute>();
+                                field.ElementType = par.ParameterType.GetElementType().Name;
                             }
                             field.IdlType = par.ParameterType.Name;
                             field.Name = par.Name;
+                            field.IsBaseValueType = IsBaseValueType(par.ParameterType);
                             if (par.ParameterType.IsEnum == true)
                             {
                                 field.Enum = GetTargetEnum(field.IdlType);
@@ -352,9 +402,15 @@ namespace EmbedXrpcIdlParser
             }
         }
     }
+    public enum GenType
+    {
+        Client,
+        Server,
+        All
+    }
     public interface ICodeGenerater
     {
-        void CodeGen(IdlInfo idlInfo);
+        void CodeGen(IdlInfo idlInfo,GenType genType,string outputpath);
     }
     
     

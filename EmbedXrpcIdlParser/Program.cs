@@ -13,38 +13,33 @@ namespace EmbedXrpcIdlParser
     {
         static void Main(string[] args)
         {
-            
 #if true
-            //IdlInfo idlInfo = new IdlInfo();
-            //idlInfo.Parse("idltest1.cs");
-            /*CppCodeGenerater cpp = new CppCodeGenerater();
-            cpp.CodeGen(idlInfo);*/
-            CommandCSharpGenerater cs = new CommandCSharpGenerater();
-            cs.InputFile = "idltest1.cs";
-            CommandCSharpGenerater.Parsed(cs);
-            Console.WriteLine("complete!");
-            Console.ReadLine();
-#else
-            Console.WriteLine("example:");
-            Console.WriteLine(@".\EmbedXrpcIdlParser.exe cpp  -i idltest1.cs");
-            Console.WriteLine(@".\EmbedXrpcIdlParser.exe cs  -i idltest1.cs");
+            args = new string[9];
+            args[0] = "EmbedXrpcIdlParser.exe";
+            args[1] = "-g";
+            args[2] = "all";
+            args[3] = "-l";
+            args[4] = "cs";
+            args[5] = "-i";
+            args[6] = "idltest1.cs";
+            args[7] = "-o";
+            args[8] = @"D:\VSProject\EmbedXrpcIdlParser\EmbedXrpc.CSharp.Test\";
+#endif
             try
             {
                 /*var exitCode = Parser.Default.ParseArguments<CommandCppGenerater>(args)
                     .WithParsed(CommandCppGenerater.Parsed)
                     .WithNotParsed(CommandCppGenerater.NotParsed);*/
 
-                var exitCode = Parser.Default.ParseArguments<CommandCSharpGenerater>(args)
-                    .WithParsed(CommandCSharpGenerater.Parsed)
-                    .WithNotParsed(CommandCSharpGenerater.NotParsed);
+                var exitCode = Parser.Default.ParseArguments<CommandGenerater>(args)
+                    .WithParsed(CommandGenerater.Parsed)
+                    .WithNotParsed(CommandGenerater.NotParsed);
             }
             catch (Exception e)
             {
 
                 Console.WriteLine(e.ToString());
             }
-            //Console.ReadLine();
-#endif
         }
     }
 }

@@ -6,17 +6,18 @@
 2.在EmbedXrpcIdlParser\bin\Debug会出现一个EmbedXrpcIdlParser.exe,
 3.编写你的IDL文件，目录下会有一个idltest1.cs 文件，是例子。如果你打算用这个文件的话，请记得改一下这个文件里的这条语句
 ```
-[GenerationOptionParameter(OutPutFileName= "StudentService",OutPutPath = @"D:\VSProject\EmbedXrpcIdlParser\TestEmbeXrpc\")]
+[GenerationOptionParameter(OutPutFileName= "StudentService")]
 ```
-把OutPutPath改成你想要的路径，这个路径是生成代码的路径。记得保存
+把OutPutFileName改成你想要的名字，记得保存.
 
 4.执行命令
 ```
-./EmbedXrpcIdlParser.exe cpp -i 你的idl文件 
+.\EmbedXrpcIdlParser.exe -g all -l cpp -i idltest1.cs -o yourPath
 ```
 如
 ```
-./EmbedXrpcIdlParser.exe cpp -i idltest1.cs
+.\EmbedXrpcIdlParser.exe -g all -l cpp -i idltest1.cs -o D:/Test/
+.\EmbedXrpcIdlParser.exe -g all -l cs -i idltest1.cs -o D:/Test/ 
 ```
 记得写上文件扩展名
 
@@ -86,7 +87,7 @@ Return
 ```
 ## 关于使用注意：
 **例如例子中 结构体ss中的b这个动态数组，如果b的值是无效的。也就是说当b指向一块无效的内存的时候，这时候执行序列化代码会发生异常，因为序列化库不管这些，他只是忠实的序列化b指向的内容。所以这些部分由用户去控制。**
-具体的看代码吧，暂时看不懂序列化和反序列化没关系。最讨厌写文档了。
+具体的看代码吧，暂时看不懂序列化和反序列化没关系。
 
 
 
