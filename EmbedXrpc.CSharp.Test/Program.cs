@@ -51,7 +51,7 @@ namespace StudentService
 
 namespace EmbedXrpc
 {
-    
+
     class Program
     {
         static void Main(string[] args)
@@ -59,8 +59,8 @@ namespace EmbedXrpc
             client = new Client(500000, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
             server = new Server(500000, serverSend, Assembly.GetExecutingAssembly());
-            server.Start();    
-            
+            server.Start();
+
             Task.Run(() =>
             {
                 IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
@@ -77,7 +77,7 @@ namespace EmbedXrpc
                 BroadcastDataTimeDelegate broadcastDataTimeDelegate = new BroadcastDataTimeDelegate(server);
                 while (true)
                 {
-                    broadcastDataTimeDelegate.BroadcastDataTime(new DateTime_t()
+                    broadcastDataTimeDelegate.Invoke(new DateTime_t()
                     {
                         Year = DateTime.Now.Year,
                         Month = DateTime.Now.Month,
@@ -89,16 +89,16 @@ namespace EmbedXrpc
                     Thread.Sleep(100);
                 }
             });
-            
+
             while (true)
             {
-                
+
                 Thread.Sleep(1000);
             }
         }
         static Client client;
         static Server server;
-        public static void clientSend(UInt32 sid,int dataLen,byte[]data)
+        public static void clientSend(UInt32 sid, int dataLen, byte[] data)
         {
             server.ReceivedMessage(sid, (UInt32)dataLen, 0, data);
         }

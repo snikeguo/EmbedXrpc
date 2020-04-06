@@ -1,7 +1,7 @@
 using EmbedXrpc;
 using System;
 using System.Reflection;
-// auto code gen ! DO NOT modify this file! create time 2020-04-06 18:17:11.316 ; 
+// auto code gen ! DO NOT modify this file! create time 2020-04-06 21:23:28.712 ; 
 namespace StudentService
 {
     public enum Sex_t : UInt32
@@ -69,7 +69,7 @@ namespace StudentService
         public BroadcastDataTimeDelegate(EmbedXrpc.Server server)
         { Server = server; }
         public static readonly UInt32 BroadcastDataTime_ServiceId = 16;
-        public void BroadcastDataTime(DateTime_t t)
+        public void Invoke(DateTime_t t)
         {
             BroadcastDataTimeStruct request = new BroadcastDataTimeStruct();
             request.t = t;
