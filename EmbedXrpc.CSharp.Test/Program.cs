@@ -15,7 +15,7 @@ namespace StudentService
     {
         public void BroadcastDataTime(DateTime_t t)
         {
-            Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
+            //Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
         }
     }
     public partial class GetStudentInfoFormStudentIdService : IService
@@ -29,6 +29,7 @@ namespace StudentService
     {
         public void GetStudentsInfoFormAge()
         {
+            Thread.Sleep(10000);
             Response.ReturnValue = new StudentArray_t();
             Response.ReturnValue.StudentIdLen = 1;
             var stu = new Student_t() { Age = 0x99, ResultsLen = 0, StudentIdLen = 0 };
@@ -56,9 +57,9 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new Client(500000, clientSend, Assembly.GetExecutingAssembly());
+            client = new Client(1000, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
-            server = new Server(500000, serverSend, Assembly.GetExecutingAssembly());
+            server = new Server(1000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
 
             Task.Run(() =>
@@ -100,10 +101,12 @@ namespace EmbedXrpc
         static Server server;
         public static void clientSend(UInt32 sid, int dataLen, byte[] data)
         {
+            //Console.WriteLine($"clientSend {sid}");
             server.ReceivedMessage(sid, (UInt32)dataLen, 0, data);
         }
         public static void serverSend(UInt32 sid, int dataLen, byte[] data)
         {
+            //Console.WriteLine($"serverSend {sid}");
             client.ReceivedMessage(sid, (UInt32)dataLen, 0, data);
         }
     }

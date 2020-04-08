@@ -11,12 +11,13 @@ namespace EmbedXrpc
     public class Server
     {
         UInt32 TimeOut;
-        private object BufMutex = new object();
+        public object SendMutex { get; private set; } = new object();
         private Thread ServiceThreadHandle;
         private Win32Queue<EmbeXrpcRawData> RequestQueueHandle=new Win32Queue<EmbeXrpcRawData>(10);
         private RequestMessageMap[] MessageMaps;
         public Send Send;
         private Assembly Assembly;
+        private Timer SuspendTimer;
         public Server(UInt32 timeout, Send send, Assembly assembly)
         {
             var types = assembly.GetTypes();
@@ -40,8 +41,16 @@ namespace EmbedXrpc
 
             ServiceThreadHandle = new Thread(ServiceThread);
             ServiceThreadHandle.IsBackground = true;
+
+            SuspendTimer = new Timer(SuspendTimerCallback, null, Timeout.Infinite, Timeout.Infinite);
         }
-        
+        private void SuspendTimerCallback(object s)
+        {
+            lock (SendMutex)
+            {
+                Send(EmbedXrpcCommon.EmbedXrpcSuspendSid, 0, null);
+            }
+        }
         public void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset, byte[] data)
         {
             EmbeXrpcRawData raw=new EmbeXrpcRawData();
@@ -80,11 +89,16 @@ namespace EmbedXrpc
                             SerializationManager sendsm = new SerializationManager();
                             rsm.Reset();
                             rsm.Data = new List<byte>(recData.Data);
-                            lock (BufMutex)
+
+                            sendsm.Reset();
+                            sendsm.Data = new List<byte>();
+
+                            SuspendTimer.Change(TimeOut / 2, TimeOut / 2);
+                            MessageMaps[i].Service.Invoke(rsm, sendsm);
+                            SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);
+
+                            lock (SendMutex)
                             {
-                                sendsm.Reset();
-                                sendsm.Data = new List<byte>();
-                                MessageMaps[i].Service.Invoke(rsm, sendsm);
                                 if (sendsm.Index > 0)//
                                     Send(recData.Sid, sendsm.Index, sendsm.Data.ToArray());
                             }

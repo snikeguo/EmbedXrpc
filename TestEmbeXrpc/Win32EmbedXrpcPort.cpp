@@ -5,55 +5,118 @@
 #include "EmbedXrpcCommon.h"
 #include "BlockingQueue.h"
 #include <iostream>
-EmbeXrpc_Thread_t Win32EmbedXrpcPort::CreateThread(const char* threadName, void(*Thread)(void*), void* Arg)
+
+EmbedXrpc_Thread_t Win32EmbedXrpcPort::CreateThread(const char* threadName, void(*Thread)(void*), void* Arg)
 {
 	std::thread *x = new std::thread(Thread,Arg);
 	return  x;
 }
 
-EmbeXrpc_Mutex_t Win32EmbedXrpcPort::CreateMutex(const char* mutexName)
+EmbedXrpc_Mutex_t Win32EmbedXrpcPort::CreateMutex(const char* mutexName)
 {
 	std::mutex* mutex = new std::mutex();
 	return  mutex;
 }
-EmbeXrpc_Queue_t Win32EmbedXrpcPort::CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen)
+EmbedXrpc_Queue_t Win32EmbedXrpcPort::CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen)
 {
 	//这里创建队列，由于我只实现了C++泛型的队列，而底层RTOS一般要求提供的是queueItemSize，所以这里硬编码直接创建EmbeXrpcRawData;
 	BlockingQueue<EmbeXrpcRawData> *queue = new BlockingQueue<EmbeXrpcRawData>();
 
 	return queue;
 }
+#include <windows.h>  
+struct wintimer
+{
+	uint32_t counter = 0;
+	uint32_t timeout;
+	void *Arg;
+	HANDLE hThread;
+	void (*timercb)(void* arg);
+	bool isEnable;
+};
 
-void Win32EmbedXrpcPort::ThreadStart(EmbeXrpc_Thread_t thread)
+//线程  
+DWORD CALLBACK ThreadProc(PVOID pvoid)
+{
+	//强制系统为线程简历消息队列  
+	wintimer* par = (wintimer *)pvoid;
+	while (true)
+	{
+		Sleep(1);
+		if (par->isEnable == true)
+		{
+			par->counter++;
+			if (par->counter >= par->timeout)
+			{
+				par->timercb(par->Arg);
+				par->counter = 0;
+			}
+		}
+		
+	}
+	return 0;
+}
+EmbedXrpc_Timer_t Win32EmbedXrpcPort::CreateTimer(const char* timerName, uint32_t timeout, void* Arg, void (*timercb)(void* arg))
+{
+	DWORD dwThreadId;
+	wintimer* wintimerpar = new wintimer;
+	wintimerpar->timeout = timeout;
+	wintimerpar->Arg = Arg;
+	wintimerpar->timercb = timercb;
+	wintimerpar->isEnable = false;
+	HANDLE hThread = ::CreateThread(NULL, 0, ThreadProc, wintimerpar, 0, &dwThreadId);
+	wintimerpar->hThread = hThread;
+	
+	return wintimerpar;
+}
+void Win32EmbedXrpcPort::ThreadStart(EmbedXrpc_Thread_t thread)
 {
 	std::thread* x = static_cast<std::thread*>(thread);
 	//x->join();
 
 }
+void  Win32EmbedXrpcPort::TimerStart(EmbedXrpc_Timer_t timer)
+{
+	wintimer* x = static_cast<wintimer*>(timer);
+	x->counter = 0;
+	x->isEnable = true;
+	
+}
+void Win32EmbedXrpcPort::TimerReset(EmbedXrpc_Timer_t timer)
+{
+	wintimer* x = static_cast<wintimer*>(timer);
+	x->counter = 0;
+}
+void Win32EmbedXrpcPort::TimerStop(EmbedXrpc_Timer_t timer)
+{
+	wintimer* x = static_cast<wintimer*>(timer);
+	x->isEnable = false;
+	x->counter = 0;
+}
 #if 0
-EmbeXrpc_Mutex_t Win32EmbedXrpcPort::CreateSemaphore(const char* semaphoreName)
+EmbedXrpc_Mutex_t Win32EmbedXrpcPort::CreateSemaphore(const char* semaphoreName)
 {
 	return  nullptr;
 }
-bool Win32EmbedXrpcPort::TakeSemaphore(EmbeXrpc_Semaphore_t sem, uint32_t timeout)
+bool Win32EmbedXrpcPort::TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
 {
 	return false;
 }
-bool Win32EmbedXrpcPort::ReleaseSemaphore(EmbeXrpc_Semaphore_t sem)
+bool Win32EmbedXrpcPort::ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
 {
 	return false;
 }
 #endif
-bool Win32EmbedXrpcPort::TakeMutex(EmbeXrpc_Mutex_t mutex, uint32_t timeout)
+bool Win32EmbedXrpcPort::TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout)
 {
 	return true;
 }
-bool Win32EmbedXrpcPort::ReleaseMutex(EmbeXrpc_Mutex_t mutex)
+bool Win32EmbedXrpcPort::ReleaseMutex(EmbedXrpc_Mutex_t mutex)
 {
 	return true;
 }
 
-QueueState Win32EmbedXrpcPort::ReceiveQueue(EmbeXrpc_Queue_t queue, void* item, uint32_t itemlen, uint32_t timeout)
+QueueState Win32EmbedXrpcPort::ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen, uint32_t timeout)
 {
 	BlockingQueue<EmbeXrpcRawData>* q= static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
 	auto r=q->take(timeout, (EmbeXrpcRawData *)item);
@@ -63,18 +126,22 @@ QueueState Win32EmbedXrpcPort::ReceiveQueue(EmbeXrpc_Queue_t queue, void* item, 
 	}
 	else
 	{
-		return QueueState_Empty;
+		return QueueState_Timeout;
 	}
 	
 }
-QueueState Win32EmbedXrpcPort::SendQueue(EmbeXrpc_Queue_t queue, void* item, uint32_t itemlen)
+QueueState Win32EmbedXrpcPort::SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen)
 {
 	BlockingQueue<EmbeXrpcRawData>* q = static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
 	EmbeXrpcRawData* data = static_cast<EmbeXrpcRawData*> (item);
 	q->put(*data);
 	return QueueState_OK;
 }
-
+void Win32EmbedXrpcPort::ResetQueue(EmbedXrpc_Queue_t queue)
+{
+	BlockingQueue<EmbeXrpcRawData>* q = static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
+	//reset;
+}
 void* Win32EmbedXrpcPort::Malloc(uint32_t size)
 {
 	auto x=malloc(size);

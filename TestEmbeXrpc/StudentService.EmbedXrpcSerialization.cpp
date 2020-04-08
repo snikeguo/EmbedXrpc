@@ -22,7 +22,7 @@ ArrayField Student_t_Field_Results("Student_t.Results",true,&Result_t_Type,sizeo
 Int32Field Student_t_Field_Age("Student_t.Age",offsetof(Student_t,Age));
 ArrayField Student_t_Field_Name("Student_t.Name",false,&Uint8TypeInstance,sizeof(Byte),offsetof(Student_t,Name),nullptr);
 Uint8Field Student_t_Field_StudentIdLen("Student_t.StudentIdLen",offsetof(Student_t,StudentIdLen));
-ArrayField Student_t_Field_StudentId("Student_t.StudentId",true,&Int16TypeInstance,sizeof(Int16),offsetof(Student_t,StudentId),&Student_t_Field_StudentIdLen);
+ArrayField Student_t_Field_StudentId("Student_t.StudentId",true,&Uint8TypeInstance,sizeof(Byte),offsetof(Student_t,StudentId),&Student_t_Field_StudentIdLen);
 Uint32Field Student_t_Field_Sex("Student_t.Sex",offsetof(Student_t,Sex));
 IField* Student_tDesc []=
 {

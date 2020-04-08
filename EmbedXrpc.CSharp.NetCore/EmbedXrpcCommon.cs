@@ -8,9 +8,9 @@ namespace EmbedXrpc
 {
     public enum ResponseState:UInt32
     {
-        Ok,
-        Timeout,
-        SidError,
+        Ok=1,
+        Timeout=2,
+        SidError=3,
     }
     public enum ReceiveType
     {
@@ -23,7 +23,10 @@ namespace EmbedXrpc
         public abstract UInt32 GetSid();
         public abstract void Invoke(SerializationManager recManager);
     }
-
+    public static class EmbedXrpcCommon
+    {
+        public static readonly UInt32 EmbedXrpcSuspendSid = 0x1;
+    }
 
     public abstract class IService
     {

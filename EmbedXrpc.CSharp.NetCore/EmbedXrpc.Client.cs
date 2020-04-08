@@ -12,9 +12,9 @@ namespace EmbedXrpc
     public class Client
     {
         public UInt32 TimeOut { get; set; }
-        private object BufMutex = new object();
-        private Win32Queue<EmbeXrpcRawData> DelegateMessageQueueHandle = new Win32Queue<EmbeXrpcRawData>(10);
-        private Win32Queue<EmbeXrpcRawData> ResponseMessageQueueHandle = new Win32Queue<EmbeXrpcRawData>(10);
+        public object ObjectMutex { get; private set; } =new object();
+        public Win32Queue<EmbeXrpcRawData> DelegateMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>(10);
+        public Win32Queue<EmbeXrpcRawData> ResponseMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>(10);
         private ResponseDelegateMessageMap[] MessageMaps { get; set; }
 
         public Send Send;
@@ -76,25 +76,51 @@ namespace EmbedXrpc
             EmbeXrpcRawData recData;
             response = default(T);
             Type res_t =typeof(T);
-            if (ResponseMessageQueueHandle.Receive(out recData, TimeOut)!= QueueStatus.OK)
+            ResponseState ret = ResponseState.Ok;
+            while (true)
             {
-                return ResponseState.Timeout;
+                if (ResponseMessageQueueHandle.Receive(out recData, TimeOut) != QueueStatus.OK)
+                {
+                    return ResponseState.Timeout;
+                }
+                if(recData.Sid== EmbedXrpcCommon.EmbedXrpcSuspendSid)
+                {
+                    //Console.WriteLine("sid== EmbedXrpcCommon.EmbedXrpcSuspendSid{0}",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                    continue;
+                }
+                if (sid != recData.Sid)
+                {
+                    ret=ResponseState.SidError;
+                }
+                break;
             }
-            if (sid != recData.Sid)
+            if(ret == ResponseState.Ok)
             {
-                return ResponseState.SidError;
+                SerializationManager rsm = new SerializationManager();
+                rsm.Reset();
+                rsm.Data = new List<byte>(recData.Data);
+                Serialization serialization = new Serialization(Assembly);
+                response = (T)serialization.Deserialize(res_t, rsm);
             }
-
-            SerializationManager rsm=new SerializationManager();
-            rsm.Reset();
-            rsm.Data = new List<byte>(recData.Data);
-            Serialization serialization = new Serialization(Assembly);
-            response = (T)serialization.Deserialize(res_t, rsm);
-            return ResponseState.Ok;
+            return ret;
         }
         public void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset,byte[] data)
         {
             EmbeXrpcRawData raw = new EmbeXrpcRawData();
+
+            if (serviceId == EmbedXrpcCommon.EmbedXrpcSuspendSid)
+            {
+                raw.Sid = serviceId;
+                if(dataLen>0)
+                {
+                    raw.Data = new byte[dataLen];
+                    Array.Copy(data, offset, raw.Data, 0, dataLen);
+                }
+                
+                raw.DataLen = dataLen;
+                ResponseMessageQueueHandle.Send(raw);
+                return;
+            }
 
             for (int i = 0; i < MessageMaps.Length; i++)
             {
@@ -102,8 +128,11 @@ namespace EmbedXrpc
                 if (iter.Sid == serviceId)
                 {
                     raw.Sid = serviceId;
-                    raw.Data = new byte[dataLen];
-                    Array.Copy(data, offset, raw.Data, 0, dataLen);
+                    if (dataLen > 0)
+                    {
+                        raw.Data = new byte[dataLen];
+                        Array.Copy(data, offset, raw.Data, 0, dataLen);
+                    }
                     raw.DataLen = dataLen;
                     if (iter.ReceiveType == ReceiveType.Response)
                     {

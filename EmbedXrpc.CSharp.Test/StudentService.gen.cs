@@ -1,7 +1,7 @@
 using EmbedXrpc;
 using System;
 using System.Reflection;
-// auto code gen ! DO NOT modify this file! create time 2020-04-06 21:23:28.712 ; 
+// auto code gen ! DO NOT modify this file! create time 2020-04-08 21:34:35.283 ; 
 namespace StudentService
 {
     public enum Sex_t : UInt32
@@ -159,49 +159,61 @@ namespace StudentService
         public static readonly UInt32 GetStudentInfoFormStudentId_ServiceId = 17;
         public GetStudentInfoFormStudentId_Response GetStudentInfoFormStudentId(Byte StudentIdLen, Byte[] StudentId, Int32 arg2, Int32 arg3)
         {
-            GetStudentInfoFormStudentId_Request request = new GetStudentInfoFormStudentId_Request();
-            request.StudentIdLen = StudentIdLen;
-            request.StudentId = StudentId;
-            request.arg2 = arg2;
-            request.arg3 = arg3;
-            SerializationManager sm = new SerializationManager();
-            Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
-            serialization.Serialize(sm, request);
-            Client.Send(GetStudentInfoFormStudentId_ServiceId, sm.Index, sm.Data.ToArray());
-            GetStudentInfoFormStudentId_Response response = new GetStudentInfoFormStudentId_Response();
-            ResponseState result = Client.Wait<GetStudentInfoFormStudentId_Response>(GetStudentInfoFormStudentId_ServiceId, out response);
-            if (response == null)
+            lock (Client.ObjectMutex)
             {
-                response = new GetStudentInfoFormStudentId_Response();
+                Client.ResponseMessageQueueHandle.Reset();
+                GetStudentInfoFormStudentId_Request request = new GetStudentInfoFormStudentId_Request();
+                request.StudentIdLen = StudentIdLen;
+                request.StudentId = StudentId;
+                request.arg2 = arg2;
+                request.arg3 = arg3;
+                SerializationManager sm = new SerializationManager();
+                Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
+                serialization.Serialize(sm, request);
+                Client.Send(GetStudentInfoFormStudentId_ServiceId, sm.Index, sm.Data.ToArray());
+                GetStudentInfoFormStudentId_Response response = new GetStudentInfoFormStudentId_Response();
+                ResponseState result = Client.Wait<GetStudentInfoFormStudentId_Response>(GetStudentInfoFormStudentId_ServiceId, out response);
+                if (response == null)
+                {
+                    response = new GetStudentInfoFormStudentId_Response();
+                }
+                response.State = result;
+                return response;
             }
-            response.State = result;
-            return response;
         }
         public static readonly UInt32 GetStudentsInfoFormAge_ServiceId = 18;
         public GetStudentsInfoFormAge_Response GetStudentsInfoFormAge()
         {
-            GetStudentsInfoFormAge_Request request = new GetStudentsInfoFormAge_Request();
-            SerializationManager sm = new SerializationManager();
-            Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
-            serialization.Serialize(sm, request);
-            Client.Send(GetStudentsInfoFormAge_ServiceId, sm.Index, sm.Data.ToArray());
-            GetStudentsInfoFormAge_Response response = new GetStudentsInfoFormAge_Response();
-            ResponseState result = Client.Wait<GetStudentsInfoFormAge_Response>(GetStudentsInfoFormAge_ServiceId, out response);
-            if (response == null)
+            lock (Client.ObjectMutex)
             {
-                response = new GetStudentsInfoFormAge_Response();
+                Client.ResponseMessageQueueHandle.Reset();
+                GetStudentsInfoFormAge_Request request = new GetStudentsInfoFormAge_Request();
+                SerializationManager sm = new SerializationManager();
+                Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
+                serialization.Serialize(sm, request);
+                Client.Send(GetStudentsInfoFormAge_ServiceId, sm.Index, sm.Data.ToArray());
+                GetStudentsInfoFormAge_Response response = new GetStudentsInfoFormAge_Response();
+                ResponseState result = Client.Wait<GetStudentsInfoFormAge_Response>(GetStudentsInfoFormAge_ServiceId, out response);
+                if (response == null)
+                {
+                    response = new GetStudentsInfoFormAge_Response();
+                }
+                response.State = result;
+                return response;
             }
-            response.State = result;
-            return response;
         }
         public static readonly UInt32 Test_ServiceId = 19;
         public void Test()
         {
-            Test_Request request = new Test_Request();
-            SerializationManager sm = new SerializationManager();
-            Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
-            serialization.Serialize(sm, request);
-            Client.Send(Test_ServiceId, sm.Index, sm.Data.ToArray());
+            lock (Client.ObjectMutex)
+            {
+                Client.ResponseMessageQueueHandle.Reset();
+                Test_Request request = new Test_Request();
+                SerializationManager sm = new SerializationManager();
+                Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
+                serialization.Serialize(sm, request);
+                Client.Send(Test_ServiceId, sm.Index, sm.Data.ToArray());
+            }
         }
     }
 }

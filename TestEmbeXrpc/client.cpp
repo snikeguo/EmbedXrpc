@@ -37,10 +37,10 @@ void ClientTest()
 {
     while (true)
     {
-		Client.Test();
+		//Client.Test();
 		std::cout << "client:GetStudentsInfoFormAge" << std::endl;
 		GetStudentsInfoFormAge_Response x = Client.GetStudentsInfoFormAge();
-		//your code
+        printf("GetStudentsInfoFormAge_Response.x.State:%d\n", x.State);
 		Client.Free_GetStudentsInfoFormAge(&x);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }

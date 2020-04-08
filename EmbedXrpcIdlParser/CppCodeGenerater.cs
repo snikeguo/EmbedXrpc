@@ -341,7 +341,7 @@ namespace EmbedXrpcIdlParser
                 //code gen invoke
                 ClientHsw.WriteLine("void Invoke(SerializationManager &recManager)\n{");
                 ClientHsw.WriteLine($"static {targetDelegate.MethodName}Struct request;");
-                //ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
+                //ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, 100);");
                 ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
 
                 ClientHsw.Write($"{targetDelegate.MethodName}(");
@@ -356,7 +356,7 @@ namespace EmbedXrpcIdlParser
                 }
                 ClientHsw.WriteLine(");");//生成调用目标函数。
                 ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
-                                                                                               //ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);");
+                                                                                               //ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
                 ClientHsw.WriteLine("}");//函数生成完毕
 
                 ClientHsw.WriteLine("};");//end class
@@ -399,7 +399,7 @@ namespace EmbedXrpcIdlParser
                 //函数实现
                 ServerHsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
                 ServerHsw.WriteLine($"static {targetDelegate.MethodName}Struct sendData;");
-                ServerHsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->BufMutexHandle, 100);");
+                ServerHsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, 100);");
                 ServerHsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
                         "sm.Buf = RpcServerObject->Buffer;\n" +
@@ -420,7 +420,7 @@ namespace EmbedXrpcIdlParser
                 ServerHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&sendData);");
                 ServerHsw.WriteLine($"RpcServerObject->Send({targetDelegate.MethodName}_ServiceId,sm.Index,sm.Buf);");
                 ServerHsw.WriteLine("sm.Reset();");
-                ServerHsw.WriteLine("RpcServerObject->porter->ReleaseMutex(RpcServerObject->BufMutexHandle);");
+                ServerHsw.WriteLine("RpcServerObject->porter->ReleaseMutex(RpcServerObject->SendMutexHandle);");
                 ServerHsw.WriteLine("}");//function end
 
 
@@ -520,8 +520,8 @@ namespace EmbedXrpcIdlParser
 
                     ClientHsw.WriteLine($"static {service.ServiceName}_Request sendData;");
 
-                    ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->BufMutexHandle, 100);");
-
+                    ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, 100);");
+                    ClientHsw.WriteLine("RpcClientObject->porter->ResetQueue(RpcClientObject->ResponseMessageQueueHandle);");
                     ClientHsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
                         "sm.Buf = RpcClientObject->Buffer;\n" +
@@ -543,7 +543,7 @@ namespace EmbedXrpcIdlParser
                     ClientHsw.WriteLine($"{service.ServiceName}_Request_Type.Serialize(sm,0,&sendData);");
                     ClientHsw.WriteLine($"RpcClientObject->Send({service.ServiceName}_ServiceId,sm.Index,sm.Buf);");
                     ClientHsw.WriteLine("sm.Reset();");
-                    ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->BufMutexHandle);");
+                    
 
                     if (service.ReturnValue != null)
                     {
@@ -559,9 +559,14 @@ namespace EmbedXrpcIdlParser
                         ClientHsw.WriteLine("}");
                         ClientHsw.WriteLine("else if(result==ResponseState_Timeout)\n{");
                         ClientHsw.WriteLine($"response.State=ResponseState_Timeout;");
-                        ClientHsw.WriteLine("}\nreturn response;");
+                        ClientHsw.WriteLine("}");
+                        ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
+                        ClientHsw.WriteLine("return response;");
                     }
-
+                    else
+                    {
+                        ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
+                    }
                     ClientHsw.WriteLine("}");
 
                     if (service.ReturnValue != null)

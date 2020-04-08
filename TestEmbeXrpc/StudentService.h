@@ -11,6 +11,7 @@ typedef enum _Sex_t
 {
 Man = 0,
 Woman = 1,
+HHHH = 2,
 }Sex_t;
 typedef struct _Result_t
 {
@@ -26,7 +27,7 @@ Result_t Results[32];
 Int32 Age;
 Byte* Name;
 Byte StudentIdLen;
-Int16 StudentId[100];
+Byte StudentId[100];
 Sex_t Sex;
 }Student_t;
 typedef struct _DateTime_t

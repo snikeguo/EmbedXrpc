@@ -10,7 +10,7 @@
 }
 <h1 using EmbedXrpc; />
 <h1 using System; />
-<h1 using System.Reflection;/>
+<h1 using System.Reflection; />
 <h1 // auto code gen ! DO NOT modify this file! create time @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") ; />
 <h1 namespace @idlInfo.GenerationOptionParameterAttribute.OutPutFileName />
 <h1 { />
@@ -159,7 +159,7 @@
                 }
 
             }
-            <h1 public void Invoke( @(pars) )/>
+            <h1 public void Invoke( @(pars) ) />
             <h1 { />
             <h1 @(del.MethodName + "Struct request")=new @(del.MethodName + "Struct();") />
             for (int pi = 0; pi < del.TargetFields.Count; pi++)
@@ -329,6 +329,9 @@
                     <h1 public void @(service.ServiceName + "(") @(pars + ")") />
                 }
                 <h1 { />
+                <h1 lock(Client.ObjectMutex) />
+                <h1 { />
+                <h1 Client.ResponseMessageQueueHandle.Reset(); />
                 <h1 @(service.ServiceName + "_Request request")=new @(service.ServiceName + "_Request ();") />
                 for (int pi = 0; pi < service.TargetFields.Count; pi++)
                 {
@@ -351,6 +354,8 @@
                     <h1 response.State=result; />
                     <h1 return response; />
                 }
+                <h1 } />
+
                 <h1 } />
             }
             <h1 } />

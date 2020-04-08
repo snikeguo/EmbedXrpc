@@ -1,5 +1,9 @@
 #include "StudentService.Server.h"
 #include "Win32EmbedXrpcPort.h"
+
+#include<chrono>//给演示
+#include <thread>
+#include <time.h>
 Win32EmbedXrpcPort ServerWin32Port;
 uint8_t ServerBuffer[2048];
 
@@ -11,7 +15,7 @@ static void ServerSend(uint32_t sid, uint32_t dataLen, uint8_t* data)
 
 }
 EmbedXrpcServerObject ServerRpcObject(ServerSend,
-	5000,
+	1000,
 	ServerBuffer,
 	2048,
 	&ServerWin32Port,
@@ -30,7 +34,13 @@ void GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
 	Response.ReturnValue.StudentIdLen = 1;
 	Response.ReturnValue.Students[0].Age = 2;
 	Response.ReturnValue.Students[0].Name =(uint8_t *) "123";
-	Response.ReturnValue.Students[0].Sex = Woman;
+	Response.ReturnValue.Students[0].Sex = HHHH;
+	for (int i = 0; i < 20; i++)
+	{
+		Response.ReturnValue.Students[0].StudentId[i] = i + 0x30;
+	}
+	Response.ReturnValue.Students[0].StudentIdLen = 15;//假定只传输15个
+	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 }
 void TestService::Test()
 {
@@ -40,9 +50,7 @@ void ServerInit()
 {
 	ServerRpcObject.Init();
 }
-#include<chrono>//给演示
-#include <thread>
-#include <time.h>
+
 void ServerTest()
 {
 	

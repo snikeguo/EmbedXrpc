@@ -3,11 +3,13 @@
 
 
 #include "EmbedXrpc.Port.h"
+
+#define EmbedXrpcSuspendSid 0x01
  enum ResponseState
  {
-	 ResponseState_Ok,
-	 ResponseState_Timeout,
-	 ResponseState_SidError,
+	 ResponseState_Ok=1,
+	 ResponseState_Timeout=2,
+	 ResponseState_SidError=3,
  };
  enum ReceiveType_t
  {
