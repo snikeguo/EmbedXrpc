@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security;
@@ -39,6 +39,16 @@ namespace EmbedXrpcIdlParser
             else if(generater.GenType.ToLower()=="server")
             {
                 gt = EmbedXrpcIdlParser.GenType.Server;
+            }
+            var end = generater.OutputPath[generater.OutputPath.Length - 1];
+            if (end!='\\'&&end!='/')
+            {
+                generater.OutputPath+="\\";
+                Console.WriteLine($"OutputPath:{generater.OutputPath}");
+            }
+            if(Directory.Exists(generater.OutputPath)==false)
+            {
+                Directory.CreateDirectory(generater.OutputPath);
             }
             if(generater.GenLanguageType.ToLower()=="cpp")
             {
