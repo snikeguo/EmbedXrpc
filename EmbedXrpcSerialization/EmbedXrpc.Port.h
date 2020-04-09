@@ -26,13 +26,13 @@ public:
 	//virtual EmbedXrpc_Mutex_t CreateSemaphore(const char* semaphoreName)=0;
 	virtual EmbedXrpc_Mutex_t CreateMutex(const char* mutexName)=0;
 	virtual EmbedXrpc_Queue_t CreateQueue(const char* queueName,uint32_t queueItemSize,uint32_t maxItemLen) = 0;
-	virtual EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout,void *Arg,void (*timercb)(void *arg));
+	virtual EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout,void *Arg,void (*timercb)(void *arg))=0;
 
 	virtual void ThreadStart(EmbedXrpc_Thread_t thread) = 0;
 
-	virtual void TimerStart(EmbedXrpc_Timer_t timer);
-	virtual void TimerReset(EmbedXrpc_Timer_t timer);
-	virtual void TimerStop(EmbedXrpc_Timer_t timer);
+	virtual void TimerStart(EmbedXrpc_Timer_t timer) = 0;
+	virtual void TimerReset(EmbedXrpc_Timer_t timer) = 0;
+	virtual void TimerStop(EmbedXrpc_Timer_t timer) = 0;
 	//virtual bool TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout) = 0;
 	//virtual bool ReleaseSemaphore(EmbedXrpc_Semaphore_t sem) = 0;
 

@@ -21,16 +21,10 @@
     <ClCompile Include="StudentService.EmbedXrpcSerialization.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Win32EmbedXrpcPort.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="StudentService.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="client.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Server.cpp">

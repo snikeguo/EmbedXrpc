@@ -19,8 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
-    <ClCompile Include="client.cpp" />
     <ClCompile Include="Client\StudentService.Client.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Server.cpp" />
