@@ -34,6 +34,7 @@ void  TestEmbedXrpcForQt::readyRead()
 void TestEmbedXrpcForQt::connected()
 {
 	QThread* b = QThread::create([this] {while (true) {
+		QThread::msleep(1000);
 		DateTime_t t;
 		auto date = QDateTime::currentDateTime().date();
 		auto time = QDateTime::currentDateTime().time();
@@ -44,7 +45,7 @@ void TestEmbedXrpcForQt::connected()
 		t.Sec = time.second();
 		t.Year = date.year();
 		this->BroadcastDataTimeProxy.Invoke(t);
-		QThread::msleep(1000);
+		
 	}});
 	b->start();
 }

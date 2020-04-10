@@ -130,9 +130,10 @@ namespace EmbedXrpc
                     IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
                     while (true)
                     {
-                        var re = inter.GetStudentsInfoFormAge();
+                        
                         try
                         {
+                            var re = inter.GetStudentsInfoFormAge();
                             Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
                         }
                         catch 
@@ -157,15 +158,24 @@ namespace EmbedXrpc
         }
         public static void RecCallback(IAsyncResult ar)
         {
-            var stream = TcpClient.GetStream();
-            var len = stream.EndRead(ar);
-            if (recBuff[0]!=0xff&&recBuff[1]!=0xff)
+            try
             {
-                return;
+                var stream = TcpClient.GetStream();
+                var len = stream.EndRead(ar);
+                if (recBuff[0] != 0xff && recBuff[1] != 0xff)
+                {
+                    return;
+                }
+                UInt32 sid = (UInt32)(recBuff[2] << 0 | recBuff[3] << 8 | recBuff[4] << 16 | recBuff[5] << 24);
+                client.ReceivedMessage(sid, (UInt32)(len - 6), 6, recBuff);
+                TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
             }
-            UInt32 sid = (UInt32)(recBuff[2] << 0 | recBuff[3] << 8 | recBuff[4] << 16 | recBuff[5] << 24);
-            client.ReceivedMessage(sid, (UInt32)(len - 6), 6, recBuff);
-            TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+            
         }
         static Client client;
         static TcpListener TcpListener;
