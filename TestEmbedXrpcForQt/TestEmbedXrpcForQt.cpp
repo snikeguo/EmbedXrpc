@@ -1,7 +1,7 @@
 #include "TestEmbedXrpcForQt.h"
 #include <QPushButton>
-
-//#include "StudentService.Client.h"
+#include <QDateTime>
+static TestEmbedXrpcForQt* GuiInstance;
 TestEmbedXrpcForQt::TestEmbedXrpcForQt(QWidget* parent) : QMainWindow(parent), ServerRpcObject(ServerSend,
 	1000,
 	ServerBuffer,
@@ -13,18 +13,54 @@ TestEmbedXrpcForQt::TestEmbedXrpcForQt(QWidget* parent) : QMainWindow(parent), S
 	Socket(this)
 {
 	ui.setupUi(this);
-	connect(ui.ConnectButton, &QPushButton::click, this, &TestEmbedXrpcForQt::ConnectButtonClicked);
+	connect(&Socket, &QTcpSocket::readyRead, this, &TestEmbedXrpcForQt::readyRead);
+	connect(&Socket, &QTcpSocket::connected, this, &TestEmbedXrpcForQt::connected);
+	ServerRpcObject.Init();
+	GuiInstance = this;
 }
 
 
-void  TestEmbedXrpcForQt::ConnectButtonClicked()
+void  TestEmbedXrpcForQt::readyRead()
 {
-	Socket.connectToHost("127.0.0.1", 5567);
+	qint64 len=Socket.read(SocketBuffer, 10240);
+	if (len < 6)
+		return;
+	if ((SocketBuffer[0] == (char)0xff) && (SocketBuffer[1] ==(char) 0xff))
+	{
+		uint32_t sid = SocketBuffer[2] | SocketBuffer[3] << 8 | SocketBuffer[4] << 16 | SocketBuffer[5] << 24;
+		ServerRpcObject.ReceivedMessage(sid, len - 6, (uint8_t *)&SocketBuffer[6]);
+	}
+}
+void TestEmbedXrpcForQt::connected()
+{
+	QThread* b = QThread::create([this] {while (true) {
+		DateTime_t t;
+		auto date = QDateTime::currentDateTime().date();
+		auto time = QDateTime::currentDateTime().time();
+		t.Day = date.day();
+		t.Hour = time.hour();
+		t.Min = time.minute();
+		t.Month = date.month();
+		t.Sec = time.second();
+		t.Year = date.year();
+		this->BroadcastDataTimeProxy.Invoke(t);
+		QThread::msleep(1000);
+	}});
+	b->start();
 }
 void TestEmbedXrpcForQt::ServerSend(uint32_t sid, uint32_t dataLen, uint8_t* data)
 {
 	//ClientRpcObject.ReceivedMessage(sid, dataLen, data);
-
+	QByteArray b;
+	b.append(0xff);
+	b.append(0xff);
+	b.append(sid&0xff);
+	b.append(sid>>8 & 0xff);
+	b.append(sid>>16 & 0xff);
+	b.append(sid>>24 & 0xff);
+	b.append((char *)data, dataLen);
+	GuiInstance->Socket.write(b);
+	GuiInstance->Socket.waitForBytesWritten(-1);
 }
 
 
@@ -44,7 +80,7 @@ void GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
 	{
 		Response.ReturnValue.Students[0].StudentId[i] = i + 0x30;
 	}
-	Response.ReturnValue.Students[0].StudentIdLen = 15;//¼Ù¶¨Ö»´«Êä15¸ö
+	Response.ReturnValue.Students[0].StudentIdLen = 10;//ï¿½Ù¶ï¿½Ö»ï¿½ï¿½ï¿½ï¿½15ï¿½ï¿½
 	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 }
 void TestService::Test()
@@ -78,3 +114,7 @@ void ServerTest()
 
 }
 #endif
+void TestEmbedXrpcForQt::on_ConnectButton_clicked()
+{
+	Socket.connectToHost("127.0.0.1", 5567);
+}

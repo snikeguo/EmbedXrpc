@@ -3,6 +3,8 @@ using StudentService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -15,7 +17,7 @@ namespace StudentService
     {
         public void BroadcastDataTime(DateTime_t t)
         {
-            //Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
+            Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
         }
     }
     public partial class GetStudentInfoFormStudentIdService : IService
@@ -52,7 +54,7 @@ namespace StudentService
 
 namespace EmbedXrpc
 {
-
+#if local
     class Program
     {
         static void Main(string[] args)
@@ -110,4 +112,79 @@ namespace EmbedXrpc
             client.ReceivedMessage(sid, (UInt32)dataLen, 0, data);
         }
     }
+#else
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            TcpListener = new TcpListener(IPAddress.Any, 5567);
+            TcpListener.Start();
+            Task.Run(() =>
+            {
+                TcpClient = TcpListener.AcceptTcpClient();
+                client = new Client(1000, clientSend, Assembly.GetExecutingAssembly());
+                client.Start();
+                TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
+                Task.Run(() =>
+                {
+                    IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
+                    while (true)
+                    {
+                        var re = inter.GetStudentsInfoFormAge();
+                        try
+                        {
+                            Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
+                        }
+                        catch 
+                        {
+
+                            
+                        }
+                       
+                        Thread.Sleep(1000);
+                    }
+                });
+            });
+            
+
+            
+
+            while (true)
+            {
+
+                Thread.Sleep(1000);
+            }
+        }
+        public static void RecCallback(IAsyncResult ar)
+        {
+            var stream = TcpClient.GetStream();
+            var len = stream.EndRead(ar);
+            if (recBuff[0]!=0xff&&recBuff[1]!=0xff)
+            {
+                return;
+            }
+            UInt32 sid = (UInt32)(recBuff[2] << 0 | recBuff[3] << 8 | recBuff[4] << 16 | recBuff[5] << 24);
+            client.ReceivedMessage(sid, (UInt32)(len - 6), 6, recBuff);
+            TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
+        }
+        static Client client;
+        static TcpListener TcpListener;
+        static TcpClient TcpClient;
+        static byte[] recBuff = new byte[10240];
+        public static void clientSend(UInt32 sid, int dataLen, byte[] data)
+        {
+            var stream = TcpClient.GetStream();
+            byte[] buffer = new byte[4 + dataLen + 2];
+            buffer[0] = 0xff;
+            buffer[1] = 0xff;
+            buffer[2] = (byte)(sid&0xff);
+            buffer[3] = (byte)(sid>>8 & 0xff);
+            buffer[4] = (byte)(sid>>16 & 0xff);
+            buffer[5] = (byte)(sid>>24 & 0xff);
+            Array.Copy(data, 0, buffer, 6, dataLen);
+            stream.Write(buffer);
+        }
+        
+    }
+#endif
 }

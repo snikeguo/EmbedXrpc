@@ -6,8 +6,7 @@
 //这是一个demo 所以不用考虑内存的问题，直接new出来不用管即可。 因为一般地	Server是单片机，创建后一直在跑。
 EmbedXrpc_Thread_t Win32EmbedXrpcPort::CreateThread(const char* threadName, void(*Thread)(void*), void* Arg)
 {
-	auto ServiceThread = new QThread(this);
-	ServiceThread->create(Thread, Arg);
+	auto ServiceThread = QThread::create(Thread, Arg);
 	return  ServiceThread;
 }
 
@@ -94,7 +93,7 @@ QueueState Win32EmbedXrpcPort::SendQueue(EmbedXrpc_Queue_t queue, void* item, ui
 {
 	BlockingQueue<EmbeXrpcRawData>* q = static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
 	EmbeXrpcRawData* data = static_cast<EmbeXrpcRawData*> (item);
-	q->Send(*data);
+	q->Send((*data));
 	return QueueState_OK;
 }
 void Win32EmbedXrpcPort::ResetQueue(EmbedXrpc_Queue_t queue)

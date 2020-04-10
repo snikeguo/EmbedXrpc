@@ -11,7 +11,12 @@ class TestEmbedXrpcForQt : public QMainWindow
 
 public:
 	TestEmbedXrpcForQt(QWidget *parent = Q_NULLPTR);
-	void ConnectButtonClicked();
+	void readyRead();
+	void connected();
+	QTcpSocket Socket;
+private slots:
+    void on_ConnectButton_clicked();
+
 private:
 	Ui::TestEmbedXrpcForQtClass ui;
 	EmbedXrpcServerObject ServerRpcObject;
@@ -19,6 +24,5 @@ private:
 	uint8_t ServerBuffer[2048];
 	BroadcastDataTimeDelegate BroadcastDataTimeProxy;
 	static void ServerSend(uint32_t sid, uint32_t dataLen, uint8_t* data);
-
-	QTcpSocket Socket;
+	char SocketBuffer[10240];
 };
