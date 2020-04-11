@@ -118,7 +118,7 @@ namespace EmbedXrpcIdlParser
         public static StringBuilder EmitIFieldsArray(string name,IList<string> FieldDesc)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append($"IField* {name}Desc []=\n");
+            stringBuilder.Append($"IField* {name} []=\n");
             stringBuilder.Append("{\n");
             foreach (var fd in FieldDesc)
             {
@@ -192,7 +192,8 @@ namespace EmbedXrpcIdlParser
             }
             if(FieldsDesc.Count>0)
             {
-                cfilestringBuilder.Append(EmitIFieldsArray($"{name}", FieldsDesc));
+                cfilestringBuilder.Append(EmitIFieldsArray($"{name}Desc", FieldsDesc));
+                hfilestringBuilder.Append($"extern IField* {name}Desc [{FieldsDesc.Count}];\n");
             }
             
 

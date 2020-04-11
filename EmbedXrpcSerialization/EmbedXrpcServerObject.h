@@ -1,8 +1,6 @@
-#pragma once
 #ifndef EmbedXrpcServerObject_H
 #define EmbedXrpcServerObject_H
-#include <iostream>
-#include <list>
+
 #include "EmbedXrpcCommon.h"
 #include "EmbedSerialization.h"
 class EmbedXrpcServerObject
@@ -66,7 +64,7 @@ public:
 	static void SuspendTimerCallBack(void* arg)
 	{
 		EmbedXrpcServerObject* obj = (EmbedXrpcServerObject*)arg;
-		obj->porter->TakeMutex(obj->SendMutexHandle, WAIT_FOREVER);
+		obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
 		obj->Send(EmbedXrpcSuspendSid, 0, nullptr);
 		obj->porter->ReleaseMutex(obj->SendMutexHandle);
 	}
@@ -92,7 +90,7 @@ public:
 					rsm.Buf = recData.Data;
 					rsm.BufferLen = recData.DataLen;
 
-					//obj->porter->TakeMutex(obj->BufMutexHandle, WAIT_FOREVER);
+					//obj->porter->TakeMutex(obj->BufMutexHandle, EmbedXrpc_WAIT_FOREVER);
 					sendsm.Reset();
 					sendsm.Buf = obj->Buffer;
 					sendsm.BufferLen = obj->BufferLen;
@@ -103,7 +101,7 @@ public:
 					obj->porter->TimerStop(obj->SuspendTimer);
 					if (sendsm.Index > 0)//
 					{
-						obj->porter->TakeMutex(obj->SendMutexHandle, WAIT_FOREVER);
+						obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
 						obj->Send(recData.Sid, sendsm.Index, sendsm.Buf);
 						obj->porter->ReleaseMutex(obj->SendMutexHandle);
 					}

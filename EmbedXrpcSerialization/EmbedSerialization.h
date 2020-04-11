@@ -1,17 +1,14 @@
 #ifndef EmbedSerialization_H
 #define EmbedSerialization_H
 
-#include <cstddef>
-#include <cstdint>
-#include <cstdio>
-#include <cassert>
-#include <cstdlib>
-#include <cstring>
+#include "EmbedSerializationBaseType.h"
+#include <rtthread.h>
 #ifndef offsetof
-#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
+#define offsetof(s, m) (uint32_t)((char*)(&((s*)0)->m))
 #endif
 #define MALLOC	malloc
 #define FREE	free
+#define MEMCPY	rt_memcpy
 #define Debug  
 typedef  uint32_t ptr_t;
 /*

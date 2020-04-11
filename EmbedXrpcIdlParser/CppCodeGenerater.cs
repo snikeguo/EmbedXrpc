@@ -47,11 +47,11 @@ namespace EmbedXrpcIdlParser
         {
             this.genType = genType;
 
-            Console.WriteLine("cpp code gen...");
+            Console.WriteLine($"cpp code gen:   {fileIdlInfo.FileName}");
             var outputattr = fileIdlInfo.GenerationOption;
             CommonHsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
-            CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_H");
-            CommonHsw.WriteLine($"#define {outputattr.OutPutFileName}_H");
+            CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_H");
+            CommonHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_H");
             CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
             CommonHsw.WriteLine("#include\"EmbedSerialization.h\"");
             if(fileIdlInfo.TargetDelegates.Count>0||fileIdlInfo.TargetInterfaces.Count>0)
@@ -110,14 +110,15 @@ namespace EmbedXrpcIdlParser
             SerializeHsw.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
             SerializeHsw.WriteLine("#endif");
 
-            if (Directory.Exists(outputpath + "Client") == false)
-                Directory.CreateDirectory(outputpath + "Client");
+            
 
-            if (Directory.Exists(outputpath + "Server") == false)
-                Directory.CreateDirectory(outputpath + "Server");
+            
 
             if(genType== GenType.Client|| genType== GenType.All)
             {
+                if (Directory.Exists(outputpath + "Client") == false)
+                    Directory.CreateDirectory(outputpath + "Client");
+
                 ClientHsw = new StreamWriter(outputpath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
                 ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
                 ClientHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
@@ -132,6 +133,9 @@ namespace EmbedXrpcIdlParser
 
             if (genType == GenType.Server || genType == GenType.All)
             {
+                if (Directory.Exists(outputpath + "Server") == false)
+                    Directory.CreateDirectory(outputpath + "Server");
+
                 ServerHsw = new StreamWriter(outputpath + "Server/" + outputattr.OutPutFileName + ".Server.h", false, Encoding.UTF8);
                 ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
                 ServerHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
@@ -349,25 +353,28 @@ namespace EmbedXrpcIdlParser
                 ClientHsw.WriteLine(");");
 
                 //code gen invoke
-                ClientHsw.WriteLine("void Invoke(SerializationManager &recManager)\n{");
-                ClientHsw.WriteLine($"static {targetDelegate.MethodName}Struct request;");
-                //ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, 100);");
-                ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
+                ClientHsw.WriteLine("void Invoke(SerializationManager &recManager);");//声明
 
-                ClientHsw.Write($"{targetDelegate.MethodName}(");
+                ClientCsw.WriteLine($"void {targetDelegate.MethodName}ClientImpl::Invoke(SerializationManager &recManager)");
+                ClientCsw.WriteLine("{");
+                ClientCsw.WriteLine($"static {targetDelegate.MethodName}Struct request;");
+
+                ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
+
+                ClientCsw.Write($"{targetDelegate.MethodName}(");
                 for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
                 {
                     var par = targetDelegate.TargetFields[i];
-                    ClientHsw.Write($"request.{par.Name}");
+                    ClientCsw.Write($"request.{par.Name}");
                     if (i + 1 < targetDelegate.TargetFields.Count)
                     {
-                        ClientHsw.Write(",");
+                        ClientCsw.Write(",");
                     }
                 }
-                ClientHsw.WriteLine(");");//生成调用目标函数。
-                ClientHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
+                ClientCsw.WriteLine(");");//生成调用目标函数。
+                ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
                                                                                                //ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
-                ClientHsw.WriteLine("}");//函数生成完毕
+                ClientCsw.WriteLine("}");//函数生成完毕
 
                 ClientHsw.WriteLine("};");//end class
                 ClientCsw.WriteLine($"{targetDelegate.MethodName}ClientImpl {targetDelegate.MethodName}ClientImplInstance;");//创建一个委托实例
@@ -383,7 +390,7 @@ namespace EmbedXrpcIdlParser
                 ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
 
                 ServerHsw.Write($"void  Invoke(");
-
+                ServerCsw.Write($"void  {targetDelegate.MethodName }Delegate::Invoke(");
                 temp_fileds = string.Empty;
                 for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
                 {
@@ -399,39 +406,56 @@ namespace EmbedXrpcIdlParser
                     }
 
                     ServerHsw.Write(cppType + " " + name);
+                    ServerCsw.Write(cppType + " " + name);
                     if (i + 1 < targetDelegate.TargetFields.Count)
                     {
                         ServerHsw.Write(",");
+                        ServerCsw.Write(",");
                     }
                 }
-                ServerHsw.WriteLine(")\n{");//函数名
+                ServerHsw.WriteLine(");");//函数名
+                ServerCsw.WriteLine(")\n{");//函数名
 
                 //函数实现
-                ServerHsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
-                ServerHsw.WriteLine($"static {targetDelegate.MethodName}Struct sendData;");
-                ServerHsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, 100);");
-                ServerHsw.WriteLine("SerializationManager sm;\n" +
+                ServerCsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
+                ServerCsw.WriteLine($"static {targetDelegate.MethodName}Struct sendData;");
+                ServerCsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, 100);");
+                ServerCsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
                         "sm.Buf = RpcServerObject->Buffer;\n" +
                         "sm.BufferLen = RpcServerObject->BufferLen;");
                 foreach (var field in targetDelegate.TargetFields)
                 {
-                    if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                    //if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                    if (field.IsArray == true)
                     {
-                        string arrayelementtype = field.IdlType.Replace("[", "").Replace("]", "");
-                        ServerHsw.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
+                        var lenField=IdlInfo.GetArrayLenField(targetDelegate.TargetFields, field);
+                        if(lenField!=null)
+                        {
+                            ServerCsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
+                            ServerCsw.WriteLine("{");
+                            ServerCsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
+                            ServerCsw.WriteLine("}");
+                        }
+                        else
+                        {
+                            ServerCsw.WriteLine($"sendData.{field.Name}[0]={field.Name}[0];");
+                        }
+                        //ServerHsw.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
+                        
                     }
                     else
                     {
-                        ServerHsw.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                        //ServerHsw.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                        ServerCsw.WriteLine($"sendData.{field.Name}={field.Name};");
                     }
 
                 }
-                ServerHsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&sendData);");
-                ServerHsw.WriteLine($"RpcServerObject->Send({targetDelegate.MethodName}_ServiceId,sm.Index,sm.Buf);");
-                ServerHsw.WriteLine("sm.Reset();");
-                ServerHsw.WriteLine("RpcServerObject->porter->ReleaseMutex(RpcServerObject->SendMutexHandle);");
-                ServerHsw.WriteLine("}");//function end
+                ServerCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&sendData);");
+                ServerCsw.WriteLine($"RpcServerObject->Send({targetDelegate.MethodName}_ServiceId,sm.Index,sm.Buf);");
+                ServerCsw.WriteLine("sm.Reset();");
+                ServerCsw.WriteLine("RpcServerObject->porter->ReleaseMutex(RpcServerObject->SendMutexHandle);");
+                ServerCsw.WriteLine("}");//function end
 
 
                 ServerHsw.WriteLine("};");//class end
@@ -539,7 +563,7 @@ namespace EmbedXrpcIdlParser
 
                     foreach (var field in service.TargetFields)
                     {
-                        if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                        /*if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
                         {
                             string arrayelementtype = field.IdlType.Replace("[", "").Replace("]", "");
                             ClientHsw.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
@@ -547,6 +571,30 @@ namespace EmbedXrpcIdlParser
                         else
                         {
                             ClientHsw.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                        }*/
+
+                        //if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                        if (field.IsArray == true)
+                        {
+                            var lenField = IdlInfo.GetArrayLenField(service.TargetFields, field);
+                            if (lenField != null)
+                            {
+                                ClientHsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
+                                ClientHsw.WriteLine("{");
+                                ClientHsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
+                                ClientHsw.WriteLine("}");
+                            }
+                            else
+                            {
+                                ClientHsw.WriteLine($"sendData.{field.Name}[0]={field.Name}[0];");
+                            }
+                            //ServerHsw.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
+
+                        }
+                        else
+                        {
+                            //ServerHsw.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
+                            ClientHsw.WriteLine($"sendData.{field.Name}={field.Name};");
                         }
 
                     }
@@ -590,85 +638,87 @@ namespace EmbedXrpcIdlParser
                 }
                 ClientHsw.WriteLine("};"); //client interface end class
 
-                foreach (var service in targetInterface.Services)
+                
+            }
+            foreach (var service in targetInterface.Services)
+            {
+                //生成Server端代码
+                if (genType == GenType.Server || genType == GenType.All)
                 {
-                    //生成Server端代码
-                    if (genType == GenType.Server || genType == GenType.All)
+                    ServerHsw.WriteLine($"class {service.ServiceName}Service:public IService");
+                    ServerHsw.WriteLine("{\npublic:");
+                    ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
+
+                    //string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response& ";
+                    if (service.ReturnValue != null)
+                        ServerHsw.WriteLine($"{service.ServiceName}_Response Response;");
+                    string returnType = "void";
+                    ServerHsw.Write($"{returnType} {service.ServiceName}(");
+
+                    var temp_fileds = string.Empty;
+                    for (int i = 0; i < service.TargetFields.Count; i++)
                     {
-                        ServerHsw.WriteLine($"class {service.ServiceName}Service:public IService");
-                        ServerHsw.WriteLine("{\npublic:");
-                        ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
+                        var field = service.TargetFields[i];
+                        string name = field.Name;
+                        temp_fileds += name + ",";
 
-                        //string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response& ";
-                        if (service.ReturnValue != null)
-                            ServerHsw.WriteLine($"{service.ServiceName}_Response Response;");
-                        string returnType = "void";
-                        ServerHsw.Write($"{returnType} {service.ServiceName}(");
+                        string cppType = IdlType2CppType(field);
 
-                        var temp_fileds = string.Empty;
-                        for (int i = 0; i < service.TargetFields.Count; i++)
+                        if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
                         {
-                            var field = service.TargetFields[i];
-                            string name = field.Name;
-                            temp_fileds += name + ",";
-
-                            string cppType = IdlType2CppType(field);
-
-                            if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
-                            {
-                                name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
-                            }
-
-                            ServerHsw.Write(cppType + " " + name);
-                            if (i + 1 < service.TargetFields.Count)
-                            {
-                                ServerHsw.Write(",");
-                            }
-                        }
-                        ServerHsw.WriteLine(");");
-
-                        //code gen invoke
-                        ServerHsw.WriteLine("void Invoke(SerializationManager &recManager, SerializationManager& sendManager)\n{");
-
-                        ServerHsw.WriteLine($"static {service.ServiceName}_Request request;");
-                        ServerHsw.WriteLine($"{service.ServiceName}_Request_Type.Deserialize(recManager,&request);");
-
-                        //if (service.ReturnValue != null)
-                        //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");
-                        ServerHsw.Write($"{service.ServiceName}(");
-                        for (int i = 0; i < service.TargetFields.Count; i++)
-                        {
-                            var par = service.TargetFields[i];
-                            ServerHsw.Write($"request.{par.Name}");
-                            if (i + 1 < service.TargetFields.Count)
-                            {
-                                ServerHsw.Write(",");
-                            }
-                        }
-                        ServerHsw.WriteLine(");");//生成调用目标函数。
-
-                        ServerHsw.WriteLine($"{service.ServiceName}_Request_Type.Free(&request);");//free
-
-                        if (service.ReturnValue != null)
-                        {
-                            ServerHsw.WriteLine($"{service.ServiceName}_Response_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
-                            ServerHsw.WriteLine($"{service.ServiceName}_Response_Type.Free(&Response);");//生成返回值序列化
+                            name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                         }
 
-                        ServerHsw.WriteLine("}");
-
-
-                        ServerHsw.WriteLine("};");
-
-                        ServerCsw.WriteLine($"{service.ServiceName}Service {service.ServiceName}ServiceInstance;");//创建一个service实例
+                        ServerHsw.Write(cppType + " " + name);
+                        if (i + 1 < service.TargetFields.Count)
+                        {
+                            ServerHsw.Write(",");
+                        }
                     }
-                   
+                    ServerHsw.WriteLine(");");
+
+                    //code gen invoke
+                    ServerHsw.WriteLine("void Invoke(SerializationManager &recManager, SerializationManager& sendManager);");
+                    ServerCsw.WriteLine($"void {service.ServiceName}Service::Invoke(SerializationManager &recManager, SerializationManager& sendManager)");
+                    ServerCsw.WriteLine("{");
+                    ServerCsw.WriteLine($"static {service.ServiceName}_Request request;");
+                    ServerCsw.WriteLine($"{service.ServiceName}_Request_Type.Deserialize(recManager,&request);");
+
+                    //if (service.ReturnValue != null)
+                    //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");
+                    ServerCsw.Write($"{service.ServiceName}(");
+                    for (int i = 0; i < service.TargetFields.Count; i++)
+                    {
+                        var par = service.TargetFields[i];
+                        ServerCsw.Write($"request.{par.Name}");
+                        if (i + 1 < service.TargetFields.Count)
+                        {
+                            ServerCsw.Write(",");
+                        }
+                    }
+                    ServerCsw.WriteLine(");");//生成调用目标函数。
+
+                    ServerCsw.WriteLine($"{service.ServiceName}_Request_Type.Free(&request);");//free
+
+                    if (service.ReturnValue != null)
+                    {
+                        ServerCsw.WriteLine($"{service.ServiceName}_Response_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
+                        ServerCsw.WriteLine($"{service.ServiceName}_Response_Type.Free(&Response);");//生成返回值序列化
+                    }
+
+                    ServerCsw.WriteLine("}");//end function
+
+
+                    ServerHsw.WriteLine("};");//end class
+
+                    ServerCsw.WriteLine($"{service.ServiceName}Service {service.ServiceName}ServiceInstance;");//创建一个service实例
                 }
+
             }
             if (genType == GenType.Server || genType == GenType.All)
             {
                 //生成request Service 数组
-                ServerCsw.WriteLine($"RequestMessageMap RequestMessages[]=");
+                ServerCsw.WriteLine($"RequestMessageMap {targetInterface.Name}_RequestMessages[]=");
                 int RequestMessagesCount = 0;
                 ServerCsw.WriteLine("{");
                 foreach (var message in messageMaps)
@@ -683,12 +733,12 @@ namespace EmbedXrpcIdlParser
 
                 }
                 ServerCsw.WriteLine("};");
-                ServerHsw.WriteLine($"extern RequestMessageMap RequestMessages[{RequestMessagesCount}];");
+                ServerHsw.WriteLine($"extern RequestMessageMap {targetInterface.Name}_RequestMessages[{RequestMessagesCount}];");
             }
             if (genType == GenType.Client || genType == GenType.All)
             {
                 //生成Response\Delegate service 数组
-                ClientCsw.WriteLine($"ResponseDelegateMessageMap ResponseDelegateMessages[]=");
+                ClientCsw.WriteLine($"ResponseDelegateMessageMap {targetInterface.Name}_ResponseDelegateMessages[]=");
                 int ResponseDelegateMessagesCount = 0;
                 ClientCsw.WriteLine("{");
                 foreach (var message in messageMaps)
@@ -709,7 +759,7 @@ namespace EmbedXrpcIdlParser
                     }
                 }
                 ClientCsw.WriteLine("};");
-                ClientHsw.WriteLine($"extern ResponseDelegateMessageMap ResponseDelegateMessages[{ResponseDelegateMessagesCount}];");
+                ClientHsw.WriteLine($"extern ResponseDelegateMessageMap {targetInterface.Name}_ResponseDelegateMessages[{ResponseDelegateMessagesCount}];");
             }
         }
 

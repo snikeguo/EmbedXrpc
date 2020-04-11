@@ -1,7 +1,7 @@
 #pragma once
 #ifndef EmbedXrpc_Port_H
 #define EmbedXrpc_Port_H
-#include <cstdint>
+#include "EmbedSerializationBaseType.h"
 
 typedef void* EmbedXrpc_Semaphore_t;
 typedef void* EmbedXrpc_Mutex_t;
