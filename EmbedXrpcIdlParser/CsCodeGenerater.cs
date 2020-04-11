@@ -21,7 +21,7 @@ namespace EmbedXrpcIdlParser
             result = result.Replace("<h1", string.Empty);
             result = result.Replace("/>", string.Empty);
             File.WriteAllText(outputpath+
-                idlInfo.GenerationOptionParameterAttribute.OutPutFileName + ".gen.cs", result);
+                idlInfo.GenerationOption.OutPutFileName + ".gen.cs", result);
         }
     }
 }

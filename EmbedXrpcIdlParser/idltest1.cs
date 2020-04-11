@@ -108,9 +108,12 @@ interface IMyInterface
     void SetValue(UInt16 v);
 }
 #endif
-//[GenerationOptionParameter(OutPutFileName= "StudentService")]
-[GenerationOptionParameter(OutPutFileName = "StudentService")]
-public struct GenerationOption
+public class OptionProcess:IOptionProcess
 {
-
+    public GenerationOption Process()
+    {
+        GenerationOption option = new GenerationOption();
+        option.OutPutFileName = "StudentService";
+        return option;
+    }
 }

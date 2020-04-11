@@ -13,7 +13,8 @@ namespace EmbedXrpcIdlParser
     {
         static void Main(string[] args)
         {
-#if false
+#if true
+
 #if cpp
             args = new string[9];
             args[0] = "EmbedXrpcIdlParser.exe";
@@ -24,7 +25,7 @@ namespace EmbedXrpcIdlParser
             args[5] = "-i";
             args[6] = "idltest1.cs";
             args[7] = "-o";
-            args[8] = @"D:\VSProject\EmbedXrpcIdlParser\TestEmbeXrpc\";
+            args[8] = @"D:\VSProject\EmbedXrpcIdlParser\TestEmbedXrpcForQt\";
 #else
             args = new string[9];
             args[0] = "EmbedXrpcIdlParser.exe";

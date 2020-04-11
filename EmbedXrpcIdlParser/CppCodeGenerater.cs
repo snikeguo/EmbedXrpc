@@ -48,7 +48,7 @@ namespace EmbedXrpcIdlParser
             this.genType = genType;
 
             Console.WriteLine("cpp code gen...");
-            var outputattr = idlInfo.GenerationOptionParameterAttribute;
+            var outputattr = idlInfo.GenerationOption;
             CommonHsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
             CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_H");
             CommonHsw.WriteLine($"#define {outputattr.OutPutFileName}_H");
@@ -56,6 +56,16 @@ namespace EmbedXrpcIdlParser
             CommonHsw.WriteLine("#include\"EmbedSerialization.h\"");
             if(idlInfo.TargetDelegates.Count>0||idlInfo.TargetInterfaces.Count>0)
                 CommonHsw.WriteLine("#include\"EmbedXrpcCommon.h\"");
+
+            foreach (var userInc in outputattr.UserIncludes)
+            {
+                CommonHsw.WriteLine($"#include\"{userInc}\"");
+            }
+            if(outputattr.UserNote!=null&& outputattr.UserNote != string.Empty)
+            {
+                CommonHsw.WriteLine($"/* {outputattr.UserNote} */");
+            }
+            
 
             CommonHsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             CommonHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");

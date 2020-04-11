@@ -27,16 +27,24 @@ namespace EmbedXrpcIdlParser
 
     }
 
-    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-    [Serializable]
-    public sealed class GenerationOptionParameterAttribute : Attribute
+    public interface IOptionProcess
+    {
+        GenerationOption Process();
+    }
+    public class GenerationOption
     {
         public string OutPutFileName { get; set; } = "idl_gen";
-        //public string OutPutPath { get; set; } = "";
-        public GenerationOptionParameterAttribute()
-        {
-           
-        } 
+        /// <summary>
+        /// 生成CPP时用这个
+        /// </summary>
+        public List<string> UserIncludes { get; set; } = new List<string>();
+        /// <summary>
+        ///生成C#时用这个
+        /// </summary>
+        public List<string> UserNamespace { get; set; } = new List<string>();
+
+        public string UserNote { get; set; }
+
     } 
 
 

@@ -174,7 +174,7 @@ namespace EmbedXrpcIdlParser
         public List<TargetInterface> TargetInterfaces { get; set; } = new List<TargetInterface>();
         public List<TargetDelegate> TargetDelegates { get; set; } = new List<TargetDelegate>();
 
-        public GenerationOptionParameterAttribute GenerationOptionParameterAttribute = null;
+        public GenerationOption GenerationOption = null;
 
         public TargetEnum GetTargetEnum(string name)
         {
@@ -248,9 +248,10 @@ namespace EmbedXrpcIdlParser
                 var types = assembly.GetTypes();
                 foreach (var type in types)
                 {
-                    if (type.Name == "GenerationOption")
+                    if (type.Name == "OptionProcess")
                     {
-                        GenerationOptionParameterAttribute = type.GetCustomAttribute<GenerationOptionParameterAttribute>();
+                        var process = assembly.CreateInstance(type.FullName) as IOptionProcess;
+                        GenerationOption = process.Process();
                     }
                     else if (type.IsValueType == true)
                     {
@@ -396,9 +397,9 @@ namespace EmbedXrpcIdlParser
                     }
                 }
             }
-            if (GenerationOptionParameterAttribute == null)
+            if (GenerationOption == null)
             {
-                throw new Exception("GenerationOptionParameterAttribute is null!");
+                throw new Exception("GenerationOption is null!");
             }
         }
     }
