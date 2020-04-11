@@ -31,9 +31,29 @@ namespace EmbedXrpcIdlParser
     {
         GenerationOption Process();
     }
+    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    public class FileNameAttribute : Attribute
+    {
+        public FileNameAttribute(string fn)
+        {
+            FileNameString = fn;
+        }
+        public string FileNameString
+        {
+            get;set;
+        }
+
+    }
     public class GenerationOption
     {
+        /// <summary>
+        /// 输出的文件名
+        /// </summary>
         public string OutPutFileName { get; set; } = "idl_gen";
+        /// <summary>
+        /// 生成的命名空间(C#)
+        /// </summary>
+        public string CSharpNameSpace { get; set; } = "idl_gen";
         /// <summary>
         /// 生成CPP时用这个
         /// </summary>
@@ -42,7 +62,9 @@ namespace EmbedXrpcIdlParser
         ///生成C#时用这个
         /// </summary>
         public List<string> UserNamespace { get; set; } = new List<string>();
-
+        /// <summary>
+        /// 用户注释
+        /// </summary>
         public string UserNote { get; set; }
 
     } 

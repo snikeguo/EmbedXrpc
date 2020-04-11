@@ -43,18 +43,18 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine($"#define {defineName}_ServiceId {ServiceId}");
         }
         public GenType genType;
-        public void CodeGen(IdlInfo idlInfo,GenType genType,string outputpath)
+        public void CodeGen(FileIdlInfo fileIdlInfo,GenType genType,string outputpath)
         {
             this.genType = genType;
 
             Console.WriteLine("cpp code gen...");
-            var outputattr = idlInfo.GenerationOption;
+            var outputattr = fileIdlInfo.GenerationOption;
             CommonHsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
             CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_H");
             CommonHsw.WriteLine($"#define {outputattr.OutPutFileName}_H");
             CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
             CommonHsw.WriteLine("#include\"EmbedSerialization.h\"");
-            if(idlInfo.TargetDelegates.Count>0||idlInfo.TargetInterfaces.Count>0)
+            if(fileIdlInfo.TargetDelegates.Count>0||fileIdlInfo.TargetInterfaces.Count>0)
                 CommonHsw.WriteLine("#include\"EmbedXrpcCommon.h\"");
 
             foreach (var userInc in outputattr.UserIncludes)
@@ -144,13 +144,13 @@ namespace EmbedXrpcIdlParser
             }
             
 
-            foreach (var em in idlInfo.TargetEnums)
+            foreach (var em in fileIdlInfo.TargetEnums)
             {
                 //EmitFbsEnum(em);
                 //fbsStreamWriter.WriteLine(em.ToFbs().ToString());
                 EmitEnum(em);
             }
-            foreach (var stru in idlInfo.TargetStructs)
+            foreach (var stru in fileIdlInfo.TargetStructs)
             {
                 //EmitFbsTable(stru);
                 //fbsStreamWriter.WriteLine(stru.ToFbs().ToString());
@@ -161,7 +161,7 @@ namespace EmbedXrpcIdlParser
                 EmitStruct(stru);
             }
 
-            foreach (var del in idlInfo.TargetDelegates)
+            foreach (var del in fileIdlInfo.TargetDelegates)
             {
                 //fbsStreamWriter.WriteLine(del.ToFbs().ToString());
                 TargetStruct targetStruct = new TargetStruct();
@@ -178,7 +178,7 @@ namespace EmbedXrpcIdlParser
 
             }
 
-            foreach (var ifs in idlInfo.TargetInterfaces)
+            foreach (var ifs in fileIdlInfo.TargetInterfaces)
             {
                 //fbsStreamWriter.WriteLine(ifs.ToFbs().ToString());
                 EmitClientInterface(ifs);

@@ -54,6 +54,7 @@ namespace EmbedXrpcIdlParser
 
                 Console.WriteLine(e.ToString());
             }
+            Console.ReadLine();
         }
     }
 }

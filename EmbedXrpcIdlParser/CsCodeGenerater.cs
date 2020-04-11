@@ -1,27 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using RazorLight;
+using RazorEngine;
+using RazorEngine.Templating; // For extension methods.
 using System.IO;
+using RazorEngine.Configuration;
+using RazorEngine.Text;
+
 namespace EmbedXrpcIdlParser
 {
     public class CsCodeGenerater : ICodeGenerater
     {
-        public IdlInfo IdlInfo { get; set; }
+        public FileIdlInfo IdlInfo { get; set; }
         public GenType GenType { get; set; }
-        public void CodeGen(IdlInfo idlInfo, GenType genType,string outputpath)
+        public void CodeGen(FileIdlInfo fileIdlInfo, GenType genType,string outputpath)
         {
-            this.IdlInfo = idlInfo;
+            this.IdlInfo = fileIdlInfo;
             this.GenType = genType;
+#if false
             var engine = new RazorLightEngineBuilder()
                 .UseFileSystemProject(Directory.GetCurrentDirectory())
                 .UseMemoryCachingProvider()
                 .Build();
             var result = engine.CompileRenderStringAsync("templateKey", File.ReadAllText("CSharpTemplate.cshtml"), this).Result;
+#endif
+            var config = new TemplateServiceConfiguration();
+            config.EncodedStringFactory = new RawStringFactory(); // Raw string encoding.
+            var service = RazorEngineService.Create(config);
+            Engine.Razor = service;
+            var result = Engine.Razor.RunCompile(File.ReadAllText("CSharpTemplate.cshtml"), "templateKey", GetType(), this);
+
             result = result.Replace("<h1", string.Empty);
             result = result.Replace("/>", string.Empty);
             File.WriteAllText(outputpath+
-                idlInfo.GenerationOption.OutPutFileName + ".gen.cs", result);
+                fileIdlInfo.GenerationOption.OutPutFileName + ".gen.cs", result);
         }
     }
 }

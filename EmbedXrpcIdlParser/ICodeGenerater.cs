@@ -1,5 +1,5 @@
 ﻿
-using CSScriptLib;
+using CSScriptLibrary;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -166,19 +166,27 @@ namespace EmbedXrpcIdlParser
             return sb.ToString();
         }
     }
-    [Serializable]
-    public class IdlInfo
+    /// <summary>
+    /// 本文件中所有的资源
+    /// </summary>
+    public class FileIdlInfo
     {
+        public string FileName { get; set; } = string.Empty;
         public List<TargetEnum> TargetEnums { get; set; } = new List<TargetEnum>();
         public List<TargetStruct> TargetStructs { get; set; } = new List<TargetStruct>();
         public List<TargetInterface> TargetInterfaces { get; set; } = new List<TargetInterface>();
         public List<TargetDelegate> TargetDelegates { get; set; } = new List<TargetDelegate>();
 
         public GenerationOption GenerationOption = null;
+    }
+    [Serializable]
+    public class IdlInfo
+    {
+       
 
-        public TargetEnum GetTargetEnum(string name)
+        public TargetEnum GetTargetEnum(string name,FileIdlInfo fileIdlInfo)
         {
-            foreach (var e in TargetEnums)
+            foreach (var e in fileIdlInfo.TargetEnums)
             {
                 if (name == e.Name)
                 {
@@ -238,20 +246,43 @@ namespace EmbedXrpcIdlParser
             }
             return false;
         }
+        public List< FileIdlInfo> ParsedFiles { get; private set; } = new List< FileIdlInfo>();//已经被Parse过的file
         public void Parse(string file)
         {
+            FileIdlInfo fileIdlInfo = null;
+            var pfv = from pf in ParsedFiles where pf.FileName == file select pf;
+            if (pfv.ToList().Count!=0)
+                return;
+            else
+            {
+                fileIdlInfo = new FileIdlInfo();
+                fileIdlInfo.FileName = file;
+                ParsedFiles.Add( fileIdlInfo);
+            }
             int ServiceId = 0x10;
             Console.WriteLine("parse :{0}...", file);
             //using (SimpleAsmProbing.For(Assembly.GetExecutingAssembly().Location.GetDirName()))
             {
+                CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
+                var eva = CSScript.Evaluator;
                 Assembly assembly = CSScript.Evaluator.CompileCode(File.ReadAllText(file));
                 var types = assembly.GetTypes();
                 foreach (var type in types)
                 {
-                    if (type.Name == "OptionProcess")
+                    var filename = type.GetCustomAttribute<FileNameAttribute>();
+                    if (filename == null)
+                    {
+                        throw new Exception("you must add FileNameAttribute into every class/struct!");
+                    }
+                    if (filename.FileNameString != file)
+                    {
+                        Parse(filename.FileNameString);
+                        continue;
+                    }
+                    if(type.GetInterface("IOptionProcess")!=null)
                     {
                         var process = assembly.CreateInstance(type.FullName) as IOptionProcess;
-                        GenerationOption = process.Process();
+                        fileIdlInfo.GenerationOption = process.Process();
                     }
                     else if (type.IsValueType == true)
                     {
@@ -268,7 +299,7 @@ namespace EmbedXrpcIdlParser
                                 targetEnumValue.Description = type.GetEnumName(vsv);
                                 te.TargetEnumValues.Add(targetEnumValue);
                             }
-                            TargetEnums.Add(te);
+                            fileIdlInfo.TargetEnums.Add(te);
                             //Console.WriteLine(te.ToString());
                         }
                         else
@@ -292,11 +323,11 @@ namespace EmbedXrpcIdlParser
                                 }
                                 if (field.FieldType.IsEnum == true)
                                 {
-                                    targetField.Enum = GetTargetEnum(targetField.IdlType);
+                                    targetField.Enum = GetTargetEnum(targetField.IdlType, fileIdlInfo);
                                 }
                                 targetStruct.TargetFields.Add(targetField);
                             }
-                            TargetStructs.Add(targetStruct);
+                            fileIdlInfo.TargetStructs.Add(targetStruct);
                             //Console.WriteLine(targetStruct.ToString());
                         }
 
@@ -343,14 +374,14 @@ namespace EmbedXrpcIdlParser
                                 field.IsBaseValueType = IsBaseValueType(par.ParameterType);
                                 if (par.ParameterType.IsEnum == true)
                                 {
-                                    field.Enum = GetTargetEnum(field.IdlType);
+                                    field.Enum = GetTargetEnum(field.IdlType, fileIdlInfo);
                                 }
                                 targetService.TargetFields.Add(field);
                             }
                             targetInterface.Services.Add(targetService);
                         }
                         //Console.WriteLine(targetInterface.ToString());
-                        TargetInterfaces.Add(targetInterface);
+                        fileIdlInfo.TargetInterfaces.Add(targetInterface);
                     }
                     else if (type.BaseType.Name == "MulticastDelegate")//如果这个类型是委托。
                     {
@@ -388,16 +419,16 @@ namespace EmbedXrpcIdlParser
                             field.IsBaseValueType = IsBaseValueType(par.ParameterType);
                             if (par.ParameterType.IsEnum == true)
                             {
-                                field.Enum = GetTargetEnum(field.IdlType);
+                                field.Enum = GetTargetEnum(field.IdlType, fileIdlInfo);
                             }
                             targetDelegate.TargetFields.Add(field);
                         }
-                        TargetDelegates.Add(targetDelegate);
+                        fileIdlInfo.TargetDelegates.Add(targetDelegate);
                         //Console.WriteLine(targetDelegate.ToString());
                     }
                 }
             }
-            if (GenerationOption == null)
+            if (fileIdlInfo.GenerationOption == null)
             {
                 throw new Exception("GenerationOption is null!");
             }
@@ -411,7 +442,7 @@ namespace EmbedXrpcIdlParser
     }
     public interface ICodeGenerater
     {
-        void CodeGen(IdlInfo idlInfo,GenType genType,string outputpath);
+        void CodeGen(FileIdlInfo fileIdlInfo,GenType genType,string outputpath);
     }
     
     

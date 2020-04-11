@@ -1,12 +1,11 @@
-﻿@using RazorLight
+﻿@using RazorEngine
 @using System
 @using System.Collections.Generic
 @using EmbedXrpcIdlParser
-@inherits TemplatePage<CsCodeGenerater>
+@inherits RazorEngine.Templating.TemplateBase<CsCodeGenerater>
 @{
-    IdlInfo idlInfo = this.Model.IdlInfo;
-    GenType genType = this.Model.GenType;
-    DisableEncoding = true;
+    FileIdlInfo idlInfo = ((CsCodeGenerater)this.Model).IdlInfo;
+    GenType genType = ((CsCodeGenerater)this.Model).GenType;
 }
 <h1 using EmbedXrpc; />
 <h1 using System; />
@@ -14,11 +13,11 @@
 @{
     foreach (var userNs in idlInfo.GenerationOption.UserNamespace)
     {
-<h1 using @userNs ;/>
+        <h1 using @userNs ; />
     }
 }
 <h1 // auto code gen ! DO NOT modify this file! create time @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") ; />
-<h1 namespace @idlInfo.GenerationOption.OutPutFileName />
+<h1 namespace @idlInfo.GenerationOption.CSharpNameSpace />
 <h1 { />
 @{
     var ens = idlInfo.TargetEnums;

@@ -53,12 +53,20 @@ namespace EmbedXrpcIdlParser
             if(generater.GenLanguageType.ToLower()=="cpp")
             {
                 CppCodeGenerater cpp = new CppCodeGenerater();
-                cpp.CodeGen(idlInfo,gt, generater.OutputPath);
+                for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
+                {
+                    cpp.CodeGen(idlInfo.ParsedFiles[i], gt, generater.OutputPath);
+                }
+                
             }
             else if (generater.GenLanguageType.ToLower() == "cs")
             {
                 CsCodeGenerater cs = new CsCodeGenerater();
-                cs.CodeGen(idlInfo, gt, generater.OutputPath);
+                for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
+                {
+                    cs.CodeGen(idlInfo.ParsedFiles[i], gt, generater.OutputPath);
+                }
+                
             }
 
             Console.WriteLine("complete!");
