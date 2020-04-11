@@ -13,7 +13,7 @@ namespace EmbedXrpcIdlParser
     {
         static void Main(string[] args)
         {
-#if true
+#if false
 
 #if cpp
             args = new string[9];

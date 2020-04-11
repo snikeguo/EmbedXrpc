@@ -88,25 +88,30 @@ namespace EmbedXrpcIdlParser
         internal static Dictionary<string, string> TypeReplaceDic = new Dictionary<string, string>();
         static EmbedXrpcSerializationHelper()
         {
-            FieldReplaceDic.Add("byte", "Uint8Field");
-            FieldReplaceDic.Add("Byte", "Uint8Field");
+            FieldReplaceDic.Add("byte", "UInt8Field");
+            FieldReplaceDic.Add("Byte", "UInt8Field");
             FieldReplaceDic.Add("sbyte", "Int8Field");
             FieldReplaceDic.Add("SByte", "Int8Field");
-            FieldReplaceDic.Add("UInt16", "Uint16Field");
+            FieldReplaceDic.Add("UInt16", "UInt16Field");
             FieldReplaceDic.Add("Int16", "Int16Field");
-            FieldReplaceDic.Add("UInt32", "Uint32Field");
+            FieldReplaceDic.Add("UInt32", "UInt32Field");
             FieldReplaceDic.Add("Int32", "Int32Field");
+            FieldReplaceDic.Add("UInt64", "UInt64Field");
+            FieldReplaceDic.Add("Int64", "Int64Field");
+
             FieldReplaceDic.Add("float", "FloatField");
             FieldReplaceDic.Add("double", "DoubleField");
 
-            TypeReplaceDic.Add("byte", "Uint8TypeInstance");
-            TypeReplaceDic.Add("Byte", "Uint8TypeInstance");
+            TypeReplaceDic.Add("byte", "UInt8TypeInstance");
+            TypeReplaceDic.Add("Byte", "UInt8TypeInstance");
             TypeReplaceDic.Add("sbyte", "Int8TypeInstance");
             TypeReplaceDic.Add("SByte", "Int8TypeInstance");
-            TypeReplaceDic.Add("UInt16", "Uint16TypeInstance");
+            TypeReplaceDic.Add("UInt16", "UInt16TypeInstance");
             TypeReplaceDic.Add("Int16", "Int16TypeInstance");
-            TypeReplaceDic.Add("UInt32", "Uint32TypeInstance");
+            TypeReplaceDic.Add("UInt32", "UInt32TypeInstance");
             TypeReplaceDic.Add("Int32", "Int32TypeInstance");
+            TypeReplaceDic.Add("UInt64", "UInt64TypeInstance");
+            TypeReplaceDic.Add("Int64", "Int64TypeInstance");
             TypeReplaceDic.Add("float", "FloatTypeInstance");
             TypeReplaceDic.Add("double", "DoubleTypeInstance");
         }

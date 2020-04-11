@@ -266,7 +266,7 @@ public:
 		t.Free(ptr,arrayLen);
 	}
 };
-class Uint8Type :public IType
+class UInt8Type :public IType
 {
 public:
 	const char* GetTypeName()
@@ -287,14 +287,14 @@ public:
 		manager.Index++;
 	}
 };
-extern Uint8Type Uint8TypeInstance;
-class Uint8Field : public IField
+extern UInt8Type UInt8TypeInstance;
+class UInt8Field : public IField
 {
 public:
 	const char* Name;
 	uint32_t Offset;
-	Uint8Type t;
-	Uint8Field(const char* name, uint32_t offset) :Name(name), Offset(offset)
+	UInt8Type t;
+	UInt8Field(const char* name, uint32_t offset) :Name(name), Offset(offset)
 	{
 
 	}
@@ -386,11 +386,11 @@ public:\
 	}\
 }
 CodeGenBaseValueClass(Int8, "int8_t", TYPE_INT8, 1);
-CodeGenBaseValueClass(Uint16, "uint16_t", TYPE_UINT16, 2);
+CodeGenBaseValueClass(UInt16, "uint16_t", TYPE_UINT16, 2);
 CodeGenBaseValueClass(Int16, "int16_t", TYPE_INT16, 2);
-CodeGenBaseValueClass(Uint32, "uint32_t", TYPE_UINT32, 4);
+CodeGenBaseValueClass(UInt32, "uint32_t", TYPE_UINT32, 4);
 CodeGenBaseValueClass(Int32, "int32_t", TYPE_UINT32, 4);
-CodeGenBaseValueClass(Uint64, "uint64_t", TYPE_UINT64, 8);
+CodeGenBaseValueClass(UInt64, "uint64_t", TYPE_UINT64, 8);
 CodeGenBaseValueClass(Int64, "int64_t", TYPE_UINT64, 8);
 CodeGenBaseValueClass(Float, "float", TYPE_FLOAT, 4);
 CodeGenBaseValueClass(Double, "double", TYPE_DOUBLE, 8);

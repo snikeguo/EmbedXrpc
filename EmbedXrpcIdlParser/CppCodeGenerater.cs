@@ -59,7 +59,7 @@ namespace EmbedXrpcIdlParser
 
             foreach (var userInc in outputattr.UserIncludes)
             {
-                CommonHsw.WriteLine($"#include\"{userInc}\"");
+                CommonHsw.WriteLine($"#include\"{userInc}.h\"");
             }
             if(outputattr.UserNote!=null&& outputattr.UserNote != string.Empty)
             {
@@ -89,8 +89,8 @@ namespace EmbedXrpcIdlParser
             SerializeCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
             SerializeHsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
-            SerializeHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
-            SerializeHsw.WriteLine($"#define {outputattr.OutPutFileName}_EmbedXrpcSerialization_H");
+            SerializeHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".","_")}_EmbedXrpcSerialization_H");
+            SerializeHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_EmbedXrpcSerialization_H");
 
             SerializeHsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             SerializeHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
@@ -119,9 +119,9 @@ namespace EmbedXrpcIdlParser
             if(genType== GenType.Client|| genType== GenType.All)
             {
                 ClientHsw = new StreamWriter(outputpath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
-                ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_Client_H");
-                ClientHsw.WriteLine($"#define {outputattr.OutPutFileName}_Client_H");
-                ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
+                ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
+                ClientHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
+                ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
                 ClientHsw.WriteLine("#include\"EmbedXrpcClientObject.h\"");
                 ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
@@ -133,8 +133,8 @@ namespace EmbedXrpcIdlParser
             if (genType == GenType.Server || genType == GenType.All)
             {
                 ServerHsw = new StreamWriter(outputpath + "Server/" + outputattr.OutPutFileName + ".Server.h", false, Encoding.UTF8);
-                ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName}_Server_H");
-                ServerHsw.WriteLine($"#define {outputattr.OutPutFileName}_Server_H");
+                ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
+                ServerHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
                 ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
                 ServerHsw.WriteLine("#include\"EmbedXrpcServerObject.h\"");
                 ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
