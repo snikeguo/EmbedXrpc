@@ -31,10 +31,10 @@ namespace StudentService
     {
         public void GetStudentsInfoFormAge()
         {
-            Thread.Sleep(10000);
+            //Thread.Sleep(10000);
             Response.ReturnValue = new StudentArray_t();
             Response.ReturnValue.StudentIdLen = 1;
-            var stu = new Student_t() { Age = 0x99, ResultsLen = 0, StudentIdLen = 0 };
+            var stu = new Student_t() { Age = 2, ResultsLen = 0, StudentIdLen = 0 };
             //stu.Name = new byte[1];
             //stu.Results = new Result_t[0];
             stu.StudentId = Encoding.ASCII.GetBytes("0123456789");
@@ -80,7 +80,7 @@ namespace EmbedXrpc
                 BroadcastDataTimeDelegate broadcastDataTimeDelegate = new BroadcastDataTimeDelegate(server);
                 while (true)
                 {
-                    broadcastDataTimeDelegate.Invoke(new DateTime_t()
+                    /*broadcastDataTimeDelegate.Invoke(new DateTime_t()
                     {
                         Year = DateTime.Now.Year,
                         Month = DateTime.Now.Month,
@@ -88,7 +88,7 @@ namespace EmbedXrpc
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second
-                    });
+                    });*/
                     Thread.Sleep(100);
                 }
             });
@@ -101,15 +101,15 @@ namespace EmbedXrpc
         }
         static Client client;
         static Server server;
-        public static void clientSend(UInt32 sid, int dataLen, byte[] data)
+        public static void clientSend(int dataLen, int offset, byte[] data)
         {
             //Console.WriteLine($"clientSend {sid}");
-            server.ReceivedMessage(sid, (UInt32)dataLen, 0, data);
+            server.ReceivedMessage((UInt32)dataLen, (UInt32)offset,data);
         }
-        public static void serverSend(UInt32 sid, int dataLen, byte[] data)
+        public static void serverSend(int dataLen, int offset, byte[] data)
         {
             //Console.WriteLine($"serverSend {sid}");
-            client.ReceivedMessage(sid, (UInt32)dataLen, 0, data);
+            client.ReceivedMessage((UInt32)dataLen, (UInt32)offset, data);
         }
     }
 #else
@@ -122,7 +122,7 @@ namespace EmbedXrpc
             Task.Run(() =>
             {
                 TcpClient = TcpListener.AcceptTcpClient();
-                client = new Client(1000, clientSend, Assembly.GetExecutingAssembly());
+                client = new Client(1000000, clientSend, Assembly.GetExecutingAssembly());
                 client.Start();
                 TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
                 Task.Run(() =>
@@ -166,8 +166,7 @@ namespace EmbedXrpc
                 {
                     return;
                 }
-                UInt32 sid = (UInt32)(recBuff[2] << 0 | recBuff[3] << 8 | recBuff[4] << 16 | recBuff[5] << 24);
-                client.ReceivedMessage(sid, (UInt32)(len - 6), 6, recBuff);
+                client.ReceivedMessage((UInt32)(len - 2), 2, recBuff);
                 TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
             }
             catch (Exception e)
@@ -181,17 +180,13 @@ namespace EmbedXrpc
         static TcpListener TcpListener;
         static TcpClient TcpClient;
         static byte[] recBuff = new byte[10240];
-        public static void clientSend(UInt32 sid, int dataLen, byte[] data)
+        public static void clientSend(int dataLen, int offset,byte[] data)
         {
             var stream = TcpClient.GetStream();
-            byte[] buffer = new byte[4 + dataLen + 2];
+            byte[] buffer = new byte[dataLen + 2];
             buffer[0] = 0xff;
             buffer[1] = 0xff;
-            buffer[2] = (byte)(sid&0xff);
-            buffer[3] = (byte)(sid>>8 & 0xff);
-            buffer[4] = (byte)(sid>>16 & 0xff);
-            buffer[5] = (byte)(sid>>24 & 0xff);
-            Array.Copy(data, 0, buffer, 6, dataLen);
+            Array.Copy(data, offset, buffer, 2, dataLen);
             stream.Write(buffer);
         }
         

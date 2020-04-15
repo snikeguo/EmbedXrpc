@@ -1,14 +1,15 @@
 #include "TestEmbedXrpcForQt.h"
 #include <QPushButton>
 #include <QDateTime>
+#include <iostream>
 static TestEmbedXrpcForQt* GuiInstance;
 TestEmbedXrpcForQt::TestEmbedXrpcForQt(QWidget* parent) : QMainWindow(parent), ServerRpcObject(ServerSend,
 	1000,
 	ServerBuffer,
 	2048,
 	&ServerWin32Port,
-	sizeof(RequestMessages) / sizeof(RequestMessageMap),
-	RequestMessages),
+	sizeof(IMyInterface_RequestMessages) / sizeof(RequestMessageMap),
+	IMyInterface_RequestMessages),
 	BroadcastDataTimeProxy(&ServerRpcObject),
 	Socket(this)
 {
@@ -27,8 +28,7 @@ void  TestEmbedXrpcForQt::readyRead()
 		return;
 	if ((SocketBuffer[0] == (char)0xff) && (SocketBuffer[1] ==(char) 0xff))
 	{
-		uint32_t sid = SocketBuffer[2] | SocketBuffer[3] << 8 | SocketBuffer[4] << 16 | SocketBuffer[5] << 24;
-		ServerRpcObject.ReceivedMessage(sid, len - 6, (uint8_t *)&SocketBuffer[6]);
+		ServerRpcObject.ReceivedMessage(len - 2, (uint8_t *)&SocketBuffer[2]);
 	}
 }
 void TestEmbedXrpcForQt::connected()
@@ -49,16 +49,13 @@ void TestEmbedXrpcForQt::connected()
 	}});
 	b->start();
 }
-void TestEmbedXrpcForQt::ServerSend(uint32_t sid, uint32_t dataLen, uint8_t* data)
+void TestEmbedXrpcForQt::ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)
 {
 	//ClientRpcObject.ReceivedMessage(sid, dataLen, data);
 	QByteArray b;
 	b.append(0xff);
 	b.append(0xff);
-	b.append(sid&0xff);
-	b.append(sid>>8 & 0xff);
-	b.append(sid>>16 & 0xff);
-	b.append(sid>>24 & 0xff);
+	
 	b.append((char *)data, dataLen);
 	GuiInstance->Socket.write(b);
 	GuiInstance->Socket.waitForBytesWritten(-1);

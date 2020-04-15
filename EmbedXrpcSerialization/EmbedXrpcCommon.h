@@ -49,7 +49,7 @@
 	 uint8_t* Data;
 	 uint32_t DataLen;
  };
-typedef void (*SendPack_t)(uint32_t serviceId, uint32_t dataLen, uint8_t* data);
+typedef void (*SendPack_t)(void *rpcObj,uint32_t dataLen, uint8_t* data);
 
 
 #endif

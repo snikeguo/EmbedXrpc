@@ -1,10 +1,7 @@
 #pragma once
 #ifndef EmbedXrpcClientObject_H
 #define EmbedXrpcClientObject_H
-#include <iostream>
-#include <list>
 #include "EmbedXrpcCommon.h"
-#include "EmbedSerialization.h"
 class EmbedXrpcClientObject
 {
 public:
@@ -51,14 +48,17 @@ public:
 		ResponseMessageQueueHandle = porter->CreateQueue("ResponseMessageQueueHandle", sizeof(EmbeXrpcRawData), 10);
 		porter->ThreadStart(ServiceThreadHandle);
 	}
-	void ReceivedMessage(uint32_t serviceId, uint32_t dataLen, uint8_t* data)
+	void ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
 	{
+		if (allDataLen < 4)
+			return;
 		EmbeXrpcRawData raw;
-
+		uint32_t serviceId = (uint32_t)(allData[0] | allData[1] << 8 | allData[2] << 16 | allData[3] << 24);
 		raw.Data = nullptr;
 		raw.DataLen = 0;
 		raw.Sid = 0;
-
+		uint32_t dataLen = allDataLen - 4;
+		uint8_t* data = &allData[4];
 		//XrpcDebug("Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 		if (serviceId == EmbedXrpcSuspendSid)
 		{
@@ -104,7 +104,7 @@ public:
 		uint32_t i = 0;
 		for (;;)
 		{
-			if (obj->porter->ReceiveQueue(obj->DelegateMessageQueueHandle, &recData, sizeof(EmbeXrpcRawData), WAIT_FOREVER)!=QueueState_OK)
+			if (obj->porter->ReceiveQueue(obj->DelegateMessageQueueHandle, &recData, sizeof(EmbeXrpcRawData), EmbedXrpc_WAIT_FOREVER)!=QueueState_OK)
 			{
 				continue;
 			}

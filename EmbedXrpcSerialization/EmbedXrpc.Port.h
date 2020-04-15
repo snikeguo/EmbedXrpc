@@ -1,14 +1,14 @@
 #pragma once
 #ifndef EmbedXrpc_Port_H
 #define EmbedXrpc_Port_H
-#include "EmbedSerializationBaseType.h"
+#include "EmbedSerialization.Port.h"
 
 typedef void* EmbedXrpc_Semaphore_t;
 typedef void* EmbedXrpc_Mutex_t;
 typedef void* EmbedXrpc_Thread_t;
 typedef void* EmbedXrpc_Queue_t;
 typedef void* EmbedXrpc_Timer_t;
-#define WAIT_FOREVER	0xFFFFFFFF
+#define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
 #define  XrpcDebug	printf
 

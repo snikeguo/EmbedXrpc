@@ -10,10 +10,11 @@
 <h1 using EmbedXrpc; />
 <h1 using System; />
 <h1 using System.Reflection; />
-@{
-    foreach (var userNs in idlInfo.GenerationOption.UserNamespace)
-    {
-        <h1 using @userNs ; />
+<h1 using System.Collections.Generic;/>
+@{ 
+    foreach (var userNs in idlInfo.GenerationOption.UserNamespace) 
+    { 
+<h1 using @userNs ; />
     }
 }
 <h1 // auto code gen ! DO NOT modify this file! create time @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") ; />
@@ -176,7 +177,23 @@
             <h1 SerializationManager sm=new SerializationManager(); />
             <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
             <h1 serialization.Serialize(sm, request); />
-            <h1 Server.Send ( @(del.MethodName + "_ServiceId") , sm.Index,sm.Data.ToArray() ); />
+            string sendBytesString = "List<byte> sendBytes = new List<byte>();";
+            <h1 @sendBytesString />
+
+            string sid_temp = "(byte)(" + del.MethodName + "_ServiceId&0xff)";
+            <h1 sendBytes.Add( @sid_temp ); />
+
+            sid_temp = "(byte)(" + del.MethodName + "_ServiceId>>8&0xff)";
+            <h1 sendBytes.Add( @sid_temp ); />
+
+            sid_temp = "(byte)(" + del.MethodName + "_ServiceId>>16&0xff)";
+            <h1 sendBytes.Add( @sid_temp ); />
+
+            sid_temp = "(byte)(" + del.MethodName + "_ServiceId>>24&0xff)";
+            <h1 sendBytes.Add( @sid_temp ); />
+
+            <h1 sendBytes.AddRange(sm.Data); />
+            <h1 Server.Send ( sendBytes.Count,0,sendBytes.ToArray() ); />
             <h1 } />
             <h1 } />
         }
@@ -347,7 +364,24 @@
                 <h1 SerializationManager sm=new SerializationManager(); />
                 <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
                 <h1 serialization.Serialize(sm, request); />
-                <h1 Client.Send ( @(service.ServiceName + "_ServiceId") , sm.Index,sm.Data.ToArray() ); />
+
+                var sendBytesString2 = "List<byte> sendBytes = new List<byte>();";
+                <h1 @sendBytesString2 />
+
+                string sid_temp = "(byte)(" + service.ServiceName + "_ServiceId&0xff)";
+                <h1 sendBytes.Add( @sid_temp ); />
+
+                sid_temp = "(byte)(" + service.ServiceName + "_ServiceId>>8&0xff)";
+                <h1 sendBytes.Add( @sid_temp ); />
+
+                sid_temp = "(byte)(" + service.ServiceName + "_ServiceId>>16&0xff)";
+                <h1 sendBytes.Add( @sid_temp ); />
+
+                sid_temp = "(byte)(" + service.ServiceName + "_ServiceId>>24&0xff)";
+                <h1 sendBytes.Add( @sid_temp ); />
+
+                <h1 sendBytes.AddRange(sm.Data); />
+                <h1 Client.Send ( sendBytes.Count,0,sendBytes.ToArray() ); />
                 if (service.ReturnValue != null)
                 {
                     <h1 @(service.ServiceName + "_Response response")=new @(service.ServiceName + "_Response()") ; />

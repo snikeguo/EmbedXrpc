@@ -45,7 +45,7 @@ namespace EmbedXrpc
         public ReceiveType ReceiveType { get; set; }
         public IDelegate Delegate { get; set; }
     };
-    public delegate void Send(UInt32 sid, int dataLen, byte[] data);
+    public delegate void Send(int dataLen, int offset ,byte[] data);
     public struct EmbeXrpcRawData
     {
         public UInt32 Sid { get; set; }

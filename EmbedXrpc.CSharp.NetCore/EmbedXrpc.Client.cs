@@ -85,7 +85,7 @@ namespace EmbedXrpc
                 }
                 if(recData.Sid== EmbedXrpcCommon.EmbedXrpcSuspendSid)
                 {
-                    //Console.WriteLine("sid== EmbedXrpcCommon.EmbedXrpcSuspendSid{0}",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                    Console.WriteLine("sid== EmbedXrpcCommon.EmbedXrpcSuspendSid{0}",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
                     continue;
                 }
                 if (sid != recData.Sid)
@@ -104,8 +104,14 @@ namespace EmbedXrpc
             }
             return ret;
         }
-        public void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset,byte[] data)
+        public void ReceivedMessage(UInt32 validdataLen, UInt32 offset,byte[] alldata)
         {
+            if(alldata.Length<offset+ validdataLen)
+            {
+                return;
+            }
+            UInt32 serviceId = (UInt32)(alldata[0+ offset] << 0 | alldata[1+ offset] << 8 | alldata[2+ offset] << 16 | alldata[3+ offset] << 24);
+            UInt32 dataLen = validdataLen - 4;
             EmbeXrpcRawData raw = new EmbeXrpcRawData();
 
             if (serviceId == EmbedXrpcCommon.EmbedXrpcSuspendSid)
@@ -114,7 +120,7 @@ namespace EmbedXrpc
                 if(dataLen>0)
                 {
                     raw.Data = new byte[dataLen];
-                    Array.Copy(data, offset, raw.Data, 0, dataLen);
+                    Array.Copy(alldata, offset+4, raw.Data, 0, dataLen);
                 }
                 
                 raw.DataLen = dataLen;
@@ -131,7 +137,7 @@ namespace EmbedXrpc
                     if (dataLen > 0)
                     {
                         raw.Data = new byte[dataLen];
-                        Array.Copy(data, offset, raw.Data, 0, dataLen);
+                        Array.Copy(alldata, offset+4, raw.Data, 0, dataLen);
                     }
                     raw.DataLen = dataLen;
                     if (iter.ReceiveType == ReceiveType.Response)

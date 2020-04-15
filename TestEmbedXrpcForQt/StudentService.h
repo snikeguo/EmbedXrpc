@@ -1,6 +1,5 @@
 ﻿#ifndef StudentService_H
 #define StudentService_H
-#include"EmbedSerializationBaseType.h"
 #include"EmbedSerialization.h"
 #include"EmbedXrpcCommon.h"
 

@@ -41,14 +41,17 @@ public:
 		porter->ThreadStart(ServiceThreadHandle);
 	}
 
-	void ReceivedMessage(uint32_t serviceId, uint32_t dataLen, uint8_t* data)
+	void ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
 	{
+		if (allDataLen < 4)
+			return;
 		EmbeXrpcRawData raw;
-
+		uint32_t serviceId = (uint32_t)(allData[0] | allData[1] << 8 | allData[2] << 16 | allData[3] << 24);
 		raw.Data = nullptr;
 		raw.DataLen = 0;
 		raw.Sid = 0;
-
+		uint32_t dataLen = allDataLen - 4;
+		uint8_t* data = &allData[4];
 		//XrpcDebug("Server ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 
 		raw.Sid = serviceId;
@@ -65,7 +68,12 @@ public:
 	{
 		EmbedXrpcServerObject* obj = (EmbedXrpcServerObject*)arg;
 		obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
-		obj->Send(EmbedXrpcSuspendSid, 0, nullptr);
+		uint8_t *sb= obj->Buffer;
+		sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
+		sb[1] = (uint8_t)(EmbedXrpcSuspendSid>>8 & 0xff);
+		sb[2] = (uint8_t)(EmbedXrpcSuspendSid>>16 & 0xff);
+		sb[3] = (uint8_t)(EmbedXrpcSuspendSid>>24 & 0xff);
+		obj->Send(obj,4, sb);
 		obj->porter->ReleaseMutex(obj->SendMutexHandle);
 	}
 	static void ServiceThread(void* arg)
@@ -92,8 +100,8 @@ public:
 
 					//obj->porter->TakeMutex(obj->BufMutexHandle, EmbedXrpc_WAIT_FOREVER);
 					sendsm.Reset();
-					sendsm.Buf = obj->Buffer;
-					sendsm.BufferLen = obj->BufferLen;
+					sendsm.Buf = &obj->Buffer[4];
+					sendsm.BufferLen = obj->BufferLen-4;
 
 					obj->porter->TimerReset(obj->SuspendTimer);
 					obj->porter->TimerStart(obj->SuspendTimer);
@@ -102,7 +110,14 @@ public:
 					if (sendsm.Index > 0)//
 					{
 						obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
-						obj->Send(recData.Sid, sendsm.Index, sendsm.Buf);
+
+						obj->Buffer[0] = (uint8_t)(recData.Sid & 0xff);
+						obj->Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
+						obj->Buffer[2] = (uint8_t)(recData.Sid >> 16 & 0xff);
+						obj->Buffer[3] = (uint8_t)(recData.Sid >> 24 & 0xff);
+
+						obj->Send(obj,sendsm.Index+4, obj->Buffer);
+
 						obj->porter->ReleaseMutex(obj->SendMutexHandle);
 					}
 						

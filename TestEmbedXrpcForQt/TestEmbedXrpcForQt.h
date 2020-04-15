@@ -23,6 +23,6 @@ private:
 	Win32EmbedXrpcPort ServerWin32Port;
 	uint8_t ServerBuffer[2048];
 	BroadcastDataTimeDelegate BroadcastDataTimeProxy;
-	static void ServerSend(uint32_t sid, uint32_t dataLen, uint8_t* data);
+	static void ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data);
 	char SocketBuffer[10240];
 };

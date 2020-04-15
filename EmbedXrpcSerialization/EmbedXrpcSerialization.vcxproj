@@ -154,7 +154,7 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EmbedSerializationBaseType.h" />
+    <ClInclude Include="EmbedSerialization.Port.h" />
     <ClInclude Include="EmbedXrpc.Port.h" />
     <ClInclude Include="EmbedXrpcCommon.h" />
     <ClInclude Include="EmbedXrpcClientObject.h" />

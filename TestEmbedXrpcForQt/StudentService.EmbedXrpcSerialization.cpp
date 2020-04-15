@@ -5,8 +5,8 @@
 //自动代码生成,请不要修改本文件!
 
 Int32Field Result_t_Field_Value("Result_t.Value",offsetof(Result_t,Value));
-Uint8Field Result_t_Field_NameLen("Result_t.NameLen",offsetof(Result_t,NameLen));
-ArrayField Result_t_Field_Name("Result_t.Name",true,&Uint8TypeInstance,sizeof(Byte),offsetof(Result_t,Name),&Result_t_Field_NameLen);
+UInt8Field Result_t_Field_NameLen("Result_t.NameLen",offsetof(Result_t,NameLen));
+ArrayField Result_t_Field_Name("Result_t.Name",true,&UInt8TypeInstance,sizeof(Byte),offsetof(Result_t,Name),&Result_t_Field_NameLen);
 Int8Field Result_t_Field_Arg1("Result_t.Arg1",offsetof(Result_t,Arg1));
 IField* Result_tDesc []=
 {
@@ -17,13 +17,13 @@ IField* Result_tDesc []=
 };
 ObjectType Result_t_Type(sizeof(Result_tDesc)/sizeof(IField*),Result_tDesc);
 
-Uint16Field Student_t_Field_ResultsLen("Student_t.ResultsLen",offsetof(Student_t,ResultsLen));
+UInt16Field Student_t_Field_ResultsLen("Student_t.ResultsLen",offsetof(Student_t,ResultsLen));
 ArrayField Student_t_Field_Results("Student_t.Results",true,&Result_t_Type,sizeof(Result_t),offsetof(Student_t,Results),&Student_t_Field_ResultsLen);
 Int32Field Student_t_Field_Age("Student_t.Age",offsetof(Student_t,Age));
-ArrayField Student_t_Field_Name("Student_t.Name",false,&Uint8TypeInstance,sizeof(Byte),offsetof(Student_t,Name),nullptr);
-Uint8Field Student_t_Field_StudentIdLen("Student_t.StudentIdLen",offsetof(Student_t,StudentIdLen));
-ArrayField Student_t_Field_StudentId("Student_t.StudentId",true,&Uint8TypeInstance,sizeof(Byte),offsetof(Student_t,StudentId),&Student_t_Field_StudentIdLen);
-Uint32Field Student_t_Field_Sex("Student_t.Sex",offsetof(Student_t,Sex));
+ArrayField Student_t_Field_Name("Student_t.Name",false,&UInt8TypeInstance,sizeof(Byte),offsetof(Student_t,Name),nullptr);
+UInt8Field Student_t_Field_StudentIdLen("Student_t.StudentIdLen",offsetof(Student_t,StudentIdLen));
+ArrayField Student_t_Field_StudentId("Student_t.StudentId",true,&UInt8TypeInstance,sizeof(Byte),offsetof(Student_t,StudentId),&Student_t_Field_StudentIdLen);
+UInt32Field Student_t_Field_Sex("Student_t.Sex",offsetof(Student_t,Sex));
 IField* Student_tDesc []=
 {
 &Student_t_Field_ResultsLen,
@@ -53,7 +53,7 @@ IField* DateTime_tDesc []=
 };
 ObjectType DateTime_t_Type(sizeof(DateTime_tDesc)/sizeof(IField*),DateTime_tDesc);
 
-Uint8Field StudentArray_t_Field_StudentIdLen("StudentArray_t.StudentIdLen",offsetof(StudentArray_t,StudentIdLen));
+UInt8Field StudentArray_t_Field_StudentIdLen("StudentArray_t.StudentIdLen",offsetof(StudentArray_t,StudentIdLen));
 ArrayField StudentArray_t_Field_Students("StudentArray_t.Students",true,&Student_t_Type,sizeof(Student_t),offsetof(StudentArray_t,Students),&StudentArray_t_Field_StudentIdLen);
 IField* StudentArray_tDesc []=
 {
@@ -69,8 +69,8 @@ IField* BroadcastDataTimeStructDesc []=
 };
 ObjectType BroadcastDataTimeStruct_Type(sizeof(BroadcastDataTimeStructDesc)/sizeof(IField*),BroadcastDataTimeStructDesc);
 
-Uint8Field GetStudentInfoFormStudentId_Request_Field_StudentIdLen("GetStudentInfoFormStudentId_Request.StudentIdLen",offsetof(GetStudentInfoFormStudentId_Request,StudentIdLen));
-ArrayField GetStudentInfoFormStudentId_Request_Field_StudentId("GetStudentInfoFormStudentId_Request.StudentId",true,&Uint8TypeInstance,sizeof(Byte),offsetof(GetStudentInfoFormStudentId_Request,StudentId),&GetStudentInfoFormStudentId_Request_Field_StudentIdLen);
+UInt8Field GetStudentInfoFormStudentId_Request_Field_StudentIdLen("GetStudentInfoFormStudentId_Request.StudentIdLen",offsetof(GetStudentInfoFormStudentId_Request,StudentIdLen));
+ArrayField GetStudentInfoFormStudentId_Request_Field_StudentId("GetStudentInfoFormStudentId_Request.StudentId",true,&UInt8TypeInstance,sizeof(Byte),offsetof(GetStudentInfoFormStudentId_Request,StudentId),&GetStudentInfoFormStudentId_Request_Field_StudentIdLen);
 Int32Field GetStudentInfoFormStudentId_Request_Field_arg2("GetStudentInfoFormStudentId_Request.arg2",offsetof(GetStudentInfoFormStudentId_Request,arg2));
 Int32Field GetStudentInfoFormStudentId_Request_Field_arg3("GetStudentInfoFormStudentId_Request.arg3",offsetof(GetStudentInfoFormStudentId_Request,arg3));
 IField* GetStudentInfoFormStudentId_RequestDesc []=
@@ -82,7 +82,7 @@ IField* GetStudentInfoFormStudentId_RequestDesc []=
 };
 ObjectType GetStudentInfoFormStudentId_Request_Type(sizeof(GetStudentInfoFormStudentId_RequestDesc)/sizeof(IField*),GetStudentInfoFormStudentId_RequestDesc);
 
-Uint8Field GetStudentInfoFormStudentId_Response_Field_State("GetStudentInfoFormStudentId_Response.State",offsetof(GetStudentInfoFormStudentId_Response,State));
+UInt8Field GetStudentInfoFormStudentId_Response_Field_State("GetStudentInfoFormStudentId_Response.State",offsetof(GetStudentInfoFormStudentId_Response,State));
 ObjectField GetStudentInfoFormStudentId_Response_Field_ReturnValue("GetStudentInfoFormStudentId_Response.ReturnValue",sizeof(Student_tDesc)/sizeof(IField*),Student_tDesc,offsetof(GetStudentInfoFormStudentId_Response,ReturnValue));
 IField* GetStudentInfoFormStudentId_ResponseDesc []=
 {
@@ -93,7 +93,7 @@ ObjectType GetStudentInfoFormStudentId_Response_Type(sizeof(GetStudentInfoFormSt
 
 ObjectType GetStudentsInfoFormAge_Request_Type(0,nullptr);
 
-Uint8Field GetStudentsInfoFormAge_Response_Field_State("GetStudentsInfoFormAge_Response.State",offsetof(GetStudentsInfoFormAge_Response,State));
+UInt8Field GetStudentsInfoFormAge_Response_Field_State("GetStudentsInfoFormAge_Response.State",offsetof(GetStudentsInfoFormAge_Response,State));
 ObjectField GetStudentsInfoFormAge_Response_Field_ReturnValue("GetStudentsInfoFormAge_Response.ReturnValue",sizeof(StudentArray_tDesc)/sizeof(IField*),StudentArray_tDesc,offsetof(GetStudentsInfoFormAge_Response,ReturnValue));
 IField* GetStudentsInfoFormAge_ResponseDesc []=
 {

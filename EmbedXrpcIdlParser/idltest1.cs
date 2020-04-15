@@ -2,12 +2,14 @@
 using System;
 using EmbedXrpcIdlParser;
 #if true
+[FileName("idltest1.cs")]
 enum Sex_t:uint
 {
     Man,
     Woman,
     HHHH,
 }
+[FileName("idltest1.cs")]
 struct Result_t
 {
     ////[FieldIndex(0)]
@@ -23,6 +25,7 @@ struct Result_t
     //[FieldIndex(3)]
     sbyte Arg1;
 }
+[FileName("idltest1.cs")]
 struct  Student_t
 {
     //[FieldIndex(0)]
@@ -53,6 +56,7 @@ struct  Student_t
     //[FieldIndex(7)]
     Sex_t Sex;
 }
+[FileName("idltest1.cs")]
 struct DateTime_t
 {
     //[FieldIndex(0)]
@@ -68,6 +72,7 @@ struct DateTime_t
     //[FieldIndex(5)]
     int Sec;
 }
+[FileName("idltest1.cs")]
 struct StudentArray_t
 {
     //[FieldIndex(0)]
@@ -77,7 +82,9 @@ struct StudentArray_t
     [MaxCount(IsFixed = true, MaxCount = 2, LenFieldName = "StudentIdLen")]
     Student_t[] Students;
 }
+[FileName("idltest1.cs")]
 delegate void BroadcastDataTime(DateTime_t t);
+[FileName("idltest1.cs")]
 interface IMyInterface
 {
         Student_t GetStudentInfoFormStudentId(
@@ -102,18 +109,21 @@ interface IMyInterface
     void Test();
 }
 #else
+[FileName("idltest1.cs")]
 interface IMyInterface
 {
     UInt16 GetValue();
     void SetValue(UInt16 v);
 }
 #endif
+[FileName("idltest1.cs")]
 public class OptionProcess:IOptionProcess
 {
     public GenerationOption Process()
     {
         GenerationOption option = new GenerationOption();
         option.OutPutFileName = "StudentService";
+        option.CSharpNameSpace = "StudentService";
         return option;
     }
 }

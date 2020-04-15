@@ -15,18 +15,20 @@
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
 extern Int32Field Result_t_Field_Value;
-extern Uint8Field Result_t_Field_NameLen;
+extern UInt8Field Result_t_Field_NameLen;
 extern ArrayField Result_t_Field_Name;
 extern Int8Field Result_t_Field_Arg1;
+extern IField* Result_tDesc [4];
 extern ObjectType Result_t_Type;
 
-extern Uint16Field Student_t_Field_ResultsLen;
+extern UInt16Field Student_t_Field_ResultsLen;
 extern ArrayField Student_t_Field_Results;
 extern Int32Field Student_t_Field_Age;
 extern ArrayField Student_t_Field_Name;
-extern Uint8Field Student_t_Field_StudentIdLen;
+extern UInt8Field Student_t_Field_StudentIdLen;
 extern ArrayField Student_t_Field_StudentId;
-extern Uint32Field Student_t_Field_Sex;
+extern UInt32Field Student_t_Field_Sex;
+extern IField* Student_tDesc [7];
 extern ObjectType Student_t_Type;
 
 extern Int32Field DateTime_t_Field_Year;
@@ -35,32 +37,38 @@ extern Int32Field DateTime_t_Field_Day;
 extern Int32Field DateTime_t_Field_Hour;
 extern Int32Field DateTime_t_Field_Min;
 extern Int32Field DateTime_t_Field_Sec;
+extern IField* DateTime_tDesc [6];
 extern ObjectType DateTime_t_Type;
 
-extern Uint8Field StudentArray_t_Field_StudentIdLen;
+extern UInt8Field StudentArray_t_Field_StudentIdLen;
 extern ArrayField StudentArray_t_Field_Students;
+extern IField* StudentArray_tDesc [2];
 extern ObjectType StudentArray_t_Type;
 
 extern ObjectField BroadcastDataTimeStruct_Field_t;
+extern IField* BroadcastDataTimeStructDesc [1];
 extern ObjectType BroadcastDataTimeStruct_Type;
 
 #define BroadcastDataTime_ServiceId 16
-extern Uint8Field GetStudentInfoFormStudentId_Request_Field_StudentIdLen;
+extern UInt8Field GetStudentInfoFormStudentId_Request_Field_StudentIdLen;
 extern ArrayField GetStudentInfoFormStudentId_Request_Field_StudentId;
 extern Int32Field GetStudentInfoFormStudentId_Request_Field_arg2;
 extern Int32Field GetStudentInfoFormStudentId_Request_Field_arg3;
+extern IField* GetStudentInfoFormStudentId_RequestDesc [4];
 extern ObjectType GetStudentInfoFormStudentId_Request_Type;
 
 #define GetStudentInfoFormStudentId_ServiceId 17
-extern Uint8Field GetStudentInfoFormStudentId_Response_Field_State;
+extern UInt8Field GetStudentInfoFormStudentId_Response_Field_State;
 extern ObjectField GetStudentInfoFormStudentId_Response_Field_ReturnValue;
+extern IField* GetStudentInfoFormStudentId_ResponseDesc [2];
 extern ObjectType GetStudentInfoFormStudentId_Response_Type;
 
 extern ObjectType GetStudentsInfoFormAge_Request_Type;
 
 #define GetStudentsInfoFormAge_ServiceId 18
-extern Uint8Field GetStudentsInfoFormAge_Response_Field_State;
+extern UInt8Field GetStudentsInfoFormAge_Response_Field_State;
 extern ObjectField GetStudentsInfoFormAge_Response_Field_ReturnValue;
+extern IField* GetStudentsInfoFormAge_ResponseDesc [2];
 extern ObjectType GetStudentsInfoFormAge_Response_Type;
 
 extern ObjectType Test_Request_Type;

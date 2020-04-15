@@ -52,7 +52,7 @@ namespace EmbedXrpcIdlParser
             CommonHsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
             CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_H");
             CommonHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_H");
-            CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
+            //CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
             CommonHsw.WriteLine("#include\"EmbedSerialization.h\"");
             if(fileIdlInfo.TargetDelegates.Count>0||fileIdlInfo.TargetInterfaces.Count>0)
                 CommonHsw.WriteLine("#include\"EmbedXrpcCommon.h\"");
@@ -422,8 +422,8 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, 100);");
                 ServerCsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
-                        "sm.Buf = RpcServerObject->Buffer;\n" +
-                        "sm.BufferLen = RpcServerObject->BufferLen;");
+                        "sm.Buf = &RpcServerObject->Buffer[4];\n" +
+                        "sm.BufferLen = RpcServerObject->BufferLen-4;");
                 foreach (var field in targetDelegate.TargetFields)
                 {
                     //if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
@@ -452,7 +452,13 @@ namespace EmbedXrpcIdlParser
 
                 }
                 ServerCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&sendData);");
-                ServerCsw.WriteLine($"RpcServerObject->Send({targetDelegate.MethodName}_ServiceId,sm.Index,sm.Buf);");
+
+                ServerCsw.WriteLine($"RpcServerObject->Buffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
+                ServerCsw.WriteLine($"RpcServerObject->Buffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
+                ServerCsw.WriteLine($"RpcServerObject->Buffer[2]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>16&0xff);");
+                ServerCsw.WriteLine($"RpcServerObject->Buffer[3]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>24&0xff);");
+
+                ServerCsw.WriteLine($"RpcServerObject->Send(RpcServerObject,sm.Index+4,RpcServerObject->Buffer);");
                 ServerCsw.WriteLine("sm.Reset();");
                 ServerCsw.WriteLine("RpcServerObject->porter->ReleaseMutex(RpcServerObject->SendMutexHandle);");
                 ServerCsw.WriteLine("}");//function end
@@ -558,8 +564,8 @@ namespace EmbedXrpcIdlParser
                     ClientHsw.WriteLine("RpcClientObject->porter->ResetQueue(RpcClientObject->ResponseMessageQueueHandle);");
                     ClientHsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
-                        "sm.Buf = RpcClientObject->Buffer;\n" +
-                        "sm.BufferLen = RpcClientObject->BufferLen;");
+                        "sm.Buf = &RpcClientObject->Buffer[4];\n" +
+                        "sm.BufferLen = RpcClientObject->BufferLen-4;");
 
                     foreach (var field in service.TargetFields)
                     {
@@ -599,7 +605,13 @@ namespace EmbedXrpcIdlParser
 
                     }
                     ClientHsw.WriteLine($"{service.ServiceName}_Request_Type.Serialize(sm,0,&sendData);");
-                    ClientHsw.WriteLine($"RpcClientObject->Send({service.ServiceName}_ServiceId,sm.Index,sm.Buf);");
+
+                    ClientHsw.WriteLine($"RpcClientObject->Buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
+                    ClientHsw.WriteLine($"RpcClientObject->Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
+                    ClientHsw.WriteLine($"RpcClientObject->Buffer[2]=(uint8_t)({service.ServiceName}_ServiceId>>16&0xff);");
+                    ClientHsw.WriteLine($"RpcClientObject->Buffer[3]=(uint8_t)({service.ServiceName}_ServiceId>>24&0xff);");
+
+                    ClientHsw.WriteLine($"RpcClientObject->Send(RpcClientObject,sm.Index+4,RpcClientObject->Buffer);");
                     ClientHsw.WriteLine("sm.Reset();");
                     
 

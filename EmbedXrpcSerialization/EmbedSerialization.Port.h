@@ -1,5 +1,6 @@
-#ifndef EmbedSerializationBaseType_H
-#define EmbedSerializationBaseType_H
+#ifndef EmbedSerialization_Port_H
+#define EmbedSerialization_Port_H
+
 #ifdef __cplusplus
 #include <cstdint>
 #else
@@ -17,4 +18,15 @@ typedef  int64_t Int64;
 typedef  float Float;
 typedef  double Double;
 
+#ifndef WIN32
+#include <rtthread.h>
+#else
+#include <cstring>
+#include <cstdlib>
+#define MALLOC	malloc
+#define FREE	free
+#define MEMCPY	memcpy
+#define Debug  
 #endif
+
+#endif // EmbedSerialization_Port_H

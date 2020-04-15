@@ -48,15 +48,26 @@ namespace EmbedXrpc
         {
             lock (SendMutex)
             {
-                Send(EmbedXrpcCommon.EmbedXrpcSuspendSid, 0, null);
+                byte[] sendBytes = new byte[4];
+                sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 0 & 0xff);
+                sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 8 & 0xff);
+                sendBytes[2] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 16 & 0xff);
+                sendBytes[3] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 24 & 0xff);
+                Send(sendBytes.Length, 0, sendBytes);
             }
         }
-        public void ReceivedMessage(UInt32 serviceId, UInt32 dataLen, UInt32 offset, byte[] data)
+        public void ReceivedMessage(UInt32 validdataLen, UInt32 offset, byte[] alldata)
         {
+            if (alldata.Length < offset + validdataLen)
+            {
+                return;
+            }
+            UInt32 serviceId = (UInt32)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8 | alldata[2 + offset] << 16 | alldata[3 + offset] << 24);
+            UInt32 dataLen = validdataLen - 4;
             EmbeXrpcRawData raw=new EmbeXrpcRawData();
             raw.Sid = serviceId;
             raw.Data = new byte[dataLen];
-            Array.Copy(data, offset, raw.Data, 0, dataLen);
+            Array.Copy(alldata, offset+4, raw.Data, 0, dataLen);
             raw.DataLen = dataLen;
             RequestQueueHandle.Send(raw);
 
@@ -100,7 +111,15 @@ namespace EmbedXrpc
                             lock (SendMutex)
                             {
                                 if (sendsm.Index > 0)//
-                                    Send(recData.Sid, sendsm.Index, sendsm.Data.ToArray());
+                                {
+                                    byte[] sendBytes = new byte[sendsm.Index + 4];
+                                    sendBytes[0] = (byte)(recData.Sid>>0 & 0xff);
+                                    sendBytes[1] = (byte)(recData.Sid >> 8 & 0xff);
+                                    sendBytes[2] = (byte)(recData.Sid >> 16 & 0xff);
+                                    sendBytes[3] = (byte)(recData.Sid >> 24 & 0xff);
+                                    Array.Copy(sendsm.Data.ToArray(), 0, sendBytes, 4, sendsm.Index);
+                                    Send(sendBytes.Length,0, sendBytes);
+                                }
                             }
                         }
                     }

@@ -1,15 +1,12 @@
 #ifndef EmbedSerialization_H
 #define EmbedSerialization_H
 
-#include "EmbedSerializationBaseType.h"
-#include <rtthread.h>
+
+#include "EmbedSerialization.Port.h"
 #ifndef offsetof
 #define offsetof(s, m) (uint32_t)((char*)(&((s*)0)->m))
 #endif
-#define MALLOC	malloc
-#define FREE	free
-#define MEMCPY	rt_memcpy
-#define Debug  
+
 typedef  uint32_t ptr_t;
 /*
 ”√¿¥≤‚ ‘
@@ -54,12 +51,12 @@ public:
 	uint32_t Index = 0;
 	uint8_t* Buf = nullptr;
 	uint32_t BufferLen = 0;
-	void Append(uint32_t  Tag, Type_t   Field, size_t	Len, void* v)
+	void Append(uint32_t  Tag, Type_t   Field, uint32_t	Len, void* v)
 	{
 		//Buf[Index++]=Tag;
 		//Buf[Index++]=Field;
 		//Buf[Index++]=Len;
-		memcpy(&Buf[Index], v, Len);
+		MEMCPY(&Buf[Index], v, Len);
 		Index += Len;
 	}
 	void Reset()
@@ -147,7 +144,7 @@ public:
 	{
 		for (uint32_t i = 0; i < arrayLen; i++)
 		{
-			//memcpy((void*)((uint8_t*)v + i * ElementTypeLen), &manager.Buf[manager.Index], ElementTypeLen);
+			//MEMCPY((void*)((uint8_t*)v + i * ElementTypeLen), &manager.Buf[manager.Index], ElementTypeLen);
 			ArrayElementType->Deserialize(manager, (void*)((uint8_t*)v + i * ElementTypeLen));
 			//manager.Index += ElementTypeLen;
 		}
@@ -280,7 +277,7 @@ public:
 	}
 	void Deserialize(SerializationManager& manager, void* v)
 	{
-		memcpy(v, &manager.Buf[manager.Index], 1);
+		MEMCPY(v, &manager.Buf[manager.Index], 1);
 		manager.Index++;
 	}
 };
@@ -343,7 +340,7 @@ public:							\
 	}\
 	void Deserialize(SerializationManager& manager, void* v)\
 	{\
-		memcpy(v, &manager.Buf[manager.Index], len);\
+		MEMCPY(v, &manager.Buf[manager.Index], len);\
 		manager.Index+=len;\
 	}\
 };\
@@ -431,7 +428,7 @@ public:
 				if (arrayLenField != nullptr)
 				{
 					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-					memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+					MEMCPY(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
 				}
 
 				ptr_t* ptr =(ptr_t*) d;
@@ -462,13 +459,13 @@ public:
 				if (arrayLenField != nullptr)
 				{
 					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-					memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+					MEMCPY(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
 				}
 				void* ptr = d;
 				if (arrayfield->IsFixed() == false)
 				{
 					ptr = arrayfield->Malloc(len);
-					memcpy((void *)((ptr_t*)d),&ptr,sizeof(ptr_t));
+					MEMCPY((void *)((ptr_t*)d),&ptr,sizeof(ptr_t));
 				}
 				SubFields[i]->Deserialize(manager, ptr, len);
 			}
@@ -488,7 +485,7 @@ public:
 					if (arrayLenField != nullptr)
 					{
 						void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-						memcpy(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+						MEMCPY(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
 					}					
 					uint8_t** arrayfieldPtr = (uint8_t**)((uint8_t*)v + arrayfield->GetOffset());
 					arrayfield->Free(*arrayfieldPtr, len);
