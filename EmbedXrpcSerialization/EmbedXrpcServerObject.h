@@ -21,7 +21,15 @@ public:
 	uint32_t MessageMapCount;
 	RequestMessageMap* MessageMaps;
 
-	EmbedXrpcServerObject(SendPack_t send, uint32_t timeOut, uint8_t* buf, uint32_t bufLen, IEmbeXrpcPort* port, uint32_t messageMapCount, RequestMessageMap* messageMaps)
+	void* UserData;
+	EmbedXrpcServerObject(SendPack_t send,
+		uint32_t timeOut, 
+		uint8_t* buf,
+		uint32_t bufLen,
+		IEmbeXrpcPort* port,
+		uint32_t messageMapCount,
+		RequestMessageMap* messageMaps,
+		void *ud=nullptr)
 	{
 		Send = send;
 		TimeOut = timeOut;
@@ -30,6 +38,7 @@ public:
 		porter = port;
 		MessageMapCount = messageMapCount;
 		MessageMaps = messageMaps;
+		UserData = ud;
 	}
 	void Init()
 	{

@@ -20,7 +20,11 @@ typedef  double Double;
 
 #ifndef WIN32
 #include <rtthread.h>
-#else
+#define MALLOC	rt_malloc
+#define FREE	rt_free
+#define MEMCPY	rt_memcpy
+#define Debug  rt_kprintf
+#else 
 #include <cstring>
 #include <cstdlib>
 #define MALLOC	malloc
