@@ -27,6 +27,7 @@ typedef  double Double;
 #else 
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #define MALLOC	malloc
 #define FREE	free
 #define MEMCPY	memcpy
