@@ -2,18 +2,17 @@
 #ifndef EmbedXrpc_Port_H
 #define EmbedXrpc_Port_H
 #include "EmbedSerialization.Port.h"
-#ifdef WIN32
-
-#include <cstdio>
-
 typedef void* EmbedXrpc_Semaphore_t;
 typedef void* EmbedXrpc_Mutex_t;
 typedef void* EmbedXrpc_Thread_t;
 typedef void* EmbedXrpc_Queue_t;
 typedef void* EmbedXrpc_Timer_t;
 #define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
-
+#ifdef WIN32
+#include <cstdio>
 #define  XrpcDebug	printf
+#else
+#define  XrpcDebug	rt_kprintf
 #endif
 enum QueueState
 {
