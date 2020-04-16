@@ -110,7 +110,8 @@ namespace EmbedXrpc
             {
                 return;
             }
-            UInt32 serviceId = (UInt32)(alldata[0+ offset] << 0 | alldata[1+ offset] << 8 | alldata[2+ offset] << 16 | alldata[3+ offset] << 24);
+            UInt16 serviceId = (UInt16)(alldata[0+ offset] << 0 | alldata[1+ offset] << 8);
+            UInt16 targettimeout = (UInt16)(alldata[2 + offset] << 0 | alldata[3 + offset] << 8);
             UInt32 dataLen = validdataLen - 4;
             EmbeXrpcRawData raw = new EmbeXrpcRawData();
 
@@ -124,6 +125,7 @@ namespace EmbedXrpc
                 }
                 
                 raw.DataLen = dataLen;
+                raw.TargetTimeOut = targettimeout;
                 ResponseMessageQueueHandle.Send(raw);
                 return;
             }
@@ -140,6 +142,7 @@ namespace EmbedXrpc
                         Array.Copy(alldata, offset+4, raw.Data, 0, dataLen);
                     }
                     raw.DataLen = dataLen;
+                    raw.TargetTimeOut = targettimeout;
                     if (iter.ReceiveType == ReceiveType.Response)
                     {
                         ResponseMessageQueueHandle.Send(raw);
@@ -167,6 +170,7 @@ namespace EmbedXrpc
                         if ((MessageMaps[i].ReceiveType ==  ReceiveType.Delegate) && (MessageMaps[i].Delegate.GetSid() == recData.Sid))
                         {
                             SerializationManager rsm=new SerializationManager();
+                            Console.WriteLine($"get server timeout value{recData.TargetTimeOut}");
                             rsm.Reset();
                             rsm.Data = new List<byte>(recData.Data);
                             MessageMaps[i].Delegate.Invoke(rsm);

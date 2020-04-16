@@ -33,10 +33,10 @@ void Win32EmbedXrpcPort::ThreadStart(EmbedXrpc_Thread_t thread)
 	QThread* x = static_cast<QThread*>(thread);
 	x->start();
 }
-void  Win32EmbedXrpcPort::TimerStart(EmbedXrpc_Timer_t timer)
+void  Win32EmbedXrpcPort::TimerStart(EmbedXrpc_Timer_t timer, uint16_t interval)
 {
 	MyTimer* t = static_cast<MyTimer*>(timer);
-	t->Start();
+	t->Start(interval);
 	
 }
 void Win32EmbedXrpcPort::TimerReset(EmbedXrpc_Timer_t timer)

@@ -20,7 +20,7 @@
  class IDelegate
  {
  public:
-     virtual uint32_t GetSid() = 0;
+     virtual uint16_t GetSid() = 0;
 	 virtual void Invoke(SerializationManager& recManager) = 0;
  };
 
@@ -28,7 +28,7 @@
  class IService
  {
  public:
-     virtual uint32_t GetSid() = 0;
+     virtual uint16_t GetSid() = 0;
 	 virtual void Invoke(SerializationManager& recManager, SerializationManager& sendManager) = 0;
  };
  struct RequestMessageMap
@@ -39,13 +39,14 @@
  struct ResponseDelegateMessageMap
  {
      const char* Name;
-     uint32_t Sid;//有可能是Response/Delegate
+     uint16_t Sid;//有可能是Response/Delegate
      ReceiveType_t ReceiveType;
      IDelegate* Delegate;
  };
  struct EmbeXrpcRawData
  {
-	 uint32_t Sid;
+     uint16_t Sid;
+     uint16_t TargetTimeout;
 	 uint8_t* Data;
 	 uint32_t DataLen;
  };

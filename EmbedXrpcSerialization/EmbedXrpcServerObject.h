@@ -44,7 +44,7 @@ public:
 	{
 		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread,this);
 		SendMutexHandle = porter->CreateMutex("SendBufMutex");
-		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), 10);
+		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), 2);
 		SuspendTimer = porter->CreateTimer("SuspendTimer", TimeOut/2,this, SuspendTimerCallBack);
 
 		porter->ThreadStart(ServiceThreadHandle);
@@ -55,7 +55,8 @@ public:
 		if (allDataLen < 4)
 			return;
 		EmbeXrpcRawData raw;
-		uint32_t serviceId = (uint32_t)(allData[0] | allData[1] << 8 | allData[2] << 16 | allData[3] << 24);
+		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
+		uint16_t targettimeout = (uint16_t)(allData[2] | allData[3] << 8);
 		raw.Data = nullptr;
 		raw.DataLen = 0;
 		raw.Sid = 0;
@@ -70,6 +71,7 @@ public:
 			porter->Memcpy(raw.Data, data, dataLen);
 		}
 		raw.DataLen = dataLen;
+		raw.TargetTimeout = targettimeout;
 		porter->SendQueue(RequestQueueHandle, &raw, sizeof(EmbeXrpcRawData));
 
 	}
@@ -80,8 +82,8 @@ public:
 		uint8_t *sb= obj->Buffer;
 		sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 		sb[1] = (uint8_t)(EmbedXrpcSuspendSid>>8 & 0xff);
-		sb[2] = (uint8_t)(EmbedXrpcSuspendSid>>16 & 0xff);
-		sb[3] = (uint8_t)(EmbedXrpcSuspendSid>>24 & 0xff);
+		sb[2] = (uint8_t)(obj->TimeOut & 0xff);
+		sb[3] = (uint8_t)(obj->TimeOut >>8 & 0xff);
 		obj->Send(obj,4, sb);
 		obj->porter->ReleaseMutex(obj->SendMutexHandle);
 	}
@@ -92,7 +94,7 @@ public:
 		uint32_t i = 0;
 		for (;;)
 		{
-			if (obj->porter->ReceiveQueue(obj->RequestQueueHandle, &recData, sizeof(EmbeXrpcRawData), 1) != QueueState_OK)
+			if (obj->porter->ReceiveQueue(obj->RequestQueueHandle, &recData, sizeof(EmbeXrpcRawData), EmbedXrpc_WAIT_FOREVER) != QueueState_OK)
 			{
 				continue;
 			}
@@ -113,17 +115,17 @@ public:
 					sendsm.BufferLen = obj->BufferLen-4;
 
 					obj->porter->TimerReset(obj->SuspendTimer);
-					obj->porter->TimerStart(obj->SuspendTimer);
+					obj->porter->TimerStart(obj->SuspendTimer, recData.TargetTimeout/2);
 					obj->MessageMaps[i].Service->Invoke(rsm, sendsm);
 					obj->porter->TimerStop(obj->SuspendTimer);
 					if (sendsm.Index > 0)//
 					{
 						obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
 
-						obj->Buffer[0] = (uint8_t)(recData.Sid & 0xff);
+						obj->Buffer[0] = (uint8_t)(recData.Sid >>0 & 0xff);
 						obj->Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
-						obj->Buffer[2] = (uint8_t)(recData.Sid >> 16 & 0xff);
-						obj->Buffer[3] = (uint8_t)(recData.Sid >> 24 & 0xff);
+						obj->Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
+						obj->Buffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
 
 						obj->Send(obj,sendsm.Index+4, obj->Buffer);
 

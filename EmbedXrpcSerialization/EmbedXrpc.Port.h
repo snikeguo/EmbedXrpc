@@ -2,6 +2,9 @@
 #ifndef EmbedXrpc_Port_H
 #define EmbedXrpc_Port_H
 #include "EmbedSerialization.Port.h"
+#ifdef WIN32
+
+#include <cstdio>
 
 typedef void* EmbedXrpc_Semaphore_t;
 typedef void* EmbedXrpc_Mutex_t;
@@ -11,7 +14,7 @@ typedef void* EmbedXrpc_Timer_t;
 #define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
 #define  XrpcDebug	printf
-
+#endif
 enum QueueState
 {
 	QueueState_Empty,
@@ -30,7 +33,7 @@ public:
 
 	virtual void ThreadStart(EmbedXrpc_Thread_t thread) = 0;
 
-	virtual void TimerStart(EmbedXrpc_Timer_t timer) = 0;
+	virtual void TimerStart(EmbedXrpc_Timer_t timer,uint16_t interval) = 0;
 	virtual void TimerReset(EmbedXrpc_Timer_t timer) = 0;
 	virtual void TimerStop(EmbedXrpc_Timer_t timer) = 0;
 	//virtual bool TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout) = 0;

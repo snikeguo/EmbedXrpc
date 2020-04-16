@@ -15,9 +15,9 @@ public:
 	{
 		connect(&Timer, &QTimer::timeout, this, [=] {Cb(Arg);});
 	}
-	void Start()
+	void Start(uint16_t interval)
 	{
-		Timer.start(Timeout);
+		Timer.start(interval);
 	}
 	void Stop()
 	{
@@ -43,7 +43,7 @@ public:
 	EmbedXrpc_Queue_t CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen) ;
 	EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout, void* Arg, void (*timercb)(void* arg));
 	void ThreadStart(EmbedXrpc_Thread_t thread) ;
-	void TimerStart(EmbedXrpc_Timer_t timer);
+	void TimerStart(EmbedXrpc_Timer_t timer, uint16_t interval);
 	void TimerReset(EmbedXrpc_Timer_t timer);
 	void TimerStop(EmbedXrpc_Timer_t timer);
 	//bool TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout) ;

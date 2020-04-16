@@ -31,7 +31,7 @@ namespace StudentService
     {
         public void GetStudentsInfoFormAge()
         {
-            //Thread.Sleep(10000);
+            Thread.Sleep(10000);
             Response.ReturnValue = new StudentArray_t();
             Response.ReturnValue.StudentIdLen = 1;
             var stu = new Student_t() { Age = 2, ResultsLen = 0, StudentIdLen = 0 };
@@ -59,9 +59,9 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new Client(1000, clientSend, Assembly.GetExecutingAssembly());
+            client = new Client(3000, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
-            server = new Server(1000, serverSend, Assembly.GetExecutingAssembly());
+            server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
 
             Task.Run(() =>
@@ -80,7 +80,7 @@ namespace EmbedXrpc
                 BroadcastDataTimeDelegate broadcastDataTimeDelegate = new BroadcastDataTimeDelegate(server);
                 while (true)
                 {
-                    /*broadcastDataTimeDelegate.Invoke(new DateTime_t()
+                    broadcastDataTimeDelegate.Invoke(new DateTime_t()
                     {
                         Year = DateTime.Now.Year,
                         Month = DateTime.Now.Month,
@@ -88,7 +88,7 @@ namespace EmbedXrpc
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second
-                    });*/
+                    });
                     Thread.Sleep(100);
                 }
             });
@@ -122,7 +122,7 @@ namespace EmbedXrpc
             Task.Run(() =>
             {
                 TcpClient = TcpListener.AcceptTcpClient();
-                client = new Client(1000000, clientSend, Assembly.GetExecutingAssembly());
+                client = new Client(6666, clientSend, Assembly.GetExecutingAssembly());
                 client.Start();
                 TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
                 Task.Run(() =>

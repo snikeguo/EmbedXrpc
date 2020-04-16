@@ -4,7 +4,7 @@
 #include <iostream>
 static TestEmbedXrpcForQt* GuiInstance;
 TestEmbedXrpcForQt::TestEmbedXrpcForQt(QWidget* parent) : QMainWindow(parent), ServerRpcObject(ServerSend,
-	1000,
+	5000,
 	ServerBuffer,
 	2048,
 	&ServerWin32Port,

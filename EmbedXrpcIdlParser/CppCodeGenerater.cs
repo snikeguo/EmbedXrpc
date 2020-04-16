@@ -326,7 +326,7 @@ namespace EmbedXrpcIdlParser
             {
                 ClientHsw.WriteLine($"class {targetDelegate.MethodName}ClientImpl:public IDelegate");
                 ClientHsw.WriteLine("{\npublic:");
-                ClientHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
+                ClientHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
 
                 ClientHsw.Write($"void {targetDelegate.MethodName}(");
 
@@ -387,7 +387,7 @@ namespace EmbedXrpcIdlParser
                 ServerHsw.WriteLine(targetDelegate.MethodName + "Delegate" + "(EmbedXrpcServerObject *rpcobj)");
                 ServerHsw.WriteLine("{\nthis->RpcServerObject=rpcobj;");
                 ServerHsw.WriteLine("}");
-                ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
+                ServerHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
 
                 ServerHsw.Write($"void  Invoke(");
                 ServerCsw.Write($"void  {targetDelegate.MethodName }Delegate::Invoke(");
@@ -455,8 +455,8 @@ namespace EmbedXrpcIdlParser
 
                 ServerCsw.WriteLine($"RpcServerObject->Buffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
                 ServerCsw.WriteLine($"RpcServerObject->Buffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
-                ServerCsw.WriteLine($"RpcServerObject->Buffer[2]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>16&0xff);");
-                ServerCsw.WriteLine($"RpcServerObject->Buffer[3]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>24&0xff);");
+                ServerCsw.WriteLine($"RpcServerObject->Buffer[2]=(uint8_t)(RpcServerObject->TimeOut>>0&0xff);");
+                ServerCsw.WriteLine($"RpcServerObject->Buffer[3]=(uint8_t)(RpcServerObject->TimeOut>>8&0xff);");
 
                 ServerCsw.WriteLine($"RpcServerObject->Send(RpcServerObject,sm.Index+4,RpcServerObject->Buffer);");
                 ServerCsw.WriteLine("sm.Reset();");
@@ -608,8 +608,8 @@ namespace EmbedXrpcIdlParser
 
                     ClientHsw.WriteLine($"RpcClientObject->Buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
                     ClientHsw.WriteLine($"RpcClientObject->Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
-                    ClientHsw.WriteLine($"RpcClientObject->Buffer[2]=(uint8_t)({service.ServiceName}_ServiceId>>16&0xff);");
-                    ClientHsw.WriteLine($"RpcClientObject->Buffer[3]=(uint8_t)({service.ServiceName}_ServiceId>>24&0xff);");
+                    ClientHsw.WriteLine($"RpcClientObject->Buffer[2]=(uint8_t)(RpcClientObject->TimeOut>>0&0xff);");
+                    ClientHsw.WriteLine($"RpcClientObject->Buffer[3]=(uint8_t)(RpcClientObject->TimeOut>>8&0xff);");
 
                     ClientHsw.WriteLine($"RpcClientObject->Send(RpcClientObject,sm.Index+4,RpcClientObject->Buffer);");
                     ClientHsw.WriteLine("sm.Reset();");
@@ -659,7 +659,7 @@ namespace EmbedXrpcIdlParser
                 {
                     ServerHsw.WriteLine($"class {service.ServiceName}Service:public IService");
                     ServerHsw.WriteLine("{\npublic:");
-                    ServerHsw.WriteLine("uint32_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
+                    ServerHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
 
                     //string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response& ";
                     if (service.ReturnValue != null)

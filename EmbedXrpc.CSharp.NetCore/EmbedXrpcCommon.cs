@@ -20,17 +20,17 @@ namespace EmbedXrpc
     };
     public abstract class IDelegate
     {
-        public abstract UInt32 GetSid();
+        public abstract UInt16 GetSid();
         public abstract void Invoke(SerializationManager recManager);
     }
     public static class EmbedXrpcCommon
     {
-        public static readonly UInt32 EmbedXrpcSuspendSid = 0x1;
+        public static readonly UInt16 EmbedXrpcSuspendSid = 0x1;
     }
 
     public abstract class IService
     {
-        public abstract UInt32 GetSid();
+        public abstract UInt16 GetSid();
         public abstract void Invoke(SerializationManager recManager, SerializationManager sendManager);
     }
     public class RequestMessageMap
@@ -41,14 +41,15 @@ namespace EmbedXrpc
     public class ResponseDelegateMessageMap
     {
         public string Name { get; set; }
-        public UInt32 Sid { get; set; }//有可能是Response/Delegate
+        public UInt16 Sid { get; set; }//有可能是Response/Delegate
         public ReceiveType ReceiveType { get; set; }
         public IDelegate Delegate { get; set; }
     };
     public delegate void Send(int dataLen, int offset ,byte[] data);
     public struct EmbeXrpcRawData
     {
-        public UInt32 Sid { get; set; }
+        public UInt16 Sid { get; set; }
+        public UInt16 TargetTimeOut { get; set; }
         public byte[] Data { get; set; }
         public UInt32 DataLen { get; set; }
     }
@@ -81,6 +82,6 @@ namespace EmbedXrpc
         }
         // This is a named argument
         public string Name { get; set; }
-        public uint ServiceId { get; set; }
+        public UInt16 ServiceId { get; set; }
     }
 }

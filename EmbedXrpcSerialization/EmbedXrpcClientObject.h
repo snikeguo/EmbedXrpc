@@ -54,7 +54,8 @@ public:
 		if (allDataLen < 4)
 			return;
 		EmbeXrpcRawData raw;
-		uint32_t serviceId = (uint32_t)(allData[0] | allData[1] << 8 | allData[2] << 16 | allData[3] << 24);
+		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
+		uint16_t targettimeout= (uint16_t)(allData[2] | allData[3] << 8);
 		raw.Data = nullptr;
 		raw.DataLen = 0;
 		raw.Sid = 0;
@@ -70,6 +71,7 @@ public:
 				porter->Memcpy(raw.Data, data, dataLen);
 			}
 			raw.DataLen = dataLen;
+			raw.TargetTimeout = targettimeout;
 			porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
 			return;
 		}
@@ -87,6 +89,7 @@ public:
 					porter->Memcpy(raw.Data, data, dataLen);
 				}
 				raw.DataLen = dataLen;
+				raw.TargetTimeout = targettimeout;
 				if (iter->ReceiveType == ReceiveType_Response)
 				{					
 					porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));

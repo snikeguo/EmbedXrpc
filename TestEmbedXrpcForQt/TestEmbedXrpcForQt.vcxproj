@@ -39,7 +39,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>../EmbedXrpcSerialization;Server;.;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;Client;Server;.;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
@@ -86,6 +86,8 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.cpp" />
     <ClCompile Include="BlockQueue.cpp" />
+    <ClCompile Include="client.cpp" />
+    <ClCompile Include="Client\StudentService.Client.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Server\StudentService.Server.cpp" />
     <ClCompile Include="StudentService.cpp" />
@@ -109,6 +111,7 @@
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcServerObject.h" />
     <ClInclude Include="BlockQueue.h" />
+    <ClInclude Include="Client\StudentService.Client.h" />
     <ClInclude Include="Server\StudentService.Server.h" />
     <ClInclude Include="StudentService.EmbedXrpcSerialization.h" />
     <ClInclude Include="StudentService.h" />

@@ -10,7 +10,7 @@ namespace EmbedXrpc
 {
     public class Server
     {
-        UInt32 TimeOut;
+        public UInt32 TimeOut { get; set; }
         public object SendMutex { get; private set; } = new object();
         private Thread ServiceThreadHandle;
         private Win32Queue<EmbeXrpcRawData> RequestQueueHandle=new Win32Queue<EmbeXrpcRawData>(10);
@@ -42,17 +42,18 @@ namespace EmbedXrpc
             ServiceThreadHandle = new Thread(ServiceThread);
             ServiceThreadHandle.IsBackground = true;
 
-            SuspendTimer = new Timer(SuspendTimerCallback, null, Timeout.Infinite, Timeout.Infinite);
+            SuspendTimer = new Timer(SuspendTimerCallback, this, Timeout.Infinite, Timeout.Infinite);
         }
         private void SuspendTimerCallback(object s)
         {
+            Server server = s as Server;
             lock (SendMutex)
             {
                 byte[] sendBytes = new byte[4];
                 sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 0 & 0xff);
                 sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 8 & 0xff);
-                sendBytes[2] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 16 & 0xff);
-                sendBytes[3] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 24 & 0xff);
+                sendBytes[2] = (byte)(server.TimeOut >> 0 & 0xff);
+                sendBytes[3] = (byte)(server.TimeOut >> 8 & 0xff);
                 Send(sendBytes.Length, 0, sendBytes);
             }
         }
@@ -62,13 +63,15 @@ namespace EmbedXrpc
             {
                 return;
             }
-            UInt32 serviceId = (UInt32)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8 | alldata[2 + offset] << 16 | alldata[3 + offset] << 24);
+            UInt16 serviceId = (UInt16)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8);
+            UInt16 targettimeout = (UInt16)(alldata[2 + offset] << 0 | alldata[3 + offset] << 8);
             UInt32 dataLen = validdataLen - 4;
             EmbeXrpcRawData raw=new EmbeXrpcRawData();
             raw.Sid = serviceId;
             raw.Data = new byte[dataLen];
             Array.Copy(alldata, offset+4, raw.Data, 0, dataLen);
             raw.DataLen = dataLen;
+            raw.TargetTimeOut = targettimeout;
             RequestQueueHandle.Send(raw);
 
         }
@@ -104,7 +107,8 @@ namespace EmbedXrpc
                             sendsm.Reset();
                             sendsm.Data = new List<byte>();
 
-                            SuspendTimer.Change(TimeOut / 2, TimeOut / 2);
+                            //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
+                            SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);
                             MessageMaps[i].Service.Invoke(rsm, sendsm);
                             SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
@@ -115,8 +119,8 @@ namespace EmbedXrpc
                                     byte[] sendBytes = new byte[sendsm.Index + 4];
                                     sendBytes[0] = (byte)(recData.Sid>>0 & 0xff);
                                     sendBytes[1] = (byte)(recData.Sid >> 8 & 0xff);
-                                    sendBytes[2] = (byte)(recData.Sid >> 16 & 0xff);
-                                    sendBytes[3] = (byte)(recData.Sid >> 24 & 0xff);
+                                    sendBytes[2] = (byte)(this.TimeOut>>0 & 0xff);
+                                    sendBytes[3] = (byte)(this.TimeOut >> 8 & 0xff);
                                     Array.Copy(sendsm.Data.ToArray(), 0, sendBytes, 4, sendsm.Index);
                                     Send(sendBytes.Length,0, sendBytes);
                                 }

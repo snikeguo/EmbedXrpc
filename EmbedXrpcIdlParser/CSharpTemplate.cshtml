@@ -118,8 +118,8 @@
             <h1 @delattr />
             <h1 public partial class @(del.MethodName + "ClientImpl") :IDelegate />
             <h1 { />
-            <h1 @("public static readonly UInt32 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
-            <h1 public override UInt32 GetSid(){ return @(del.MethodName + "_ServiceId") ; } />
+            <h1 @("public static readonly UInt16 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
+            <h1 public override UInt16 GetSid(){ return @(del.MethodName + "_ServiceId") ; } />
             <h1 public override void Invoke(SerializationManager recManager) />
             <h1 { />
             <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
@@ -152,7 +152,7 @@
             <h1 private EmbedXrpc.Server Server; />
             <h1 public @(del.MethodName + "Delegate(EmbedXrpc.Server server)") />
             <h1 { Server=server; } />
-            <h1 @("public static readonly UInt32 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
+            <h1 @("public static readonly UInt16 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
 
             var pars = string.Empty;
             for (int pi = 0; pi < del.TargetFields.Count; pi++)
@@ -186,10 +186,10 @@
             sid_temp = "(byte)(" + del.MethodName + "_ServiceId>>8&0xff)";
             <h1 sendBytes.Add( @sid_temp ); />
 
-            sid_temp = "(byte)(" + del.MethodName + "_ServiceId>>16&0xff)";
+            sid_temp = "(byte)(Server.TimeOut>>0&0xff)";
             <h1 sendBytes.Add( @sid_temp ); />
 
-            sid_temp = "(byte)(" + del.MethodName + "_ServiceId>>24&0xff)";
+            sid_temp = "(byte)(Server.TimeOut>>8&0xff)";
             <h1 sendBytes.Add( @sid_temp ); />
 
             <h1 sendBytes.AddRange(sm.Data); />
@@ -275,9 +275,9 @@
                 <h1 @serviceattr />
                 <h1 public partial class @(service.ServiceName + "Service") :IService />
                 <h1 { />
-                <h1 @("public static readonly UInt32 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
+                <h1 @("public static readonly UInt16 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
 
-                <h1 public override UInt32 GetSid(){ return @(service.ServiceName + "_ServiceId") ; } />
+                <h1 public override UInt16 GetSid(){ return @(service.ServiceName + "_ServiceId") ; } />
                 if (service.ReturnValue != null)
                 {
                     <h1 private @(service.ServiceName + "_Response Response")=new @(service.ServiceName + "_Response()") ; />
@@ -330,7 +330,7 @@
 
             foreach (var service in interf.Services)
             {
-                <h1 @("public static readonly UInt32 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
+                <h1 @("public static readonly UInt16 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
                 string pars = string.Empty;
                 for (int pi = 0; pi < service.TargetFields.Count; pi++)
                 {
@@ -374,10 +374,10 @@
                 sid_temp = "(byte)(" + service.ServiceName + "_ServiceId>>8&0xff)";
                 <h1 sendBytes.Add( @sid_temp ); />
 
-                sid_temp = "(byte)(" + service.ServiceName + "_ServiceId>>16&0xff)";
+                sid_temp = "(byte)(Client.TimeOut>>0&0xff)";
                 <h1 sendBytes.Add( @sid_temp ); />
 
-                sid_temp = "(byte)(" + service.ServiceName + "_ServiceId>>24&0xff)";
+                sid_temp = "(byte)(Client.TimeOut>>8&0xff)";
                 <h1 sendBytes.Add( @sid_temp ); />
 
                 <h1 sendBytes.AddRange(sm.Data); />

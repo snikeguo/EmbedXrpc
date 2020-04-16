@@ -52,6 +52,12 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Client\StudentService.Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TestEmbedXrpcForQt.h">
@@ -97,6 +103,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcServerObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Client\StudentService.Client.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
