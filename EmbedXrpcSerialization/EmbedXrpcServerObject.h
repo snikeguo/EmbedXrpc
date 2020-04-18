@@ -42,10 +42,10 @@ public:
 	}
 	void Init()
 	{
-		ServiceThreadHandle = porter->CreateThread("ServiceThread", ServiceThread,this);
+		ServiceThreadHandle = porter->CreateThread("ServiceThread",Server_ThreadPriority, ServiceThread,this);
 		SendMutexHandle = porter->CreateMutex("SendBufMutex");
-		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), 2);
-		SuspendTimer = porter->CreateTimer("SuspendTimer", TimeOut/2,this, SuspendTimerCallBack);
+		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), Server_RequestQueue_MaxItemNumber);
+		SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER,this, SuspendTimerCallBack);
 
 		porter->ThreadStart(ServiceThreadHandle);
 	}

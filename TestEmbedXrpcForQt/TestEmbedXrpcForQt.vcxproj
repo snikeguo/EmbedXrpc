@@ -39,7 +39,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>../EmbedXrpcSerialization;Client;Server;.;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;Client;Server;.;../EmbedXrpcSerialization/Win32Port;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
@@ -85,7 +85,8 @@
   <ItemGroup>
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.cpp" />
-    <ClCompile Include="BlockQueue.cpp" />
+    <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.cpp" />
+    <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.cpp" />
     <ClCompile Include="client.cpp" />
     <ClCompile Include="Client\StudentService.Client.cpp" />
     <ClCompile Include="main.cpp" />
@@ -93,7 +94,6 @@
     <ClCompile Include="StudentService.cpp" />
     <ClCompile Include="StudentService.EmbedXrpcSerialization.cpp" />
     <ClCompile Include="TestEmbedXrpcForQt.cpp" />
-    <ClCompile Include="Win32EmbedXrpcPort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TestEmbedXrpcForQt.h" />
@@ -106,16 +106,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h" />
-    <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerializationBaseType.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcServerObject.h" />
-    <ClInclude Include="BlockQueue.h" />
+    <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.h" />
+    <QtMoc Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.h" />
     <ClInclude Include="Client\StudentService.Client.h" />
     <ClInclude Include="Server\StudentService.Server.h" />
     <ClInclude Include="StudentService.EmbedXrpcSerialization.h" />
     <ClInclude Include="StudentService.h" />
-    <QtMoc Include="Win32EmbedXrpcPort.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

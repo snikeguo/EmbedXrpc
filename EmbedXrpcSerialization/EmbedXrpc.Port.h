@@ -10,10 +10,17 @@ typedef void* EmbedXrpc_Timer_t;
 #define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 #ifdef WIN32
 #include <cstdio>
-#define  XrpcDebug	printf
+#define  XrpcDebug	//printf
 #else
-#define  XrpcDebug	rt_kprintf
+#define  XrpcDebug	//rt_kprintf
 #endif
+
+#define Server_ThreadPriority				0x6
+#define Server_RequestQueue_MaxItemNumber	100
+
+#define Client_ThreadPriority				0x6
+#define Client_DelegateMessageQueue_MaxItemNumber	100
+#define Client_ResponseMessageQueue_MaxItemNumber	100
 enum QueueState
 {
 	QueueState_Empty,
@@ -24,7 +31,7 @@ enum QueueState
 class IEmbeXrpcPort
 {
 public:
-	virtual EmbedXrpc_Thread_t CreateThread(const char* threadName,void (*Thread)(void *),void *Arg)=0;
+	virtual EmbedXrpc_Thread_t CreateThread(const char* threadName,uint8_t priority,void (*Thread)(void *),void *Arg)=0;
 	//virtual EmbedXrpc_Mutex_t CreateSemaphore(const char* semaphoreName)=0;
 	virtual EmbedXrpc_Mutex_t CreateMutex(const char* mutexName)=0;
 	virtual EmbedXrpc_Queue_t CreateQueue(const char* queueName,uint32_t queueItemSize,uint32_t maxItemLen) = 0;

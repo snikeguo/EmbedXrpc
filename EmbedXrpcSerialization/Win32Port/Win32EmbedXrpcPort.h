@@ -1,4 +1,3 @@
-#pragma once
 #ifndef Win32EmbedXrpcPort_H
 #define  Win32EmbedXrpcPort_H
 #include "EmbedXrpc.Port.h"
@@ -37,7 +36,7 @@ class Win32EmbedXrpcPort :public QObject, public  IEmbeXrpcPort
 {
 	Q_OBJECT
 public:
-	EmbedXrpc_Thread_t CreateThread(const char* threadName,void(*Thread)(void*), void* Arg) ;
+	EmbedXrpc_Thread_t CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg) ;
 	//EmbedXrpc_Mutex_t CreateSemaphore(const char* semaphoreName) ;
 	EmbedXrpc_Mutex_t CreateMutex(const char* mutexName) ;
 	EmbedXrpc_Queue_t CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen) ;

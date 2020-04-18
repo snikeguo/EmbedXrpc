@@ -419,7 +419,7 @@ namespace EmbedXrpcIdlParser
                 //函数实现
                 ServerCsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
                 ServerCsw.WriteLine($"static {targetDelegate.MethodName}Struct sendData;");
-                ServerCsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, 100);");
+                ServerCsw.WriteLine("RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                 ServerCsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
                         "sm.Buf = &RpcServerObject->Buffer[4];\n" +
@@ -560,7 +560,7 @@ namespace EmbedXrpcIdlParser
 
                     ClientHsw.WriteLine($"static {service.ServiceName}_Request sendData;");
 
-                    ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, 100);");
+                    ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                     ClientHsw.WriteLine("RpcClientObject->porter->ResetQueue(RpcClientObject->ResponseMessageQueueHandle);");
                     ClientHsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +

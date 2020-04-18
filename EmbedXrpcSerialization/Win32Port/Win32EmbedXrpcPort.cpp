@@ -4,7 +4,7 @@
 
 
 //这是一个demo 所以不用考虑内存的问题，直接new出来不用管即可。 因为一般地	Server是单片机，创建后一直在跑。
-EmbedXrpc_Thread_t Win32EmbedXrpcPort::CreateThread(const char* threadName, void(*Thread)(void*), void* Arg)
+EmbedXrpc_Thread_t Win32EmbedXrpcPort::CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg)
 {
 	auto ServiceThread = QThread::create(Thread, Arg);
 	return  ServiceThread;
