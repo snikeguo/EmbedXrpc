@@ -47,7 +47,7 @@ void TestEmbedXrpcForQt::connected()
 		this->BroadcastDataTimeProxy.Invoke(t);
 		
 	}});
-	b->start();
+	//b->start();
 }
 void TestEmbedXrpcForQt::ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)
 {
@@ -84,6 +84,7 @@ void GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
 void TestService::Test()
 {
 	std::cout << "server:test!" << std::endl;
+	this->Response.ReturnValue = false;
 }
 #if 0
 void ServerInit()

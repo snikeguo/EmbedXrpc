@@ -17,11 +17,11 @@ namespace EmbedXrpcIdlParser
 
         public string ToCode()
         {
-           return $"{EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",offsetof({StructName},{Name}));\n";
+           return $"const {EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",offsetof({StructName},{Name}));\n";
         }
         public string ToExtern()
         {
-            return $"extern {EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name};\n";
+            return $"extern const {EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name};\n";
         }
     }
     public class ArrayType
@@ -32,11 +32,11 @@ namespace EmbedXrpcIdlParser
 
         public string ToCode()
         {
-            return $"ArrayType {Name}_Type({ArrayElementType},{ArrayElementLen});\n";
+            return $"const ArrayType {Name}_Type({ArrayElementType},{ArrayElementLen});\n";
         }
         public string ToExtern()
         {
-            return $"extern ArrayType {Name}_Type;\n";
+            return $"extern const ArrayType {Name}_Type;\n";
         }
     }
     public class ArrayField:ArrayType
@@ -48,11 +48,11 @@ namespace EmbedXrpcIdlParser
         public new string ToCode()
         {
             var arrayLenFieldDesc = LenField == null ? "nullptr" : $"&{StructName}_{Prefix}_{LenField.Name}";
-            return $"ArrayField {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{arrayLenFieldDesc});\n";
+            return $"const ArrayField {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{arrayLenFieldDesc});\n";
         }
         public new string ToExtern()
         {
-            return $"extern ArrayField {StructName}_{Prefix}_{Name};\n";
+            return $"extern const ArrayField {StructName}_{Prefix}_{Name};\n";
         }
     }
     public class ObjectType
@@ -62,11 +62,11 @@ namespace EmbedXrpcIdlParser
         public string FieldDesc { get; set; }
         public string ToCode()
         {
-            return $"ObjectType {Name}({FieldCount},{FieldDesc});\n";
+            return $"const ObjectType {Name}({FieldCount},{FieldDesc});\n";
         }
         public string ToExtern()
         {
-            return $"extern ObjectType {Name};\n";
+            return $"extern const ObjectType {Name};\n";
         }
     }
     public class ObjectField:ObjectType
@@ -75,11 +75,11 @@ namespace EmbedXrpcIdlParser
         public string StructName { get; set; }
         public new string ToCode()
         {
-            return $"ObjectField {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",{FieldCount},{FieldDesc},offsetof({StructName},{Name}));\n";
+            return $"const ObjectField {StructName}_{Prefix}_{Name}(\"{StructName}.{Name}\",{FieldCount},{FieldDesc},offsetof({StructName},{Name}));\n";
         }
         public new string ToExtern()
         {
-            return $"extern ObjectField {StructName}_{Prefix}_{Name};\n";
+            return $"extern const ObjectField {StructName}_{Prefix}_{Name};\n";
         }
     }
     public class EmbedXrpcSerializationHelper
@@ -88,6 +88,8 @@ namespace EmbedXrpcIdlParser
         internal static Dictionary<string, string> TypeReplaceDic = new Dictionary<string, string>();
         static EmbedXrpcSerializationHelper()
         {
+            FieldReplaceDic.Add("bool", "UInt8Field");
+            FieldReplaceDic.Add("Boolean", "UInt8Field");
             FieldReplaceDic.Add("byte", "UInt8Field");
             FieldReplaceDic.Add("Byte", "UInt8Field");
             FieldReplaceDic.Add("sbyte", "Int8Field");
@@ -98,10 +100,11 @@ namespace EmbedXrpcIdlParser
             FieldReplaceDic.Add("Int32", "Int32Field");
             FieldReplaceDic.Add("UInt64", "UInt64Field");
             FieldReplaceDic.Add("Int64", "Int64Field");
-
             FieldReplaceDic.Add("float", "FloatField");
             FieldReplaceDic.Add("double", "DoubleField");
 
+            TypeReplaceDic.Add("bool", "UInt8TypeInstance");
+            TypeReplaceDic.Add("Boolean", "UInt8TypeInstance");
             TypeReplaceDic.Add("byte", "UInt8TypeInstance");
             TypeReplaceDic.Add("Byte", "UInt8TypeInstance");
             TypeReplaceDic.Add("sbyte", "Int8TypeInstance");
@@ -118,7 +121,7 @@ namespace EmbedXrpcIdlParser
         public static StringBuilder EmitIFieldsArray(string name,IList<string> FieldDesc)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append($"IField* {name} []=\n");
+            stringBuilder.Append($"const IField* {name} []=\n");
             stringBuilder.Append("{\n");
             foreach (var fd in FieldDesc)
             {
@@ -193,7 +196,7 @@ namespace EmbedXrpcIdlParser
             if(FieldsDesc.Count>0)
             {
                 cfilestringBuilder.Append(EmitIFieldsArray($"{name}Desc", FieldsDesc));
-                hfilestringBuilder.Append($"extern IField* {name}Desc [{FieldsDesc.Count}];\n");
+                hfilestringBuilder.Append($"extern const IField* {name}Desc [{FieldsDesc.Count}];\n");
             }
             
 

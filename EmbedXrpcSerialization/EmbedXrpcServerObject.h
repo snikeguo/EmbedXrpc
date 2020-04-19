@@ -72,7 +72,12 @@ public:
 		}
 		raw.DataLen = dataLen;
 		raw.TargetTimeout = targettimeout;
-		porter->SendQueue(RequestQueueHandle, &raw, sizeof(EmbeXrpcRawData));
+		auto r=porter->SendQueue(RequestQueueHandle, &raw, sizeof(EmbeXrpcRawData));
+		if (r != QueueState_OK)
+		{
+			if (dataLen > 0)
+				porter->Free(raw.Data);
+		}
 
 	}
 	static void SuspendTimerCallBack(void* arg)

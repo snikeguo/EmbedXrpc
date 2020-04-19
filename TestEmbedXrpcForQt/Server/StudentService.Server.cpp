@@ -3,7 +3,7 @@ void  BroadcastDataTimeDelegate::Invoke(DateTime_t t)
 {
 //write serialization code:BroadcastDataTime(t,)
 static BroadcastDataTimeStruct sendData;
-RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, 100);
+RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
 SerializationManager sm;
 sm.Reset();
 sm.Buf = &RpcServerObject->Buffer[4];
@@ -44,6 +44,8 @@ static Test_Request request;
 Test_Request_Type.Deserialize(recManager,&request);
 Test();
 Test_Request_Type.Free(&request);
+Test_Response_Type.Serialize(sendManager,0,&Response);
+Test_Response_Type.Free(&Response);
 }
 TestService TestServiceInstance;
 RequestMessageMap IMyInterface_RequestMessages[]=

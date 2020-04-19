@@ -17,7 +17,7 @@ typedef  uint64_t UInt64;
 typedef  int64_t Int64;
 typedef  float Float;
 typedef  double Double;
-
+typedef bool Boolean;
 #ifndef WIN32
 #include <rtthread.h>
 #define MALLOC	rt_malloc

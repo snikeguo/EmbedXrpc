@@ -47,7 +47,7 @@ namespace StudentService
     {
         public void Test()
         {
-
+            this.Response.ReturnValue = true;
         }
     }
 }
@@ -59,7 +59,7 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new Client(3000, clientSend, Assembly.GetExecutingAssembly());
+            client = new Client(1000000, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
             server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
@@ -69,8 +69,9 @@ namespace EmbedXrpc
                 IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
                 while (true)
                 {
-                    var re = inter.GetStudentsInfoFormAge();
-                    Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
+                    //var re = inter.GetStudentsInfoFormAge();
+                    //Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
+                    var x=inter.Test();
                     Thread.Sleep(100);
                 }
             });
@@ -80,7 +81,7 @@ namespace EmbedXrpc
                 BroadcastDataTimeDelegate broadcastDataTimeDelegate = new BroadcastDataTimeDelegate(server);
                 while (true)
                 {
-                    broadcastDataTimeDelegate.Invoke(new DateTime_t()
+                    /*broadcastDataTimeDelegate.Invoke(new DateTime_t()
                     {
                         Year = DateTime.Now.Year,
                         Month = DateTime.Now.Month,
@@ -88,7 +89,7 @@ namespace EmbedXrpc
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second
-                    });
+                    });*/
                     Thread.Sleep(100);
                 }
             });
@@ -133,8 +134,10 @@ namespace EmbedXrpc
                         
                         try
                         {
-                            var re = inter.GetStudentsInfoFormAge();
-                            Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
+                            //var re = inter.GetStudentsInfoFormAge();
+                            //Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
+                            var testResult = inter.Test();
+                            Console.WriteLine("testResult:{0}", testResult.ReturnValue);
                         }
                         catch 
                         {

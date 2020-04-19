@@ -77,39 +77,39 @@ public:
 class IType
 {
 public:
-	virtual const char* GetTypeName() = 0;
-	virtual Type_t GetType() = 0;
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) {}
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) {}
-	virtual void Deserialize(SerializationManager& manager, void* v) {}
-	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) {}
-	virtual void Free(void* ptr, uint32_t arrayLen=1) {}
-	virtual void* Malloc(uint32_t arrayLen) { return nullptr; }
+	virtual const char* GetTypeName() const = 0;
+	virtual const Type_t GetType() const = 0;
+	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen)  const  {}
+	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const {}
+	virtual void Deserialize(SerializationManager& manager, void* v)const {}
+	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen)const {}
+	virtual void Free(void* ptr, uint32_t arrayLen=1)const {}
+	virtual void* Malloc(uint32_t arrayLen)const { return nullptr; }
 };
 
 class IField //:public IType
 {
 public:
 	
-	virtual uint32_t GetOffset() { return 0; }
-	virtual const char* GetName() = 0;
+	virtual const uint32_t GetOffset() const { return 0; }
+	virtual const char* GetName() const = 0;
 	
 
-	virtual IField* GetArrayLenField() { return nullptr; }
-	virtual uint8_t GetArrayLenFieldLen() { return 0; }
-	virtual bool IsFixed() { return true; }
+	virtual const IField* GetArrayLenField() const { return nullptr; }
+	virtual const uint8_t GetArrayLenFieldLen() const { return 0; }
+	virtual const bool IsFixed() const { return true; }
 
 	//type 部分
-	virtual const char* GetTypeName() = 0;
+	virtual const char* GetTypeName() const = 0;
 	//virtual Type_t GetType() = 0;
-	virtual IType* GetTypeInstance() { return nullptr; }
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) {}
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) {}
-	virtual void Deserialize(SerializationManager& manager, void* v) {}
-	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) {}
+	virtual const IType* GetTypeInstance() const { return nullptr; }
+	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) const {}
+	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const {}
+	virtual void Deserialize(SerializationManager& manager, void* v) const {}
+	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const {}
 
-	virtual void Free(void* ptr, uint32_t arrayLen=1) {}
-	virtual void* Malloc(uint32_t arrayLen) { return nullptr; }
+	virtual void Free(void* ptr, uint32_t arrayLen=1) const {}
+	virtual void* Malloc(uint32_t arrayLen) const { return nullptr; }
 
 	
 };
@@ -117,22 +117,22 @@ public:
 class ArrayType :public IType
 {
 public:
-	IType* ArrayElementType;
-	uint32_t ElementTypeLen;
-	ArrayType(IType* arrayElementType, uint32_t elementTypeLen)
+	const IType* ArrayElementType;
+	const uint32_t ElementTypeLen;
+	ArrayType(const IType* arrayElementType, const uint32_t elementTypeLen) :
+		ArrayElementType(arrayElementType),
+		ElementTypeLen(elementTypeLen) 
 	{
-		ArrayElementType = arrayElementType;
-		ElementTypeLen = elementTypeLen;
 	}
-	const char* GetTypeName()
+	const char* GetTypeName() const
 	{
 		return "array";
 	}
-	Type_t GetType()
+	const Type_t GetType()const 
 	{
 		return TYPE_ARRAY;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen)
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) const
 	{
 		for (uint32_t i = 0; i < arrayLen; i++)
 		{
@@ -140,7 +140,7 @@ public:
 			ArrayElementType->Serialize(manager, Tag, (void*)(d + i * ElementTypeLen));
 		}
 	}
-	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen)
+	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
 	{
 		for (uint32_t i = 0; i < arrayLen; i++)
 		{
@@ -151,13 +151,13 @@ public:
 
 	}
 	
-	void* Malloc(uint32_t arrayLen)
+	void* Malloc(uint32_t arrayLen) const
 	{
 		void *ptr=MALLOC(arrayLen * ElementTypeLen);
 		Debug("malloc :0x%x,arrayLen:%d\n", (uint32_t)ptr, arrayLen);
 		return ptr;
 	}
-	void Free(void* ptr, uint32_t arrayLen=1)
+	void Free(void* ptr, uint32_t arrayLen=1) const
 	{
 		for (uint32_t i = 0; i < arrayLen; i++)
 		{
@@ -171,32 +171,34 @@ class ArrayField :public IField
 {
 public:
 	const char* Name;
-	uint32_t Offset;
-	IField* ArrayLenField;
-	ArrayType t;
-	bool _IsFixed;
-	ArrayField(const char* name,bool isFixed, IType* arrayElementType, uint32_t elementTypeLen, uint32_t offset, IField* arrayLenField) :t(arrayElementType, elementTypeLen)
+	const uint32_t Offset;
+	const IField* ArrayLenField;
+	const ArrayType t;
+	const bool _IsFixed;
+	ArrayField(const char* name, const bool isFixed, const IType* arrayElementType, const uint32_t elementTypeLen, const uint32_t offset,const IField* arrayLenField)
+		:t(arrayElementType, elementTypeLen),
+		ArrayLenField(arrayLenField),
+		Offset(offset),
+		Name(name),
+		_IsFixed(isFixed)
 	{
-		Offset = offset;
-		ArrayLenField = arrayLenField;
-		Name = name;
-		_IsFixed = isFixed;
+
 	}
 
-	const char* GetName()
+	const char* GetName() const
 	{
 		return Name;
 	}
 
-	uint32_t GetOffset()
+	const uint32_t GetOffset() const
 	{
 		return Offset;
 	}
-	IField* GetArrayLenField()
+	const IField* GetArrayLenField() const
 	{
 		return ArrayLenField;
 	}
-	uint8_t GetArrayLenFieldLen()
+	const uint8_t GetArrayLenFieldLen() const
 	{
 		switch (ArrayLenField->GetTypeInstance()->GetType())
 		{
@@ -230,32 +232,32 @@ public:
 		}
 		return 0;
 	}
-	bool IsFixed()
+	const bool IsFixed() const
 	{
 		return _IsFixed;
 	}
 	//type部分
-	const char* GetTypeName()
+	const char* GetTypeName() const
 	{
 		return t.GetTypeName();
 	}
-	IType * GetTypeInstance()
+	const IType * GetTypeInstance() const
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen)
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) const
 	{
 		t.Serialize(manager, Tag, v, arrayLen);
 	}
-	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen)
+	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
 	{
 		t.Deserialize(manager, v, arrayLen);
 	}
-	void* Malloc(uint32_t arrayLen)
+	void* Malloc(uint32_t arrayLen) const
 	{
 		return t.Malloc(arrayLen);
 	}
-	void Free(void* ptr, uint32_t arrayLen=1)
+	void Free(void* ptr, uint32_t arrayLen=1) const
 	{
 		t.Free(ptr,arrayLen);
 	}
@@ -263,59 +265,59 @@ public:
 class UInt8Type :public IType
 {
 public:
-	const char* GetTypeName()
+	const char* GetTypeName() const
 	{
 		return "uint8_t";
 	}
-	Type_t GetType()
+	const Type_t GetType() const
 	{
 		return TYPE_UINT8;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
 	{
 		manager.Append(Tag, TYPE_UINT8, 1, v);
 	}
-	void Deserialize(SerializationManager& manager, void* v)
+	void Deserialize(SerializationManager& manager, void* v) const
 	{
 		MEMCPY(v, &manager.Buf[manager.Index], 1);
 		manager.Index++;
 	}
 };
-extern UInt8Type UInt8TypeInstance;
+extern const UInt8Type UInt8TypeInstance;
 class UInt8Field : public IField
 {
 public:
 	const char* Name;
-	uint32_t Offset;
-	UInt8Type t;
-	UInt8Field(const char* name, uint32_t offset) :Name(name), Offset(offset)
+	const uint32_t Offset;
+	const UInt8Type t;
+	UInt8Field(const char* name, const uint32_t offset) :Name(name), Offset(offset)
 	{
 
 	}
-	const char* GetName()
+	const char* GetName() const
 	{
 		return Name;
 	}
 
-	uint32_t GetOffset()
+	const uint32_t GetOffset() const
 	{
 		return Offset;
 	}
 
 	//type部分
-	const char* GetTypeName()
+	const char* GetTypeName() const
 	{
 		return t.GetTypeName();
 	}
-	IType* GetTypeInstance()
+	const IType* GetTypeInstance() const
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
 	{
 		t.Serialize(manager, Tag, v);
 	}
-	void Deserialize(SerializationManager& manager, void* v)
+	void Deserialize(SerializationManager& manager, void* v) const
 	{
 		t.Deserialize(manager, v);
 	}
@@ -326,55 +328,55 @@ public:
 class prefix##Type:public IType	\
 {								\
 public:							\
-	const char* GetTypeName()	\
+	const char* GetTypeName() const	\
 	{							\
 		return typeName;		\
 	}							\
-	Type_t GetType()\
+	const Type_t GetType() const \
 	{\
 		return type;\
 	}\
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)	\
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const	\
 	{	\
 		manager.Append(Tag, type, len, v);\
 	}\
-	void Deserialize(SerializationManager& manager, void* v)\
+	void Deserialize(SerializationManager& manager, void* v) const \
 	{\
 		MEMCPY(v, &manager.Buf[manager.Index], len);\
 		manager.Index+=len;\
 	}\
 };\
-extern prefix##Type prefix##TypeInstance; \
+extern const prefix##Type prefix##TypeInstance; \
 class prefix##Field : public IField	\
 {\
 public:\
 	const char* Name;\
-	uint32_t Offset;\
-	prefix##Type t;\
-	prefix##Field(const char* name, uint32_t offset) :Name(name), Offset(offset)\
+	const uint32_t Offset;\
+	const prefix##Type t;\
+	prefix##Field(const char* name, const uint32_t offset) :Name(name), Offset(offset)\
 	{																			\
 	}																			\
-	const char* GetName()\
+	const char* GetName() const \
 	{\
 		return Name;\
 	}\
-	uint32_t GetOffset()\
+	const uint32_t GetOffset() const \
 	{\
 		return Offset;\
 	}\
-	const char* GetTypeName()\
+	const char* GetTypeName() const \
 	{\
 		return t.GetTypeName();\
 	}\
-	IType * GetTypeInstance()	\
+	const IType * GetTypeInstance()	const \
 	{	\
 		return &t;\
 	}\
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)\
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const \
 	{\
 		t.Serialize(manager, Tag, v);\
 	}\
-	void Deserialize(SerializationManager& manager, void* v)\
+	void Deserialize(SerializationManager& manager, void* v) const \
 	{\
 		t.Deserialize(manager, v);\
 	}\
@@ -389,28 +391,29 @@ CodeGenBaseValueClass(Int64, "int64_t", TYPE_UINT64, 8);
 CodeGenBaseValueClass(Float, "float", TYPE_FLOAT, 4);
 CodeGenBaseValueClass(Double, "double", TYPE_DOUBLE, 8);
 
-#define DefineBaseValueInstance(prefix) prefix##Type prefix##TypeInstance;
+#define DefineBaseValueInstance(prefix) const prefix##Type prefix##TypeInstance;
 
 
 class ObjectType :public IType
 {
 public:
-	uint32_t FieldCount;
-	IField** SubFields;
-	const char* GetTypeName()
+	const uint32_t FieldCount;
+	const IField** SubFields;
+	const char* GetTypeName() const
 	{
 		return "Object";
 	}
-	Type_t GetType()
+	const Type_t GetType() const 
 	{
 		return TYPE_OBJECT;
 	}
-	ObjectType(uint32_t fc, IField* ftds[])
+	ObjectType(const uint32_t fc, const IField* ftds[]):
+		FieldCount(fc),
+		SubFields(ftds)
 	{
-		FieldCount = fc;
-		SubFields = ftds;
+
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
@@ -440,7 +443,7 @@ public:
 			}
 		}
 	}
-	void Deserialize(SerializationManager& manager, void* v)
+	void Deserialize(SerializationManager& manager, void* v) const
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
@@ -471,7 +474,7 @@ public:
 			}
 		}
 	}
-	void Free(void* v, uint32_t arrayLen=1)
+	void Free(void* v, uint32_t arrayLen=1) const
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
@@ -500,40 +503,42 @@ class ObjectField :public IField
 public:
 
 	const char* Name;
-	uint32_t Offset;
-	ObjectType t;
-	ObjectField(const char* name, uint32_t fc, IField* ftds[], uint32_t offset) :t(fc, ftds)
+	const uint32_t Offset;
+	const ObjectType t;
+	ObjectField(const char* name, const uint32_t fc, const IField* ftds[], const uint32_t offset) :
+		t(fc, ftds),
+		Offset(offset),
+		Name(name)
 	{
-		Offset = offset;
-		Name = name;
+
 	}
-	const char* GetName()
+	const char* GetName() const
 	{
 		return Name;
 	}
-	uint32_t GetOffset()
+	const uint32_t GetOffset() const
 	{
 		return Offset;
 	}
 
 	//type部分
-	const char* GetTypeName()
+	const char* GetTypeName() const 
 	{
 		return t.GetTypeName();
 	}
-	IType* GetTypeInstance()
+	const IType* GetTypeInstance() const
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v)
+	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
 	{
 		t.Serialize(manager, Tag, v);
 	}
-	void Deserialize(SerializationManager& manager, void* v)
+	void Deserialize(SerializationManager& manager, void* v) const
 	{
 		t.Deserialize(manager, v);
 	}
-	void Free(void* v, uint32_t arrayLen=1)
+	void Free(void* v, uint32_t arrayLen=1) const
 	{
 		t.Free(v, arrayLen);
 	}

@@ -51,6 +51,11 @@ namespace EmbedXrpc
         {
             Assembly = assembly;
         }
+        public static void ToBytes(SerializationManager sm, bool d)
+        {
+            //Console.WriteLine($"u8:{d}");
+            ToBytes(sm, Convert.ToByte(d));
+        }
         public static void ToBytes(SerializationManager sm,byte d)
         {
             //Console.WriteLine($"u8:{d}");
@@ -154,6 +159,10 @@ namespace EmbedXrpc
             {
                 return true;
             }
+            if (t == typeof(bool))
+            {
+                return true;
+            }
             if (t == typeof(byte))
             {
                 return true;
@@ -194,7 +203,12 @@ namespace EmbedXrpc
             {
                 vt = vt.GetEnumUnderlyingType();
             }
-            if (vt == typeof(byte))
+            if (vt == typeof(bool))
+            {
+                return Convert.ToBoolean(FromBytes(sm, 1));
+                //field.SetValue(s, Convert.ToByte(FromBytes(sm, 1)));
+            }
+            else if (vt == typeof(byte))
             {
                 return Convert.ToByte(FromBytes(sm, 1));
                 //field.SetValue(s, Convert.ToByte(FromBytes(sm, 1)));
@@ -315,7 +329,11 @@ namespace EmbedXrpc
             {
                 vt = vt.GetEnumUnderlyingType();
             }
-            if (vt == typeof(byte))
+            if (vt == typeof(bool))
+            {
+                ToBytes(sm, (bool)v);
+            }
+            else if (vt == typeof(byte))
             {
                 ToBytes(sm, (byte)v);
             }

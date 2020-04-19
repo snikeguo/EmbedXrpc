@@ -70,5 +70,10 @@ StudentArray_t ReturnValue;
 typedef struct _Test_Request
 {
 }Test_Request;
+typedef struct _Test_Response
+{
+ResponseState State;
+Boolean ReturnValue;
+}Test_Response;
 
 #endif

@@ -34,6 +34,7 @@ class TestService:public IService
 {
 public:
 uint16_t GetSid(){return Test_ServiceId;}
+Test_Response Response;
 void Test();
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };

@@ -79,6 +79,7 @@ public:
 		for (uint32_t i=0;i< MessageMapsCount; i++)
 		{
 			auto iter = &MessageMaps[i];
+			auto r = QueueState_OK;
 			if (iter->Sid== serviceId)
 			{		
 				raw.Sid = serviceId;
@@ -92,13 +93,19 @@ public:
 				raw.TargetTimeout = targettimeout;
 				if (iter->ReceiveType == ReceiveType_Response)
 				{					
-					porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
+					r=porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
 				}
 				else if (iter->ReceiveType == ReceiveType_Delegate)
 				{
-					porter->SendQueue(DelegateMessageQueueHandle, &raw, sizeof(raw));
+					r=porter->SendQueue(DelegateMessageQueueHandle, &raw, sizeof(raw));
 				}
 			}
+			if (r != QueueState_OK)
+			{
+				if (dataLen > 0)
+					porter->Free(raw.Data);
+			}
+
 		}
 	}
 	static void ServiceThread(void* arg)
@@ -128,7 +135,7 @@ public:
 		}
 	}
 
-	ResponseState Wait(uint32_t sid, IType *type,void * response)
+	ResponseState Wait(uint32_t sid, const IType *type,void * response)
 	{
 		EmbeXrpcRawData recData;
 		ResponseState ret= ResponseState_Ok;
