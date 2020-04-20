@@ -20,18 +20,18 @@ namespace StudentService
             Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
         }
     }
-    public partial class GetStudentInfoFormStudentIdService : IService
+    public partial class IMyInterface_GetStudentInfoFormStudentIdService : IService
     {
         public void GetStudentInfoFormStudentId(Byte StudentIdLen, Byte[] StudentId, Int32 arg2, Int32 arg3)
         {
 
         }
     }
-    public partial class GetStudentsInfoFormAgeService : IService
+    public partial class IMyInterface_GetStudentsInfoFormAgeService : IService
     {
         public void GetStudentsInfoFormAge()
         {
-            Thread.Sleep(10000);
+            //Thread.Sleep(10000);
             Response.ReturnValue = new StudentArray_t();
             Response.ReturnValue.StudentIdLen = 1;
             var stu = new Student_t() { Age = 2, ResultsLen = 0, StudentIdLen = 0 };
@@ -43,9 +43,9 @@ namespace StudentService
             Response.ReturnValue.Students = new Student_t[1] { stu };
         }
     }
-    public partial class TestService : IService
+    public partial class IMyInterface_TestService : IService
     {
-        public void Test()
+        public void Test(Byte[] noLen)
         {
             this.Response.ReturnValue = true;
         }
@@ -59,7 +59,7 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new Client(1000000, clientSend, Assembly.GetExecutingAssembly());
+            client = new Client(1000, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
             server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
@@ -69,9 +69,9 @@ namespace EmbedXrpc
                 IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
                 while (true)
                 {
-                    //var re = inter.GetStudentsInfoFormAge();
-                    //Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
-                    var x=inter.Test();
+                    var re = inter.GetStudentsInfoFormAge();
+                    Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
+                    var x=inter.Test(new byte[1] { 22});
                     Thread.Sleep(100);
                 }
             });
@@ -81,7 +81,7 @@ namespace EmbedXrpc
                 BroadcastDataTimeDelegate broadcastDataTimeDelegate = new BroadcastDataTimeDelegate(server);
                 while (true)
                 {
-                    /*broadcastDataTimeDelegate.Invoke(new DateTime_t()
+                    broadcastDataTimeDelegate.Invoke(new DateTime_t()
                     {
                         Year = DateTime.Now.Year,
                         Month = DateTime.Now.Month,
@@ -89,7 +89,7 @@ namespace EmbedXrpc
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second
-                    });*/
+                    });
                     Thread.Sleep(100);
                 }
             });

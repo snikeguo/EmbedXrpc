@@ -47,33 +47,34 @@ typedef struct _BroadcastDataTimeStruct
 {
 DateTime_t t;
 }BroadcastDataTimeStruct;
-typedef struct _GetStudentInfoFormStudentId_Request
+typedef struct _IMyInterface_GetStudentInfoFormStudentId_Request
 {
 Byte StudentIdLen;
 Byte StudentId[100];
 Int32 arg2;
 Int32 arg3;
-}GetStudentInfoFormStudentId_Request;
-typedef struct _GetStudentInfoFormStudentId_Response
+}IMyInterface_GetStudentInfoFormStudentId_Request;
+typedef struct _IMyInterface_GetStudentInfoFormStudentId_Response
 {
 ResponseState State;
 Student_t ReturnValue;
-}GetStudentInfoFormStudentId_Response;
-typedef struct _GetStudentsInfoFormAge_Request
+}IMyInterface_GetStudentInfoFormStudentId_Response;
+typedef struct _IMyInterface_GetStudentsInfoFormAge_Request
 {
-}GetStudentsInfoFormAge_Request;
-typedef struct _GetStudentsInfoFormAge_Response
+}IMyInterface_GetStudentsInfoFormAge_Request;
+typedef struct _IMyInterface_GetStudentsInfoFormAge_Response
 {
 ResponseState State;
 StudentArray_t ReturnValue;
-}GetStudentsInfoFormAge_Response;
-typedef struct _Test_Request
+}IMyInterface_GetStudentsInfoFormAge_Response;
+typedef struct _IMyInterface_Test_Request
 {
-}Test_Request;
-typedef struct _Test_Response
+Byte noLen[1];
+}IMyInterface_Test_Request;
+typedef struct _IMyInterface_Test_Response
 {
 ResponseState State;
 Boolean ReturnValue;
-}Test_Response;
+}IMyInterface_Test_Response;
 
 #endif

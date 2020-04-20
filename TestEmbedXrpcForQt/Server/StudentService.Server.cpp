@@ -18,39 +18,39 @@ RpcServerObject->Send(RpcServerObject,sm.Index+4,RpcServerObject->Buffer);
 sm.Reset();
 RpcServerObject->porter->ReleaseMutex(RpcServerObject->SendMutexHandle);
 }
-void GetStudentInfoFormStudentIdService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
+void IMyInterface_GetStudentInfoFormStudentIdService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
-static GetStudentInfoFormStudentId_Request request;
-GetStudentInfoFormStudentId_Request_Type.Deserialize(recManager,&request);
+static IMyInterface_GetStudentInfoFormStudentId_Request request;
+IMyInterface_GetStudentInfoFormStudentId_Request_Type.Deserialize(recManager,&request);
 GetStudentInfoFormStudentId(request.StudentIdLen,request.StudentId,request.arg2,request.arg3);
-GetStudentInfoFormStudentId_Request_Type.Free(&request);
-GetStudentInfoFormStudentId_Response_Type.Serialize(sendManager,0,&Response);
-GetStudentInfoFormStudentId_Response_Type.Free(&Response);
+IMyInterface_GetStudentInfoFormStudentId_Request_Type.Free(&request);
+IMyInterface_GetStudentInfoFormStudentId_Response_Type.Serialize(sendManager,0,&Response);
+IMyInterface_GetStudentInfoFormStudentId_Response_Type.Free(&Response);
 }
-GetStudentInfoFormStudentIdService GetStudentInfoFormStudentIdServiceInstance;
-void GetStudentsInfoFormAgeService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
+IMyInterface_GetStudentInfoFormStudentIdService IMyInterface_GetStudentInfoFormStudentIdServiceInstance;
+void IMyInterface_GetStudentsInfoFormAgeService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
-static GetStudentsInfoFormAge_Request request;
-GetStudentsInfoFormAge_Request_Type.Deserialize(recManager,&request);
+static IMyInterface_GetStudentsInfoFormAge_Request request;
+IMyInterface_GetStudentsInfoFormAge_Request_Type.Deserialize(recManager,&request);
 GetStudentsInfoFormAge();
-GetStudentsInfoFormAge_Request_Type.Free(&request);
-GetStudentsInfoFormAge_Response_Type.Serialize(sendManager,0,&Response);
-GetStudentsInfoFormAge_Response_Type.Free(&Response);
+IMyInterface_GetStudentsInfoFormAge_Request_Type.Free(&request);
+IMyInterface_GetStudentsInfoFormAge_Response_Type.Serialize(sendManager,0,&Response);
+IMyInterface_GetStudentsInfoFormAge_Response_Type.Free(&Response);
 }
-GetStudentsInfoFormAgeService GetStudentsInfoFormAgeServiceInstance;
-void TestService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
+IMyInterface_GetStudentsInfoFormAgeService IMyInterface_GetStudentsInfoFormAgeServiceInstance;
+void IMyInterface_TestService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
-static Test_Request request;
-Test_Request_Type.Deserialize(recManager,&request);
-Test();
-Test_Request_Type.Free(&request);
-Test_Response_Type.Serialize(sendManager,0,&Response);
-Test_Response_Type.Free(&Response);
+static IMyInterface_Test_Request request;
+IMyInterface_Test_Request_Type.Deserialize(recManager,&request);
+Test(request.noLen);
+IMyInterface_Test_Request_Type.Free(&request);
+IMyInterface_Test_Response_Type.Serialize(sendManager,0,&Response);
+IMyInterface_Test_Response_Type.Free(&Response);
 }
-TestService TestServiceInstance;
+IMyInterface_TestService IMyInterface_TestServiceInstance;
 RequestMessageMap IMyInterface_RequestMessages[]=
 {
-{"GetStudentInfoFormStudentId",&GetStudentInfoFormStudentIdServiceInstance},
-{"GetStudentsInfoFormAge",&GetStudentsInfoFormAgeServiceInstance},
-{"Test",&TestServiceInstance},
+{"IMyInterface_GetStudentInfoFormStudentId",&IMyInterface_GetStudentInfoFormStudentIdServiceInstance},
+{"IMyInterface_GetStudentsInfoFormAge",&IMyInterface_GetStudentsInfoFormAgeServiceInstance},
+{"IMyInterface_Test",&IMyInterface_TestServiceInstance},
 };

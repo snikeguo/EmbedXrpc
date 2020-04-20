@@ -106,7 +106,7 @@ interface IMyInterface
         //[FieldIndex(0)]int Age
         );//客户端从服务器获取数据：根据姓名筛选出那个学生
 
-    bool Test();
+    bool Test(byte[]noLen);
 }
 #else
 [FileName("idltest1.cs")]

@@ -272,17 +272,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attribute.cs" />
-    <Content Include="can.idl.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Compile Include="Commands.cs" />
     <Compile Include="CppCodeGenerater.cs" />
     <Compile Include="CsCodeGenerater.cs" />
     <Compile Include="EmbedXrpcSerializationExtension.cs" />
     <Compile Include="FbsExtension.cs" />
-    <None Include="global.idl.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="ICodeGenerater.cs" />
     <None Include="idltest1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

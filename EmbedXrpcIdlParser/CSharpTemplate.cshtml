@@ -207,7 +207,7 @@
         foreach (var service in interf.Services)
         {
             TargetStruct stru = new TargetStruct();
-            stru.Name = service.ServiceName + "_Request";
+            stru.Name = interf.Name+"_"+ service.ServiceName + "_Request";
             stru.TargetFields = service.TargetFields;
             <h1 public class @stru.Name />
             <h1 { />
@@ -246,7 +246,7 @@
             if (service.ReturnValue != null)
             {
                 TargetStruct returnstru = new TargetStruct();
-                returnstru.Name = service.ServiceName + "_Response";
+                returnstru.Name = interf.Name+"_"+service.ServiceName + "_Response";
                 TargetField returnField = new TargetField() { IdlType = service.ReturnValue.IdlType, IsArray = false, Name = "ReturnValue" };
                 TargetField ResponseStateField = new TargetField() { IdlType = "ResponseState", IsArray = false, Name = "State" };
                 returnstru.TargetFields = new List<TargetField>() { ResponseStateField, returnField };
@@ -273,19 +273,19 @@
             {
                 string serviceattr = "[ServiceInfo(Name=\"" + service.ServiceName + "\")]";
                 <h1 @serviceattr />
-                <h1 public partial class @(service.ServiceName + "Service") :IService />
+                <h1 public partial class @(interf.Name+"_"+service.ServiceName + "Service") :IService />
                 <h1 { />
                 <h1 @("public static readonly UInt16 " + service.ServiceName + "_ServiceId=" + service.ServiceId.ToString() + ";") />
 
                 <h1 public override UInt16 GetSid(){ return @(service.ServiceName + "_ServiceId") ; } />
                 if (service.ReturnValue != null)
                 {
-                    <h1 private @(service.ServiceName + "_Response Response")=new @(service.ServiceName + "_Response()") ; />
+                    <h1 private @(interf.Name+"_"+service.ServiceName + "_Response Response")=new @(interf.Name+"_"+service.ServiceName + "_Response()") ; />
                 }
                 <h1 public override void Invoke(SerializationManager recManager, SerializationManager sendManager) />
                 <h1 { />
                 <h1 Serialization serialization=new Serialization(Assembly.GetExecutingAssembly()); />
-                string s = service.ServiceName + "_Request request = serialization.Deserialize <" + service.ServiceName + "_Request>(recManager);";
+                string s = interf.Name+"_"+service.ServiceName + "_Request request = serialization.Deserialize <" +interf.Name+"_"+ service.ServiceName + "_Request>(recManager);";
                 <h1 @s />
                 string pars = string.Empty;
                 string externstr = string.Empty;
@@ -344,7 +344,7 @@
                 }
                 if (service.ReturnValue != null)
                 {
-                    <h1 public @(service.ServiceName + "_Response") @(service.ServiceName + "(") @(pars + ")") />
+                    <h1 public @(interf.Name+"_"+service.ServiceName + "_Response") @(service.ServiceName + "(") @(pars + ")") />
                 }
                 else
                 {
@@ -354,7 +354,7 @@
                 <h1 lock(Client.ObjectMutex) />
                 <h1 { />
                 <h1 Client.ResponseMessageQueueHandle.Reset(); />
-                <h1 @(service.ServiceName + "_Request request")=new @(service.ServiceName + "_Request ();") />
+                <h1 @(interf.Name+"_"+service.ServiceName + "_Request request")=new @(interf.Name+"_"+service.ServiceName + "_Request ();") />
                 for (int pi = 0; pi < service.TargetFields.Count; pi++)
                 {
                     var par = service.TargetFields[pi];
@@ -384,11 +384,11 @@
                 <h1 Client.Send ( sendBytes.Count,0,sendBytes.ToArray() ); />
                 if (service.ReturnValue != null)
                 {
-                    <h1 @(service.ServiceName + "_Response response")=new @(service.ServiceName + "_Response()") ; />
-                    <h1 ResponseState result=@("Client.Wait<"+service.ServiceName+ "_Response>(") @(service.ServiceName + "_ServiceId, out response);") />
+                    <h1 @(interf.Name+"_"+service.ServiceName + "_Response response")=new @(interf.Name+"_"+service.ServiceName + "_Response()") ; />
+                    <h1 ResponseState result=@("Client.Wait<"+interf.Name+"_"+service.ServiceName+ "_Response>(") @(service.ServiceName + "_ServiceId, out response);") />
                     <h1 if(response @("==null") ) />
                     <h1 { />
-                    <h1 response=new @(service.ServiceName + "_Response()") ; />
+                    <h1 response=new @(interf.Name+"_"+service.ServiceName + "_Response()") ; />
                     <h1 } />
                     <h1 response.State=result; />
                     <h1 return response; />

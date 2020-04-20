@@ -63,13 +63,13 @@ void TestEmbedXrpcForQt::ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* dat
 
 
 
-void GetStudentInfoFormStudentIdService::GetStudentInfoFormStudentId(Byte StudentIdLen, Byte StudentId[100], Int32 arg2, Int32 arg3)
+void IMyInterface_GetStudentInfoFormStudentIdService::GetStudentInfoFormStudentId(Byte StudentIdLen, Byte StudentId[100], Int32 arg2, Int32 arg3)
 {
 	Response.ReturnValue.Age = 1;
 }
-void GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
+void IMyInterface_GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
 {
-	memset(&Response, 0x0, sizeof(GetStudentsInfoFormAge_Response));
+	memset(&Response, 0x0, sizeof(IMyInterface_GetStudentsInfoFormAge_Response));
 	Response.ReturnValue.StudentIdLen = 1;
 	Response.ReturnValue.Students[0].Age = 2;
 	Response.ReturnValue.Students[0].Name = (uint8_t*)"123";
@@ -78,10 +78,10 @@ void GetStudentsInfoFormAgeService::GetStudentsInfoFormAge()
 	{
 		Response.ReturnValue.Students[0].StudentId[i] = i + 0x30;
 	}
-	Response.ReturnValue.Students[0].StudentIdLen = 10;//�ٶ�ֻ����15��
+	Response.ReturnValue.Students[0].StudentIdLen = 10;//
 	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 }
-void TestService::Test()
+void IMyInterface_TestService::Test(Byte noLen[1])
 {
 	std::cout << "server:test!" << std::endl;
 	this->Response.ReturnValue = false;

@@ -67,6 +67,8 @@ namespace EmbedXrpcIdlParser
         /// </summary>
         public string UserNote { get; set; }
 
+        public int ServiceIdStartNumber { get; set; } = 0x10;
+
     } 
 
 

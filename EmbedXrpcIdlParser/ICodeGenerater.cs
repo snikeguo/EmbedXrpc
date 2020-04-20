@@ -261,149 +261,124 @@ namespace EmbedXrpcIdlParser
             }
             int ServiceId = 0x10;
             Console.WriteLine("parse :{0}...", file);
-            //using (SimpleAsmProbing.For(Assembly.GetExecutingAssembly().Location.GetDirName()))
+            CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
+            var eva = CSScript.Evaluator;
+            Assembly assembly = CSScript.Evaluator.CompileCode(File.ReadAllText(file));
+            var types = assembly.GetTypes();
+
+            //processing the service id
+            foreach (var type in types)
             {
-                CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
-                var eva = CSScript.Evaluator;
-                Assembly assembly = CSScript.Evaluator.CompileCode(File.ReadAllText(file));
-                var types = assembly.GetTypes();
-                foreach (var type in types)
+                var filename = type.GetCustomAttribute<FileNameAttribute>();
+                if (filename == null)
                 {
-                    var filename = type.GetCustomAttribute<FileNameAttribute>();
-                    if (filename == null)
-                    {
-                        throw new Exception("you must add FileNameAttribute into every class/struct!");
-                    }
-                    if (filename.FileNameString != file)
-                    {
-                        Parse(filename.FileNameString);
-                        continue;
-                    }
-                    if(type.GetInterface("IOptionProcess")!=null)
-                    {
-                        var process = assembly.CreateInstance(type.FullName) as IOptionProcess;
-                        fileIdlInfo.GenerationOption = process.Process();
-                    }
-                    else if (type.IsValueType == true)
-                    {
-                        if (type.IsEnum == true)
-                        {
-                            var vs = type.GetEnumValues();
-                            TargetEnum te = new TargetEnum();
-                            te.Name = type.Name;
-                            te.IntType = type.GetEnumUnderlyingType().Name;
-                            foreach (var vsv in vs)
-                            {
-                                TargetEnumValue targetEnumValue = new TargetEnumValue();
-                                targetEnumValue.Value = Convert.ToInt32(vsv);
-                                targetEnumValue.Description = type.GetEnumName(vsv);
-                                te.TargetEnumValues.Add(targetEnumValue);
-                            }
-                            fileIdlInfo.TargetEnums.Add(te);
-                            //Console.WriteLine(te.ToString());
-                        }
-                        else
-                        {
-                            TargetStruct targetStruct = new TargetStruct();
-                            targetStruct.Name = type.Name;
-                            var fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-                            foreach (var field in fields)
-                            {
-                                //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
-                                TargetField targetField = new TargetField();
-                                //targetField.FieldIndexAttribute = fieldIndexAttribute;
-                                targetField.IsArray = field.FieldType.IsArray;
-                                targetField.IdlType = field.FieldType.Name;
-                                targetField.Name = field.Name;
-                                targetField.IsBaseValueType = IsBaseValueType(field.FieldType);
-                                if (targetField.IsArray == true)
-                                {
-                                    targetField.MaxCountAttribute = field.GetCustomAttribute<MaxCountAttribute>();
-                                    targetField.ElementType = field.FieldType.GetElementType().Name;
-                                }
-                                if (field.FieldType.IsEnum == true)
-                                {
-                                    targetField.Enum = GetTargetEnum(targetField.IdlType, fileIdlInfo);
-                                }
-                                targetStruct.TargetFields.Add(targetField);
-                            }
-                            fileIdlInfo.TargetStructs.Add(targetStruct);
-                            //Console.WriteLine(targetStruct.ToString());
-                        }
+                    throw new Exception("you must add FileNameAttribute into every class/struct!");
+                }
+                if (filename.FileNameString != file)
+                {
+                    Parse(filename.FileNameString);
+                    continue;
+                }
+                if (type.GetInterface("IOptionProcess") != null)
+                {
+                    var process = assembly.CreateInstance(type.FullName) as IOptionProcess;
+                    fileIdlInfo.GenerationOption = process.Process();
+                    ServiceId = fileIdlInfo.GenerationOption.ServiceIdStartNumber;
+                }
+            }
+            if(fileIdlInfo==null)
+            {
+                throw new Exception("GenerationOption is null!");
+            }
 
-                    }
-                    else if (type.IsInterface == true)
+            foreach (var type in types)
+            {
+                var filename = type.GetCustomAttribute<FileNameAttribute>();
+                if (filename == null)
+                {
+                    throw new Exception("you must add FileNameAttribute into every class/struct!");
+                }
+                if (filename.FileNameString != file)
+                {
+                    Parse(filename.FileNameString);
+                    continue;
+                }
+                if (type.IsValueType == true)
+                {
+                    if (type.IsEnum == true)
                     {
-                        TargetInterface targetInterface = new TargetInterface();
-                        targetInterface.Name = type.Name;
-                        var services = type.GetMembers();
-                        foreach (var service in services)
+                        var vs = type.GetEnumValues();
+                        TargetEnum te = new TargetEnum();
+                        te.Name = type.Name;
+                        te.IntType = type.GetEnumUnderlyingType().Name;
+                        foreach (var vsv in vs)
                         {
-                            TargetService targetService = new TargetService();
-                            targetService.ServiceId = ServiceId;
-                            ServiceId++;
-                            var mt = (service as MethodInfo);
-                            Type rt = mt.ReturnType;
-                            if(rt.Name!="Void")
-                            {
-                                TargetReturnValue returnValue = new TargetReturnValue();
-                                returnValue.IdlType = mt.ReturnType.Name;
-                                if (mt.ReturnType.IsArray == true)
-                                {
-                                    throw new Exception("return value does not support array type!");
-                                }
-
-                                targetService.ReturnValue = returnValue;
-                            }
-
-
-                            targetService.ServiceName = mt.Name;
-                            var pars = mt.GetParameters();
-                            foreach (var par in pars)
-                            {
-                                TargetField field = new TargetField();
-                                //field.FieldIndexAttribute = par.GetCustomAttribute<FieldIndexAttribute>();
-                                field.IsArray = par.ParameterType.IsArray;
-                                if (field.IsArray == true)
-                                {
-                                    field.MaxCountAttribute = par.GetCustomAttribute<MaxCountAttribute>();
-                                    field.ElementType = par.ParameterType.GetElementType().Name;
-                                }
-                                field.IdlType = par.ParameterType.Name;
-                                field.Name = par.Name;
-                                field.IsBaseValueType = IsBaseValueType(par.ParameterType);
-                                if (par.ParameterType.IsEnum == true)
-                                {
-                                    field.Enum = GetTargetEnum(field.IdlType, fileIdlInfo);
-                                }
-                                targetService.TargetFields.Add(field);
-                            }
-                            targetInterface.Services.Add(targetService);
+                            TargetEnumValue targetEnumValue = new TargetEnumValue();
+                            targetEnumValue.Value = Convert.ToInt32(vsv);
+                            targetEnumValue.Description = type.GetEnumName(vsv);
+                            te.TargetEnumValues.Add(targetEnumValue);
                         }
-                        //Console.WriteLine(targetInterface.ToString());
-                        fileIdlInfo.TargetInterfaces.Add(targetInterface);
+                        fileIdlInfo.TargetEnums.Add(te);
+                        //Console.WriteLine(te.ToString());
                     }
-                    else if (type.BaseType.Name == "MulticastDelegate")//如果这个类型是委托。
+                    else
                     {
-                        var delms = type.GetMembers();
-                        MethodInfo invokemi = null;
-                        foreach (var delm in delms)
+                        TargetStruct targetStruct = new TargetStruct();
+                        targetStruct.Name = type.Name;
+                        var fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+                        foreach (var field in fields)
                         {
-                            if (delm.Name == "Invoke")
+                            //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
+                            TargetField targetField = new TargetField();
+                            //targetField.FieldIndexAttribute = fieldIndexAttribute;
+                            targetField.IsArray = field.FieldType.IsArray;
+                            targetField.IdlType = field.FieldType.Name;
+                            targetField.Name = field.Name;
+                            targetField.IsBaseValueType = IsBaseValueType(field.FieldType);
+                            if (targetField.IsArray == true)
                             {
-                                invokemi = delm as MethodInfo;
-                                break;
+                                var arratt = field.GetCustomAttribute<MaxCountAttribute>();
+                                targetField.MaxCountAttribute = arratt == null?new MaxCountAttribute() { IsFixed=true} : arratt;
+                                targetField.ElementType = field.FieldType.GetElementType().Name;
                             }
+                            if (field.FieldType.IsEnum == true)
+                            {
+                                targetField.Enum = GetTargetEnum(targetField.IdlType, fileIdlInfo);
+                            }
+                            targetStruct.TargetFields.Add(targetField);
                         }
-                        if (invokemi == null)
-                        {
-                            throw new NullReferenceException("invokemi is null");
-                        }
-                        TargetDelegate targetDelegate = new TargetDelegate();
-                        targetDelegate.ServiceId = ServiceId;
+                        fileIdlInfo.TargetStructs.Add(targetStruct);
+                        //Console.WriteLine(targetStruct.ToString());
+                    }
+
+                }
+                else if (type.IsInterface == true)
+                {
+                    TargetInterface targetInterface = new TargetInterface();
+                    targetInterface.Name = type.Name;
+                    var services = type.GetMembers();
+                    foreach (var service in services)
+                    {
+                        TargetService targetService = new TargetService();
+                        targetService.ServiceId = ServiceId;
                         ServiceId++;
-                        targetDelegate.MethodName = type.Name;
-                        var pars = invokemi.GetParameters();
+                        var mt = (service as MethodInfo);
+                        Type rt = mt.ReturnType;
+                        if (rt.Name != "Void")
+                        {
+                            TargetReturnValue returnValue = new TargetReturnValue();
+                            returnValue.IdlType = mt.ReturnType.Name;
+                            if (mt.ReturnType.IsArray == true)
+                            {
+                                throw new Exception("return value does not support array type!");
+                            }
+
+                            targetService.ReturnValue = returnValue;
+                        }
+
+
+                        targetService.ServiceName = mt.Name;
+                        var pars = mt.GetParameters();
                         foreach (var par in pars)
                         {
                             TargetField field = new TargetField();
@@ -411,7 +386,8 @@ namespace EmbedXrpcIdlParser
                             field.IsArray = par.ParameterType.IsArray;
                             if (field.IsArray == true)
                             {
-                                field.MaxCountAttribute = par.GetCustomAttribute<MaxCountAttribute>();
+                                var arratt = par.GetCustomAttribute<MaxCountAttribute>();
+                                field.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true } : arratt;
                                 field.ElementType = par.ParameterType.GetElementType().Name;
                             }
                             field.IdlType = par.ParameterType.Name;
@@ -421,17 +397,59 @@ namespace EmbedXrpcIdlParser
                             {
                                 field.Enum = GetTargetEnum(field.IdlType, fileIdlInfo);
                             }
-                            targetDelegate.TargetFields.Add(field);
+                            targetService.TargetFields.Add(field);
                         }
-                        fileIdlInfo.TargetDelegates.Add(targetDelegate);
-                        //Console.WriteLine(targetDelegate.ToString());
+                        targetInterface.Services.Add(targetService);
                     }
+                    //Console.WriteLine(targetInterface.ToString());
+                    fileIdlInfo.TargetInterfaces.Add(targetInterface);
+                }
+                else if (type.BaseType.Name == "MulticastDelegate")//如果这个类型是委托。
+                {
+                    var delms = type.GetMembers();
+                    MethodInfo invokemi = null;
+                    foreach (var delm in delms)
+                    {
+                        if (delm.Name == "Invoke")
+                        {
+                            invokemi = delm as MethodInfo;
+                            break;
+                        }
+                    }
+                    if (invokemi == null)
+                    {
+                        throw new NullReferenceException("invokemi is null");
+                    }
+                    TargetDelegate targetDelegate = new TargetDelegate();
+                    targetDelegate.ServiceId = ServiceId;
+                    ServiceId++;
+                    targetDelegate.MethodName = type.Name;
+                    var pars = invokemi.GetParameters();
+                    foreach (var par in pars)
+                    {
+                        TargetField field = new TargetField();
+                        //field.FieldIndexAttribute = par.GetCustomAttribute<FieldIndexAttribute>();
+                        field.IsArray = par.ParameterType.IsArray;
+                        if (field.IsArray == true)
+                        {
+                            var arratt = par.GetCustomAttribute<MaxCountAttribute>();
+                            field.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true } : arratt;
+                            field.ElementType = par.ParameterType.GetElementType().Name;
+                        }
+                        field.IdlType = par.ParameterType.Name;
+                        field.Name = par.Name;
+                        field.IsBaseValueType = IsBaseValueType(par.ParameterType);
+                        if (par.ParameterType.IsEnum == true)
+                        {
+                            field.Enum = GetTargetEnum(field.IdlType, fileIdlInfo);
+                        }
+                        targetDelegate.TargetFields.Add(field);
+                    }
+                    fileIdlInfo.TargetDelegates.Add(targetDelegate);
+                    //Console.WriteLine(targetDelegate.ToString());
                 }
             }
-            if (fileIdlInfo.GenerationOption == null)
-            {
-                throw new Exception("GenerationOption is null!");
-            }
+
         }
     }
     public enum GenType

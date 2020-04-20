@@ -50,34 +50,36 @@ extern const IField* BroadcastDataTimeStructDesc [1];
 extern const ObjectType BroadcastDataTimeStruct_Type;
 
 #define BroadcastDataTime_ServiceId 16
-extern const UInt8Field GetStudentInfoFormStudentId_Request_Field_StudentIdLen;
-extern const ArrayField GetStudentInfoFormStudentId_Request_Field_StudentId;
-extern const Int32Field GetStudentInfoFormStudentId_Request_Field_arg2;
-extern const Int32Field GetStudentInfoFormStudentId_Request_Field_arg3;
-extern const IField* GetStudentInfoFormStudentId_RequestDesc [4];
-extern const ObjectType GetStudentInfoFormStudentId_Request_Type;
+extern const UInt8Field IMyInterface_GetStudentInfoFormStudentId_Request_Field_StudentIdLen;
+extern const ArrayField IMyInterface_GetStudentInfoFormStudentId_Request_Field_StudentId;
+extern const Int32Field IMyInterface_GetStudentInfoFormStudentId_Request_Field_arg2;
+extern const Int32Field IMyInterface_GetStudentInfoFormStudentId_Request_Field_arg3;
+extern const IField* IMyInterface_GetStudentInfoFormStudentId_RequestDesc [4];
+extern const ObjectType IMyInterface_GetStudentInfoFormStudentId_Request_Type;
 
-#define GetStudentInfoFormStudentId_ServiceId 17
-extern const UInt8Field GetStudentInfoFormStudentId_Response_Field_State;
-extern const ObjectField GetStudentInfoFormStudentId_Response_Field_ReturnValue;
-extern const IField* GetStudentInfoFormStudentId_ResponseDesc [2];
-extern const ObjectType GetStudentInfoFormStudentId_Response_Type;
+#define IMyInterface_GetStudentInfoFormStudentId_ServiceId 17
+extern const UInt8Field IMyInterface_GetStudentInfoFormStudentId_Response_Field_State;
+extern const ObjectField IMyInterface_GetStudentInfoFormStudentId_Response_Field_ReturnValue;
+extern const IField* IMyInterface_GetStudentInfoFormStudentId_ResponseDesc [2];
+extern const ObjectType IMyInterface_GetStudentInfoFormStudentId_Response_Type;
 
-extern const ObjectType GetStudentsInfoFormAge_Request_Type;
+extern const ObjectType IMyInterface_GetStudentsInfoFormAge_Request_Type;
 
-#define GetStudentsInfoFormAge_ServiceId 18
-extern const UInt8Field GetStudentsInfoFormAge_Response_Field_State;
-extern const ObjectField GetStudentsInfoFormAge_Response_Field_ReturnValue;
-extern const IField* GetStudentsInfoFormAge_ResponseDesc [2];
-extern const ObjectType GetStudentsInfoFormAge_Response_Type;
+#define IMyInterface_GetStudentsInfoFormAge_ServiceId 18
+extern const UInt8Field IMyInterface_GetStudentsInfoFormAge_Response_Field_State;
+extern const ObjectField IMyInterface_GetStudentsInfoFormAge_Response_Field_ReturnValue;
+extern const IField* IMyInterface_GetStudentsInfoFormAge_ResponseDesc [2];
+extern const ObjectType IMyInterface_GetStudentsInfoFormAge_Response_Type;
 
-extern const ObjectType Test_Request_Type;
+extern const ArrayField IMyInterface_Test_Request_Field_noLen;
+extern const IField* IMyInterface_Test_RequestDesc [1];
+extern const ObjectType IMyInterface_Test_Request_Type;
 
-#define Test_ServiceId 19
-extern const UInt8Field Test_Response_Field_State;
-extern const UInt8Field Test_Response_Field_ReturnValue;
-extern const IField* Test_ResponseDesc [2];
-extern const ObjectType Test_Response_Type;
+#define IMyInterface_Test_ServiceId 19
+extern const UInt8Field IMyInterface_Test_Response_Field_State;
+extern const UInt8Field IMyInterface_Test_Response_Field_ReturnValue;
+extern const IField* IMyInterface_Test_ResponseDesc [2];
+extern const ObjectType IMyInterface_Test_Response_Type;
 
 
 #endif
