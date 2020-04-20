@@ -271,7 +271,7 @@
         {
             if (genType == GenType.Server || genType == GenType.All)
             {
-                string serviceattr = "[ServiceInfo(Name=\"" + service.ServiceName + "\")]";
+                string serviceattr = "[ServiceInfo(Name=\"" +interf.Name+"."+ service.ServiceName + "\")]";
                 <h1 @serviceattr />
                 <h1 public partial class @(interf.Name+"_"+service.ServiceName + "Service") :IService />
                 <h1 { />
@@ -319,7 +319,7 @@
         {
             foreach (var service in interf.Services)
             {
-                string responseInfoattr = "[ResponseInfo(Name=\"" + service.ServiceName + "\",ServiceId=" + service.ServiceId.ToString() + ")]";
+                string responseInfoattr = "[ResponseInfo(Name=\"" +interf.Name+"."+ service.ServiceName + "\",ServiceId=" + service.ServiceId.ToString() + ")]";
                 <h1 @responseInfoattr />
             }
             <h1 public class @(interf.Name + "ClientImpl") />
