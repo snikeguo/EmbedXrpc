@@ -3,13 +3,16 @@
 #include <QDateTime>
 #include <iostream>
 static TestEmbedXrpcForQt* GuiInstance;
-TestEmbedXrpcForQt::TestEmbedXrpcForQt(QWidget* parent) : QMainWindow(parent), ServerRpcObject(ServerSend,
+
+TestEmbedXrpcForQt::TestEmbedXrpcForQt(QWidget* parent) : QMainWindow(parent),
+	rmCollection{ {sizeof(IMyInterface_RequestMessages) / sizeof(RequestMessageMap),IMyInterface_RequestMessages} },
+	ServerRpcObject(ServerSend,
 	5000,
 	ServerBuffer,
 	2048,
 	&ServerWin32Port,
-	sizeof(IMyInterface_RequestMessages) / sizeof(RequestMessageMap),
-	IMyInterface_RequestMessages),
+	1,
+	rmCollection),
 	BroadcastDataTimeProxy(&ServerRpcObject),
 	Socket(this)
 {

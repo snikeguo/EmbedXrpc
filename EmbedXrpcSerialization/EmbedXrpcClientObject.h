@@ -19,8 +19,11 @@ public:
 	EmbedXrpc_Queue_t ResponseMessageQueueHandle;
 	EmbedXrpc_Thread_t ServiceThreadHandle;
 
-	uint32_t MessageMapsCount;
-	ResponseDelegateMessageMap* MessageMaps;
+	uint32_t CollectionCount;
+	//ResponseDelegateMessageMap* MessageMaps;
+
+	ResponseDelegateMessageMapCollection *MapCollection;
+
 	void* UserData;
 	EmbedXrpcClientObject(
 		SendPack_t send,
@@ -28,8 +31,8 @@ public:
 		uint8_t* buf,
 		uint32_t bufLen,
 		IEmbeXrpcPort *port,
-		uint32_t messageMapsCount,
-		ResponseDelegateMessageMap* messageMaps,
+		uint32_t collectionCount,
+		ResponseDelegateMessageMapCollection* mapCollection,
 		void* ud = nullptr)
 	{
 		Send = send;
@@ -37,10 +40,13 @@ public:
 		Buffer = buf;
 		BufferLen = bufLen;
 		porter = port;
-		MessageMapsCount = messageMapsCount;
-		MessageMaps = messageMaps;
+		CollectionCount = collectionCount;
+		MapCollection = mapCollection;
 		UserData = ud;
 	}
+
+	
+
 	void Init()
 	{
 		ServiceThreadHandle = porter->CreateThread("ServiceThread", Client_ThreadPriority, ServiceThread,this);
@@ -75,38 +81,43 @@ public:
 			porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
 			return;
 		}
-
-		for (uint32_t i=0;i< MessageMapsCount; i++)
+		for (uint32_t collectionIndex = 0; collectionIndex < CollectionCount; collectionIndex++)
 		{
-			auto iter = &MessageMaps[i];
-			auto r = QueueState_OK;
-			if (iter->Sid== serviceId)
-			{		
-				raw.Sid = serviceId;
-				//raw.MessageType = iter->MessageType;
-				if (dataLen > 0)
-				{
-					raw.Data = (uint8_t*)porter->Malloc(dataLen);
-					porter->Memcpy(raw.Data, data, dataLen);
-				}
-				raw.DataLen = dataLen;
-				raw.TargetTimeout = targettimeout;
-				if (iter->ReceiveType == ReceiveType_Response)
-				{					
-					r=porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
-				}
-				else if (iter->ReceiveType == ReceiveType_Delegate)
-				{
-					r=porter->SendQueue(DelegateMessageQueueHandle, &raw, sizeof(raw));
-				}
-			}
-			if (r != QueueState_OK)
+			auto MessageMaps = MapCollection[collectionIndex].Map;
+			for (uint32_t i = 0; i < MapCollection[collectionIndex].Count; i++)
 			{
-				if (dataLen > 0)
-					porter->Free(raw.Data);
-			}
 
+				auto iter = &MessageMaps[i];
+				auto r = QueueState_OK;
+				if (iter->Sid == serviceId)
+				{
+					raw.Sid = serviceId;
+					//raw.MessageType = iter->MessageType;
+					if (dataLen > 0)
+					{
+						raw.Data = (uint8_t*)porter->Malloc(dataLen);
+						porter->Memcpy(raw.Data, data, dataLen);
+					}
+					raw.DataLen = dataLen;
+					raw.TargetTimeout = targettimeout;
+					if (iter->ReceiveType == ReceiveType_Response)
+					{
+						r = porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
+					}
+					else if (iter->ReceiveType == ReceiveType_Delegate)
+					{
+						r = porter->SendQueue(DelegateMessageQueueHandle, &raw, sizeof(raw));
+					}
+				}
+				if (r != QueueState_OK)
+				{
+					if (dataLen > 0)
+						porter->Free(raw.Data);
+				}
+
+			}
 		}
+		
 	}
 	static void ServiceThread(void* arg)
 	{
@@ -119,17 +130,22 @@ public:
 			{
 				continue;
 			}
-			for (i = 0; i < obj->MessageMapsCount; i++)
+			for (uint32_t collectionIndex = 0; collectionIndex < obj->CollectionCount; collectionIndex++)
 			{
-				if( (obj->MessageMaps[i].ReceiveType== ReceiveType_Delegate)&&(obj->MessageMaps[i].Delegate->GetSid() == recData.Sid))
+				auto MessageMaps = obj->MapCollection[collectionIndex].Map;
+				for (i = 0; i < obj->MapCollection[collectionIndex].Count; i++)
 				{
-					SerializationManager rsm;
-					rsm.Reset();
-					rsm.Buf = recData.Data;
-					rsm.BufferLen = recData.DataLen;
-					obj->MessageMaps[i].Delegate->Invoke(rsm);
+					if ((MessageMaps[i].ReceiveType == ReceiveType_Delegate) && (MessageMaps[i].Delegate->GetSid() == recData.Sid))
+					{
+						SerializationManager rsm;
+						rsm.Reset();
+						rsm.Buf = recData.Data;
+						rsm.BufferLen = recData.DataLen;
+						MessageMaps[i].Delegate->Invoke(rsm);
+					}
 				}
 			}
+			
 			obj->porter->Free(recData.Data);
 			XrpcDebug("Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}

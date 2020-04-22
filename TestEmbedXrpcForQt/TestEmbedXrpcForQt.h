@@ -18,6 +18,7 @@ private slots:
     void on_ConnectButton_clicked();
 
 private:
+	RequestMessageMapCollection rmCollection[1];
 	Ui::TestEmbedXrpcForQtClass ui;
 	EmbedXrpcServerObject ServerRpcObject;
 	Win32EmbedXrpcPort ServerWin32Port;

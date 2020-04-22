@@ -43,6 +43,16 @@
      ReceiveType_t ReceiveType;
      IDelegate* Delegate;
  };
+ struct ResponseDelegateMessageMapCollection
+ {
+     uint32_t Count;
+     ResponseDelegateMessageMap* Map;
+ };
+ struct RequestMessageMapCollection
+ {
+     uint32_t Count;
+     RequestMessageMap* Map;
+ };
  struct EmbeXrpcRawData
  {
      uint16_t Sid;

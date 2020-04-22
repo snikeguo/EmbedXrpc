@@ -18,8 +18,8 @@ public:
 	EmbedXrpc_Queue_t RequestQueueHandle;
 	EmbedXrpc_Timer_t SuspendTimer;
 
-	uint32_t MessageMapCount;
-	RequestMessageMap* MessageMaps;
+	uint32_t CollectionCount;
+	RequestMessageMapCollection* MapCollection;
 
 	void* UserData;
 	EmbedXrpcServerObject(SendPack_t send,
@@ -27,8 +27,8 @@ public:
 		uint8_t* buf,
 		uint32_t bufLen,
 		IEmbeXrpcPort* port,
-		uint32_t messageMapCount,
-		RequestMessageMap* messageMaps,
+		uint32_t collectionCount,
+		RequestMessageMapCollection* mapCollection,
 		void *ud=nullptr)
 	{
 		Send = send;
@@ -36,8 +36,8 @@ public:
 		Buffer = buf;
 		BufferLen = bufLen;
 		porter = port;
-		MessageMapCount = messageMapCount;
-		MessageMaps = messageMaps;
+		CollectionCount = collectionCount;
+		MapCollection = mapCollection;
 		UserData = ud;
 	}
 	void Init()
@@ -103,43 +103,48 @@ public:
 			{
 				continue;
 			}
-			for (i = 0; i < obj->MessageMapCount; i++)
+			for (uint32_t collectionIndex = 0; collectionIndex < obj->CollectionCount; collectionIndex++)
 			{
-				if (obj->MessageMaps[i].Service->GetSid() == recData.Sid)
+				auto MessageMaps = obj->MapCollection[collectionIndex].Map;
+				for (i = 0; i < obj->MapCollection[collectionIndex].Count; i++)
 				{
-					
-					SerializationManager rsm;
-					SerializationManager sendsm;
-					rsm.Reset();
-					rsm.Buf = recData.Data;
-					rsm.BufferLen = recData.DataLen;
-
-					//obj->porter->TakeMutex(obj->BufMutexHandle, EmbedXrpc_WAIT_FOREVER);
-					sendsm.Reset();
-					sendsm.Buf = &obj->Buffer[4];
-					sendsm.BufferLen = obj->BufferLen-4;
-
-					obj->porter->TimerReset(obj->SuspendTimer);
-					obj->porter->TimerStart(obj->SuspendTimer, recData.TargetTimeout/2);
-					obj->MessageMaps[i].Service->Invoke(rsm, sendsm);
-					obj->porter->TimerStop(obj->SuspendTimer);
-					if (sendsm.Index > 0)//
+					if (MessageMaps[i].Service->GetSid() == recData.Sid)
 					{
-						obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
 
-						obj->Buffer[0] = (uint8_t)(recData.Sid >>0 & 0xff);
-						obj->Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
-						obj->Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
-						obj->Buffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
+						SerializationManager rsm;
+						SerializationManager sendsm;
+						rsm.Reset();
+						rsm.Buf = recData.Data;
+						rsm.BufferLen = recData.DataLen;
 
-						obj->Send(obj,sendsm.Index+4, obj->Buffer);
+						//obj->porter->TakeMutex(obj->BufMutexHandle, EmbedXrpc_WAIT_FOREVER);
+						sendsm.Reset();
+						sendsm.Buf = &obj->Buffer[4];
+						sendsm.BufferLen = obj->BufferLen - 4;
 
-						obj->porter->ReleaseMutex(obj->SendMutexHandle);
+						obj->porter->TimerReset(obj->SuspendTimer);
+						obj->porter->TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
+						MessageMaps[i].Service->Invoke(rsm, sendsm);
+						obj->porter->TimerStop(obj->SuspendTimer);
+						if (sendsm.Index > 0)//
+						{
+							obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
+
+							obj->Buffer[0] = (uint8_t)(recData.Sid >> 0 & 0xff);
+							obj->Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
+							obj->Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
+							obj->Buffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
+
+							obj->Send(obj, sendsm.Index + 4, obj->Buffer);
+
+							obj->porter->ReleaseMutex(obj->SendMutexHandle);
+						}
+
+						//obj->porter->ReleaseMutex(obj->BufMutexHandle);
 					}
-						
-					//obj->porter->ReleaseMutex(obj->BufMutexHandle);
 				}
 			}
+			
 			obj->porter->Free(recData.Data);
 			//XrpcDebug("Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
