@@ -530,10 +530,14 @@ namespace EmbedXrpcIdlParser
                 {
                     string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
                     if (service.ReturnValue != null)
+                    {
                         ClientHsw.Write($"{GeneratServiceName}_Response& {service.ServiceName}(");
+                        ClientCsw.Write($"{GeneratServiceName}_Response& {targetInterface.Name}ClientImpl::{service.ServiceName}(");
+                    }
                     else
                     {
                         ClientHsw.Write("void " + service.ServiceName + "(");
+                        ClientCsw.Write($"void  {targetInterface.Name}ClientImpl::{service.ServiceName}(");
                     }
                     string temp_fileds = string.Empty;
                     for (int i = 0; i < service.TargetFields.Count; i++)
@@ -550,20 +554,23 @@ namespace EmbedXrpcIdlParser
                         }
 
                         ClientHsw.Write(cppType + " " + name);
+                        ClientCsw.Write(cppType + " " + name);
                         if (i + 1 < service.TargetFields.Count)
                         {
                             ClientHsw.Write(",");
+                            ClientCsw.Write(",");
                         }
                     }
-                    ClientHsw.WriteLine(")\n{");
+                    ClientHsw.WriteLine(");");
+                    ClientCsw.WriteLine(")\n{");
 
-                    ClientHsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
+                    ClientCsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
-                    ClientHsw.WriteLine($"static {GeneratServiceName}_Request sendData;");
+                    ClientCsw.WriteLine($"static {GeneratServiceName}_Request sendData;");
 
-                    ClientHsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
-                    ClientHsw.WriteLine("RpcClientObject->porter->ResetQueue(RpcClientObject->ResponseMessageQueueHandle);");
-                    ClientHsw.WriteLine("SerializationManager sm;\n" +
+                    ClientCsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
+                    ClientCsw.WriteLine("RpcClientObject->porter->ResetQueue(RpcClientObject->ResponseMessageQueueHandle);");
+                    ClientCsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
                         "sm.Buf = &RpcClientObject->Buffer[4];\n" +
                         "sm.BufferLen = RpcClientObject->BufferLen-4;");
@@ -586,14 +593,14 @@ namespace EmbedXrpcIdlParser
                             var lenField = IdlInfo.GetArrayLenField(service.TargetFields, field);
                             if (lenField != null)
                             {
-                                ClientHsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
-                                ClientHsw.WriteLine("{");
-                                ClientHsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
-                                ClientHsw.WriteLine("}");
+                                ClientCsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
+                                ClientCsw.WriteLine("{");
+                                ClientCsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
+                                ClientCsw.WriteLine("}");
                             }
                             else
                             {
-                                ClientHsw.WriteLine($"sendData.{field.Name}[0]={field.Name}[0];");
+                                ClientCsw.WriteLine($"sendData.{field.Name}[0]={field.Name}[0];");
                             }
                             //ServerHsw.WriteLine($"memcpy(sendData.{field.Name},{field.Name},sizeof(sendData.{field.Name})/sizeof({arrayelementtype}));");
 
@@ -601,53 +608,54 @@ namespace EmbedXrpcIdlParser
                         else
                         {
                             //ServerHsw.WriteLine($"memcpy(&sendData.{field.Name},&{field.Name},sizeof(sendData.{field.Name}));");
-                            ClientHsw.WriteLine($"sendData.{field.Name}={field.Name};");
+                            ClientCsw.WriteLine($"sendData.{field.Name}={field.Name};");
                         }
 
                     }
-                    ClientHsw.WriteLine($"{GeneratServiceName}_Request_Type.Serialize(sm,0,&sendData);");
+                    ClientCsw.WriteLine($"{GeneratServiceName}_Request_Type.Serialize(sm,0,&sendData);");
 
-                    ClientHsw.WriteLine($"RpcClientObject->Buffer[0]=(uint8_t)({GeneratServiceName}_ServiceId&0xff);");
-                    ClientHsw.WriteLine($"RpcClientObject->Buffer[1]=(uint8_t)({GeneratServiceName}_ServiceId>>8&0xff);");
-                    ClientHsw.WriteLine($"RpcClientObject->Buffer[2]=(uint8_t)(RpcClientObject->TimeOut>>0&0xff);");
-                    ClientHsw.WriteLine($"RpcClientObject->Buffer[3]=(uint8_t)(RpcClientObject->TimeOut>>8&0xff);");
+                    ClientCsw.WriteLine($"RpcClientObject->Buffer[0]=(uint8_t)({GeneratServiceName}_ServiceId&0xff);");
+                    ClientCsw.WriteLine($"RpcClientObject->Buffer[1]=(uint8_t)({GeneratServiceName}_ServiceId>>8&0xff);");
+                    ClientCsw.WriteLine($"RpcClientObject->Buffer[2]=(uint8_t)(RpcClientObject->TimeOut>>0&0xff);");
+                    ClientCsw.WriteLine($"RpcClientObject->Buffer[3]=(uint8_t)(RpcClientObject->TimeOut>>8&0xff);");
 
-                    ClientHsw.WriteLine($"RpcClientObject->Send(RpcClientObject,sm.Index+4,RpcClientObject->Buffer);");
-                    ClientHsw.WriteLine("sm.Reset();");
+                    ClientCsw.WriteLine($"RpcClientObject->Send(RpcClientObject,sm.Index+4,RpcClientObject->Buffer);");
+                    ClientCsw.WriteLine("sm.Reset();");
                     
 
                     if (service.ReturnValue != null)
                     {
-                        ClientHsw.WriteLine($"static {GeneratServiceName}_Response response;\n" +
+                        ClientCsw.WriteLine($"static {GeneratServiceName}_Response response;\n" +
                                            $"ResponseState result=RpcClientObject->Wait({GeneratServiceName}_ServiceId,&{GeneratServiceName}_Response_Type,&response);");
-                        ClientHsw.WriteLine("if(result==ResponseState_SidError)\n{");
+                        ClientCsw.WriteLine("if(result==ResponseState_SidError)\n{");
                         //ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_SidError;");
-                        ClientHsw.WriteLine($"response.State=ResponseState_SidError;");
-                        ClientHsw.WriteLine("}");
-                        ClientHsw.WriteLine("else if(result==ResponseState_Ok)\n{");
+                        ClientCsw.WriteLine($"response.State=ResponseState_SidError;");
+                        ClientCsw.WriteLine("}");
+                        ClientCsw.WriteLine("else if(result==ResponseState_Ok)\n{");
                         //ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_Ok;");
-                        ClientHsw.WriteLine($"response.State=ResponseState_Ok;");
-                        ClientHsw.WriteLine("}");
-                        ClientHsw.WriteLine("else if(result==ResponseState_Timeout)\n{");
-                        ClientHsw.WriteLine($"response.State=ResponseState_Timeout;");
-                        ClientHsw.WriteLine("}");
-                        ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
-                        ClientHsw.WriteLine("return response;");
+                        ClientCsw.WriteLine($"response.State=ResponseState_Ok;");
+                        ClientCsw.WriteLine("}");
+                        ClientCsw.WriteLine("else if(result==ResponseState_Timeout)\n{");
+                        ClientCsw.WriteLine($"response.State=ResponseState_Timeout;");
+                        ClientCsw.WriteLine("}");
+                        ClientCsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
+                        ClientCsw.WriteLine("return response;");
                     }
                     else
                     {
-                        ClientHsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
+                        ClientCsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
                     }
-                    ClientHsw.WriteLine("}");
+                    ClientCsw.WriteLine("}");
 
                     if (service.ReturnValue != null)
                     {
-                        ClientHsw.WriteLine("void Free_" + service.ServiceName +
-                            $"({GeneratServiceName}_Response *response)");
-                        ClientHsw.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
-                        ClientHsw.WriteLine($"{GeneratServiceName}_Response_Type.Free(response);");
-                        ClientHsw.WriteLine("}\n}");
+                        ClientHsw.WriteLine($"void Free_{service.ServiceName}({GeneratServiceName}_Response *response);\n");
+                        ClientCsw.WriteLine($"void {targetInterface.Name}ClientImpl::Free_{service.ServiceName}({GeneratServiceName}_Response *response)");
+                        ClientCsw.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
+                        ClientCsw.WriteLine($"{GeneratServiceName}_Response_Type.Free(response);");
+                        ClientCsw.WriteLine("}\n}");
                     }
+                    ClientCsw.WriteLine("\n"); //client interface end class
                 }
                 ClientHsw.WriteLine("};"); //client interface end class
 
