@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4BF9C443-A0FB-4B40-A4C8-3D56ED390846}"
 	ProjectSection(SolutionItems) = preProject
 		readme.md = readme.md
+		网图1.jpg = 网图1.jpg
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmbedXrpc.CSharp.Test", "EmbedXrpc.CSharp.Test\EmbedXrpc.CSharp.Test.csproj", "{03C622BD-2F5C-4F2E-A2BA-A7A798B70E30}"

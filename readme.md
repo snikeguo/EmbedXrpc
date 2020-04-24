@@ -1,33 +1,143 @@
 # EmbedRpc 用户手册
 #### [视频教程](https://v.qq.com/x/page/v0943tykmh8.html)
 #### 应用场景：单片机近距离Client/Server交互场景（USB、串口、CAN（如J1939 、ISO15765协议等），）只要是流协议都支持
+![avatar](/简单示意图.png)
+![avatar](/网图1.png)
 ## 用户使用步骤
 1.用vs2019 打开EmbedXrpcIdlParser.sln编译好。
 2.在EmbedXrpcIdlParser\bin\Debug会出现一个EmbedXrpcIdlParser.exe,
-3.编写你的IDL文件，目录下会有一个idltest1.cs 文件，是例子。如果你打算用这个文件的话，请记得改一下这个文件里的这条语句
+3.编写你的IDL文件，目录下会有一个idltest1.cs 文件，是例子。如果你打算用这个文件的话，请记得改一下这个文件里的配置类
 ```
-[GenerationOptionParameter(OutPutFileName= "StudentService")]
+[FileName("idltest1.cs")]
+public class OptionProcess:IOptionProcess
+{
+    public GenerationOption Process()
+    {
+        GenerationOption option = new GenerationOption();
+        option.OutPutFileName = "StudentService";//输出的文件名
+        option.CSharpNameSpace = "StudentService";//如果生成C#文件,这是生成的命名空间
+        option.UserIncludes.Add("UserIncFile");//如果生成Cpp文件,生成的代码将会添加UserIncFile.h文件.如果你不需要，则不用写这条语句
+        option.UserNamespace.Add("UserNameSpace");//如果生成C#文件,生成的代码将会添加using UserNameSpace;语句.如果你不需要，则不用写这条语句
+        return option;
+    }
+}
+
 ```
-把OutPutFileName改成你想要的名字，记得保存.
+记得保存.
 
 4.执行命令
 ```
 .\EmbedXrpcIdlParser.exe -g all -l cpp -i idltest1.cs -o yourPath
 ```
-如
-```
-.\EmbedXrpcIdlParser.exe -g all -l cpp -i idltest1.cs -o D:/Test/
-.\EmbedXrpcIdlParser.exe -g all -l cs -i idltest1.cs -o D:/Test/ 
-```
-记得写上文件扩展名
 
-5.生成好代码后（我假定你生成在了A文件夹下），你还要把EmbedXrpcSerialization目录下的那堆Cpp和H文件也复制到A文件夹下，至此完成了工作。
+
+###### -g 代表生成client还是server 还是all
+###### -l 代表生成cpp还是 cs
+###### -o 代表生成的代码打算放到哪个目录
+
+
+5.生成好代码后（我假定你生成在了A文件夹下,
 ###### 其中：
-###### A文件夹下的文件+ Client目录下的代码=客户端需要（x86 PC端） 不支持大端
-###### A文件夹下的文件+ Server目录下的代码=服务端需要（单片机端）
+###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/Cpp + EmbedXrpcRuntime/Cpp/Win32.Port = 客户端(上位机端)的源文件(如果上位机用C++开发)
+###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/CS = 客户端(上位机端)的源文件(如果上位机用C#开发)
+###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/Cpp + EmbedXrpcRuntime/Cpp/RT-Thread.Port = 服务端(单片机端)的源文件 目前支持RT-Thread
+
+#### 一个简单的例子
+1.编写idl文件：demo.cs
+```
+using System;
+using EmbedXrpcIdlParser;
+
+[FileName("demo.cs")]
+interface Inter
+{
+    UInt16 GetValue();
+}
+[FileName("demo.cs")]
+public class OptionProcess:IOptionProcess
+{
+    public GenerationOption Process()
+    {
+        GenerationOption option = new GenerationOption();
+        option.OutPutFileName = "Demo";
+        option.CSharpNameSpace = "Demo";
+        return option;
+    }
+}
+```
+2.执行命令(见上述),生成客户端(电脑端)的代码和服务端代码(这里假定执行命令中,-g参数你写的是all,而不是单独的client和server),接口所示：
+
+```
+//客户端
+class InterClientImpl
+{
+public:
+    EmbedXrpcClientObject *RpcClientObject = nullptr;
+    InterClientImpl(EmbedXrpcClientObject *rpcobj)
+    {
+        this->RpcClientObject = rpcobj;
+    }
+    Inter_GetValue_Response &GetValue();
+    void Free_GetValue(Inter_GetValue_Response *response);
+};
 
 
+//----------服务端-----------
+class Inter_GetValueService : public IService
+{
+public:
+    uint16_t GetSid() { return Inter_GetValue_ServiceId; }
+    Inter_GetValue_Response Response;
+    void GetValue();
+    void Invoke(SerializationManager &recManager, SerializationManager &sendManager);
+};
+```
 
+**3.服务端(单片机)这边,你需要编写代码：**
+```
+EmbedXrpcServerObject ServerRpcObject(.....);//参数我这里省略了
+
+void Inter_GetValueService::GetValue()
+{
+    Response.ReturnValue=188;
+}
+
+```
+
+
+**4.客户端(电脑)这边,你需要编写代码：**
+
+```
+EmbedXrpcClientObject ClientRpcObject(....Args...);//参数我这里省略了
+InterClientImpl Client(&ClientRpcObject);
+auto val=Client.GetValue();//这个函数将会把数据发送到服务器(比如单片机)上
+if(val.State==ResponseState_Ok)
+{
+    UInt16 value=val.ReturnValue;//如果不出意外的话，value的值是188
+    //你的代码
+}
+Client.Free_GetValue(&val);//最后用完val,记得调用接口对应的释放函数,形如： Free_你的接口()
+```
+
+至此一个完整的RPC调用就完成了
+可以看下我自己项目上实现的
+```
+auto ThreadsInfo=Dev.Request.GetThreadsInfo();
+CheckResponseState(ThreadsInfo);//我自己写的一个宏，就是判断State是否是OK，如果不是OK，就返回错误的，简单辅助宏罢了
+printf("...");//打印参数
+
+auto EraseResult=Dev.Request.FlashErase(addr,size);
+CheckResponseState(EraseResult);
+while(...)
+{
+  auto WriteResult=Dev.Request.FlashWrite(addr,size,bin);
+  CheckResponseState(WriteResult);
+}
+```
+是不是非常方便~~
+
+
+### 原理部分
 
 #### 序列化部分：
 例如有如下结构体：
@@ -41,8 +151,8 @@ Struct ss
 {
  Uint8  a;
  Uint16 b_len;
- MyStructType[] b;
-MyStructType c;
+ sub[] b;
+ sub c;
 }
 ```
 这个IDL文件通过exe后会生成序列化描述源文件，功能和高级语言的反射差不多。
