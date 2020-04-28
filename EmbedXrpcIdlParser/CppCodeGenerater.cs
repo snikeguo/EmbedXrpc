@@ -280,22 +280,37 @@ namespace EmbedXrpcIdlParser
         
         public void EmitStruct(TargetStruct targetStruct)
         {
-            CommonHsw.WriteLine("typedef struct _" + targetStruct.Name);
-            CommonHsw.WriteLine("{");
-            foreach (var field in targetStruct.TargetFields)
+            if (targetStruct.BitsAttribute == null)
             {
-                string name = field.Name;
-                string cppType = IdlType2CppType(field);
-
-                if (field.IsArray == true && field.MaxCountAttribute.IsFixed==true)
+                CommonHsw.WriteLine("typedef struct _" + targetStruct.Name);
+                CommonHsw.WriteLine("{");
+                foreach (var field in targetStruct.TargetFields)
                 {
-                    name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
+                    string name = field.Name;
+                    string cppType = IdlType2CppType(field);
+
+                    if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                    {
+                        name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
+                    }
+
+                    CommonHsw.WriteLine(cppType + " " + name + ";");
+
                 }
-
-                CommonHsw.WriteLine(cppType + " " + name + ";");
-
+                CommonHsw.WriteLine("}" + targetStruct.Name + ";");
             }
-            CommonHsw.WriteLine("}" + targetStruct.Name + ";");
+            else
+            {
+                CommonHsw.WriteLine("typedef struct _" + targetStruct.Name);
+                CommonHsw.WriteLine("{");
+                foreach (var field in targetStruct.TargetFields)
+                {
+                    CommonHsw.WriteLine($"{targetStruct.BitsAttribute.BitsType} {field.Name}:{field.BitsFieldLengthAttribute.Length};");
+
+                }
+                CommonHsw.WriteLine("}" + targetStruct.Name + ";");
+            }
+            
         }
 
         public void EmitDelegate(TargetDelegate targetDelegate)

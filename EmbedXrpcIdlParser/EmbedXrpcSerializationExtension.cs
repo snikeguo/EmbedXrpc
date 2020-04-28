@@ -140,10 +140,10 @@ namespace EmbedXrpcIdlParser
                 FieldsDesc.Add($"{name}_Field_{field.Name}");
                 if (field.IsArray==false)
                 {                   
-                    if (FieldReplaceDic.ContainsKey(field.IdlType) == true)
+                    if (FieldReplaceDic.ContainsKey(field.BitsType== BitsType.NoBits? field.IdlType: field.BitsType.ToString()) == true)
                     {
                         BaseValueField baseValueField = new BaseValueField();
-                        baseValueField.Type = field.IdlType;
+                        baseValueField.Type = field.BitsType == BitsType.NoBits ? field.IdlType : field.BitsType.ToString();//field.IdlType;
                         baseValueField.StructName = name;
                         baseValueField.Name = $"{field.Name}";
                         cfilestringBuilder.Append(baseValueField.ToCode());

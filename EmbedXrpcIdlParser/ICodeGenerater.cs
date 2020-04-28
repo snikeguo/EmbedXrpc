@@ -34,8 +34,10 @@ namespace EmbedXrpcIdlParser
         public bool IsArray { get; set; }
 
         public bool IsBaseValueType { get; set; }
-
         public string ElementType { get; set; }
+
+        public BitsFieldLengthAttribute BitsFieldLengthAttribute { get; set; }
+        public BitsType BitsType { get; set; } = BitsType.NoBits;
         public TargetEnum Enum { get; set; }
         //public FieldIndexAttribute FieldIndexAttribute { get; set; }
         public MaxCountAttribute MaxCountAttribute { get; set; }
@@ -96,6 +98,7 @@ namespace EmbedXrpcIdlParser
     public class TargetStruct
     {
         public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
+        public BitsAttribute BitsAttribute { get; set; }
 
         public string Name { get; set; }
 
@@ -326,27 +329,56 @@ namespace EmbedXrpcIdlParser
                         TargetStruct targetStruct = new TargetStruct();
                         targetStruct.Name = type.Name;
                         var fields = type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-                        foreach (var field in fields)
+                        var BitsAttribute = type.GetCustomAttribute<BitsAttribute>();
+                        targetStruct.BitsAttribute = BitsAttribute;
+                        if (BitsAttribute==null)
                         {
-                            //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
-                            TargetField targetField = new TargetField();
-                            //targetField.FieldIndexAttribute = fieldIndexAttribute;
-                            targetField.IsArray = field.FieldType.IsArray;
-                            targetField.IdlType = field.FieldType.Name;
-                            targetField.Name = field.Name;
-                            targetField.IsBaseValueType = IsBaseValueType(field.FieldType);
-                            if (targetField.IsArray == true)
+                            foreach (var field in fields)
                             {
-                                var arratt = field.GetCustomAttribute<MaxCountAttribute>();
-                                targetField.MaxCountAttribute = arratt == null?new MaxCountAttribute() { IsFixed=true} : arratt;
-                                targetField.ElementType = field.FieldType.GetElementType().Name;
+                                //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
+                                TargetField targetField = new TargetField();
+                                //targetField.FieldIndexAttribute = fieldIndexAttribute;
+                                targetField.IsArray = field.FieldType.IsArray;
+                                targetField.IdlType = field.FieldType.Name;
+                                targetField.Name = field.Name;
+                                targetField.IsBaseValueType = IsBaseValueType(field.FieldType);
+                                if (targetField.IsArray == true)
+                                {
+                                    var arratt = field.GetCustomAttribute<MaxCountAttribute>();
+                                    targetField.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true } : arratt;
+                                    targetField.ElementType = field.FieldType.GetElementType().Name;
+                                }
+                                if (field.FieldType.IsEnum == true)
+                                {
+                                    targetField.Enum = GetTargetEnum(targetField.IdlType, fileIdlInfo);
+                                }
+                                var fieldtypelist = (from ft in types where field.FieldType == ft select ft).ToList();
+                                if(fieldtypelist.Count>0)
+                                {
+                                    var fieldtype = fieldtypelist[0];
+                                    if (fieldtype.GetCustomAttribute<BitsAttribute>() != null)
+                                    {
+                                        targetField.BitsType = fieldtype.GetCustomAttribute<BitsAttribute>().BitsType;//
+                                        targetField.IsBaseValueType = true;
+                                    }
+                                }
+                               
+                                targetStruct.TargetFields.Add(targetField);
                             }
-                            if (field.FieldType.IsEnum == true)
-                            {
-                                targetField.Enum = GetTargetEnum(targetField.IdlType, fileIdlInfo);
-                            }
-                            targetStruct.TargetFields.Add(targetField);
                         }
+                        else
+                        {
+                            foreach (var field in fields)
+                            {
+                                //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
+                                TargetField targetField = new TargetField();
+                                targetField.IdlType = field.FieldType.Name;
+                                targetField.Name = field.Name;
+                                targetField.BitsFieldLengthAttribute = field.GetCustomAttribute<BitsFieldLengthAttribute>();
+                                targetStruct.TargetFields.Add(targetField);
+                            }
+                        }
+                        
                         fileIdlInfo.TargetStructs.Add(targetStruct);
                         //Console.WriteLine(targetStruct.ToString());
                     }

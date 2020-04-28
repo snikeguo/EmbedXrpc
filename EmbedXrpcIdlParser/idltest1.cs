@@ -26,6 +26,16 @@ struct Result_t
     sbyte Arg1;
 }
 [FileName("idltest1.cs")]
+[Bits(BitsType.UInt64)]
+struct BitsTest
+{
+    [BitsFieldLength(10)]
+    int Field1;
+
+    [BitsFieldLength(20)]
+    int Field2;
+}
+[FileName("idltest1.cs")]
 struct  Student_t
 {
     //[FieldIndex(0)]
@@ -55,6 +65,8 @@ struct  Student_t
 
     //[FieldIndex(7)]
     Sex_t Sex;
+
+    BitsTest Bt;
 }
 [FileName("idltest1.cs")]
 struct DateTime_t
@@ -82,6 +94,7 @@ struct StudentArray_t
     [MaxCount(IsFixed = true, MaxCount = 2, LenFieldName = "StudentIdLen")]
     Student_t[] Students;
 }
+
 [FileName("idltest1.cs")]
 delegate void BroadcastDataTime(DateTime_t t);
 [FileName("idltest1.cs")]
