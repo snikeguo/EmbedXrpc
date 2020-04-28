@@ -1,4 +1,5 @@
 # EmbedXrpc 用户手册
+# QQ群134161401
 #### [视频教程](https://v.qq.com/x/page/v0943tykmh8.html)
 #### 应用场景：单片机近距离Client/Server交互场景（USB、串口、CAN（如J1939 、ISO15765协议等），）只要是流协议都支持
 ![](简单示意图.jpg)
