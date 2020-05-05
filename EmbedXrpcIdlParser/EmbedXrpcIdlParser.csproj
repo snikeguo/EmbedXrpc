@@ -52,9 +52,9 @@
     <Compile Include="EmbedXrpcSerializationExtension.cs" />
     <Compile Include="FbsExtension.cs" />
     <Compile Include="ICodeGenerater.cs" />
-    <Compile Include="idltest1.cs">
+    <None Include="idltest1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </None>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
