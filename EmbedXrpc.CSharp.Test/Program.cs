@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace StudentService
 {
+#if false
     public partial class BroadcastDataTimeClientImpl : IDelegate
     {
         public void BroadcastDataTime(DateTime_t t)
@@ -50,6 +51,7 @@ namespace StudentService
             this.Response.ReturnValue = true;
         }
     }
+#endif
 }
 
 namespace EmbedXrpc
@@ -63,7 +65,13 @@ namespace EmbedXrpc
             client.Start();
             server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
-
+            Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
+            SerializationManager sm = new SerializationManager();
+            StudentBitTest studentBitTest = new StudentBitTest();
+            studentBitTest.bt.Field1 = 1;
+            studentBitTest.bt.Field2 = 2;
+            serialization.Serialize(sm, studentBitTest);
+#if false
             Task.Run(() =>
             {
                 IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
@@ -99,7 +107,9 @@ namespace EmbedXrpc
 
                 Thread.Sleep(1000);
             }
+#endif
         }
+
         static Client client;
         static Server server;
         public static void clientSend(int dataLen, int offset, byte[] data)
@@ -114,7 +124,7 @@ namespace EmbedXrpc
         }
     }
 #else
-    class Program
+        class Program
     {
         static void Main(string[] args)
         {

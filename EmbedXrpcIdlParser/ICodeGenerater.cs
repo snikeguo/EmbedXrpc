@@ -375,6 +375,7 @@ namespace EmbedXrpcIdlParser
                                 targetField.IdlType = field.FieldType.Name;
                                 targetField.Name = field.Name;
                                 targetField.BitsFieldLengthAttribute = field.GetCustomAttribute<BitsFieldLengthAttribute>();
+                                targetField.IsBaseValueType = true;
                                 targetStruct.TargetFields.Add(targetField);
                             }
                         }

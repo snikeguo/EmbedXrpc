@@ -1,7 +1,7 @@
 ﻿#pragma  warning disable 0169
 using System;
 using EmbedXrpcIdlParser;
-#if true
+#if false
 [FileName("idltest1.cs")]
 enum Sex_t:uint
 {
@@ -121,14 +121,22 @@ interface IMyInterface
 
     bool Test(byte[]noLen);
 }
-#else
-[FileName("idltest1.cs")]
-interface IMyInterface
-{
-    UInt16 GetValue();
-    void SetValue(UInt16 v);
-}
 #endif
+[FileName("idltest1.cs")]
+[Bits(BitsType.UInt64)]
+struct BitsTest
+{
+    [BitsFieldLength(10)]
+    int Field1;
+
+    [BitsFieldLength(20)]
+    int Field2;
+}
+[FileName("idltest1.cs")]
+struct StudentBitTest
+{
+    BitsTest bt;
+}
 [FileName("idltest1.cs")]
 public class OptionProcess:IOptionProcess
 {
