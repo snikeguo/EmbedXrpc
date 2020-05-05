@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace StudentService
 {
-#if false
+#if true
     public partial class BroadcastDataTimeClientImpl : IDelegate
     {
         public void BroadcastDataTime(DateTime_t t)
@@ -65,12 +65,7 @@ namespace EmbedXrpc
             client.Start();
             server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
-            Serialization serialization = new Serialization(Assembly.GetExecutingAssembly());
-            SerializationManager sm = new SerializationManager();
-            StudentBitTest studentBitTest = new StudentBitTest();
-            studentBitTest.bt.Field1 = 1;
-            studentBitTest.bt.Field2 = 2;
-            serialization.Serialize(sm, studentBitTest);
+            
 #if false
             Task.Run(() =>
             {

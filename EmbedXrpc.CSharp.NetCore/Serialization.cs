@@ -44,6 +44,36 @@ namespace EmbedXrpc
         public string LenFieldName { get; set; } = string.Empty;
 
     }
+    public enum BitsType
+    {
+        NoBits,
+        Byte,
+        SByte,
+        UInt16,
+        Int16,
+        UInt32,
+        Int32,
+        UInt64,
+        Int64,
+    }
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+    public sealed class BitsAttribute : Attribute
+    {
+        public BitsType BitsType { get; set; }
+        public BitsAttribute(BitsType ut)
+        {
+            BitsType = ut;
+        }
+    }
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public sealed class BitsFieldLengthAttribute : Attribute
+    {
+        public int Length { get; set; }
+        public BitsFieldLengthAttribute(int len)
+        {
+            Length = len;
+        }
+    }
     public class Serialization
     {
         private Assembly Assembly;
