@@ -770,7 +770,8 @@ namespace EmbedXrpcIdlParser
 
                 }
                 ServerCsw.WriteLine("};");
-                ServerHsw.WriteLine($"extern RequestMessageMap {targetInterface.Name}_RequestMessages[{RequestMessagesCount}];");
+                ServerHsw.WriteLine($"#define {targetInterface.Name}_RequestMessages_Count  {RequestMessagesCount}");
+                ServerHsw.WriteLine($"extern RequestMessageMap {targetInterface.Name}_RequestMessages[{targetInterface.Name}_RequestMessages_Count];");
             }
             if (genType == GenType.Client || genType == GenType.All)
             {
@@ -796,7 +797,8 @@ namespace EmbedXrpcIdlParser
                     }
                 }
                 ClientCsw.WriteLine("};");
-                ClientHsw.WriteLine($"extern ResponseDelegateMessageMap {targetInterface.Name}_ResponseDelegateMessages[{ResponseDelegateMessagesCount}];");
+                ClientHsw.WriteLine($"#define {targetInterface.Name}_ResponseDelegateMessages_Count {ResponseDelegateMessagesCount}");
+                ClientHsw.WriteLine($"extern ResponseDelegateMessageMap {targetInterface.Name}_ResponseDelegateMessages[{targetInterface.Name}_ResponseDelegateMessages_Count];");
             }
         }
 
