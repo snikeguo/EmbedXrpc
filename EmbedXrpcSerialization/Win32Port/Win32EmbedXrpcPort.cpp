@@ -36,7 +36,7 @@ void Win32EmbedXrpcPort::ThreadStart(EmbedXrpc_Thread_t thread)
 void  Win32EmbedXrpcPort::TimerStart(EmbedXrpc_Timer_t timer, uint16_t interval)
 {
 	MyTimer* t = static_cast<MyTimer*>(timer);
-	t->Start(interval);
+	t->Start(interval);//在其他线程操作Qt定时器 会报警告  没啥好办法
 	
 }
 void Win32EmbedXrpcPort::TimerReset(EmbedXrpc_Timer_t timer)

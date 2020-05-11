@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="XrpcCodeGen">
+      <UniqueIdentifier>{54a690d2-99be-4cc1-8c8d-5b97b7f0886b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XrpcCodeGen\Client">
+      <UniqueIdentifier>{6ecf1e99-895a-40e7-865d-91c8630eb8cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XrpcCodeGen\Server">
+      <UniqueIdentifier>{13599fdc-ed9b-4142-b449-9464905e2d8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XrpcLib">
+      <UniqueIdentifier>{265193f8-4a6e-49f0-b77a-f72c326958e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XrpcLib\Win32Port">
+      <UniqueIdentifier>{1d7be16c-7acb-4bbf-b2a6-e199225fc538}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="other">
+      <UniqueIdentifier>{6204acdb-316a-4625-a719-d990fabee8bc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XrpcCodeGen\Sample1.cpp">
+      <Filter>XrpcCodeGen</Filter>
+    </ClCompile>
+    <ClCompile Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.cpp">
+      <Filter>XrpcCodeGen</Filter>
+    </ClCompile>
+    <ClCompile Include="XrpcCodeGen\Client\Sample1.Client.cpp">
+      <Filter>XrpcCodeGen\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="XrpcCodeGen\Server\Sample1.Server.cpp">
+      <Filter>XrpcCodeGen\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp">
+      <Filter>XrpcLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.cpp">
+      <Filter>XrpcLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.cpp">
+      <Filter>XrpcLib\Win32Port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.cpp">
+      <Filter>XrpcLib\Win32Port</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sample1.cs" />
+    <None Include="cmd.bat">
+      <Filter>other</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h">
+      <Filter>XrpcCodeGen</Filter>
+    </ClInclude>
+    <ClInclude Include="XrpcCodeGen\Sample1.h">
+      <Filter>XrpcCodeGen</Filter>
+    </ClInclude>
+    <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h">
+      <Filter>XrpcCodeGen\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="XrpcCodeGen\Server\Sample1.Server.h">
+      <Filter>XrpcCodeGen\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h">
+      <Filter>XrpcLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.Port.h">
+      <Filter>XrpcLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.h">
+      <Filter>XrpcLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcClientObject.h">
+      <Filter>XrpcLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h">
+      <Filter>XrpcLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcServerObject.h">
+      <Filter>XrpcLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.h">
+      <Filter>XrpcLib\Win32Port</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.h">
+      <Filter>XrpcLib\Win32Port</Filter>
+    </QtMoc>
+  </ItemGroup>
+</Project>

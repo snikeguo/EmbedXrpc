@@ -1,0 +1,1 @@
+EmbedXrpcIdlParser.exe -i sample1.cs -g all -l cpp -o XrpcCodeGen
