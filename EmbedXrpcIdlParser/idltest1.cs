@@ -86,10 +86,12 @@ struct StudentArray_t
 }
 
 [FileName("idltest1.cs")]
+[ServiceId(99)]
 delegate void BroadcastDataTime(DateTime_t t);
 [FileName("idltest1.cs")]
 interface IMyInterface
 {
+        [ServiceId(100)]
         Student_t GetStudentInfoFormStudentId(
 
         byte StudentIdLen,

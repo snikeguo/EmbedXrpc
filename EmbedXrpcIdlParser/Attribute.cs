@@ -73,6 +73,15 @@ namespace EmbedXrpcIdlParser
         }
 
     }
+    [AttributeUsage(AttributeTargets.Method|AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
+    public class ServiceIdAttribute : Attribute
+    {
+        public ServiceIdAttribute(int serviceId)
+        {
+            this.ServiceId = serviceId;
+        }
+        public int ServiceId { get; set; }
+    }
     public class GenerationOption
     {
         /// <summary>

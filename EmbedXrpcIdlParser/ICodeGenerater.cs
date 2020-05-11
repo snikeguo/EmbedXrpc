@@ -389,11 +389,13 @@ namespace EmbedXrpcIdlParser
                 {
                     TargetInterface targetInterface = new TargetInterface();
                     targetInterface.Name = type.Name;
+                    
                     var services = type.GetMembers();
                     foreach (var service in services)
                     {
                         TargetService targetService = new TargetService();
-                        targetService.ServiceId = ServiceId;
+                        var serviceIdAttr = service.GetCustomAttribute<ServiceIdAttribute>();
+                        targetService.ServiceId = serviceIdAttr==null? ServiceId: serviceIdAttr.ServiceId;
                         ServiceId++;
                         var mt = (service as MethodInfo);
                         Type rt = mt.ReturnType;
@@ -453,8 +455,9 @@ namespace EmbedXrpcIdlParser
                     {
                         throw new NullReferenceException("invokemi is null");
                     }
+                    var serviceIdAttr = type.GetCustomAttribute<ServiceIdAttribute>();
                     TargetDelegate targetDelegate = new TargetDelegate();
-                    targetDelegate.ServiceId = ServiceId;
+                    targetDelegate.ServiceId = serviceIdAttr == null ? ServiceId : serviceIdAttr.ServiceId;
                     ServiceId++;
                     targetDelegate.MethodName = type.Name;
                     var pars = invokemi.GetParameters();
