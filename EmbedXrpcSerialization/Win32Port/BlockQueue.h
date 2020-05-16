@@ -27,7 +27,7 @@ template<class T>
 void BlockingQueue<T>::Send(T& msg)
 {
 	mutex.lock();
-	queue.append(msg);
+	queue.enqueue(msg);
 	mutex.unlock();
 	semaphore.release(1);
 	//waitCondition.wakeAll();
@@ -61,6 +61,7 @@ void BlockingQueue<T>::Reset()
 {
 	mutex.lock();
 	queue.clear();
+	while (semaphore.tryAcquire(1) == true);
 	mutex.unlock();
 }
 #endif
