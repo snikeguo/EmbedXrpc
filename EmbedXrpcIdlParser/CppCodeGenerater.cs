@@ -584,7 +584,7 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine($"static {GeneratServiceName}_Request sendData;");
 
                     ClientCsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
-                    ClientCsw.WriteLine("RpcClientObject->porter->ResetQueue(RpcClientObject->ResponseMessageQueueHandle);");
+                    ClientCsw.WriteLine("RpcClientObject->porter->ResetSemaphore(RpcClientObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
                         "sm.Buf = &RpcClientObject->Buffer[4];\n" +

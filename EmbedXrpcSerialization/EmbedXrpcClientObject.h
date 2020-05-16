@@ -16,7 +16,12 @@ public:
 	IEmbeXrpcPort* porter;
 	EmbedXrpc_Mutex_t ObjectMutexHandle;
 	EmbedXrpc_Queue_t DelegateMessageQueueHandle;
-	EmbedXrpc_Queue_t ResponseMessageQueueHandle;
+	//EmbedXrpc_Queue_t ResponseMessageQueueHandle;
+	EmbedXrpc_Semaphore_t ResponseMessageSemaphoreHandle;
+	EmbeXrpcRawData ResponseMessageEmbedXrpcRawData;//回复数据
+
+
+
 	EmbedXrpc_Thread_t ServiceThreadHandle;
 
 	uint32_t CollectionCount;
@@ -25,6 +30,8 @@ public:
 	ResponseDelegateMessageMapCollection *MapCollection;
 
 	void* UserData;
+
+	bool DeInitFlag = false;
 	EmbedXrpcClientObject(
 		SendPack_t send,
 		uint32_t timeOut,
@@ -49,11 +56,20 @@ public:
 
 	void Init()
 	{
+		DeInitFlag = false;
 		ServiceThreadHandle = porter->CreateThread("ServiceThread", Client_ThreadPriority, ServiceThread,this);
 		ObjectMutexHandle = porter->CreateMutex("ObjectMutex");
 		DelegateMessageQueueHandle = porter->CreateQueue("DelegateMessageQueueHandle",sizeof(EmbeXrpcRawData), Client_DelegateMessageQueue_MaxItemNumber);
-		ResponseMessageQueueHandle = porter->CreateQueue("ResponseMessageQueueHandle", sizeof(EmbeXrpcRawData), Client_ResponseMessageQueue_MaxItemNumber);
+		ResponseMessageSemaphoreHandle = porter->CreateSemaphore("ResponseMessageSemaphoreHandle");
 		porter->ThreadStart(ServiceThreadHandle);
+	}
+	void DeInit()
+	{
+		DeInitFlag = true;
+		porter->DeleteThread(ServiceThreadHandle);
+		porter->DeleteMutex(ObjectMutexHandle);
+		porter->DeleteQueue(DelegateMessageQueueHandle);
+		porter->DeleteSemaphore(ResponseMessageSemaphoreHandle);
 	}
 	void ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
 	{
@@ -78,7 +94,8 @@ public:
 			}
 			raw.DataLen = dataLen;
 			raw.TargetTimeout = targettimeout;
-			porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
+			ResponseMessageEmbedXrpcRawData = raw;
+			porter->ReleaseSemaphore(ResponseMessageSemaphoreHandle);
 			return;
 		}
 		for (uint32_t collectionIndex = 0; collectionIndex < CollectionCount; collectionIndex++)
@@ -100,21 +117,22 @@ public:
 					}
 					raw.DataLen = dataLen;
 					raw.TargetTimeout = targettimeout;
+					ResponseMessageEmbedXrpcRawData = raw;
 					if (iter->ReceiveType == ReceiveType_Response)
 					{
-						r = porter->SendQueue(ResponseMessageQueueHandle, &raw, sizeof(EmbeXrpcRawData));
+						porter->ReleaseSemaphore(ResponseMessageSemaphoreHandle);
 					}
 					else if (iter->ReceiveType == ReceiveType_Delegate)
 					{
 						r = porter->SendQueue(DelegateMessageQueueHandle, &raw, sizeof(raw));
+						if (r != QueueState_OK)
+						{
+							if (dataLen > 0)
+								porter->Free(raw.Data);
+						}
 					}
-				}
-				if (r != QueueState_OK)
-				{
-					if (dataLen > 0)
-						porter->Free(raw.Data);
-				}
-
+					return;//只要匹配相等的SID 就返回了
+				}		
 			}
 		}
 		
@@ -126,54 +144,54 @@ public:
 		uint32_t i = 0;
 		for (;;)
 		{
-			if (obj->porter->ReceiveQueue(obj->DelegateMessageQueueHandle, &recData, sizeof(EmbeXrpcRawData), EmbedXrpc_WAIT_FOREVER)!=QueueState_OK)
+			if (obj->porter->ReceiveQueue(obj->DelegateMessageQueueHandle, &recData, sizeof(EmbeXrpcRawData), 1)==QueueState_OK)
 			{
-				continue;
-			}
-			for (uint32_t collectionIndex = 0; collectionIndex < obj->CollectionCount; collectionIndex++)
-			{
-				auto MessageMaps = obj->MapCollection[collectionIndex].Map;
-				for (i = 0; i < obj->MapCollection[collectionIndex].Count; i++)
+				for (uint32_t collectionIndex = 0; collectionIndex < obj->CollectionCount; collectionIndex++)
 				{
-					if ((MessageMaps[i].ReceiveType == ReceiveType_Delegate) && (MessageMaps[i].Delegate->GetSid() == recData.Sid))
+					auto MessageMaps = obj->MapCollection[collectionIndex].Map;
+					for (i = 0; i < obj->MapCollection[collectionIndex].Count; i++)
 					{
-						SerializationManager rsm;
-						rsm.Reset();
-						rsm.Buf = recData.Data;
-						rsm.BufferLen = recData.DataLen;
-						MessageMaps[i].Delegate->Invoke(rsm);
+						if ((MessageMaps[i].ReceiveType == ReceiveType_Delegate) && (MessageMaps[i].Delegate->GetSid() == recData.Sid))
+						{
+							SerializationManager rsm;
+							rsm.Reset();
+							rsm.Buf = recData.Data;
+							rsm.BufferLen = recData.DataLen;
+							MessageMaps[i].Delegate->Invoke(rsm);
+						}
 					}
 				}
+
+				obj->porter->Free(recData.Data);
+				XrpcDebug("Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 			}
-			
-			obj->porter->Free(recData.Data);
-			XrpcDebug("Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
+			if (obj->DeInitFlag == true)
+			{
+				return;
+			}
 		}
 	}
 
 	ResponseState Wait(uint32_t sid, const IType *type,void * response)
 	{
-		EmbeXrpcRawData recData;
 		ResponseState ret= ResponseState_Ok;
-		recData.Data = nullptr;
-		recData.DataLen = 0;
-		recData.Sid = 0;
+		EmbeXrpcRawData* recData = &ResponseMessageEmbedXrpcRawData;
 		while (true)
 		{
-			if (porter->ReceiveQueue(ResponseMessageQueueHandle, &recData, sizeof(EmbeXrpcRawData), TimeOut) != QueueState_OK)
+			if (porter->TakeSemaphore(ResponseMessageSemaphoreHandle, TimeOut) == false)
 			{
 				return ResponseState_Timeout;
 			}
-			if (recData.Sid == EmbedXrpcSuspendSid)
+			if (recData->Sid == EmbedXrpcSuspendSid)
 			{
 				XrpcDebug("Client:recData.Sid == EmbedXrpcSuspendSid\n");
-				if (recData.DataLen > 0)
+				if (recData->DataLen > 0)
 				{
-					porter->Free(recData.Data);
+					porter->Free(recData->Data);
 				}
 				continue;
 			}
-			if (sid != recData.Sid)
+			if (sid != recData->Sid)
 			{
 				ret = ResponseState_SidError;
 			}
@@ -188,13 +206,13 @@ public:
 		{
 			SerializationManager rsm;
 			rsm.Reset();
-			rsm.Buf = recData.Data;
-			rsm.BufferLen = recData.DataLen;
+			rsm.Buf = recData->Data;
+			rsm.BufferLen = recData->DataLen;
 			type->Deserialize(rsm, response);
 		}
-		if (recData.DataLen > 0)
+		if (recData->DataLen > 0)
 		{
-			porter->Free(recData.Data);
+			porter->Free(recData->Data);
 		}
 		return ret;
 	}

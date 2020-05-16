@@ -21,12 +21,45 @@ EmbedXrpc_Queue_t Win32EmbedXrpcPort::CreateQueue(const char* queueName, uint32_
 	BlockingQueue<EmbeXrpcRawData> *queue = new BlockingQueue<EmbeXrpcRawData>();
 	return queue;
 }
-
+EmbedXrpc_Semaphore_t  Win32EmbedXrpcPort::CreateSemaphore(const char* SemaphoreName)
+{
+	QSemaphore *sem = new QSemaphore();
+	return sem;
+}
 
 EmbedXrpc_Timer_t Win32EmbedXrpcPort::CreateTimer(const char* timerName, uint32_t timeout, void* Arg, void (*timercb)(void* arg))
 {
 	MyTimer* timer = new MyTimer(timeout,Arg,timercb);
 	return timer;
+}
+void Win32EmbedXrpcPort::DeleteThread(EmbedXrpc_Thread_t thread)
+{
+	auto qtThread = static_cast<QThread*>(thread);
+	while (qtThread->isRunning() == true);
+	delete qtThread;
+}
+void Win32EmbedXrpcPort::DeleteMutex(EmbedXrpc_Mutex_t mutex)
+{
+	auto qtMutex = static_cast<QMutex*>(mutex);
+	delete qtMutex;
+}
+void Win32EmbedXrpcPort::DeleteQueue(EmbedXrpc_Queue_t queue)
+{
+	auto qtQueue = static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
+	qtQueue->Reset();
+	delete qtQueue;
+}
+void Win32EmbedXrpcPort::DeleteSemaphore(EmbedXrpc_Semaphore_t sem)
+{
+	QSemaphore* qtsem = static_cast<QSemaphore*>(sem);
+	while (qtsem->tryAcquire() == true);
+	delete sem;
+}
+void Win32EmbedXrpcPort::DeleteTimer(EmbedXrpc_Timer_t timer) 
+{
+	auto myTimer = static_cast<MyTimer*>(timer);
+	myTimer->Stop();
+	delete myTimer;
 }
 void Win32EmbedXrpcPort::ThreadStart(EmbedXrpc_Thread_t thread)
 {
@@ -49,20 +82,22 @@ void Win32EmbedXrpcPort::TimerStop(EmbedXrpc_Timer_t timer)
 	MyTimer* t = static_cast<MyTimer*>(timer);
 	t->Stop();
 }
-#if 0
-EmbedXrpc_Mutex_t Win32EmbedXrpcPort::CreateSemaphore(const char* semaphoreName)
-{
-	return  nullptr;
-}
+
 bool Win32EmbedXrpcPort::TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
 {
-	return false;
+	QSemaphore* qtsem = static_cast<QSemaphore*>(sem);
+	return qtsem->tryAcquire(1, timeout);
 }
-bool Win32EmbedXrpcPort::ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
+void Win32EmbedXrpcPort::ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
 {
-	return false;
+	QSemaphore* qtsem = static_cast<QSemaphore*>(sem);
+	qtsem->release(1);
 }
-#endif
+void Win32EmbedXrpcPort::ResetSemaphore(EmbedXrpc_Semaphore_t sem)
+{
+	QSemaphore* qtsem = static_cast<QSemaphore*>(sem);
+	while (qtsem->tryAcquire(1) == true);
+}
 bool Win32EmbedXrpcPort::TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout)
 {
 	QMutex*m = static_cast<QMutex*>(mutex);
@@ -104,12 +139,13 @@ void Win32EmbedXrpcPort::ResetQueue(EmbedXrpc_Queue_t queue)
 void* Win32EmbedXrpcPort::Malloc(uint32_t size)
 {
 	auto x=malloc(size);
-	//std::cout << "malloc ptr:	"<<std::hex<<x<<"	size:	" << size << std::endl;
+	printf("malloc ptr:0x%8x,size:%4d\n", x, size);
 	return x;
 }
 void Win32EmbedXrpcPort::Free(void* ptr)
 {
-	//std::cout << "free ptr:	" << std::hex << ptr  << std::endl;
+	free(ptr);
+	printf("free ptr:0x%8x\n", ptr);
 }
 void Win32EmbedXrpcPort::Memcpy(void* d, const void* s, uint32_t size)
 {

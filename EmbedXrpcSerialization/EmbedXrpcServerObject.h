@@ -22,6 +22,7 @@ public:
 	RequestMessageMapCollection* MapCollection;
 
 	void* UserData;
+	bool DeInitFlag = false;
 	EmbedXrpcServerObject(SendPack_t send,
 		uint32_t timeOut, 
 		uint8_t* buf,
@@ -42,12 +43,19 @@ public:
 	}
 	void Init()
 	{
+		DeInitFlag = false;
 		ServiceThreadHandle = porter->CreateThread("ServiceThread",Server_ThreadPriority, ServiceThread,this);
 		SendMutexHandle = porter->CreateMutex("SendBufMutex");
 		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), Server_RequestQueue_MaxItemNumber);
 		SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER,this, SuspendTimerCallBack);
-
 		porter->ThreadStart(ServiceThreadHandle);
+	}
+	void DeInit()
+	{
+		DeInitFlag = true;
+		porter->DeleteThread(ServiceThreadHandle);
+		porter->DeleteMutex(SendMutexHandle);
+		porter->DeleteQueue(RequestQueueHandle);
 	}
 
 	void ReceivedMessage(uint32_t allDataLen, uint8_t* allData)

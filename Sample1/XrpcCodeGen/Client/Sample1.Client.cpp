@@ -12,7 +12,7 @@ Inter_Add_Response& InterClientImpl::Add(Int32 a,Int32 b)
 //write serialization code:Add(a,b,)
 static Inter_Add_Request sendData;
 RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
-RpcClientObject->porter->ResetQueue(RpcClientObject->ResponseMessageQueueHandle);
+RpcClientObject->porter->ResetSemaphore(RpcClientObject->ResponseMessageSemaphoreHandle);
 SerializationManager sm;
 sm.Reset();
 sm.Buf = &RpcClientObject->Buffer[4];
