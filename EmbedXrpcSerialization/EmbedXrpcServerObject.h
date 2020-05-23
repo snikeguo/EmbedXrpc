@@ -91,14 +91,14 @@ public:
 	static void SuspendTimerCallBack(void* arg)
 	{
 		EmbedXrpcServerObject* obj = (EmbedXrpcServerObject*)arg;
-		obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
-		uint8_t *sb= obj->Buffer;
+		//obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);//不需要加锁 这里不使用obj->buffer全局buffer
+		uint8_t sb[4];
 		sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 		sb[1] = (uint8_t)(EmbedXrpcSuspendSid>>8 & 0xff);
 		sb[2] = (uint8_t)(obj->TimeOut & 0xff);
 		sb[3] = (uint8_t)(obj->TimeOut >>8 & 0xff);
 		obj->Send(obj,4, sb);
-		obj->porter->ReleaseMutex(obj->SendMutexHandle);
+		//obj->porter->ReleaseMutex(obj->SendMutexHandle);
 	}
 	static void ServiceThread(void* arg)
 	{
@@ -126,6 +126,7 @@ public:
 						rsm.BufferLen = recData.DataLen;
 
 						//obj->porter->TakeMutex(obj->BufMutexHandle, EmbedXrpc_WAIT_FOREVER);
+						obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
 						sendsm.Reset();
 						sendsm.Buf = &obj->Buffer[4];
 						sendsm.BufferLen = obj->BufferLen - 4;
@@ -134,21 +135,16 @@ public:
 						obj->porter->TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
 						MessageMaps[i].Service->Invoke(rsm, sendsm);
 						obj->porter->TimerStop(obj->SuspendTimer);
+
 						if (sendsm.Index > 0)//
 						{
-							obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
-
 							obj->Buffer[0] = (uint8_t)(recData.Sid >> 0 & 0xff);
 							obj->Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
 							obj->Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
 							obj->Buffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
-
 							obj->Send(obj, sendsm.Index + 4, obj->Buffer);
-
-							obj->porter->ReleaseMutex(obj->SendMutexHandle);
 						}
-
-						//obj->porter->ReleaseMutex(obj->BufMutexHandle);
+						obj->porter->ReleaseMutex(obj->SendMutexHandle);
 					}
 				}
 			}

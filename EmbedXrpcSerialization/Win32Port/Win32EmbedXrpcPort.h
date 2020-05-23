@@ -32,6 +32,26 @@ private:
 	void (*Cb)(void* par);
 	uint32_t Timeout;
 };
+typedef void (*ThreadFun_t)(void*);
+class MyThread :public QThread
+{
+	Q_OBJECT
+public:
+	MyThread(ThreadFun_t fun, void* arg)
+	{
+		Thread = fun;
+		Arg = arg;
+	}
+	ThreadFun_t Thread;
+	void* Arg;
+	void run() override
+	{
+		if (Thread != nullptr)
+		{
+			Thread(Arg);
+		}
+	}
+};
 class Win32EmbedXrpcPort :public QObject, public  IEmbeXrpcPort
 {
 	Q_OBJECT

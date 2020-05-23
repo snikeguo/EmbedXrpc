@@ -3,10 +3,10 @@
 #include "Win32EmbedXrpcPort.h"
 
 
-//这是一个demo 所以不用考虑内存的问题，直接new出来不用管即可。 因为一般地	Server是单片机，创建后一直在跑。
 EmbedXrpc_Thread_t Win32EmbedXrpcPort::CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg)
 {
 	auto ServiceThread = QThread::create(Thread, Arg);
+	//auto ServiceThread =new MyThread(Thread, Arg);
 	return  ServiceThread;
 }
 
@@ -34,6 +34,7 @@ EmbedXrpc_Timer_t Win32EmbedXrpcPort::CreateTimer(const char* timerName, uint32_
 }
 void Win32EmbedXrpcPort::DeleteThread(EmbedXrpc_Thread_t thread)
 {
+	//auto qtThread = static_cast<QThread*>(thread);
 	auto qtThread = static_cast<QThread*>(thread);
 	while (qtThread->isRunning() == true);
 	delete qtThread;
@@ -86,7 +87,10 @@ void Win32EmbedXrpcPort::TimerStop(EmbedXrpc_Timer_t timer)
 bool Win32EmbedXrpcPort::TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
 {
 	QSemaphore* qtsem = static_cast<QSemaphore*>(sem);
-	return qtsem->tryAcquire(1, timeout);
+	auto r= qtsem->tryAcquire(1, timeout);
+	//assert(r == true);
+	return r;
+
 }
 void Win32EmbedXrpcPort::ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
 {
@@ -139,13 +143,13 @@ void Win32EmbedXrpcPort::ResetQueue(EmbedXrpc_Queue_t queue)
 void* Win32EmbedXrpcPort::Malloc(uint32_t size)
 {
 	auto x=malloc(size);
-	printf("malloc ptr:0x%8x,size:%4d\n", x, size);
+	//printf("malloc ptr:0x%8x,size:%4d\n", x, size);
 	return x;
 }
 void Win32EmbedXrpcPort::Free(void* ptr)
 {
 	free(ptr);
-	printf("free ptr:0x%8x\n", ptr);
+	//printf("free ptr:0x%8x\n", ptr);
 }
 void Win32EmbedXrpcPort::Memcpy(void* d, const void* s, uint32_t size)
 {

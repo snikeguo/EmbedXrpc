@@ -105,7 +105,6 @@ public:
 			{
 
 				auto iter = &MessageMaps[i];
-				auto r = QueueState_OK;
 				if (iter->Sid == serviceId)
 				{
 					raw.Sid = serviceId;
@@ -117,14 +116,14 @@ public:
 					}
 					raw.DataLen = dataLen;
 					raw.TargetTimeout = targettimeout;
-					ResponseMessageEmbedXrpcRawData = raw;
 					if (iter->ReceiveType == ReceiveType_Response)
 					{
+						ResponseMessageEmbedXrpcRawData = raw;
 						porter->ReleaseSemaphore(ResponseMessageSemaphoreHandle);
 					}
 					else if (iter->ReceiveType == ReceiveType_Delegate)
 					{
-						r = porter->SendQueue(DelegateMessageQueueHandle, &raw, sizeof(raw));
+						auto r = porter->SendQueue(DelegateMessageQueueHandle, &raw, sizeof(raw));
 						if (r != QueueState_OK)
 						{
 							if (dataLen > 0)

@@ -17,11 +17,11 @@ typedef void* EmbedXrpc_Timer_t;
 #endif
 
 #define Server_ThreadPriority				0x6
-#define Server_RequestQueue_MaxItemNumber	100
+#define Server_RequestQueue_MaxItemNumber	20
 
 #define Client_ThreadPriority				0x6
-#define Client_DelegateMessageQueue_MaxItemNumber	100
-#define Client_ResponseMessageQueue_MaxItemNumber	100
+#define Client_DelegateMessageQueue_MaxItemNumber	20
+#define Client_ResponseMessageQueue_MaxItemNumber	20
 enum QueueState
 {
 	QueueState_Empty,

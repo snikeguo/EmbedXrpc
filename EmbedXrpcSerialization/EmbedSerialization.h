@@ -56,6 +56,10 @@ public:
 		//Buf[Index++]=Tag;
 		//Buf[Index++]=Field;
 		//Buf[Index++]=Len;
+		if(Index+Len>BufferLen)
+		{
+			while(1);
+		}
 		MEMCPY(&Buf[Index], v, Len);
 		Index += Len;
 	}

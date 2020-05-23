@@ -37,9 +37,10 @@ QueueStatus BlockingQueue<T>::Receive(T& msg, unsigned long timeOut)
 {
 	QueueStatus s= QueueStatus::Empty;
 	bool r=semaphore.tryAcquire(1, timeOut);
+	mutex.lock();
 	if (r == true)
 	{
-		mutex.lock();
+		
 		//waitCondition.wait(&mutex, timeOut);
 		if (queue.count() > 0)
 		{
@@ -52,8 +53,9 @@ QueueStatus BlockingQueue<T>::Receive(T& msg, unsigned long timeOut)
 		{
 			s = QueueStatus::Empty;
 		}
-		mutex.unlock();
+		
 	}
+	mutex.unlock();
 	return s;
 }
 template<class T>
