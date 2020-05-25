@@ -16,11 +16,11 @@ public:
 	}
 	void Start(uint16_t interval)
 	{
-		Timer.start(interval);
+		//Timer.start(interval);
 	}
 	void Stop()
 	{
-		Timer.stop();
+		//Timer.stop();
 	}
 	void Reset()
 	{

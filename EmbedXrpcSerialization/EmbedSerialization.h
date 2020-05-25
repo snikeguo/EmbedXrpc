@@ -3,6 +3,7 @@
 
 
 #include "EmbedSerialization.Port.h"
+#include "BlockBufferProvider.h"
 #ifndef offsetof
 #define offsetof(s, m) (uint32_t)((char*)(&((s*)0)->m))
 #endif
@@ -45,21 +46,29 @@ typedef enum {
 } Type_t;
 
 
+/*class IBlockBufferProvider
+{
+public:
+	virtual bool Receive(BlockBufferItemInfo *item, uint32_t timeout) ;
+	virtual bool GetChar(uint8_t *ch) ;
+	virtual bool Send( uint8_t *buf, int16_t bufLen) ;
+	virtual void SetCalculateSum(uint32_t s)=0;
+    virtual uint32_t GetCalculateSum()=0;
+	virtual void SetReferenceSum(uint32_t refSum)=0;
+}*/
 class SerializationManager
 {
 public:
 	uint32_t Index = 0;
 	uint8_t* Buf = nullptr;
 	uint32_t BufferLen = 0;
+	BlockRingBufferProvider *BlockBufferProvider;
 	void Append(uint32_t  Tag, Type_t   Field, uint32_t	Len, void* v)
 	{
 		//Buf[Index++]=Tag;
 		//Buf[Index++]=Field;
 		//Buf[Index++]=Len;
-		if(Index+Len>BufferLen)
-		{
-			while(1);
-		}
+		EmbedSerializationAssert(Index+Len<BufferLen);
 		MEMCPY(&Buf[Index], v, Len);
 		Index += Len;
 	}
@@ -283,8 +292,23 @@ public:
 	}
 	void Deserialize(SerializationManager& manager, void* v) const
 	{
-		MEMCPY(v, &manager.Buf[manager.Index], 1);
-		manager.Index++;
+		if(manager.BlockBufferProvider ==nullptr)
+		{
+			MEMCPY(v, &manager.Buf[manager.Index], 1);
+			manager.Index++;
+		}
+		else
+		{
+			uint8_t *u8v=(uint8_t *)v;
+			uint8_t d=0;
+			for(uint8_t i=0;i<1;i++)
+			{
+				EmbedSerializationAssert(manager.BlockBufferProvider->GetChar(&d)==true);
+				MEMCPY(&u8v[i],&d,1);
+			}
+		}
+		
+		
 	}
 };
 extern const UInt8Type UInt8TypeInstance;
@@ -346,8 +370,21 @@ public:							\
 	}\
 	void Deserialize(SerializationManager& manager, void* v) const \
 	{\
-		MEMCPY(v, &manager.Buf[manager.Index], len);\
-		manager.Index+=len;\
+		if(manager.BlockBufferProvider==nullptr)\
+		{\
+			MEMCPY(v, &manager.Buf[manager.Index], len);\
+			manager.Index++;\
+		}\
+		else\
+		{\
+			uint8_t *u8v=(uint8_t *)v;\
+			uint8_t d=0;\
+			for(uint8_t i=0;i<len;i++)\
+			{\
+				EmbedSerializationAssert(manager.BlockBufferProvider->GetChar(&d)==true);\
+				MEMCPY(&u8v[i],&d,1);\
+			}\
+		}\
 	}\
 };\
 extern const prefix##Type prefix##TypeInstance; \

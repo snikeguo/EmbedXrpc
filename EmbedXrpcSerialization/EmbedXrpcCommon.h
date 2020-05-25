@@ -53,13 +53,13 @@
      uint32_t Count;
      RequestMessageMap* Map;
  };
- struct EmbeXrpcRawData
+ /*struct EmbeXrpcRawData
  {
      uint16_t Sid;
      uint16_t TargetTimeout;
 	 uint8_t* Data;
 	 uint32_t DataLen;
- };
+ };*/
 typedef void (*SendPack_t)(void *rpcObj,uint32_t dataLen, uint8_t* data);
 
 

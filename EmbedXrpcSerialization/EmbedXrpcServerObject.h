@@ -3,6 +3,7 @@
 
 #include "EmbedXrpcCommon.h"
 #include "EmbedSerialization.h"
+#include "BlockBufferProvider.h"
 class EmbedXrpcServerObject
 {
 public:
@@ -15,7 +16,11 @@ public:
 	IEmbeXrpcPort* porter;
 	EmbedXrpc_Thread_t ServiceThreadHandle;
 	EmbedXrpc_Mutex_t SendMutexHandle;
-	EmbedXrpc_Queue_t RequestQueueHandle;
+
+	uint8_t *RequestRingBuffer;
+	int16_t RequestRingBufferSize;
+	BlockRingBufferProvider *RequestBlockBufferProvider;
+
 	EmbedXrpc_Timer_t SuspendTimer;
 
 	uint32_t CollectionCount;
@@ -27,6 +32,8 @@ public:
 		uint32_t timeOut, 
 		uint8_t* buf,
 		uint32_t bufLen,
+		uint8_t *requestRingBuffer,
+		int16_t requestRingBufferSize,
 		IEmbeXrpcPort* port,
 		uint32_t collectionCount,
 		RequestMessageMapCollection* mapCollection,
@@ -40,53 +47,44 @@ public:
 		CollectionCount = collectionCount;
 		MapCollection = mapCollection;
 		UserData = ud;
+
+		RequestRingBuffer=requestRingBuffer;
+		RequestRingBufferSize=requestRingBufferSize;
 	}
 	void Init()
 	{
 		DeInitFlag = false;
 		ServiceThreadHandle = porter->CreateThread("ServiceThread",Server_ThreadPriority, ServiceThread,this);
 		SendMutexHandle = porter->CreateMutex("SendBufMutex");
-		RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), Server_RequestQueue_MaxItemNumber);
+		//RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), Server_RequestQueue_MaxItemNumber);
+		RequestBlockBufferProvider=new BlockRingBufferProvider(RequestRingBuffer,RequestRingBufferSize,porter);
 		SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER,this, SuspendTimerCallBack);
 		porter->ThreadStart(ServiceThreadHandle);
+		
 	}
 	void DeInit()
 	{
 		DeInitFlag = true;
 		porter->DeleteThread(ServiceThreadHandle);
 		porter->DeleteMutex(SendMutexHandle);
-		porter->DeleteQueue(RequestQueueHandle);
+		//porter->DeleteQueue(RequestQueueHandle);
+		delete RequestBlockBufferProvider;
 	}
 
-	void ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
+	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
 	{
 		if (allDataLen < 4)
-			return;
-		EmbeXrpcRawData raw;
+			return false;
+		BlockBufferItemInfo raw;
 		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
 		uint16_t targettimeout = (uint16_t)(allData[2] | allData[3] << 8);
-		raw.Data = nullptr;
-		raw.DataLen = 0;
-		raw.Sid = 0;
 		uint32_t dataLen = allDataLen - 4;
 		uint8_t* data = &allData[4];
 		//XrpcDebug("Server ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
-
 		raw.Sid = serviceId;
-		if (dataLen > 0)
-		{
-			raw.Data = (uint8_t*)porter->Malloc(dataLen);
-			porter->Memcpy(raw.Data, data, dataLen);
-		}
 		raw.DataLen = dataLen;
-		raw.TargetTimeout = targettimeout;
-		auto r=porter->SendQueue(RequestQueueHandle, &raw, sizeof(EmbeXrpcRawData));
-		if (r != QueueState_OK)
-		{
-			if (dataLen > 0)
-				porter->Free(raw.Data);
-		}
-
+		raw.TargetTimeout = targettimeout;		
+		return RequestBlockBufferProvider->Send(&raw, data,dataLen);
 	}
 	static void SuspendTimerCallBack(void* arg)
 	{
@@ -103,11 +101,11 @@ public:
 	static void ServiceThread(void* arg)
 	{
 		EmbedXrpcServerObject* obj = (EmbedXrpcServerObject*)arg;
-		EmbeXrpcRawData recData;
+		BlockBufferItemInfo recData;
 		uint32_t i = 0;
 		for (;;)
 		{
-			if (obj->porter->ReceiveQueue(obj->RequestQueueHandle, &recData, sizeof(EmbeXrpcRawData), EmbedXrpc_WAIT_FOREVER) != QueueState_OK)
+			if (obj->RequestBlockBufferProvider->Receive(&recData,EmbedXrpc_WAIT_FOREVER)!= true)
 			{
 				continue;
 			}
@@ -122,10 +120,10 @@ public:
 						SerializationManager rsm;
 						SerializationManager sendsm;
 						rsm.Reset();
-						rsm.Buf = recData.Data;
 						rsm.BufferLen = recData.DataLen;
-
-						//obj->porter->TakeMutex(obj->BufMutexHandle, EmbedXrpc_WAIT_FOREVER);
+						rsm.BlockBufferProvider=obj->RequestBlockBufferProvider;
+						rsm.BlockBufferProvider->SetCalculateSum(0);
+						rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
 						obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
 						sendsm.Reset();
 						sendsm.Buf = &obj->Buffer[4];
@@ -149,7 +147,7 @@ public:
 				}
 			}
 			
-			obj->porter->Free(recData.Data);
+			//obj->porter->Free(recData.Data);
 			//XrpcDebug("Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
 	}

@@ -21,13 +21,27 @@ DateTime_t now[1];
 }DateTimeChangeStruct;
 typedef struct _Inter_Add_Request
 {
-Int32 a;
-Int32 b;
+Byte a;
+Byte b;
 }Inter_Add_Request;
 typedef struct _Inter_Add_Response
 {
 ResponseState State;
 Int32 ReturnValue;
 }Inter_Add_Response;
+typedef struct _Inter_NoArg_Request
+{
+}Inter_NoArg_Request;
+typedef struct _Inter_NoArg_Response
+{
+ResponseState State;
+Boolean ReturnValue;
+}Inter_NoArg_Response;
+typedef struct _Inter_NoReturn_Request
+{
+}Inter_NoReturn_Request;
+typedef struct _Inter_NoArgAndReturn_Request
+{
+}Inter_NoArgAndReturn_Request;
 
 #endif

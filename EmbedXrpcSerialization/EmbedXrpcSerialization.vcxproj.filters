@@ -33,6 +33,12 @@
     <ClInclude Include="EmbedSerialization.Port.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="BlockBufferProvider.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ringbuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -45,6 +51,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="EmbedSerialization.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockBufferProvider.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ringbuffer.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

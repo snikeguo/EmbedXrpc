@@ -19,10 +19,32 @@ class Inter_AddService:public IService
 public:
 uint16_t GetSid(){return Inter_Add_ServiceId;}
 Inter_Add_Response Response;
-void Add(Int32 a,Int32 b);
+void Add(Byte a,Byte b);
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };
-#define Inter_RequestMessages_Count  1
+class Inter_NoArgService:public IService
+{
+public:
+uint16_t GetSid(){return Inter_NoArg_ServiceId;}
+Inter_NoArg_Response Response;
+void NoArg();
+void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
+};
+class Inter_NoReturnService:public IService
+{
+public:
+uint16_t GetSid(){return Inter_NoReturn_ServiceId;}
+void NoReturn();
+void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
+};
+class Inter_NoArgAndReturnService:public IService
+{
+public:
+uint16_t GetSid(){return Inter_NoArgAndReturn_ServiceId;}
+void NoArgAndReturn();
+void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
+};
+#define Inter_RequestMessages_Count  4
 extern RequestMessageMap Inter_RequestMessages[Inter_RequestMessages_Count];
 
 #endif

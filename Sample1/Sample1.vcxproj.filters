@@ -66,6 +66,12 @@
     <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.cpp">
       <Filter>XrpcLib\Win32Port</Filter>
     </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp">
+      <Filter>XrpcLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c">
+      <Filter>XrpcLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="sample1.cs" />
@@ -106,6 +112,12 @@
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.h">
       <Filter>XrpcLib\Win32Port</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h">
+      <Filter>XrpcLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h">
+      <Filter>XrpcLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

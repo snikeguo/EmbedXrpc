@@ -24,13 +24,17 @@ typedef bool Boolean;
 #define FREE	rt_free
 #define MEMCPY	rt_memcpy
 #define Debug  rt_kprintf
+#define EmbedSerializationAssert RT_ASSERT
 #else 
 #include <cstring>
 #include <cstdlib>
+#include <cassert>
 #define MALLOC	malloc
 #define FREE	free
 #define MEMCPY	memcpy
 #define Debug  
+#define EmbedSerializationAssert assert
 #endif
+
 
 #endif // EmbedSerialization_Port_H

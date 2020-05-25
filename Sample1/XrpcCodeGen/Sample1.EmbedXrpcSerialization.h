@@ -28,8 +28,8 @@ extern const IField* DateTimeChangeStructDesc [1];
 extern const ObjectType DateTimeChangeStruct_Type;
 
 #define DateTimeChange_ServiceId 16
-extern const Int32Field Inter_Add_Request_Field_a;
-extern const Int32Field Inter_Add_Request_Field_b;
+extern const UInt8Field Inter_Add_Request_Field_a;
+extern const UInt8Field Inter_Add_Request_Field_b;
 extern const IField* Inter_Add_RequestDesc [2];
 extern const ObjectType Inter_Add_Request_Type;
 
@@ -39,5 +39,19 @@ extern const Int32Field Inter_Add_Response_Field_ReturnValue;
 extern const IField* Inter_Add_ResponseDesc [2];
 extern const ObjectType Inter_Add_Response_Type;
 
+extern const ObjectType Inter_NoArg_Request_Type;
+
+#define Inter_NoArg_ServiceId 18
+extern const UInt8Field Inter_NoArg_Response_Field_State;
+extern const UInt8Field Inter_NoArg_Response_Field_ReturnValue;
+extern const IField* Inter_NoArg_ResponseDesc [2];
+extern const ObjectType Inter_NoArg_Response_Type;
+
+extern const ObjectType Inter_NoReturn_Request_Type;
+
+#define Inter_NoReturn_ServiceId 19
+extern const ObjectType Inter_NoArgAndReturn_Request_Type;
+
+#define Inter_NoArgAndReturn_ServiceId 20
 
 #endif
