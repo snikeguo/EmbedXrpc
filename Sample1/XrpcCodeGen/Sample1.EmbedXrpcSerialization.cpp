@@ -28,8 +28,8 @@ const IField* DateTimeChangeStructDesc []=
 };
 const ObjectType DateTimeChangeStruct_Type(sizeof(DateTimeChangeStructDesc)/sizeof(IField*),DateTimeChangeStructDesc);
 
-const Int32Field Inter_Add_Request_Field_a("Inter_Add_Request.a",offsetof(Inter_Add_Request,a));
-const Int32Field Inter_Add_Request_Field_b("Inter_Add_Request.b",offsetof(Inter_Add_Request,b));
+const UInt8Field Inter_Add_Request_Field_a("Inter_Add_Request.a",offsetof(Inter_Add_Request,a));
+const UInt8Field Inter_Add_Request_Field_b("Inter_Add_Request.b",offsetof(Inter_Add_Request,b));
 const IField* Inter_Add_RequestDesc []=
 {
 &Inter_Add_Request_Field_a,
@@ -45,4 +45,19 @@ const IField* Inter_Add_ResponseDesc []=
 &Inter_Add_Response_Field_ReturnValue,
 };
 const ObjectType Inter_Add_Response_Type(sizeof(Inter_Add_ResponseDesc)/sizeof(IField*),Inter_Add_ResponseDesc);
+
+const ObjectType Inter_NoArg_Request_Type(0,nullptr);
+
+const UInt8Field Inter_NoArg_Response_Field_State("Inter_NoArg_Response.State",offsetof(Inter_NoArg_Response,State));
+const UInt8Field Inter_NoArg_Response_Field_ReturnValue("Inter_NoArg_Response.ReturnValue",offsetof(Inter_NoArg_Response,ReturnValue));
+const IField* Inter_NoArg_ResponseDesc []=
+{
+&Inter_NoArg_Response_Field_State,
+&Inter_NoArg_Response_Field_ReturnValue,
+};
+const ObjectType Inter_NoArg_Response_Type(sizeof(Inter_NoArg_ResponseDesc)/sizeof(IField*),Inter_NoArg_ResponseDesc);
+
+const ObjectType Inter_NoReturn_Request_Type(0,nullptr);
+
+const ObjectType Inter_NoArgAndReturn_Request_Type(0,nullptr);
 

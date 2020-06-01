@@ -18,11 +18,16 @@ InterClientImpl(EmbedXrpcClientObject *rpcobj)
 {
 this->RpcClientObject=rpcobj;
 }
-Inter_Add_Response& Add(Int32 a,Int32 b);
+Inter_Add_Response& Add(Byte a,Byte b);
 void Free_Add(Inter_Add_Response *response);
 
+Inter_NoArg_Response& NoArg();
+void Free_NoArg(Inter_NoArg_Response *response);
+
+void NoReturn();
+void NoArgAndReturn();
 };
-#define Inter_ResponseDelegateMessages_Count 2
+#define Inter_ResponseDelegateMessages_Count 3
 extern ResponseDelegateMessageMap Inter_ResponseDelegateMessages[Inter_ResponseDelegateMessages_Count];
 
 #endif

@@ -375,7 +375,7 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.WriteLine($"static {targetDelegate.MethodName}Struct request;");
 
                 ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
-
+                ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
                 ClientCsw.Write($"{targetDelegate.MethodName}(");
                 for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
                 {
@@ -584,7 +584,9 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine($"static {GeneratServiceName}_Request sendData;");
 
                     ClientCsw.WriteLine("RpcClientObject->porter->TakeMutex(RpcClientObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
-                    ClientCsw.WriteLine("RpcClientObject->porter->ResetSemaphore(RpcClientObject->ResponseMessageSemaphoreHandle);");
+                    
+                    ClientCsw.WriteLine("RpcClientObject->ResponseBlockBufferProvider->Reset();");
+                    //ClientCsw.WriteLine("RpcClientObject->porter->ResetSemaphore(RpcClientObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("SerializationManager sm;\n" +
                         "sm.Reset();\n" +
                         "sm.Buf = &RpcClientObject->Buffer[4];\n" +
@@ -720,7 +722,7 @@ namespace EmbedXrpcIdlParser
                     ServerCsw.WriteLine("{");
                     ServerCsw.WriteLine($"static {GeneratServiceName}_Request request;");
                     ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Deserialize(recManager,&request);");
-
+                    ServerCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
                     //if (service.ReturnValue != null)
                     //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");
                     ServerCsw.Write($"{service.ServiceName}(");

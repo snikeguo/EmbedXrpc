@@ -21,7 +21,11 @@ delegate void DateTimeChange(DateTime_t[] now);
 [FileName("sample1.cs")]
 interface Inter
 {
-    Int32 Add(Int32 a, Int32 b);
+    Int32 Add(Byte a, Byte b);
+
+    bool NoArg();
+    void NoReturn();
+    void NoArgAndReturn();
 }
 
 [FileName("sample1.cs")]

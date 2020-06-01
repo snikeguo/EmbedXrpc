@@ -83,8 +83,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.cpp" />
+    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c" />
     <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.cpp" />
     <ClCompile Include="main.cpp" />
@@ -98,12 +100,14 @@
     <None Include="sample1.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.Port.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcClientObject.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcServerObject.h" />
+    <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.h" />
     <QtMoc Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.h" />
     <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h" />
