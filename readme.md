@@ -1,7 +1,6 @@
 # EmbedXrpc 用户手册
 # QQ群134161401
 #### 这个东西类似于Google的GRPC,但是应用场景是单片机。RPC远程调用极大的方便了开发，使得不必关注于协议解析，数据的序列化和反序列化等繁琐的工作。可是目前还没有在单片机上实现好用的RPC框架，于是我就谋生了做这个RPC框架的想法，所用的技术是：C#做 IDL语言+csscript+自己实现序列化和反序列化+代码生成(Razor Engine) QQ群134161401
-#### [视频教程](https://v.qq.com/x/page/v0943tykmh8.html)
 #### 应用场景：单片机近距离Client/Server交互场景（USB、串口、CAN（如J1939 、ISO15765协议等），）只要是流协议都支持
 #### Sample1工程是例子！除了main.cpp的代码是手工写的之外，其他的代码都是工具生成的！这是个最简单的例子！
 #### 编译此工程你需要安装Qt5.14.2和Qt For Vs Addin插件。
@@ -10,29 +9,12 @@
 #### 2.服务端每1秒广播当前的时间，客户端打印到控制台上
 ![](简单示意图.jpg)
 ![](网图1.jpg)
-## 用户使用步骤
-1.用vs2019 打开EmbedXrpcIdlParser.sln编译好。
+## 编译EmbedXrpc代码生成器EXE
+1.用vs2019 打开EmbedXrpcIdlParser.sln编译好(编译EXE只做一次)。
 2.在EmbedXrpcIdlParser\bin\Debug会出现一个EmbedXrpcIdlParser.exe,
-3.编写你的IDL文件，目录下会有一个idltest1.cs 文件，是例子。如果你打算用这个文件的话，请记得改一下这个文件里的配置类
-```
-[FileName("idltest1.cs")]
-public class OptionProcess:IOptionProcess
-{
-    public GenerationOption Process()
-    {
-        GenerationOption option = new GenerationOption();
-        option.OutPutFileName = "StudentService";//输出的文件名
-        option.CSharpNameSpace = "StudentService";//如果生成C#文件,这是生成的命名空间
-        option.UserIncludes.Add("UserIncFile");//如果生成Cpp文件,生成的代码将会添加UserIncFile.h文件.如果你不需要，则不用写这条语句
-        option.UserNamespace.Add("UserNameSpace");//如果生成C#文件,生成的代码将会添加using UserNameSpace;语句.如果你不需要，则不用写这条语句
-        return option;
-    }
-}
-
-```
-记得保存.
-
-4.执行命令
+## 用户使用步骤(以idltest1.cs为例子)
+1.编写你的IDL文件，目录下会有一个idltest1.cs 文件，是例子,你可以参考一下。
+2.执行命令
 ```
 .\EmbedXrpcIdlParser.exe -g all -l cpp -i idltest1.cs -o yourPath
 ```
@@ -47,9 +29,10 @@ public class OptionProcess:IOptionProcess
 ###### 其中：
 ###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/Cpp + EmbedXrpcRuntime/Cpp/Win32.Port = 客户端(上位机端)的源文件(如果上位机用C++开发)
 ###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/CS = 客户端(上位机端)的源文件(如果上位机用C#开发)
-###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/Cpp + EmbedXrpcRuntime/Cpp/RT-Thread.Port = 服务端(单片机端)的源文件 目前支持RT-Thread
+###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/Cpp + EmbedXrpcRuntime/Cpp/RT-Thread.Port = 服务端(单片机端)的源文件 RT-Thread的移植
+###### A文件夹所有的文件(包括子目录下的) + EmbedXrpcRuntime/Cpp + EmbedXrpcRuntime/Cpp/FreeRTOS.Port = 服务端(单片机端)的源文件 FreeRTOS的移植
 
-#### 一个简单的例子
+#### 又一个简单的例子
 1.编写idl文件：demo.cs
 ```
 using System;
@@ -144,7 +127,7 @@ while(...)
 是不是非常方便~~
 
 
-### 原理部分
+### 原理部分(可以不看)
 
 #### 序列化部分：
 例如有如下结构体：
