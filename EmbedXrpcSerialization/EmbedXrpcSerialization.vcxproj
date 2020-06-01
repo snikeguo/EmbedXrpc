@@ -72,6 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>.;.\FreeRTOS.Port\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -152,8 +153,12 @@
     <ClCompile Include="EmbedXrpc.Port.cpp" />
     <ClCompile Include="EmbedXrpcClientObject.cpp" />
     <ClCompile Include="EmbedSerialization.cpp" />
+    <ClCompile Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.cpp" />
     <ClCompile Include="ringbuffer.c" />
+    <ClCompile Include="RT-Thread.Port\EmbedXrpcPort.Rtt.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="Win32Port\BlockQueue.cpp" />
+    <ClCompile Include="Win32Port\Win32EmbedXrpcPort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlockBufferProvider.h" />
@@ -163,7 +168,14 @@
     <ClInclude Include="EmbedXrpcClientObject.h" />
     <ClInclude Include="EmbedSerialization.h" />
     <ClInclude Include="EmbedXrpcServerObject.h" />
+    <ClInclude Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.h" />
     <ClInclude Include="ringbuffer.h" />
+    <ClInclude Include="RT-Thread.Port\EmbedXrpcPort.Rtt.h" />
+    <ClInclude Include="Win32Port\BlockQueue.h" />
+    <ClInclude Include="Win32Port\Win32EmbedXrpcPort.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FreeRTOS.Port\readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
