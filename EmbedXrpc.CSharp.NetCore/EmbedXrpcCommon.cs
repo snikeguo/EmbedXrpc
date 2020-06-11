@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpc
 {
-    public enum ResponseState:Byte
+    public enum RequestResponseState:Byte
     {
-        Ok=1,
-        Timeout=2,
-        SidError=3,
+        RequestState_Ok = 1,
+        RequestState_Failed = 2,
+        ResponseState_Ok = 3,
+        ResponseState_Timeout = 4,
+        ResponseState_SidError = 5,
+        ResponseState_UnsupportedSid = 6,
     }
     public enum ReceiveType
     {
@@ -45,7 +48,7 @@ namespace EmbedXrpc
         public ReceiveType ReceiveType { get; set; }
         public IDelegate Delegate { get; set; }
     };
-    public delegate void Send(int dataLen, int offset ,byte[] data);
+    public delegate bool Send(int dataLen, int offset ,byte[] data);
     public struct EmbeXrpcRawData
     {
         public UInt16 Sid { get; set; }

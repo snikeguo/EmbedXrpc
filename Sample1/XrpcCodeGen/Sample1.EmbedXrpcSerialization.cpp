@@ -1,5 +1,4 @@
-﻿#include"Sample1.h"
-#include"Sample1.EmbedXrpcSerialization.h"
+﻿#include"Sample1.EmbedXrpcSerialization.h"
 
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
@@ -37,27 +36,41 @@ const IField* Inter_Add_RequestDesc []=
 };
 const ObjectType Inter_Add_Request_Type(sizeof(Inter_Add_RequestDesc)/sizeof(IField*),Inter_Add_RequestDesc);
 
-const UInt8Field Inter_Add_Response_Field_State("Inter_Add_Response.State",offsetof(Inter_Add_Response,State));
-const Int32Field Inter_Add_Response_Field_ReturnValue("Inter_Add_Response.ReturnValue",offsetof(Inter_Add_Response,ReturnValue));
-const IField* Inter_Add_ResponseDesc []=
+const UInt8Field Inter_Add_RequestResponseContent_Field_State("Inter_Add_RequestResponseContent.State",offsetof(Inter_Add_RequestResponseContent,State));
+const Int32Field Inter_Add_RequestResponseContent_Field_ReturnValue("Inter_Add_RequestResponseContent.ReturnValue",offsetof(Inter_Add_RequestResponseContent,ReturnValue));
+const IField* Inter_Add_RequestResponseContentDesc []=
 {
-&Inter_Add_Response_Field_State,
-&Inter_Add_Response_Field_ReturnValue,
+&Inter_Add_RequestResponseContent_Field_State,
+&Inter_Add_RequestResponseContent_Field_ReturnValue,
 };
-const ObjectType Inter_Add_Response_Type(sizeof(Inter_Add_ResponseDesc)/sizeof(IField*),Inter_Add_ResponseDesc);
+const ObjectType Inter_Add_RequestResponseContent_Type(sizeof(Inter_Add_RequestResponseContentDesc)/sizeof(IField*),Inter_Add_RequestResponseContentDesc);
 
 const ObjectType Inter_NoArg_Request_Type(0,nullptr);
 
-const UInt8Field Inter_NoArg_Response_Field_State("Inter_NoArg_Response.State",offsetof(Inter_NoArg_Response,State));
-const UInt8Field Inter_NoArg_Response_Field_ReturnValue("Inter_NoArg_Response.ReturnValue",offsetof(Inter_NoArg_Response,ReturnValue));
-const IField* Inter_NoArg_ResponseDesc []=
+const UInt8Field Inter_NoArg_RequestResponseContent_Field_State("Inter_NoArg_RequestResponseContent.State",offsetof(Inter_NoArg_RequestResponseContent,State));
+const UInt8Field Inter_NoArg_RequestResponseContent_Field_ReturnValue("Inter_NoArg_RequestResponseContent.ReturnValue",offsetof(Inter_NoArg_RequestResponseContent,ReturnValue));
+const IField* Inter_NoArg_RequestResponseContentDesc []=
 {
-&Inter_NoArg_Response_Field_State,
-&Inter_NoArg_Response_Field_ReturnValue,
+&Inter_NoArg_RequestResponseContent_Field_State,
+&Inter_NoArg_RequestResponseContent_Field_ReturnValue,
 };
-const ObjectType Inter_NoArg_Response_Type(sizeof(Inter_NoArg_ResponseDesc)/sizeof(IField*),Inter_NoArg_ResponseDesc);
+const ObjectType Inter_NoArg_RequestResponseContent_Type(sizeof(Inter_NoArg_RequestResponseContentDesc)/sizeof(IField*),Inter_NoArg_RequestResponseContentDesc);
 
 const ObjectType Inter_NoReturn_Request_Type(0,nullptr);
 
+const UInt8Field Inter_NoReturn_RequestResponseContent_Field_State("Inter_NoReturn_RequestResponseContent.State",offsetof(Inter_NoReturn_RequestResponseContent,State));
+const IField* Inter_NoReturn_RequestResponseContentDesc []=
+{
+&Inter_NoReturn_RequestResponseContent_Field_State,
+};
+const ObjectType Inter_NoReturn_RequestResponseContent_Type(sizeof(Inter_NoReturn_RequestResponseContentDesc)/sizeof(IField*),Inter_NoReturn_RequestResponseContentDesc);
+
 const ObjectType Inter_NoArgAndReturn_Request_Type(0,nullptr);
+
+const UInt8Field Inter_NoArgAndReturn_RequestResponseContent_Field_State("Inter_NoArgAndReturn_RequestResponseContent.State",offsetof(Inter_NoArgAndReturn_RequestResponseContent,State));
+const IField* Inter_NoArgAndReturn_RequestResponseContentDesc []=
+{
+&Inter_NoArgAndReturn_RequestResponseContent_Field_State,
+};
+const ObjectType Inter_NoArgAndReturn_RequestResponseContent_Type(sizeof(Inter_NoArgAndReturn_RequestResponseContentDesc)/sizeof(IField*),Inter_NoArgAndReturn_RequestResponseContentDesc);
 

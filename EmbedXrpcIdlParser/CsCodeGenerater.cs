@@ -35,7 +35,7 @@ namespace EmbedXrpcIdlParser
             config.EncodedStringFactory = new RawStringFactory(); // Raw string encoding.
             var service = RazorEngineService.Create(config);
             Engine.Razor = service;
-            var result = Engine.Razor.RunCompile(File.ReadAllText("CSharpTemplate.cshtml"), "templateKey", GetType(), this);
+            var result = Engine.Razor.RunCompile(File.ReadAllText(AppContext.BaseDirectory+"/CSharpTemplate.cshtml"), "templateKey", GetType(), this);
 
             result = result.Replace("<h1", string.Empty);
             result = result.Replace("/>", string.Empty);

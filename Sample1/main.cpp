@@ -14,9 +14,10 @@ extern EmbedXrpcServerObject ServerRpc;
 uint8_t ClientSendBuffer[2048];//发送buffer
 uint8_t ClientResponseBuffer[2048];
 uint8_t ClientDelegateBuffer[2048];
-void ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
+bool ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	ServerRpc.ReceivedMessage(dataLen, data);
+	return true;
 }
 ResponseDelegateMessageMapCollection rdCollection[1] = { {Inter_ResponseDelegateMessages_Count,Inter_ResponseDelegateMessages} };//client可以处理的service集合
 
@@ -44,11 +45,11 @@ void ClientThread()
 	QThread::msleep(500);
 	while (true)
 	{
-		/*auto sum=Client.Add(5, 2);
+		auto sum=Client.Add(5, 2);
 		if (sum.State == ResponseState_Ok)
 		{
 			printf("sum:%d\n", sum.ReturnValue);
-		}*/
+		}
 		Client.NoArg();
 		Client.NoReturn();
 		Client.NoArgAndReturn();
@@ -59,9 +60,10 @@ void ClientThread()
 //server
 uint8_t ServerSendBuffer[2048];
 uint8_t ServerRequestBuffer[2048];//发送buffer
-void ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
+bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	ClientRpc.ReceivedMessage(dataLen, data);
+	return true;
 }
 RequestMessageMapCollection rmCollection[1] = { {Inter_RequestMessages_Count,Inter_RequestMessages} };
 EmbedXrpcServerObject ServerRpc(ServerSend,

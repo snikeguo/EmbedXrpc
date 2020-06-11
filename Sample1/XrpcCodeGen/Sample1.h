@@ -24,24 +24,32 @@ typedef struct _Inter_Add_Request
 Byte a;
 Byte b;
 }Inter_Add_Request;
-typedef struct _Inter_Add_Response
+typedef struct _Inter_Add_RequestResponseContent
 {
-ResponseState State;
+RequestResponseState State;
 Int32 ReturnValue;
-}Inter_Add_Response;
+}Inter_Add_RequestResponseContent;
 typedef struct _Inter_NoArg_Request
 {
 }Inter_NoArg_Request;
-typedef struct _Inter_NoArg_Response
+typedef struct _Inter_NoArg_RequestResponseContent
 {
-ResponseState State;
+RequestResponseState State;
 Boolean ReturnValue;
-}Inter_NoArg_Response;
+}Inter_NoArg_RequestResponseContent;
 typedef struct _Inter_NoReturn_Request
 {
 }Inter_NoReturn_Request;
+typedef struct _Inter_NoReturn_RequestResponseContent
+{
+RequestResponseState State;
+}Inter_NoReturn_RequestResponseContent;
 typedef struct _Inter_NoArgAndReturn_Request
 {
 }Inter_NoArgAndReturn_Request;
+typedef struct _Inter_NoArgAndReturn_RequestResponseContent
+{
+RequestResponseState State;
+}Inter_NoArgAndReturn_RequestResponseContent;
 
 #endif

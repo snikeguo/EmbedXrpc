@@ -3,13 +3,17 @@
 
 
 #include "EmbedXrpc.Port.h"
-
+#include "EmbedSerialization.h"
 #define EmbedXrpcSuspendSid 0x01
- enum ResponseState
+#define EmbedXrpcUnsupportedSid 0x2
+ enum RequestResponseState
  {
-	 ResponseState_Ok=1,
-	 ResponseState_Timeout=2,
-	 ResponseState_SidError=3,
+     RequestState_Ok=1,
+     RequestState_Failed=2,
+     ResponseState_Ok=3,
+     ResponseState_Timeout=4,
+     ResponseState_SidError=5,
+     ResponseState_UnsupportedSid = 6,
  };
  enum ReceiveType_t
  {
@@ -60,7 +64,7 @@
 	 uint8_t* Data;
 	 uint32_t DataLen;
  };*/
-typedef void (*SendPack_t)(void *rpcObj,uint32_t dataLen, uint8_t* data);
+typedef bool (*SendPack_t)(void *rpcObj,uint32_t dataLen, uint8_t* data);
 
 
 #endif

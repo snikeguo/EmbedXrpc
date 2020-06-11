@@ -83,7 +83,7 @@ namespace EmbedXrpcIdlParser
 
             SerializeCsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, Encoding.UTF8);
 
-            SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
+
             SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
             SerializeCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             SerializeCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
@@ -91,6 +91,7 @@ namespace EmbedXrpcIdlParser
             SerializeHsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
             SerializeHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".","_")}_EmbedXrpcSerialization_H");
             SerializeHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_EmbedXrpcSerialization_H");
+            SerializeHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
 
             SerializeHsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             SerializeHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
@@ -121,8 +122,7 @@ namespace EmbedXrpcIdlParser
 
                 ClientHsw = new StreamWriter(outputpath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
                 ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
-                ClientHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
-                ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
+                ClientHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");                
                 ClientHsw.WriteLine("#include\"EmbedXrpcClientObject.h\"");
                 ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
@@ -139,7 +139,6 @@ namespace EmbedXrpcIdlParser
                 ServerHsw = new StreamWriter(outputpath + "Server/" + outputattr.OutPutFileName + ".Server.h", false, Encoding.UTF8);
                 ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
                 ServerHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
-                ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName }.h\"");
                 ServerHsw.WriteLine("#include\"EmbedXrpcServerObject.h\"");
                 ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
@@ -501,33 +500,34 @@ namespace EmbedXrpcIdlParser
                 EmitServiceIdCode(SerializeHsw, GeneratServiceName, service.ServiceId);//生成 ServiceID 宏定义
 
                 TargetStruct targetStructResponse = new TargetStruct();
-                targetStructResponse.Name = GeneratServiceName + "_Response";
-                if (service.ReturnValue!=null)
-                {           
-                    TargetField ts = new TargetField();
-                    ts.Name = "State";
-                    ts.IdlType = "ResponseState";
-                    ts.IsArray = false;
-                    ts.Enum = new TargetEnum() { IntType = "byte", Name = "ResponseState"};
-                    ts.MaxCountAttribute = null;
-                    targetStructResponse.TargetFields.Add(ts);
+                targetStructResponse.Name = GeneratServiceName + "_RequestResponseContent";
 
+                TargetField ts = new TargetField();
+                ts.Name = "State";
+                ts.IdlType = "RequestResponseState";
+                ts.IsArray = false;
+                ts.Enum = new TargetEnum() { IntType = "byte", Name = "RequestResponseState" };
+                ts.MaxCountAttribute = null;
+                targetStructResponse.TargetFields.Add(ts);
+
+                if (service.ReturnValue!=null)//添加返回值
+                {                               
                     TargetField returnValue = new TargetField();
                     returnValue.Name = "ReturnValue";
                     returnValue.IdlType = service.ReturnValue.IdlType;
                     returnValue.IsArray = false;
                     returnValue.MaxCountAttribute = null;
                     targetStructResponse.TargetFields.Add(returnValue);
-
-                    EmbedXrpcSerializationHelper.EmitStruct(targetStructResponse.Name,
-                        targetStructResponse.TargetFields,
-                        SerializeCsw,
-                        SerializeHsw);
-
-                    EmitStruct(targetStructResponse);
-
-                    AddMessageMap(GeneratServiceName, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);
                 }
+
+                EmbedXrpcSerializationHelper.EmitStruct(targetStructResponse.Name,
+                    targetStructResponse.TargetFields,
+                    SerializeCsw,
+                    SerializeHsw);
+
+                EmitStruct(targetStructResponse);
+
+                AddMessageMap(GeneratServiceName, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);
                 //EmitServiceIdCode(SerializeHsw, targetStructResponse.Name, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);//生成 ServiceID 宏定义
 
             }
@@ -544,16 +544,8 @@ namespace EmbedXrpcIdlParser
                 foreach (var service in targetInterface.Services)
                 {
                     string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
-                    if (service.ReturnValue != null)
-                    {
-                        ClientHsw.Write($"{GeneratServiceName}_Response& {service.ServiceName}(");
-                        ClientCsw.Write($"{GeneratServiceName}_Response& {targetInterface.Name}ClientImpl::{service.ServiceName}(");
-                    }
-                    else
-                    {
-                        ClientHsw.Write("void " + service.ServiceName + "(");
-                        ClientCsw.Write($"void  {targetInterface.Name}ClientImpl::{service.ServiceName}(");
-                    }
+                    ClientHsw.Write($"{GeneratServiceName}_RequestResponseContent& {service.ServiceName}(");
+                    ClientCsw.Write($"{GeneratServiceName}_RequestResponseContent& {targetInterface.Name}ClientImpl::{service.ServiceName}(");
                     string temp_fileds = string.Empty;
                     for (int i = 0; i < service.TargetFields.Count; i++)
                     {
@@ -635,41 +627,27 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine($"RpcClientObject->Buffer[1]=(uint8_t)({GeneratServiceName}_ServiceId>>8&0xff);");
                     ClientCsw.WriteLine($"RpcClientObject->Buffer[2]=(uint8_t)(RpcClientObject->TimeOut>>0&0xff);");
                     ClientCsw.WriteLine($"RpcClientObject->Buffer[3]=(uint8_t)(RpcClientObject->TimeOut>>8&0xff);");
-
-                    ClientCsw.WriteLine($"RpcClientObject->Send(RpcClientObject,sm.Index+4,RpcClientObject->Buffer);");
+                    ClientCsw.WriteLine($"static {GeneratServiceName}_RequestResponseContent reqresp;");
+                    ClientCsw.WriteLine($"auto result=RpcClientObject->Send(RpcClientObject,sm.Index+4,RpcClientObject->Buffer);");
                     ClientCsw.WriteLine("sm.Reset();");
-                    
-
+                    ClientCsw.WriteLine("if(result==false)\n{\nreqresp.State=RequestState_Failed;\ngoto exi;\n}");
+                    ClientCsw.WriteLine("else\n{\nreqresp.State=RequestState_Ok;\n}");
                     if (service.ReturnValue != null)
                     {
-                        ClientCsw.WriteLine($"static {GeneratServiceName}_Response response;\n" +
-                                           $"ResponseState result=RpcClientObject->Wait({GeneratServiceName}_ServiceId,&{GeneratServiceName}_Response_Type,&response);");
-                        ClientCsw.WriteLine("if(result==ResponseState_SidError)\n{");
-                        //ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_SidError;");
-                        ClientCsw.WriteLine($"response.State=ResponseState_SidError;");
-                        ClientCsw.WriteLine("}");
-                        ClientCsw.WriteLine("else if(result==ResponseState_Ok)\n{");
-                        //ClientHsw.WriteLine($"RpcClientObject->porter->Free(recData.Data);\nresponse.State=ResponseState_Ok;");
-                        ClientCsw.WriteLine($"response.State=ResponseState_Ok;");
-                        ClientCsw.WriteLine("}");
-                        ClientCsw.WriteLine("else if(result==ResponseState_Timeout)\n{");
-                        ClientCsw.WriteLine($"response.State=ResponseState_Timeout;");
-                        ClientCsw.WriteLine("}");
-                        ClientCsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
-                        ClientCsw.WriteLine("return response;");
+                        ClientCsw.WriteLine($"auto waitstate=RpcClientObject->Wait({GeneratServiceName}_ServiceId,&{GeneratServiceName}_RequestResponseContent_Type,&reqresp);");
+                        ClientCsw.WriteLine("reqresp.State=waitstate;");
                     }
-                    else
-                    {
-                        ClientCsw.WriteLine("RpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
-                    }
+
+                    ClientCsw.WriteLine("exi:\nRpcClientObject->porter->ReleaseMutex(RpcClientObject->ObjectMutexHandle);");
+                    ClientCsw.WriteLine("return reqresp;");
                     ClientCsw.WriteLine("}");
 
                     if (service.ReturnValue != null)
                     {
-                        ClientHsw.WriteLine($"void Free_{service.ServiceName}({GeneratServiceName}_Response *response);\n");
-                        ClientCsw.WriteLine($"void {targetInterface.Name}ClientImpl::Free_{service.ServiceName}({GeneratServiceName}_Response *response)");
+                        ClientHsw.WriteLine($"void Free_{service.ServiceName}({GeneratServiceName}_RequestResponseContent *response);\n");
+                        ClientCsw.WriteLine($"void {targetInterface.Name}ClientImpl::Free_{service.ServiceName}({GeneratServiceName}_RequestResponseContent *response)");
                         ClientCsw.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
-                        ClientCsw.WriteLine($"{GeneratServiceName}_Response_Type.Free(response);");
+                        ClientCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(response);");
                         ClientCsw.WriteLine("}\n}");
                     }
                     ClientCsw.WriteLine("\n"); //client interface end class
@@ -690,7 +668,7 @@ namespace EmbedXrpcIdlParser
 
                     //string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response& ";
                     if (service.ReturnValue != null)
-                        ServerHsw.WriteLine($"{GeneratServiceName}_Response Response;");
+                        ServerHsw.WriteLine($"{GeneratServiceName}_RequestResponseContent Response;");
                     string returnType = "void";
                     ServerHsw.Write($"{returnType} {service.ServiceName}(");
 
@@ -741,8 +719,8 @@ namespace EmbedXrpcIdlParser
 
                     if (service.ReturnValue != null)
                     {
-                        ServerCsw.WriteLine($"{GeneratServiceName}_Response_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
-                        ServerCsw.WriteLine($"{GeneratServiceName}_Response_Type.Free(&Response);");//生成返回值序列化
+                        ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
+                        ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(&Response);");//生成返回值序列化
                     }
 
                     ServerCsw.WriteLine("}");//end function

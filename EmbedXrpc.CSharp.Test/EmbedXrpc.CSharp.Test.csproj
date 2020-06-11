@@ -15,6 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="StudentService.gen.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EmbedXrpc.CSharp.NetCore\EmbedXrpc.CSharp.NetCore.csproj" />
   </ItemGroup>
 

@@ -69,7 +69,7 @@
                 {
                     <h1 [BitsFieldLength( @field.BitsFieldLengthAttribute.Length )] />
                 }
-                if (field.IsBaseValueType == true && field.BitsType== BitsType.NoBits)
+                if (field.IsBaseValueType == true && field.BitsType == BitsType.NoBits)
                 {
 
                     <h1 public @field.IdlType @(field.Name + "{get;set;}") />
@@ -252,29 +252,31 @@
                 }
             }
             <h1 } />
-
+            TargetStruct returnstru = new TargetStruct();
+            returnstru.Name = interf.Name + "_" + service.ServiceName + "_RequestResponseContent";
+            TargetField ResponseStateField = new TargetField() { IdlType = "RequestResponseState", IsArray = false, Name = "State" };
+            returnstru.TargetFields = new List<TargetField>();
+            returnstru.TargetFields.Add(ResponseStateField);
             if (service.ReturnValue != null)
             {
-                TargetStruct returnstru = new TargetStruct();
-                returnstru.Name = interf.Name + "_" + service.ServiceName + "_Response";
+
                 TargetField returnField = new TargetField() { IdlType = service.ReturnValue.IdlType, IsArray = false, Name = "ReturnValue" };
-                TargetField ResponseStateField = new TargetField() { IdlType = "ResponseState", IsArray = false, Name = "State" };
-                returnstru.TargetFields = new List<TargetField>() { ResponseStateField, returnField };
-                <h1 public class @returnstru.Name />
-                <h1 { />
-                foreach (var field in returnstru.TargetFields)
-                {
-                    if (field.IsArray == true)
-                    {
-                        string v = "[ArrayProperty(LenFieldName = \"" + field.MaxCountAttribute.LenFieldName + "\")]";
 
-                        <h1 @v />
-                    }
-                    <h1 public @field.IdlType @(field.Name + "{get;set;}") />
-                }
-                <h1 } />
+                returnstru.TargetFields.Add(returnField);
             }
+            <h1 public class @returnstru.Name />
+            <h1 { />
+            foreach (var field in returnstru.TargetFields)
+            {
+                if (field.IsArray == true)
+                {
+                    string v = "[ArrayProperty(LenFieldName = \"" + field.MaxCountAttribute.LenFieldName + "\")]";
 
+                    <h1 @v />
+                }
+                <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+            }
+            <h1 } />
         }
 
         foreach (var service in interf.Services)
@@ -290,7 +292,7 @@
                 <h1 public override UInt16 GetSid(){ return @(service.ServiceName + "_ServiceId") ; } />
                 if (service.ReturnValue != null)
                 {
-                    <h1 private @(interf.Name + "_" + service.ServiceName + "_Response Response")=new @(interf.Name + "_" + service.ServiceName + "_Response()") ; />
+                    <h1 private @(interf.Name + "_" + service.ServiceName + "_RequestResponseContent Response")=new @(interf.Name + "_" + service.ServiceName + "_RequestResponseContent()") ; />
                 }
                 <h1 public override void Invoke(SerializationManager recManager, SerializationManager sendManager) />
                 <h1 { />
@@ -352,15 +354,9 @@
                     }
 
                 }
-                if (service.ReturnValue != null)
-                {
-                    <h1 public @(interf.Name + "_" + service.ServiceName + "_Response") @(service.ServiceName + "(") @(pars + ")") />
-                }
-                else
-                {
-                    <h1 public void @(service.ServiceName + "(") @(pars + ")") />
-                }
+                <h1 public @(interf.Name + "_" + service.ServiceName + "_RequestResponseContent") @(service.ServiceName + "(") @(pars + ")") />
                 <h1 { />
+                <h1 @(interf.Name + "_" + service.ServiceName + "_RequestResponseContent reqresp")=new @(interf.Name + "_" + service.ServiceName + "_RequestResponseContent()") ; />
                 <h1 lock(Client.ObjectMutex) />
                 <h1 { />
                 <h1 Client.ResponseMessageQueueHandle.Reset(); />
@@ -391,20 +387,23 @@
                 <h1 sendBytes.Add( @sid_temp ); />
 
                 <h1 sendBytes.AddRange(sm.Data); />
-                <h1 Client.Send ( sendBytes.Count,0,sendBytes.ToArray() ); />
+
+                string sendString = "if( Client.Send ( sendBytes.Count,0,sendBytes.ToArray() )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n";
+                sendString += "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}";
+                <h1 @sendString />
                 if (service.ReturnValue != null)
                 {
-                    <h1 @(interf.Name + "_" + service.ServiceName + "_Response response")=new @(interf.Name + "_" + service.ServiceName + "_Response()") ; />
-                    <h1 ResponseState result=@("Client.Wait<"+interf.Name+"_"+service.ServiceName+ "_Response>(") @(service.ServiceName + "_ServiceId, out response);") />
-                    <h1 if(response @("==null") ) />
+                    <h1 var waitstate=@("Client.Wait<"+interf.Name+"_"+service.ServiceName+ "_RequestResponseContent>(") @(service.ServiceName + "_ServiceId, out reqresp);") />
+                    <h1 if(reqresp @("==null") ) />
                     <h1 { />
-                    <h1 response=new @(interf.Name + "_" + service.ServiceName + "_Response()") ; />
+                    <h1 reqresp=new @(interf.Name + "_" + service.ServiceName + "_RequestResponseContent()") ; />
                     <h1 } />
-                    <h1 response.State=result; />
-                    <h1 return response; />
+                    <h1 reqresp.State=waitstate;/>
+                    <h1 goto exi; />
                 }
                 <h1 } />
-
+                string exitstring = "exi:\nreturn reqresp;";
+                <h1 @exitstring />
                 <h1 } />
             }
             <h1 } />

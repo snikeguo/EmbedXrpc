@@ -1,6 +1,5 @@
 ﻿#ifndef Sample1_Server_H
 #define Sample1_Server_H
-#include"Sample1.h"
 #include"EmbedXrpcServerObject.h"
 #include"Sample1.EmbedXrpcSerialization.h"
 class DateTimeChangeDelegate
@@ -18,7 +17,7 @@ class Inter_AddService:public IService
 {
 public:
 uint16_t GetSid(){return Inter_Add_ServiceId;}
-Inter_Add_Response Response;
+Inter_Add_RequestResponseContent Response;
 void Add(Byte a,Byte b);
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };
@@ -26,7 +25,7 @@ class Inter_NoArgService:public IService
 {
 public:
 uint16_t GetSid(){return Inter_NoArg_ServiceId;}
-Inter_NoArg_Response Response;
+Inter_NoArg_RequestResponseContent Response;
 void NoArg();
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };
