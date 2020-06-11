@@ -1,5 +1,5 @@
 ﻿using EmbedXrpc;
-using StudentService;
+using Sample1;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,53 +10,48 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-
-namespace StudentService
+namespace Sample1
 {
-#if true
-    public partial class BroadcastDataTimeClientImpl : IDelegate
+    public partial class DateTimeChangeClientImpl : IDelegate
     {
-        public void BroadcastDataTime(DateTime_t t)
+        public void DateTimeChange(DateTime_t[] now)
         {
+            var t = now[0];
             Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
         }
     }
-    public partial class IMyInterface_GetStudentInfoFormStudentIdService : IService
+    public partial class Inter_AddService : IService
     {
-        public void GetStudentInfoFormStudentId(Byte StudentIdLen, Byte[] StudentId, Int32 arg2, Int32 arg3)
+        public void Add(Byte a, Byte b)
+        {
+            Response.ReturnValue = a + b;
+        }
+    }
+    public partial class Inter_NoArgService : IService
+    {
+        public void NoArg()
         {
 
         }
     }
-    public partial class IMyInterface_GetStudentsInfoFormAgeService : IService
+    public partial class Inter_NoReturnService : IService
     {
-        public void GetStudentsInfoFormAge()
+        public void NoReturn()
         {
-            //Thread.Sleep(10000);
-            Response.ReturnValue = new StudentArray_t();
-            Response.ReturnValue.StudentIdLen = 1;
-            var stu = new Student_t() { Age = 2, ResultsLen = 0, StudentIdLen = 0 };
-            //stu.Name = new byte[1];
-            //stu.Results = new Result_t[0];
-            stu.StudentId = Encoding.ASCII.GetBytes("0123456789");
-            stu.StudentIdLen = (byte)stu.StudentId.Length;
-            stu.Sex = Sex_t.HHHH;
-            Response.ReturnValue.Students = new Student_t[1] { stu };
+
         }
     }
-    public partial class IMyInterface_TestService : IService
+    public partial class Inter_NoArgAndReturnService : IService
     {
-        public void Test(Byte[] noLen)
+        public void NoArgAndReturn()
         {
-            this.Response.ReturnValue = true;
+
         }
     }
-#endif
 }
-
 namespace EmbedXrpc
 {
-#if local
+
     class Program
     {
         static void Main(string[] args)
@@ -65,26 +60,42 @@ namespace EmbedXrpc
             client.Start();
             server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
-            
-#if false
             Task.Run(() =>
             {
-                IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
+                InterClientImpl inter = new InterClientImpl(client);
                 while (true)
                 {
-                    var re = inter.GetStudentsInfoFormAge();
-                    Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
-                    var x=inter.Test(new byte[1] { 22});
-                    Thread.Sleep(100);
+                    var reAdd = inter.Add(1,2);
+                    if(reAdd.State==RequestResponseState.RequestState_Failed)
+                    {
+                        throw new Exception("send failed!");
+                    }
+                    var reNoArg = inter.NoArg();
+                    if (reNoArg.State == RequestResponseState.RequestState_Failed)
+                    {
+                        throw new Exception("send failed!");
+                    }
+                    var reNoReturn = inter.NoReturn();
+                    if (reNoReturn.State == RequestResponseState.RequestState_Failed)
+                    {
+                        throw new Exception("send failed!");
+                    }
+                    var reNoArgAndReturn = inter.NoArgAndReturn();
+                    if (reNoArgAndReturn.State == RequestResponseState.RequestState_Failed)
+                    {
+                        throw new Exception("send failed!");
+                    }
+                    Thread.Sleep(0);
                 }
             });
 
             Task.Run(() =>
             {
-                BroadcastDataTimeDelegate broadcastDataTimeDelegate = new BroadcastDataTimeDelegate(server);
+                DateTimeChangeDelegate broadcastDataTimeDelegate = new DateTimeChangeDelegate(server);
                 while (true)
                 {
-                    broadcastDataTimeDelegate.Invoke(new DateTime_t()
+                    broadcastDataTimeDelegate.Invoke(new DateTime_t[1] {
+                    new DateTime_t()
                     {
                         Year = DateTime.Now.Year,
                         Month = DateTime.Now.Month,
@@ -92,8 +103,8 @@ namespace EmbedXrpc
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second
-                    });
-                    Thread.Sleep(100);
+                    }});
+                    Thread.Sleep(1);
                 }
             });
 
@@ -102,102 +113,22 @@ namespace EmbedXrpc
 
                 Thread.Sleep(1000);
             }
-#endif
         }
 
         static Client client;
         static Server server;
-        public static void clientSend(int dataLen, int offset, byte[] data)
+        public static bool clientSend(int dataLen, int offset, byte[] data)
         {
             //Console.WriteLine($"clientSend {sid}");
             server.ReceivedMessage((UInt32)dataLen, (UInt32)offset,data);
+            return true;
         }
-        public static void serverSend(int dataLen, int offset, byte[] data)
+        public static bool serverSend(int dataLen, int offset, byte[] data)
         {
             //Console.WriteLine($"serverSend {sid}");
             client.ReceivedMessage((UInt32)dataLen, (UInt32)offset, data);
+            return true;
         }
     }
-#else
-        class Program
-    {
-        static void Main(string[] args)
-        {
-            TcpListener = new TcpListener(IPAddress.Any, 5567);
-            TcpListener.Start();
-            Task.Run(() =>
-            {
-                TcpClient = TcpListener.AcceptTcpClient();
-                client = new Client(6666, clientSend, Assembly.GetExecutingAssembly());
-                client.Start();
-                TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
-                Task.Run(() =>
-                {
-                    IMyInterfaceClientImpl inter = new IMyInterfaceClientImpl(client);
-                    while (true)
-                    {
-                        
-                        try
-                        {
-                            //var re = inter.GetStudentsInfoFormAge();
-                            //Console.WriteLine(Encoding.ASCII.GetString(re.ReturnValue.Students[0].StudentId));
-                            var testResult = inter.Test();
-                            Console.WriteLine("testResult:{0}", testResult.ReturnValue);
-                        }
-                        catch 
-                        {
 
-                            
-                        }
-                       
-                        Thread.Sleep(1000);
-                    }
-                });
-            });
-            
-
-            
-
-            while (true)
-            {
-
-                Thread.Sleep(1000);
-            }
-        }
-        public static void RecCallback(IAsyncResult ar)
-        {
-            try
-            {
-                var stream = TcpClient.GetStream();
-                var len = stream.EndRead(ar);
-                if (recBuff[0] != 0xff && recBuff[1] != 0xff)
-                {
-                    return;
-                }
-                client.ReceivedMessage((UInt32)(len - 2), 2, recBuff);
-                TcpClient.GetStream().BeginRead(recBuff, 0, recBuff.Length, RecCallback, null);
-            }
-            catch (Exception e)
-            {
-
-                Console.WriteLine(e.Message);
-            }
-            
-        }
-        static Client client;
-        static TcpListener TcpListener;
-        static TcpClient TcpClient;
-        static byte[] recBuff = new byte[10240];
-        public static void clientSend(int dataLen, int offset,byte[] data)
-        {
-            var stream = TcpClient.GetStream();
-            byte[] buffer = new byte[dataLen + 2];
-            buffer[0] = 0xff;
-            buffer[1] = 0xff;
-            Array.Copy(data, offset, buffer, 2, dataLen);
-            stream.Write(buffer);
-        }
-        
-    }
-#endif
 }

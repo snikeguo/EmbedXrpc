@@ -1,5 +1,6 @@
 ﻿#ifndef Sample1_EmbedXrpcSerialization_H
 #define Sample1_EmbedXrpcSerialization_H
+#include"Sample1.h"
 
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
@@ -34,24 +35,32 @@ extern const IField* Inter_Add_RequestDesc [2];
 extern const ObjectType Inter_Add_Request_Type;
 
 #define Inter_Add_ServiceId 17
-extern const UInt8Field Inter_Add_Response_Field_State;
-extern const Int32Field Inter_Add_Response_Field_ReturnValue;
-extern const IField* Inter_Add_ResponseDesc [2];
-extern const ObjectType Inter_Add_Response_Type;
+extern const UInt8Field Inter_Add_RequestResponseContent_Field_State;
+extern const Int32Field Inter_Add_RequestResponseContent_Field_ReturnValue;
+extern const IField* Inter_Add_RequestResponseContentDesc [2];
+extern const ObjectType Inter_Add_RequestResponseContent_Type;
 
 extern const ObjectType Inter_NoArg_Request_Type;
 
 #define Inter_NoArg_ServiceId 18
-extern const UInt8Field Inter_NoArg_Response_Field_State;
-extern const UInt8Field Inter_NoArg_Response_Field_ReturnValue;
-extern const IField* Inter_NoArg_ResponseDesc [2];
-extern const ObjectType Inter_NoArg_Response_Type;
+extern const UInt8Field Inter_NoArg_RequestResponseContent_Field_State;
+extern const UInt8Field Inter_NoArg_RequestResponseContent_Field_ReturnValue;
+extern const IField* Inter_NoArg_RequestResponseContentDesc [2];
+extern const ObjectType Inter_NoArg_RequestResponseContent_Type;
 
 extern const ObjectType Inter_NoReturn_Request_Type;
 
 #define Inter_NoReturn_ServiceId 19
+extern const UInt8Field Inter_NoReturn_RequestResponseContent_Field_State;
+extern const IField* Inter_NoReturn_RequestResponseContentDesc [1];
+extern const ObjectType Inter_NoReturn_RequestResponseContent_Type;
+
 extern const ObjectType Inter_NoArgAndReturn_Request_Type;
 
 #define Inter_NoArgAndReturn_ServiceId 20
+extern const UInt8Field Inter_NoArgAndReturn_RequestResponseContent_Field_State;
+extern const IField* Inter_NoArgAndReturn_RequestResponseContentDesc [1];
+extern const ObjectType Inter_NoArgAndReturn_RequestResponseContent_Type;
+
 
 #endif

@@ -25,8 +25,8 @@ Inter_Add_Request_Type.Deserialize(recManager,&request);
 EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());
 Add(request.a,request.b);
 Inter_Add_Request_Type.Free(&request);
-Inter_Add_Response_Type.Serialize(sendManager,0,&Response);
-Inter_Add_Response_Type.Free(&Response);
+Inter_Add_RequestResponseContent_Type.Serialize(sendManager,0,&Response);
+Inter_Add_RequestResponseContent_Type.Free(&Response);
 }
 Inter_AddService Inter_AddServiceInstance;
 void Inter_NoArgService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
@@ -36,8 +36,8 @@ Inter_NoArg_Request_Type.Deserialize(recManager,&request);
 EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());
 NoArg();
 Inter_NoArg_Request_Type.Free(&request);
-Inter_NoArg_Response_Type.Serialize(sendManager,0,&Response);
-Inter_NoArg_Response_Type.Free(&Response);
+Inter_NoArg_RequestResponseContent_Type.Serialize(sendManager,0,&Response);
+Inter_NoArg_RequestResponseContent_Type.Free(&Response);
 }
 Inter_NoArgService Inter_NoArgServiceInstance;
 void Inter_NoReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)

@@ -35,6 +35,7 @@ public class OptionProcess:IOptionProcess
     {
         GenerationOption option = new GenerationOption();
         option.OutPutFileName = "Sample1";
+        option.CSharpNameSpace = "Sample1";
         return option;
     }
 }

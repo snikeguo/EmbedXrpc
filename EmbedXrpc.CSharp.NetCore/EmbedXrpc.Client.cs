@@ -71,17 +71,17 @@ namespace EmbedXrpc
         {
             ServiceThreadHandle.Abort();
         }
-        public ResponseState Wait<T>(UInt32 sid,out T response)
+        public RequestResponseState Wait<T>(UInt32 sid,out T response)
         {
             EmbeXrpcRawData recData;
             response = default(T);
             Type res_t =typeof(T);
-            ResponseState ret = ResponseState.Ok;
+            RequestResponseState ret = RequestResponseState.ResponseState_Ok;
             while (true)
             {
                 if (ResponseMessageQueueHandle.Receive(out recData, TimeOut) != QueueStatus.OK)
                 {
-                    return ResponseState.Timeout;
+                    return RequestResponseState.ResponseState_Timeout;
                 }
                 if(recData.Sid== EmbedXrpcCommon.EmbedXrpcSuspendSid)
                 {
@@ -90,11 +90,11 @@ namespace EmbedXrpc
                 }
                 if (sid != recData.Sid)
                 {
-                    ret=ResponseState.SidError;
+                    ret= RequestResponseState.ResponseState_SidError;
                 }
                 break;
             }
-            if(ret == ResponseState.Ok)
+            if(ret == RequestResponseState.ResponseState_Ok)
             {
                 SerializationManager rsm = new SerializationManager();
                 rsm.Reset();
@@ -170,7 +170,7 @@ namespace EmbedXrpc
                         if ((MessageMaps[i].ReceiveType ==  ReceiveType.Delegate) && (MessageMaps[i].Delegate.GetSid() == recData.Sid))
                         {
                             SerializationManager rsm=new SerializationManager();
-                            Console.WriteLine($"get server timeout value{recData.TargetTimeOut}");
+                            //Console.WriteLine($"get server timeout value{recData.TargetTimeOut}");
                             rsm.Reset();
                             rsm.Data = new List<byte>(recData.Data);
                             MessageMaps[i].Delegate.Invoke(rsm);

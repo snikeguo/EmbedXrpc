@@ -180,9 +180,9 @@ public:
 		}
 	}
 
-	ResponseState Wait(uint32_t sid, const IType *type,void * response)
+	RequestResponseState Wait(uint32_t sid, const IType *type,void * response)
 	{
-		ResponseState ret= ResponseState_Ok;
+		RequestResponseState ret= ResponseState_Ok;
 		BlockBufferItemInfo recData;
 		while (true)
 		{	
