@@ -14,8 +14,8 @@ public:
 	uint32_t TimeOut;
 	SendPack_t Send;
 	IEmbeXrpcPort* porter;
-	EmbedXrpc_Thread_t ServiceThreadHandle;
-	EmbedXrpc_Mutex_t SendMutexHandle;
+	EmbedXrpc_Thread_t ResponseServiceThreadHandle;
+	EmbedXrpc_Mutex_t ObjectMutexHandle;
 
 	uint8_t *RequestRingBuffer;
 	int16_t RequestRingBufferSize;
@@ -23,8 +23,8 @@ public:
 
 	EmbedXrpc_Timer_t SuspendTimer;
 
-	uint32_t CollectionCount;
-	RequestMessageMapCollection* MapCollection;
+	uint32_t RequestMessageMapsCount;
+	RequestMessageMapCollection* RequestMessageMaps;
 
 	void* UserData;
 	bool DeInitFlag = false;
@@ -35,8 +35,8 @@ public:
 		uint8_t *requestRingBuffer,
 		int16_t requestRingBufferSize,
 		IEmbeXrpcPort* port,
-		uint32_t collectionCount,
-		RequestMessageMapCollection* mapCollection,
+		uint32_t requestMessageMapsCount,
+		RequestMessageMapCollection* requestMessageMaps,
 		void *ud=nullptr)
 	{
 		Send = send;
@@ -44,8 +44,8 @@ public:
 		Buffer = buf;
 		BufferLen = bufLen;
 		porter = port;
-		CollectionCount = collectionCount;
-		MapCollection = mapCollection;
+		RequestMessageMapsCount = requestMessageMapsCount;
+		RequestMessageMaps = requestMessageMaps;
 		UserData = ud;
 
 		RequestRingBuffer=requestRingBuffer;
@@ -54,19 +54,19 @@ public:
 	void Init()
 	{
 		DeInitFlag = false;
-		ServiceThreadHandle = porter->CreateThread("ServiceThread",Server_ThreadPriority, ServiceThread,this);
-		SendMutexHandle = porter->CreateMutex("SendBufMutex");
+		ResponseServiceThreadHandle = porter->CreateThread("ResponseServiceThread",Server_ThreadPriority, ServiceThread,this);
+		ObjectMutexHandle = porter->CreateMutex("SendBufMutex");
 		//RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), Server_RequestQueue_MaxItemNumber);
 		RequestBlockBufferProvider=new BlockRingBufferProvider(RequestRingBuffer,RequestRingBufferSize,porter);
 		SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER,this, SuspendTimerCallBack);
-		porter->ThreadStart(ServiceThreadHandle);
+		porter->ThreadStart(ResponseServiceThreadHandle);
 		
 	}
 	void DeInit()
 	{
 		DeInitFlag = true;
-		porter->DeleteThread(ServiceThreadHandle);
-		porter->DeleteMutex(SendMutexHandle);
+		porter->DeleteThread(ResponseServiceThreadHandle);
+		porter->DeleteMutex(ObjectMutexHandle);
 		//porter->DeleteQueue(RequestQueueHandle);
 		delete RequestBlockBufferProvider;
 	}
@@ -89,14 +89,14 @@ public:
 	static void SuspendTimerCallBack(void* arg)
 	{
 		EmbedXrpcServerObject* obj = (EmbedXrpcServerObject*)arg;
-		//obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);//不需要加锁 这里不使用obj->buffer全局buffer
+		//obj->porter->TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//不需要加锁 这里不使用obj->buffer全局buffer
 		uint8_t sb[4];
 		sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 		sb[1] = (uint8_t)(EmbedXrpcSuspendSid>>8 & 0xff);
 		sb[2] = (uint8_t)(obj->TimeOut & 0xff);
 		sb[3] = (uint8_t)(obj->TimeOut >>8 & 0xff);
 		obj->Send(obj,4, sb);
-		//obj->porter->ReleaseMutex(obj->SendMutexHandle);
+		//obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
 	}
 	static void ServiceThread(void* arg)
 	{
@@ -109,10 +109,10 @@ public:
 			{
 				continue;
 			}
-			for (uint32_t collectionIndex = 0; collectionIndex < obj->CollectionCount; collectionIndex++)
+			for (uint32_t collectionIndex = 0; collectionIndex < obj->RequestMessageMapsCount; collectionIndex++)
 			{
-				auto MessageMaps = obj->MapCollection[collectionIndex].Map;
-				for (i = 0; i < obj->MapCollection[collectionIndex].Count; i++)
+				auto MessageMaps = obj->RequestMessageMaps[collectionIndex].Map;
+				for (i = 0; i < obj->RequestMessageMaps[collectionIndex].Count; i++)
 				{
 					if (MessageMaps[i].Service->GetSid() == recData.Sid)
 					{
@@ -124,7 +124,7 @@ public:
 						rsm.BlockBufferProvider=obj->RequestBlockBufferProvider;
 						rsm.BlockBufferProvider->SetCalculateSum(0);
 						rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
-						obj->porter->TakeMutex(obj->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
+						obj->porter->TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
 						sendsm.Reset();
 						sendsm.Buf = &obj->Buffer[4];
 						sendsm.BufferLen = obj->BufferLen - 4;
@@ -142,7 +142,7 @@ public:
 							obj->Buffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
 							obj->Send(obj, sendsm.Index + 4, obj->Buffer);
 						}
-						obj->porter->ReleaseMutex(obj->SendMutexHandle);
+						obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
 					}
 				}
 			}

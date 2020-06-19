@@ -64,6 +64,10 @@
 	 uint8_t* Data;
 	 uint32_t DataLen;
  };*/
+ class IEmbedXrpcSession
+ {
+
+ };
 typedef bool (*SendPack_t)(void *rpcObj,uint32_t dataLen, uint8_t* data);
 
 

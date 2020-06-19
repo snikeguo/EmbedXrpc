@@ -2,6 +2,10 @@
 #ifndef EmbedXrpc_Port_H
 #define EmbedXrpc_Port_H
 #include "EmbedSerialization.Port.h"
+
+#define USE_RTOS	1
+
+
 typedef void* EmbedXrpc_Semaphore_t;
 typedef void* EmbedXrpc_Mutex_t;
 typedef void* EmbedXrpc_Thread_t;
@@ -29,6 +33,7 @@ enum QueueState
 	QueueState_OK,
 	QueueState_Timeout,
 };
+#if USE_RTOS==1
 class IEmbeXrpcPort
 {
 public:
@@ -68,5 +73,9 @@ public:
 	virtual void Memcpy(void* d, const void* s, uint32_t size)=0;
 
 };
+#else
+
+#endif
+
 
 #endif
