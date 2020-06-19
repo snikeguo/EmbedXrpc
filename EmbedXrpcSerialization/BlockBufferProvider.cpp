@@ -1,6 +1,8 @@
 #include "BlockBufferProvider.h"
 BlockRingBufferProvider::BlockRingBufferProvider(uint8_t* pool, int16_t size, IEmbeXrpcPort* porter)
 {
+	if (size == 0 || pool == nullptr)
+		return;
 	CalculateSumValue = 0;
 	ReferenceSumValue = 0;
 
@@ -13,12 +15,16 @@ BlockRingBufferProvider::BlockRingBufferProvider(uint8_t* pool, int16_t size, IE
 }
 BlockRingBufferProvider::~BlockRingBufferProvider()
 {
+	if (Size == 0 || Pool == nullptr)
+		return;
 	rt_ringbuffer_reset(&RingBuffer);
 	Porter->DeleteMutex(Mutex);
 	Porter->DeleteQueue(Queue);
 }
 bool BlockRingBufferProvider::GetChar(uint8_t* ch)
 {
+	if (Size == 0 || Pool == nullptr)
+		return false;
 	uint8_t tch = 0;
 	uint32_t size = 0;
 	Porter->TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
@@ -34,6 +40,8 @@ bool BlockRingBufferProvider::GetChar(uint8_t* ch)
 }
 bool BlockRingBufferProvider::Receive(BlockBufferItemInfo* item, uint32_t timeout)
 {
+	if (Size == 0 || Pool == nullptr)
+		return false;
 	auto r = Porter->ReceiveQueue(Queue, item, sizeof(BlockBufferItemInfo), timeout) == QueueState_OK ? true : false;
 	return r;
 }
@@ -49,6 +57,9 @@ uint32_t BlockRingBufferProvider::CalculateSum(uint8_t* d, int16_t len)
 }
 bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, int16_t bufLen)
 {
+	if (Size == 0 || Pool == nullptr)
+		return false;
+
 	int16_t putlen = 0;
 
 	Porter->TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
@@ -71,6 +82,8 @@ bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, int16
 }
 void BlockRingBufferProvider::Reset()
 {
+	if (Size == 0 || Pool == nullptr)
+		return ;
 	rt_ringbuffer_reset(&RingBuffer);
 	Porter->ResetQueue(Queue);
 }

@@ -1,6 +1,6 @@
 ﻿#ifndef Sample1_Client_H
 #define Sample1_Client_H
-#include"EmbedXrpcClientObject.h"
+#include"EmbedXrpcObject.h"
 #include"Sample1.EmbedXrpcSerialization.h"
 class DateTimeChangeClientImpl:public IDelegate
 {
@@ -12,10 +12,10 @@ void Invoke(SerializationManager &recManager);
 class InterClientImpl
 {
 public:
-EmbedXrpcClientObject *RpcClientObject=nullptr;
-InterClientImpl(EmbedXrpcClientObject *rpcobj)
+EmbedXrpcObject *RpcObject=nullptr;
+InterClientImpl(EmbedXrpcObject *rpcobj)
 {
-this->RpcClientObject=rpcobj;
+this->RpcObject=rpcobj;
 }
 Inter_Add_RequestResponseContent& Add(Byte a,Byte b);
 void Free_Add(Inter_Add_RequestResponseContent *response);

@@ -1,14 +1,14 @@
 ﻿#ifndef Sample1_Server_H
 #define Sample1_Server_H
-#include"EmbedXrpcServerObject.h"
+#include"EmbedXrpcObject.h"
 #include"Sample1.EmbedXrpcSerialization.h"
 class DateTimeChangeDelegate
 {
 public:
-EmbedXrpcServerObject *RpcServerObject=nullptr;
-DateTimeChangeDelegate(EmbedXrpcServerObject *rpcobj)
+EmbedXrpcObject *RpcObject=nullptr;
+DateTimeChangeDelegate(EmbedXrpcObject *rpcobj)
 {
-this->RpcServerObject=rpcobj;
+this->RpcObject=rpcobj;
 }
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
 void  Invoke(DateTime_t now[1]);

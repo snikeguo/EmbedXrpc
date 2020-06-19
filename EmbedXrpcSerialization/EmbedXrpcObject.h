@@ -34,13 +34,13 @@ public:
 
 	void* UserData;
 
-	bool DeInitFlag = false;
+	bool DeInitFlag;
 
 
 
 	//server:
 	EmbedXrpc_Thread_t ResponseServiceThreadHandle;
-	EmbedXrpc_Mutex_t ObjectMutexHandle;
+	//EmbedXrpc_Mutex_t ObjectMutexHandle;
 
 	uint8_t* RequestRingBuffer;
 	int16_t RequestRingBufferSize;
@@ -50,8 +50,6 @@ public:
 
 	uint32_t RequestMessageMapsCount;
 	RequestMessageMapCollection* RequestMessageMaps;
-
-
 
 	EmbedXrpcObject(
 		SendPack_t send,
@@ -66,121 +64,227 @@ public:
 		uint8_t *delegateRingBuffer,//接收到代理广播数据
 		int16_t delegateRingBufferSize,
 
-		IEmbeXrpcPort *port,
+		ResponseDelegateMessageMapCollection* responseDelegateMessageMaps,//代理的services
 		uint32_t ResponseDelegateMessageMapsCount,
-		ResponseDelegateMessageMapCollection* responseDelegateMessageMaps,
+		
 
 		uint8_t* requestRingBuffer,//server  接收到请求数据
 		int16_t requestRingBufferSize,//server
 
+		RequestMessageMapCollection* requestMessageMaps,//server 请求的services
 		uint32_t requestMessageMapsCount,//server
-		RequestMessageMapCollection* requestMessageMaps,//server
 
-
-		void* ud = nullptr)
+		IEmbeXrpcPort* port,
+		
+		void* ud = nullptr):Send(send),
+		TimeOut(timeOut),
+		Buffer(buf), 
+		BufferLen(bufLen),
+		ResponseRingBuffer(responseRingBuffer),
+		ResponseRingBufferSize(responseRingBufferSize),
+		DelegateRingBuffer(delegateRingBuffer),
+		DelegateRingBufferSize(delegateRingBufferSize),
+		ResponseDelegateMessageMaps(responseDelegateMessageMaps),
+		ResponseDelegateMessageMapsCount(ResponseDelegateMessageMapsCount),
+		RequestMessageMaps(requestMessageMaps),
+		RequestMessageMapsCount(requestMessageMapsCount),
+		RequestRingBuffer(requestRingBuffer),
+		RequestRingBufferSize(requestRingBufferSize),
+		porter(port),
+		UserData(ud),
+		//last
+		DeInitFlag(false),
+		ObjectMutexHandle(nullptr),
+		DelegateBlockBufferProvider(nullptr),
+		ResponseBlockBufferProvider(nullptr),
+		DelegateServiceThreadHandle(nullptr),
+		ResponseServiceThreadHandle(nullptr),
+		RequestBlockBufferProvider(nullptr),
+		SuspendTimer(nullptr)
 	{
-		Send = send;
-		TimeOut = timeOut;
-		Buffer = buf;
-		BufferLen = bufLen;
-
-		ResponseRingBuffer=responseRingBuffer;
-		ResponseRingBufferSize=responseRingBufferSize;
-
-		DelegateRingBuffer=delegateRingBuffer;
-		DelegateRingBufferSize=delegateRingBufferSize;
-
-		porter = port;
-		ResponseDelegateMessageMapsCount = ResponseDelegateMessageMapsCount;
-		ResponseDelegateMessageMaps = responseDelegateMessageMaps;
-		UserData = ud;
-
-		//server
-		RequestMessageMapsCount = requestMessageMapsCount;
-		RequestMessageMaps = requestMessageMaps;
-
-		RequestRingBuffer = requestRingBuffer;
-		RequestRingBufferSize = requestRingBufferSize;
+		
 	}
 
-	
+	EmbedXrpcObject(//client
+		SendPack_t send,
+		uint32_t timeOut,
+
+		uint8_t* buf,
+		uint32_t bufLen,
+
+		uint8_t* responseRingBuffer,
+		int16_t responseRingBufferSize,
+
+		uint8_t* delegateRingBuffer,
+		int16_t delegateRingBufferSize,
+
+		ResponseDelegateMessageMapCollection* mapCollection,
+		uint32_t collectionCount,
+
+		IEmbeXrpcPort* port,
+		void* ud = nullptr):EmbedXrpcObject(send,
+			timeOut,
+
+			buf,
+			bufLen,
+
+			responseRingBuffer,
+			responseRingBufferSize,
+
+			delegateRingBuffer,
+			delegateRingBufferSize,
+
+			mapCollection,
+			collectionCount,
+
+			nullptr,
+			0,
+
+			nullptr,
+			0,
+
+			port,
+			ud
+		)
+	{
+		
+	}
+	EmbedXrpcObject(SendPack_t send,
+		uint32_t timeOut,
+
+		uint8_t* buf,
+		uint32_t bufLen,
+
+		uint8_t* requestRingBuffer,
+		int16_t requestRingBufferSize,
+
+		RequestMessageMapCollection* mapCollection,
+		uint32_t collectionCount,
+
+		IEmbeXrpcPort* port,
+		void* ud = nullptr):EmbedXrpcObject(send,
+			timeOut,
+
+			buf,
+			bufLen,
+
+			nullptr,
+			0,
+
+			nullptr,
+			0,
+
+			nullptr,
+			0,
+
+			requestRingBuffer,
+			requestRingBufferSize,
+
+			mapCollection,
+			collectionCount,
+
+			port,
+			ud
+		)
+	{
+		
+	}
 
 	void Init()
 	{
 		DeInitFlag = false;
-		DelegateServiceThreadHandle = porter->CreateThread("DelegateServiceThread", Client_ThreadPriority, DelegateServiceThread,this);
-		ObjectMutexHandle = porter->CreateMutex("ObjectMutex");
-		DelegateBlockBufferProvider=new BlockRingBufferProvider(DelegateRingBuffer,DelegateRingBufferSize,porter);
-		ResponseBlockBufferProvider=new BlockRingBufferProvider(ResponseRingBuffer,ResponseRingBufferSize,porter);
-		porter->ThreadStart(DelegateServiceThreadHandle);
 
-		//server
-		ResponseServiceThreadHandle = porter->CreateThread("ResponseServiceThread", Server_ThreadPriority, ResponseServiceThread, this);
-		RequestBlockBufferProvider = new BlockRingBufferProvider(RequestRingBuffer, RequestRingBufferSize, porter);
-		SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER, this, SuspendTimerCallBack);
-		porter->ThreadStart(ResponseServiceThreadHandle);
+		ObjectMutexHandle = porter->CreateMutex("ObjectMutex");
+
+		if (ResponseDelegateMessageMapsCount > 0)
+		{
+			DelegateServiceThreadHandle = porter->CreateThread("DelegateServiceThread", Client_ThreadPriority, DelegateServiceThread, this);
+			DelegateBlockBufferProvider = new BlockRingBufferProvider(DelegateRingBuffer, DelegateRingBufferSize, porter);
+			ResponseBlockBufferProvider = new BlockRingBufferProvider(ResponseRingBuffer, ResponseRingBufferSize, porter);
+			porter->ThreadStart(DelegateServiceThreadHandle);
+		}
+		
+		if (RequestMessageMapsCount > 0)
+		{
+			//server
+			ResponseServiceThreadHandle = porter->CreateThread("ResponseServiceThread", Server_ThreadPriority, ResponseServiceThread, this);
+			RequestBlockBufferProvider = new BlockRingBufferProvider(RequestRingBuffer, RequestRingBufferSize, porter);
+			SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER, this, SuspendTimerCallBack);
+			porter->ThreadStart(ResponseServiceThreadHandle);
+		}
+		
 
 	}
 	void DeInit()
 	{
 		DeInitFlag = true;
-		porter->DeleteThread(DelegateServiceThreadHandle);
 		porter->DeleteMutex(ObjectMutexHandle);
-		delete DelegateBlockBufferProvider;		
-		delete ResponseBlockBufferProvider;
-
-		//server
-		porter->DeleteThread(ResponseServiceThreadHandle);
-		porter->DeleteMutex(ObjectMutexHandle);
-		delete RequestBlockBufferProvider;
+		if (ResponseDelegateMessageMapsCount > 0)
+		{
+			porter->DeleteThread(DelegateServiceThreadHandle);
+			delete DelegateBlockBufferProvider;
+			delete ResponseBlockBufferProvider;
+		}
+		
+		if (RequestMessageMapsCount > 0)
+		{
+			//server
+			porter->DeleteThread(ResponseServiceThreadHandle);
+			porter->DeleteMutex(ObjectMutexHandle);
+			delete RequestBlockBufferProvider;
+		}
+		
 
 	}
 	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
 	{
 		if (allDataLen < 4)
 			return false;
-		BlockBufferItemInfo raw;
-		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
-		uint16_t targettimeout= (uint16_t)(allData[2] | allData[3] << 8);
-		uint32_t dataLen = allDataLen - 4;
-		uint8_t* data = &allData[4];
-		bool SendQueueResult=false;
 		bool FindFlag = false;
-		//XrpcDebug("Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
-		if (serviceId == EmbedXrpcSuspendSid)
+		bool SendQueueResult = false;
+		if (ResponseDelegateMessageMapsCount > 0)
 		{
-			raw.Sid = serviceId;
-			raw.DataLen = dataLen;
-			raw.TargetTimeout = targettimeout;
-			return ResponseBlockBufferProvider->Send(&raw,nullptr,0);
-		}
-		for (uint32_t collectionIndex = 0; collectionIndex < ResponseDelegateMessageMapsCount; collectionIndex++)
-		{
-			auto MessageMaps = ResponseDelegateMessageMaps[collectionIndex].Map;
-			for (uint32_t i = 0; i < ResponseDelegateMessageMaps[collectionIndex].Count; i++)
-			{
+			BlockBufferItemInfo raw;
+			uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
+			uint16_t targettimeout = (uint16_t)(allData[2] | allData[3] << 8);
+			uint32_t dataLen = allDataLen - 4;
+			uint8_t* data = &allData[4];
 
-				auto iter = &MessageMaps[i];
-				if (iter->Sid == serviceId)
+			//XrpcDebug("Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
+			if (serviceId == EmbedXrpcSuspendSid)
+			{
+				raw.Sid = serviceId;
+				raw.DataLen = dataLen;
+				raw.TargetTimeout = targettimeout;
+				return ResponseBlockBufferProvider->Send(&raw, nullptr, 0);
+			}
+			for (uint32_t collectionIndex = 0; collectionIndex < ResponseDelegateMessageMapsCount; collectionIndex++)
+			{
+				auto MessageMaps = ResponseDelegateMessageMaps[collectionIndex].Map;
+				for (uint32_t i = 0; i < ResponseDelegateMessageMaps[collectionIndex].Count; i++)
 				{
-					FindFlag = true;
-					raw.Sid = serviceId;
-					raw.DataLen = dataLen;
-					raw.TargetTimeout = targettimeout;
-					if (iter->ReceiveType == ReceiveType_Response)
+
+					auto iter = &MessageMaps[i];
+					if (iter->Sid == serviceId)
 					{
-						SendQueueResult=ResponseBlockBufferProvider->Send(&raw, data,dataLen);
+						FindFlag = true;
+						raw.Sid = serviceId;
+						raw.DataLen = dataLen;
+						raw.TargetTimeout = targettimeout;
+						if (iter->ReceiveType == ReceiveType_Response)
+						{
+							SendQueueResult = ResponseBlockBufferProvider->Send(&raw, data, dataLen);
+						}
+						else if (iter->ReceiveType == ReceiveType_Delegate)
+						{
+							SendQueueResult = DelegateBlockBufferProvider->Send(&raw, data, dataLen);
+						}
+						goto sqr;
 					}
-					else if (iter->ReceiveType == ReceiveType_Delegate)
-					{
-						SendQueueResult=DelegateBlockBufferProvider->Send(&raw, data,dataLen);
-					}
-					return SendQueueResult;//只要匹配相等的SID 就返回了
-				}		
+				}
 			}
 		}
-
-		if (FindFlag == false)//server
+		else if (RequestMessageMapsCount>0)//server
 		{
 			BlockBufferItemInfo raw;
 			uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
@@ -191,8 +295,9 @@ public:
 			raw.Sid = serviceId;
 			raw.DataLen = dataLen;
 			raw.TargetTimeout = targettimeout;
-			return RequestBlockBufferProvider->Send(&raw, data, dataLen);
+			SendQueueResult=RequestBlockBufferProvider->Send(&raw, data, dataLen);
 		}
+		sqr:
 		return SendQueueResult;
 	}
 	static void SuspendTimerCallBack(void* arg)

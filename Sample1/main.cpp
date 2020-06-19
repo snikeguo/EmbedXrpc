@@ -6,8 +6,8 @@
 #include <QDebug>
 
 Win32EmbedXrpcPort Win32Port;
-extern EmbedXrpcClientObject ClientRpc;
-extern EmbedXrpcServerObject ServerRpc;
+extern EmbedXrpcObject ClientRpc;
+extern EmbedXrpcObject ServerRpc;
 
 //-------------------------------------------------------------------------
 //client 
@@ -21,7 +21,7 @@ bool ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ◊Ó÷’Õ®π˝’
 }
 ResponseDelegateMessageMapCollection rdCollection[1] = { {Inter_ResponseDelegateMessages_Count,Inter_ResponseDelegateMessages} };//clientø…“‘¥¶¿ÌµƒserviceºØ∫œ
 
-EmbedXrpcClientObject ClientRpc(ClientSend,
+EmbedXrpcObject ClientRpc(ClientSend,
 	500,
 	ClientSendBuffer,
 	2048,
@@ -29,9 +29,9 @@ EmbedXrpcClientObject ClientRpc(ClientSend,
 	2048,
 	ClientDelegateBuffer,
 	2048,
-	&Win32Port,
+	rdCollection,
 	1,
-	rdCollection, 
+	&Win32Port,
 	nullptr);//client rpc ∂‘œÛ
 
 void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//serverπ„≤•∫Û£¨clientΩ” ‹µΩµƒ
@@ -66,15 +66,15 @@ bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ◊Ó÷’Õ®π˝’
 	return true;
 }
 RequestMessageMapCollection rmCollection[1] = { {Inter_RequestMessages_Count,Inter_RequestMessages} };
-EmbedXrpcServerObject ServerRpc(ServerSend,
-	500, 
+EmbedXrpcObject ServerRpc(ServerSend,
+	500,
 	ServerSendBuffer,
 	2048,
 	ServerRequestBuffer,
-	2048,
-	&Win32Port,
+	2048, 
+	rmCollection,
 	1,
-	rmCollection, 
+	&Win32Port,
 	nullptr);//server rpc ∂‘œÛ
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()

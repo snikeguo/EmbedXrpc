@@ -3,20 +3,20 @@ void  DateTimeChangeDelegate::Invoke(DateTime_t now[1])
 {
 //write serialization code:DateTimeChange(now,)
 static DateTimeChangeStruct sendData;
-RpcServerObject->porter->TakeMutex(RpcServerObject->SendMutexHandle, EmbedXrpc_WAIT_FOREVER);
+RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 SerializationManager sm;
 sm.Reset();
-sm.Buf = &RpcServerObject->Buffer[4];
-sm.BufferLen = RpcServerObject->BufferLen-4;
+sm.Buf = &RpcObject->Buffer[4];
+sm.BufferLen = RpcObject->BufferLen-4;
 sendData.now[0]=now[0];
 DateTimeChangeStruct_Type.Serialize(sm,0,&sendData);
-RpcServerObject->Buffer[0]=(uint8_t)(DateTimeChange_ServiceId&0xff);
-RpcServerObject->Buffer[1]=(uint8_t)(DateTimeChange_ServiceId>>8&0xff);
-RpcServerObject->Buffer[2]=(uint8_t)(RpcServerObject->TimeOut>>0&0xff);
-RpcServerObject->Buffer[3]=(uint8_t)(RpcServerObject->TimeOut>>8&0xff);
-RpcServerObject->Send(RpcServerObject,sm.Index+4,RpcServerObject->Buffer);
+RpcObject->Buffer[0]=(uint8_t)(DateTimeChange_ServiceId&0xff);
+RpcObject->Buffer[1]=(uint8_t)(DateTimeChange_ServiceId>>8&0xff);
+RpcObject->Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
+RpcObject->Buffer[3]=(uint8_t)(RpcObject->TimeOut>>8&0xff);
+RpcObject->Send(RpcObject,sm.Index+4,RpcObject->Buffer);
 sm.Reset();
-RpcServerObject->porter->ReleaseMutex(RpcServerObject->SendMutexHandle);
+RpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
 void Inter_AddService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {

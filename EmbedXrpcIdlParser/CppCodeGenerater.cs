@@ -123,7 +123,7 @@ namespace EmbedXrpcIdlParser
                 ClientHsw = new StreamWriter(outputpath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
                 ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
                 ClientHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");                
-                ClientHsw.WriteLine("#include\"EmbedXrpcClientObject.h\"");
+                ClientHsw.WriteLine("#include\"EmbedXrpcObject.h\"");
                 ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
                 ClientCsw = new StreamWriter(outputpath + "Client/" + outputattr.OutPutFileName + ".Client.cpp", false, Encoding.UTF8);
@@ -535,8 +535,8 @@ namespace EmbedXrpcIdlParser
             {
                 //这里生产client 部分代码
                 ClientHsw.WriteLine("class " + targetInterface.Name + "ClientImpl");
-                ClientHsw.WriteLine("{\npublic:\nEmbedXrpcClientObject *RpcObject=nullptr;");
-                ClientHsw.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcClientObject *rpcobj)");
+                ClientHsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
+                ClientHsw.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcObject *rpcobj)");
                 ClientHsw.WriteLine("{\nthis->RpcObject=rpcobj;");
 
                 ClientHsw.WriteLine("}");
