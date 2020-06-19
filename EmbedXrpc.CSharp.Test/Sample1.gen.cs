@@ -150,8 +150,8 @@
                  [ResponseInfo(Name="Inter.NoArgAndReturn",ServiceId=20)] 
              public class InterClientImpl 
              { 
-             private EmbedXrpc.Client Client=null; 
-             public InterClientImpl(EmbedXrpc.Client client) 
+             private EmbedXrpc.EmbedXrpcObject Client=null; 
+             public InterClientImpl(EmbedXrpc.EmbedXrpcObject client) 
              { Client=client;} 
                  public static readonly UInt16 Add_ServiceId=17; 
                  public Inter_Add_RequestResponseContent Add( Byte a,Byte b) 

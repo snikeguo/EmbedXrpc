@@ -56,7 +56,7 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new Client(1000, clientSend, Assembly.GetExecutingAssembly());
+            client = new EmbedXrpcObject(1000, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
             server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
@@ -115,7 +115,7 @@ namespace EmbedXrpc
             }
         }
 
-        static Client client;
+        static EmbedXrpcObject client;
         static Server server;
         public static bool clientSend(int dataLen, int offset, byte[] data)
         {

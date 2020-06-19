@@ -11,13 +11,14 @@ namespace EmbedXrpc
     public class Server
     {
         public UInt32 TimeOut { get; set; }
-        public object SendMutex { get; private set; } = new object();
-        private Thread ServiceThreadHandle;
-        private Win32Queue<EmbeXrpcRawData> RequestQueueHandle=new Win32Queue<EmbeXrpcRawData>(10);
-        private RequestMessageMap[] MessageMaps;
+        public object ObjectMutex { get; private set; } = new object();
+        
         public Send Send;
         private Assembly Assembly;
         private Timer SuspendTimer;
+        private Thread RequestServiceThreadHandle;
+        private Win32Queue<EmbeXrpcRawData> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData>(10);
+        private RequestMessageMap[] RequestMessageMaps;
         public Server(UInt32 timeout, Send send, Assembly assembly)
         {
             var types = assembly.GetTypes();
@@ -37,17 +38,17 @@ namespace EmbedXrpc
 
             TimeOut = timeout;
             Send = send;
-            MessageMaps = maps.ToArray();
+            RequestMessageMaps = maps.ToArray();
 
-            ServiceThreadHandle = new Thread(ServiceThread);
-            ServiceThreadHandle.IsBackground = true;
+            RequestServiceThreadHandle = new Thread(RequestServiceThread);
+            RequestServiceThreadHandle.IsBackground = true;
 
             SuspendTimer = new Timer(SuspendTimerCallback, this, Timeout.Infinite, Timeout.Infinite);
         }
         private void SuspendTimerCallback(object s)
         {
             Server server = s as Server;
-            lock (SendMutex)
+            lock (ObjectMutex)
             {
                 byte[] sendBytes = new byte[4];
                 sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 0 & 0xff);
@@ -77,13 +78,13 @@ namespace EmbedXrpc
         }
         public void Start()
         {
-            ServiceThreadHandle.Start();
+            RequestServiceThreadHandle.Start();
         }
         public void Stop()
         {
-            ServiceThreadHandle.Abort();
+            RequestServiceThreadHandle.Abort();
         }
-        private void ServiceThread()
+        private void RequestServiceThread()
         {
             EmbeXrpcRawData recData;
             UInt32 i = 0;
@@ -95,9 +96,9 @@ namespace EmbedXrpc
                     {
                         continue;
                     }
-                    for (i = 0; i < MessageMaps.Length; i++)
+                    for (i = 0; i < RequestMessageMaps.Length; i++)
                     {
-                        if (MessageMaps[i].Service.GetSid() == recData.Sid)
+                        if (RequestMessageMaps[i].Service.GetSid() == recData.Sid)
                         {
                             SerializationManager rsm = new SerializationManager();
                             SerializationManager sendsm = new SerializationManager();
@@ -109,10 +110,10 @@ namespace EmbedXrpc
 
                             //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
                             SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);
-                            MessageMaps[i].Service.Invoke(rsm, sendsm);
+                            RequestMessageMaps[i].Service.Invoke(rsm, sendsm);
                             SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-                            lock (SendMutex)
+                            lock (ObjectMutex)
                             {
                                 if (sendsm.Index > 0)//
                                 {
