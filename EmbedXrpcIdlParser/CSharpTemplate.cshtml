@@ -1,4 +1,4 @@
-﻿@using RazorEngine
+@using RazorEngine
 @using System
 @using System.Collections.Generic
 @using EmbedXrpcIdlParser
@@ -159,8 +159,8 @@
         {
             <h1 public class @(del.MethodName + "Delegate") />
             <h1 { />
-            <h1 private EmbedXrpc.Server Server; />
-            <h1 public @(del.MethodName + "Delegate(EmbedXrpc.Server server)") />
+            <h1 private EmbedXrpcObject Server; />
+            <h1 public @(del.MethodName + "Delegate(EmbedXrpcObject server)") />
             <h1 { Server=server; } />
             <h1 @("public static readonly UInt16 " + del.MethodName + "_ServiceId=" + del.ServiceId.ToString() + ";") />
 
@@ -336,8 +336,8 @@
             }
             <h1 public class @(interf.Name + "ClientImpl") />
             <h1 { />
-            <h1 private EmbedXrpc.Client Client=null; />
-            <h1 public @(interf.Name + "ClientImpl(EmbedXrpc.Client client)") />
+            <h1 private EmbedXrpcObject Client=null; />
+            <h1 public @(interf.Name + "ClientImpl(EmbedXrpcObject client)") />
             <h1 { Client=client;} />
 
             foreach (var service in interf.Services)
