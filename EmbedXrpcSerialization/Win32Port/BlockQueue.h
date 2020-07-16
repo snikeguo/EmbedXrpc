@@ -1,9 +1,8 @@
 #ifndef BLOCKQUEUE_H
 #define BLOCKQUEUE_H
-#include <QWaitCondition>
-#include <QSemaphore>
-#include <QMutex>
-#include <QQueue>
+#include "Semaphore.h"
+#include <mutex>
+#include <queue>
 enum QueueStatus
 {
 	Full,
@@ -14,39 +13,42 @@ template<class T>
 class BlockingQueue
 {
 public:
+	BlockingQueue():semaphore("BlockingQueue.semaphore"){}
 	void Send(T& msg);
 	QueueStatus Receive(T& msg, unsigned long timeOut);
 	void Reset();
 private:
 	//QWaitCondition		  waitCondition;
-	QSemaphore			semaphore;
-	QMutex				  mutex;
-	QQueue<T>				queue;
+	Semaphore			semaphore;
+	std::mutex	mutex;
+	std::queue<T>		queue;
 };
 template<class T>
 void BlockingQueue<T>::Send(T& msg)
 {
 	mutex.lock();
-	queue.enqueue(msg);
+	queue.push(msg);
 	mutex.unlock();
-	semaphore.release(1);
+	semaphore.release();
 	//waitCondition.wakeAll();
 }
 template<class T>															//timeOut最大等待延迟时间
 QueueStatus BlockingQueue<T>::Receive(T& msg, unsigned long timeOut)
 {
 	QueueStatus s= QueueStatus::Empty;
-	bool r=semaphore.tryAcquire(1, timeOut);
+	bool r=semaphore.wait(timeOut);
 	mutex.lock();
 	if (r == true)
 	{
 		
 		//waitCondition.wait(&mutex, timeOut);
-		if (queue.count() > 0)
+		if (queue.size() > 0)
 		{
 			s = QueueStatus::Ok;
 
-			msg = queue.dequeue();
+			msg = queue.front();
+
+			queue.pop();
 
 		}
 		else
@@ -62,8 +64,8 @@ template<class T>
 void BlockingQueue<T>::Reset()
 {
 	mutex.lock();
-	queue.clear();
-	while (semaphore.tryAcquire(1) == true);
+	while (!queue.empty()) queue.pop();
+	while (semaphore.wait(0) == true);
 	mutex.unlock();
 }
 #endif

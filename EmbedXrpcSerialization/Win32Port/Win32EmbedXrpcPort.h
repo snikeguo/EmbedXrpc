@@ -1,67 +1,17 @@
 #ifndef Win32EmbedXrpcPort_H
 #define  Win32EmbedXrpcPort_H
 #include "EmbedXrpc.Port.h"
-#include <QObject>
-#include <QThread>
-#include <QMutex>
-#include <QTimer>
 #include "BlockQueue.h"
-class MyTimer : public QObject
+
+class Win32EmbedXrpcPort :public  IEmbeXrpcPort
 {
-	Q_OBJECT
-public:
-	MyTimer(uint32_t timeout, void* arg, void (*cb)(void* par), QObject* parent = nullptr):Timer(parent),Arg(arg),Cb(cb),Timeout(timeout)
-	{
-		connect(&Timer, &QTimer::timeout, this, [=] {Cb(Arg);});
-	}
-	void Start(uint16_t interval)
-	{
-		//Timer.start(interval);
-	}
-	void Stop()
-	{
-		//Timer.stop();
-	}
-	void Reset()
-	{
-		
-	}
-private:
-	QTimer Timer;
-	void *Arg;
-	void (*Cb)(void* par);
-	uint32_t Timeout;
-};
-typedef void (*ThreadFun_t)(void*);
-class MyThread :public QThread
-{
-	Q_OBJECT
-public:
-	MyThread(ThreadFun_t fun, void* arg)
-	{
-		Thread = fun;
-		Arg = arg;
-	}
-	ThreadFun_t Thread;
-	void* Arg;
-	void run() override
-	{
-		if (Thread != nullptr)
-		{
-			Thread(Arg);
-		}
-	}
-};
-class Win32EmbedXrpcPort :public QObject, public  IEmbeXrpcPort
-{
-	Q_OBJECT
 public:
 	EmbedXrpc_Thread_t CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg) ;
 	//EmbedXrpc_Mutex_t CreateSemaphore(const char* semaphoreName) ;
 	EmbedXrpc_Mutex_t CreateMutex(const char* mutexName) ;
 	EmbedXrpc_Queue_t CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen) ;
 	EmbedXrpc_Semaphore_t CreateSemaphore(const char* SemaphoreName);
-	EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout, void* Arg, void (*timercb)(void* arg));
+	EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg);
 	void DeleteThread(EmbedXrpc_Thread_t thread);
 	void DeleteMutex(EmbedXrpc_Mutex_t mutex);
 	void DeleteQueue(EmbedXrpc_Queue_t queue);
