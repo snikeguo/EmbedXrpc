@@ -1,5 +1,5 @@
 #include "EmbedSerialization.h"
-#include "EmbedXrpcCommon.h"
+//#include "EmbedXrpcCommon.h"
 #include "Win32EmbedXrpcPort.h"
 #include <thread>
 #include <mutex>
@@ -23,7 +23,7 @@ EmbedXrpc_Mutex_t Win32EmbedXrpcPort::CreateMutex(const char* mutexName)
 EmbedXrpc_Queue_t Win32EmbedXrpcPort::CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen)
 {
 	//这里创建队列，由于我只实现了C++泛型的队列，而底层RTOS一般要求提供的是queueItemSize，所以这里硬编码直接创建EmbeXrpcRawData;
-	BlockingQueue<EmbeXrpcRawData> *q = new BlockingQueue<EmbeXrpcRawData>();
+	NoGenericBlockingQueue *q = new NoGenericBlockingQueue(queueItemSize);
 	return q;
 }
 EmbedXrpc_Semaphore_t  Win32EmbedXrpcPort::CreateSemaphore(const char* SemaphoreName)
@@ -49,7 +49,7 @@ void Win32EmbedXrpcPort::DeleteMutex(EmbedXrpc_Mutex_t mutex)
 }
 void Win32EmbedXrpcPort::DeleteQueue(EmbedXrpc_Queue_t queue)
 {
-	auto qtQueue = static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
+	auto qtQueue = static_cast<NoGenericBlockingQueue*>(queue);
 	qtQueue->Reset();
 	delete qtQueue;
 }
@@ -113,10 +113,10 @@ bool Win32EmbedXrpcPort::ReleaseMutex(EmbedXrpc_Mutex_t mutex)
 	return true;
 }
 
-QueueState Win32EmbedXrpcPort::ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen, uint32_t timeout)
+QueueState Win32EmbedXrpcPort::ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout)
 {
-	BlockingQueue<EmbeXrpcRawData>* q= static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
-	auto r=q->Receive(*(EmbeXrpcRawData *)item, timeout);
+	NoGenericBlockingQueue* q= static_cast<NoGenericBlockingQueue*>(queue);
+	auto r=q->Receive(item, timeout);
 	if (r== QueueStatus::Ok)
 	{
 		return QueueState_OK;
@@ -127,16 +127,15 @@ QueueState Win32EmbedXrpcPort::ReceiveQueue(EmbedXrpc_Queue_t queue, void* item,
 	}
 	
 }
-QueueState Win32EmbedXrpcPort::SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen)
+QueueState Win32EmbedXrpcPort::SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize)
 {
-	BlockingQueue<EmbeXrpcRawData>* q = static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
-	EmbeXrpcRawData* data = static_cast<EmbeXrpcRawData*> (item);
-	q->Send((*data));
+	NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
+	q->Send(item);
 	return QueueState_OK;
 }
 void Win32EmbedXrpcPort::ResetQueue(EmbedXrpc_Queue_t queue)
 {
-	BlockingQueue<EmbeXrpcRawData>* q = static_cast<BlockingQueue<EmbeXrpcRawData>*>(queue);
+	NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
 	q->Reset();
 }
 void* Win32EmbedXrpcPort::Malloc(uint32_t size)

@@ -433,9 +433,9 @@ namespace EmbedXrpcIdlParser
                 //函数实现
                 ServerCsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
                 ServerCsw.WriteLine($"static {targetDelegate.MethodName}Struct sendData;");
+                ServerCsw.WriteLine($"SerializationManager sm;");
                 ServerCsw.WriteLine("RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
-                ServerCsw.WriteLine("SerializationManager sm;\n" +
-                        "sm.Reset();\n" +
+                ServerCsw.WriteLine("sm.Reset();\n" +
                         "sm.Buf = &RpcObject->Buffer[4];\n" +
                         "sm.BufferLen = RpcObject->BufferLen-4;");
                 foreach (var field in targetDelegate.TargetFields)
@@ -574,13 +574,19 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
                     ClientCsw.WriteLine($"static {GeneratServiceName}_Request sendData;");
+                    ClientCsw.WriteLine($"SerializationManager sm;");
+                    ClientCsw.WriteLine($"static {GeneratServiceName}_RequestResponseContent reqresp;");
+                    ClientCsw.WriteLine($"auto result=false;");
 
+                    if (service.ReturnValue != null)
+                    {
+                        ClientCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
+                    }
                     ClientCsw.WriteLine("RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                     
                     ClientCsw.WriteLine("RpcObject->ResponseBlockBufferProvider->Reset();");
                     //ClientCsw.WriteLine("RpcObject->porter->ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
-                    ClientCsw.WriteLine("SerializationManager sm;\n" +
-                        "sm.Reset();\n" +
+                    ClientCsw.WriteLine("sm.Reset();\n" +
                         "sm.Buf = &RpcObject->Buffer[4];\n" +
                         "sm.BufferLen = RpcObject->BufferLen-4;");
 
@@ -627,14 +633,14 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine($"RpcObject->Buffer[1]=(uint8_t)({GeneratServiceName}_ServiceId>>8&0xff);");
                     ClientCsw.WriteLine($"RpcObject->Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
                     ClientCsw.WriteLine($"RpcObject->Buffer[3]=(uint8_t)(RpcObject->TimeOut>>8&0xff);");
-                    ClientCsw.WriteLine($"static {GeneratServiceName}_RequestResponseContent reqresp;");
-                    ClientCsw.WriteLine($"auto result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->Buffer);");
+                    
+                    ClientCsw.WriteLine($"result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->Buffer);");
                     ClientCsw.WriteLine("sm.Reset();");
                     ClientCsw.WriteLine("if(result==false)\n{\nreqresp.State=RequestState_Failed;\ngoto exi;\n}");
                     ClientCsw.WriteLine("else\n{\nreqresp.State=RequestState_Ok;\n}");
                     if (service.ReturnValue != null)
                     {
-                        ClientCsw.WriteLine($"auto waitstate=RpcObject->Wait({GeneratServiceName}_ServiceId,&{GeneratServiceName}_RequestResponseContent_Type,&reqresp);");
+                        ClientCsw.WriteLine($"waitstate=RpcObject->Wait({GeneratServiceName}_ServiceId,&{GeneratServiceName}_RequestResponseContent_Type,&reqresp);");
                         ClientCsw.WriteLine("reqresp.State=waitstate;");
                     }
 

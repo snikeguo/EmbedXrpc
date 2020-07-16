@@ -10,7 +10,7 @@ public:
 	EmbedXrpc_Mutex_t CreateMutex(const char* mutexName) ;
 	EmbedXrpc_Queue_t CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen) ;
 	EmbedXrpc_Semaphore_t CreateSemaphore(const char* SemaphoreName);
-	EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout, void* Arg, void (*timercb)(void* arg));
+	EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg);
 	void DeleteThread(EmbedXrpc_Thread_t thread);
 	void DeleteMutex(EmbedXrpc_Mutex_t mutex);
 	void DeleteQueue(EmbedXrpc_Queue_t queue);

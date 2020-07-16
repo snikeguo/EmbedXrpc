@@ -209,7 +209,7 @@ public:
 			//server
 			ResponseServiceThreadHandle = porter->CreateThread("ResponseServiceThread", Server_ThreadPriority, ResponseServiceThread, this);
 			RequestBlockBufferProvider = new BlockRingBufferProvider(RequestRingBuffer, RequestRingBufferSize, porter);
-			SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER, this, SuspendTimerCallBack);
+			SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER, SuspendTimerCallBack, this);
 			porter->ThreadStart(ResponseServiceThreadHandle);
 		}
 		

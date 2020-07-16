@@ -1,9 +1,9 @@
-#include <QtCore/QCoreApplication>
+#include <thread>
 #include "Sample1.Client.h"
 #include "Sample1.Server.h"
 #include "Win32EmbedXrpcPort.h"
-#include <QDateTime>
-#include <QDebug>
+
+
 
 Win32EmbedXrpcPort Win32Port;
 extern EmbedXrpcObject ClientRpc;
@@ -42,7 +42,7 @@ void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server广播后，
 InterClientImpl Client(&ClientRpc);
 void ClientThread()
 {
-	QThread::msleep(500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	while (true)
 	{
 		auto sum=Client.Add(5, 2);
@@ -53,7 +53,7 @@ void ClientThread()
 		Client.NoArg();
 		Client.NoReturn();
 		Client.NoArgAndReturn();
-		QThread::msleep(0);
+		std::this_thread::sleep_for(std::chrono::milliseconds(0));
 	}
 }
 //--------------------------------------------------------------------
@@ -79,19 +79,19 @@ EmbedXrpcObject ServerRpc(ServerSend,
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()
 {
-	QThread::msleep(500);
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	while (true)
 	{
-		QThread::msleep(0);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		DateTime_t t;
-		auto date = QDateTime::currentDateTime().date();
-		auto time = QDateTime::currentDateTime().time();
-		t.Day = date.day();
-		t.Hour = time.hour();
-		t.Min = time.minute();
-		t.Month = date.month();
-		t.Sec = time.second();
-		t.Year = date.year();
+		auto ti = (time(nullptr));
+		auto localti = localtime(&ti);
+		t.Day = localti->tm_mday;
+		t.Hour = localti->tm_hour;
+		t.Min = localti->tm_min;
+		t.Month = localti->tm_mon;
+		t.Sec = localti->tm_sec;
+		t.Year = localti->tm_year+1900;
 		DateTimeChanger.Invoke(&t);
 	}
 }
@@ -114,17 +114,17 @@ void Inter_NoArgAndReturnService::NoArgAndReturn()
 }
 int main(int argc, char *argv[])
 {
-	QCoreApplication a(argc, argv);
+	
 
 	ClientRpc.Init();
-	QThread* c = QThread::create(ClientThread);
-	c->start();
+	std::thread c = std::thread(ClientThread);
+	c.detach();
 
 	ServerRpc.Init();
-	QThread* s = QThread::create(ServerThread);
-	s->start();
+	std::thread s = std::thread(ServerThread);
+	s.detach();
 
-	return a.exec();
+	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 }
 /*
 运行提示QObject::startTimer: Timers cannot be started from another thread  

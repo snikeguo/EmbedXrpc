@@ -68,4 +68,56 @@ void BlockingQueue<T>::Reset()
 	while (semaphore.wait(0) == true);
 	mutex.unlock();
 }
+
+class NoGenericBlockingQueue
+{
+public:
+	NoGenericBlockingQueue(unsigned long itemSize):genericQueue(), itemSize(itemSize)
+	{
+
+	}
+	void Send(void* msg)
+	{
+		NoGenericStruct ngs;
+		ngs.Item = malloc(itemSize);
+		//printf("malloc %x\n", ngs.Item);
+		memcpy(ngs.Item, msg, itemSize);
+		genericQueue.Send(ngs);
+	}
+	QueueStatus Receive(void* msg, unsigned long timeOut)
+	{
+		NoGenericStruct ngs;
+		auto recsult=genericQueue.Receive(ngs, timeOut);
+		if (recsult == QueueStatus::Ok)
+		{
+			memcpy(msg, ngs.Item, itemSize);
+			free(ngs.Item);
+			//printf("free %x\n", ngs.Item);
+		}
+		return recsult;
+	}
+	void Reset()
+	{
+		while (true)
+		{
+			NoGenericStruct ngs;
+			auto recsult = genericQueue.Receive(ngs, 0);
+			if (recsult == QueueStatus::Ok)
+			{
+				free(ngs.Item);
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+private:
+	struct NoGenericStruct
+	{
+		void* Item;
+	};
+	BlockingQueue<NoGenericStruct> genericQueue;
+	unsigned long itemSize;
+};
 #endif

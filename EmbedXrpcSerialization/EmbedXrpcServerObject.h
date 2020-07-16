@@ -58,7 +58,7 @@ public:
 		ObjectMutexHandle = porter->CreateMutex("SendBufMutex");
 		//RequestQueueHandle = porter->CreateQueue("RequestQueueHandle", sizeof(EmbeXrpcRawData), Server_RequestQueue_MaxItemNumber);
 		RequestBlockBufferProvider=new BlockRingBufferProvider(RequestRingBuffer,RequestRingBufferSize,porter);
-		SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER,this, SuspendTimerCallBack);
+		SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER, SuspendTimerCallBack,this);
 		porter->ThreadStart(ResponseServiceThreadHandle);
 		
 	}

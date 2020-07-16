@@ -22,7 +22,7 @@ EmbedXrpc_Queue_t RttEmbedXrpcPort::CreateQueue(const char *queueName,
 	return queue;
 }
 
-EmbedXrpc_Timer_t RttEmbedXrpcPort::CreateTimer(const char *timerName, uint32_t timeout, void *Arg, void (*timercb)(void *arg))
+EmbedXrpc_Timer_t RttEmbedXrpcPort::CreateTimer(const char *timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
 {
 	auto timer = rt_timer_create(timerName, timercb, Arg, timeout, RT_TIMER_FLAG_PERIODIC | RT_TIMER_FLAG_SOFT_TIMER);
 	return timer;

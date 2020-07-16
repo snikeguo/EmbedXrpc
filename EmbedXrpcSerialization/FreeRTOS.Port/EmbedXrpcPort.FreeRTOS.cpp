@@ -29,7 +29,7 @@ EmbedXrpc_Queue_t FreeRtosEmbedXrpcPort::CreateQueue(const char *queueName,
 	return queue;
 }
 
-EmbedXrpc_Timer_t FreeRtosEmbedXrpcPort::CreateTimer(const char *timerName, uint32_t timeout, void *Arg, void (*timercb)(void *arg))
+EmbedXrpc_Timer_t FreeRtosEmbedXrpcPort::CreateTimer(const char *timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
 {
 	
 	TimerHandle_t timer = xTimerCreate(timerName, timeout, pdTRUE, nullptr, timercb);

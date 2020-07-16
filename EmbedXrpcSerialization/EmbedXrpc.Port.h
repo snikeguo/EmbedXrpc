@@ -42,7 +42,7 @@ public:
 	virtual EmbedXrpc_Mutex_t CreateMutex(const char* mutexName)=0;
 	virtual EmbedXrpc_Queue_t CreateQueue(const char* queueName,uint32_t queueItemSize,uint32_t maxItemLen) = 0;
 	virtual EmbedXrpc_Semaphore_t CreateSemaphore(const char* SemaphoreName) = 0;
-	virtual EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout,void *Arg,void (*timercb)(void *arg))=0;
+	virtual EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg),void *Arg)=0;
 
 	virtual void DeleteThread(EmbedXrpc_Thread_t thread) = 0;
 	virtual void DeleteMutex(EmbedXrpc_Mutex_t) = 0;

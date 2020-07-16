@@ -3,8 +3,8 @@ void  DateTimeChangeDelegate::Invoke(DateTime_t now[1])
 {
 //write serialization code:DateTimeChange(now,)
 static DateTimeChangeStruct sendData;
-RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 SerializationManager sm;
+RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 sm.Reset();
 sm.Buf = &RpcObject->Buffer[4];
 sm.BufferLen = RpcObject->BufferLen-4;

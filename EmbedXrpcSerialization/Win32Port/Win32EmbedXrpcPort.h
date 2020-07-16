@@ -27,8 +27,8 @@ public:
 	bool TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout) ;
 	bool ReleaseMutex(EmbedXrpc_Mutex_t mutex) ;
 
-	QueueState ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen, uint32_t timeout) ;
-	QueueState SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen) ;
+	QueueState ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout) ;
+	QueueState SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize) ;
 	void ResetQueue(EmbedXrpc_Queue_t queue) ;
 
 
