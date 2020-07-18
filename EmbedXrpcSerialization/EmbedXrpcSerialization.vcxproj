@@ -156,9 +156,9 @@
     <ClCompile Include="ringbuffer.c" />
     <ClCompile Include="RT-Thread.Port\EmbedXrpcPort.Rtt.cpp" />
     <ClCompile Include="test.cpp" />
-    <ClCompile Include="Win32Port\BlockQueue.cpp" />
-    <ClCompile Include="Win32Port\Semaphore.cpp" />
-    <ClCompile Include="Win32Port\Win32EmbedXrpcPort.cpp" />
+    <ClCompile Include="Win32.Port\BlockQueue.cpp" />
+    <ClCompile Include="Win32.Port\Semaphore.cpp" />
+    <ClCompile Include="Win32.Port\Win32EmbedXrpcPort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlockBufferProvider.h" />
@@ -171,9 +171,9 @@
     <ClInclude Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.h" />
     <ClInclude Include="ringbuffer.h" />
     <ClInclude Include="RT-Thread.Port\EmbedXrpcPort.Rtt.h" />
-    <ClInclude Include="Win32Port\BlockQueue.h" />
-    <ClInclude Include="Win32Port\Semaphore.h" />
-    <ClInclude Include="Win32Port\Win32EmbedXrpcPort.h" />
+    <ClInclude Include="Win32.Port\BlockQueue.h" />
+    <ClInclude Include="Win32.Port\Semaphore.h" />
+    <ClInclude Include="Win32.Port\Win32EmbedXrpcPort.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FreeRTOS.Port\readme.md" />

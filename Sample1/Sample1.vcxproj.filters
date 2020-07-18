@@ -19,7 +19,7 @@
     <Filter Include="CodeGen">
       <UniqueIdentifier>{9556270c-8367-4e31-ba7e-6855be89b8da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="EmbedXrpcLib\Win32Port">
+    <Filter Include="EmbedXrpcLib\Win32.Port">
       <UniqueIdentifier>{9b51191d-fbf1-4a84-8813-a17394d9db5f}</UniqueIdentifier>
     </Filter>
     <Filter Include="CodeGen\Client">
@@ -45,14 +45,14 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.cpp">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.cpp">
-      <Filter>EmbedXrpcLib\Win32Port</Filter>
+    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\Semaphore.cpp">
-      <Filter>EmbedXrpcLib\Win32Port</Filter>
+    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.cpp">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.cpp">
-      <Filter>EmbedXrpcLib\Win32Port</Filter>
+    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.cpp">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
     <ClCompile Include="XrpcCodeGen\Sample1.cpp">
       <Filter>CodeGen</Filter>
@@ -92,14 +92,14 @@
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h">
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\BlockQueue.h">
-      <Filter>EmbedXrpcLib\Win32Port</Filter>
+    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.h">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\Semaphore.h">
-      <Filter>EmbedXrpcLib\Win32Port</Filter>
+    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.h">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.h">
-      <Filter>EmbedXrpcLib\Win32Port</Filter>
+    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.h">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h">
       <Filter>CodeGen</Filter>

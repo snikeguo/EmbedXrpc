@@ -45,10 +45,10 @@
     <ClInclude Include="ringbuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Win32Port\BlockQueue.h">
+    <ClInclude Include="Win32.Port\BlockQueue.h">
       <Filter>WIN32.Port</Filter>
     </ClInclude>
-    <ClInclude Include="Win32Port\Win32EmbedXrpcPort.h">
+    <ClInclude Include="Win32.Port\Win32EmbedXrpcPort.h">
       <Filter>WIN32.Port</Filter>
     </ClInclude>
     <ClInclude Include="RT-Thread.Port\EmbedXrpcPort.Rtt.h">
@@ -60,7 +60,7 @@
     <ClInclude Include="EmbedXrpcObject.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Win32Port\Semaphore.h">
+    <ClInclude Include="Win32.Port\Semaphore.h">
       <Filter>WIN32.Port</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,10 +80,10 @@
     <ClCompile Include="ringbuffer.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Win32Port\BlockQueue.cpp">
+    <ClCompile Include="Win32.Port\BlockQueue.cpp">
       <Filter>WIN32.Port</Filter>
     </ClCompile>
-    <ClCompile Include="Win32Port\Win32EmbedXrpcPort.cpp">
+    <ClCompile Include="Win32.Port\Win32EmbedXrpcPort.cpp">
       <Filter>WIN32.Port</Filter>
     </ClCompile>
     <ClCompile Include="RT-Thread.Port\EmbedXrpcPort.Rtt.cpp">
@@ -92,7 +92,7 @@
     <ClCompile Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.cpp">
       <Filter>FreeRTOS.Port</Filter>
     </ClCompile>
-    <ClCompile Include="Win32Port\Semaphore.cpp">
+    <ClCompile Include="Win32.Port\Semaphore.cpp">
       <Filter>WIN32.Port</Filter>
     </ClCompile>
   </ItemGroup>
