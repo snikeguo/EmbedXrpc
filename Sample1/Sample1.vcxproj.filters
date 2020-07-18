@@ -113,6 +113,9 @@
     <ClInclude Include="XrpcCodeGen\Server\Sample1.Server.h">
       <Filter>CodeGen\Server</Filter>
     </ClInclude>
+    <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h">
+      <Filter>CodeGen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cmd.bat">

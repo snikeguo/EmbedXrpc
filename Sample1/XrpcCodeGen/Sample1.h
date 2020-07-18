@@ -21,8 +21,8 @@ DateTime_t now[1];
 }DateTimeChangeStruct;
 typedef struct _Inter_Add_Request
 {
-Byte a;
-Byte b;
+Int32 a;
+Int32 b;
 }Inter_Add_Request;
 typedef struct _Inter_Add_RequestResponseContent
 {

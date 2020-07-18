@@ -29,8 +29,8 @@ extern const IField* DateTimeChangeStructDesc [1];
 extern const ObjectType DateTimeChangeStruct_Type;
 
 #define DateTimeChange_ServiceId 16
-extern const UInt8Field Inter_Add_Request_Field_a;
-extern const UInt8Field Inter_Add_Request_Field_b;
+extern const Int32Field Inter_Add_Request_Field_a;
+extern const Int32Field Inter_Add_Request_Field_b;
 extern const IField* Inter_Add_RequestDesc [2];
 extern const ObjectType Inter_Add_Request_Type;
 

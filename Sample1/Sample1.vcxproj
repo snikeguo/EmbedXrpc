@@ -44,6 +44,7 @@
     <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\Semaphore.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\Win32Port\Win32EmbedXrpcPort.h" />
     <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h" />
+    <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h" />
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h" />
     <ClInclude Include="XrpcCodeGen\Sample1.h" />
     <ClInclude Include="XrpcCodeGen\Server\Sample1.Server.h" />

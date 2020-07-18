@@ -17,7 +17,7 @@ InterClientImpl(EmbedXrpcObject *rpcobj)
 {
 this->RpcObject=rpcobj;
 }
-Inter_Add_RequestResponseContent& Add(Byte a,Byte b);
+Inter_Add_RequestResponseContent& Add(Int32 a,Int32 b);
 void Free_Add(Inter_Add_RequestResponseContent *response);
 
 Inter_NoArg_RequestResponseContent& NoArg();

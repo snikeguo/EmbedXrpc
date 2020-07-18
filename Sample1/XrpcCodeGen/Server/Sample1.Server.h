@@ -18,7 +18,7 @@ class Inter_AddService:public IService
 public:
 uint16_t GetSid(){return Inter_Add_ServiceId;}
 Inter_Add_RequestResponseContent Response;
-void Add(Byte a,Byte b);
+void Add(Int32 a,Int32 b);
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };
 class Inter_NoArgService:public IService

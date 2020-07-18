@@ -9,8 +9,8 @@ public:
 	//SerializationManager BufManager;
 
 
-	uint8_t *Buffer;
-	uint32_t BufferLen;
+	uint8_t *DataLinkLayoutBuffer;
+	uint32_t DataLinkLayoutBufferLen;
 
 	uint32_t TimeOut;
 	SendPack_t Send;
@@ -55,8 +55,8 @@ public:
 		SendPack_t send,
 		uint32_t timeOut,
 
-		uint8_t* buf,
-		uint32_t bufLen,
+		uint8_t* dataLinkLayoutBuffer,
+		uint32_t dataLinkLayoutBufferLen,
 
 		uint8_t *responseRingBuffer,//接收到回复数据
 		int16_t responseRingBufferSize,
@@ -65,7 +65,7 @@ public:
 		int16_t delegateRingBufferSize,
 
 		ResponseDelegateMessageMapCollection* responseDelegateMessageMaps,//代理的services
-		uint32_t ResponseDelegateMessageMapsCount,
+		uint32_t responseDelegateMessageMapsCount,
 		
 
 		uint8_t* requestRingBuffer,//server  接收到请求数据
@@ -78,14 +78,14 @@ public:
 		
 		void* ud = nullptr):Send(send),
 		TimeOut(timeOut),
-		Buffer(buf), 
-		BufferLen(bufLen),
+		DataLinkLayoutBuffer(dataLinkLayoutBuffer),
+		DataLinkLayoutBufferLen(dataLinkLayoutBufferLen),
 		ResponseRingBuffer(responseRingBuffer),
 		ResponseRingBufferSize(responseRingBufferSize),
 		DelegateRingBuffer(delegateRingBuffer),
 		DelegateRingBufferSize(delegateRingBufferSize),
 		ResponseDelegateMessageMaps(responseDelegateMessageMaps),
-		ResponseDelegateMessageMapsCount(ResponseDelegateMessageMapsCount),
+		ResponseDelegateMessageMapsCount(responseDelegateMessageMapsCount),
 		RequestMessageMaps(requestMessageMaps),
 		RequestMessageMapsCount(requestMessageMapsCount),
 		RequestRingBuffer(requestRingBuffer),
@@ -104,13 +104,12 @@ public:
 	{
 		
 	}
-
-	EmbedXrpcObject(//client
-		SendPack_t send,
+	//client节点构造函数
+	EmbedXrpcObject(SendPack_t send,
 		uint32_t timeOut,
 
-		uint8_t* buf,
-		uint32_t bufLen,
+		uint8_t* dataLinkLayoutBuffer,
+		uint32_t dataLinkLayoutBufferLen,
 
 		uint8_t* responseRingBuffer,
 		int16_t responseRingBufferSize,
@@ -125,8 +124,8 @@ public:
 		void* ud = nullptr):EmbedXrpcObject(send,
 			timeOut,
 
-			buf,
-			bufLen,
+			dataLinkLayoutBuffer,
+			dataLinkLayoutBufferLen,
 
 			responseRingBuffer,
 			responseRingBufferSize,
@@ -149,11 +148,12 @@ public:
 	{
 		
 	}
+	//server节点的构造函数
 	EmbedXrpcObject(SendPack_t send,
 		uint32_t timeOut,
 
-		uint8_t* buf,
-		uint32_t bufLen,
+		uint8_t* dataLinkLayoutBuffer,
+		uint32_t dataLinkLayoutBufferLen,
 
 		uint8_t* requestRingBuffer,
 		int16_t requestRingBufferSize,
@@ -165,8 +165,8 @@ public:
 		void* ud = nullptr):EmbedXrpcObject(send,
 			timeOut,
 
-			buf,
-			bufLen,
+			dataLinkLayoutBuffer,
+			dataLinkLayoutBufferLen,
 
 			nullptr,
 			0,
@@ -375,8 +375,8 @@ public:
 						rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
 						obj->porter->TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
 						sendsm.Reset();
-						sendsm.Buf = &obj->Buffer[4];
-						sendsm.BufferLen = obj->BufferLen - 4;
+						sendsm.Buf = &obj->DataLinkLayoutBuffer[4];
+						sendsm.BufferLen = obj->DataLinkLayoutBufferLen - 4;
 
 						obj->porter->TimerReset(obj->SuspendTimer);
 						obj->porter->TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
@@ -385,11 +385,11 @@ public:
 
 						if (sendsm.Index > 0)//
 						{
-							obj->Buffer[0] = (uint8_t)(recData.Sid >> 0 & 0xff);
-							obj->Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
-							obj->Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
-							obj->Buffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
-							obj->Send(obj, sendsm.Index + 4, obj->Buffer);
+							obj->DataLinkLayoutBuffer[0] = (uint8_t)(recData.Sid >> 0 & 0xff);
+							obj->DataLinkLayoutBuffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
+							obj->DataLinkLayoutBuffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
+							obj->DataLinkLayoutBuffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
+							obj->Send(obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
 						}
 						obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
 					}

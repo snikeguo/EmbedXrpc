@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -45,10 +46,23 @@ namespace EmbedXrpcIdlParser
         public GenType genType;
         public void CodeGen(FileIdlInfo fileIdlInfo,GenType genType,string outputpath)
         {
+
+            
+
             this.genType = genType;
 
             Console.WriteLine($"cpp code gen:   {fileIdlInfo.FileName}");
             var outputattr = fileIdlInfo.GenerationOption;
+
+            var VersionHsw = new StreamWriter(outputpath + "EmbedXrpcVersion.h", false, Encoding.UTF8);
+            VersionHsw.WriteLine("#ifndef EmbedXrpcVersion_H");
+            VersionHsw.WriteLine("#define EmbedXrpcVersion_H");
+            string ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            VersionHsw.WriteLine($"#define EmbedXrpcVersion  \"{ver}\"");
+            VersionHsw.WriteLine("#endif");
+            VersionHsw.Flush();
+            VersionHsw.Close();
+
             CommonHsw = new StreamWriter(outputpath+outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
             CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_H");
             CommonHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_H");
@@ -436,8 +450,8 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine($"SerializationManager sm;");
                 ServerCsw.WriteLine("RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                 ServerCsw.WriteLine("sm.Reset();\n" +
-                        "sm.Buf = &RpcObject->Buffer[4];\n" +
-                        "sm.BufferLen = RpcObject->BufferLen-4;");
+                        "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
+                        "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
                 foreach (var field in targetDelegate.TargetFields)
                 {
                     //if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
@@ -467,12 +481,12 @@ namespace EmbedXrpcIdlParser
                 }
                 ServerCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&sendData);");
 
-                ServerCsw.WriteLine($"RpcObject->Buffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
-                ServerCsw.WriteLine($"RpcObject->Buffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
-                ServerCsw.WriteLine($"RpcObject->Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
-                ServerCsw.WriteLine($"RpcObject->Buffer[3]=(uint8_t)(RpcObject->TimeOut>>8&0xff);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)(RpcObject->TimeOut>>8&0xff);");
 
-                ServerCsw.WriteLine($"RpcObject->Send(RpcObject,sm.Index+4,RpcObject->Buffer);");
+                ServerCsw.WriteLine($"RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
                 ServerCsw.WriteLine("sm.Reset();");
                 ServerCsw.WriteLine("RpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);");
                 ServerCsw.WriteLine("}");//function end
@@ -587,8 +601,8 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine("RpcObject->ResponseBlockBufferProvider->Reset();");
                     //ClientCsw.WriteLine("RpcObject->porter->ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("sm.Reset();\n" +
-                        "sm.Buf = &RpcObject->Buffer[4];\n" +
-                        "sm.BufferLen = RpcObject->BufferLen-4;");
+                        "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
+                        "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
 
                     foreach (var field in service.TargetFields)
                     {
@@ -629,12 +643,12 @@ namespace EmbedXrpcIdlParser
                     }
                     ClientCsw.WriteLine($"{GeneratServiceName}_Request_Type.Serialize(sm,0,&sendData);");
 
-                    ClientCsw.WriteLine($"RpcObject->Buffer[0]=(uint8_t)({GeneratServiceName}_ServiceId&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->Buffer[1]=(uint8_t)({GeneratServiceName}_ServiceId>>8&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->Buffer[3]=(uint8_t)(RpcObject->TimeOut>>8&0xff);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)({GeneratServiceName}_ServiceId&0xff);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)({GeneratServiceName}_ServiceId>>8&0xff);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)(RpcObject->TimeOut>>8&0xff);");
                     
-                    ClientCsw.WriteLine($"result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->Buffer);");
+                    ClientCsw.WriteLine($"result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
                     ClientCsw.WriteLine("sm.Reset();");
                     ClientCsw.WriteLine("if(result==false)\n{\nreqresp.State=RequestState_Failed;\ngoto exi;\n}");
                     ClientCsw.WriteLine("else\n{\nreqresp.State=RequestState_Ok;\n}");

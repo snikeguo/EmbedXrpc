@@ -12,8 +12,8 @@ extern EmbedXrpcObject ServerRpc;
 //-------------------------------------------------------------------------
 //client 
 uint8_t ClientSendBuffer[2048];//发送buffer
-uint8_t ClientResponseBuffer[2048];
-uint8_t ClientDelegateBuffer[2048];
+uint8_t ClientResponseBuffer[2048];//Client接收到Server发送的Response回复后，要把数据放到这个里面，如果你的协议没有回复，这个可以为null
+uint8_t ClientDelegateBuffer[2048];//Client接收到Server发送的Delegate广播后，要把数据放到这个里面，如果你的协议没有广播，这个可以为null
 bool ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	ServerRpc.ReceivedMessage(dataLen, data);
@@ -43,24 +43,27 @@ InterClientImpl Client(&ClientRpc);
 void ClientThread()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	int a=1000, b = 5000;
 	while (true)
 	{
-		auto sum=Client.Add(5, 2);
+		a ++;
+		b ++;
+		auto sum=Client.Add(a, b);
 		if (sum.State == ResponseState_Ok)
 		{
-			printf("sum:%d\n", sum.ReturnValue);
+			printf("%d+%d=%d\n", a,b,sum.ReturnValue);
 		}
 		Client.NoArg();
 		Client.NoReturn();
 		Client.NoArgAndReturn();
-		std::this_thread::sleep_for(std::chrono::milliseconds(0));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 }
 //--------------------------------------------------------------------
 //server
-uint8_t ServerSendBuffer[2048];
-uint8_t ServerRequestBuffer[2048];//发送buffer
-bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
+uint8_t ServerSendBuffer[2048];//发送buffer
+uint8_t ServerRequestBuffer[2048];//server接收到client发送的Request数据流后，要把数据临时存到这个数组里
+bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
 	ClientRpc.ReceivedMessage(dataLen, data);
 	return true;
@@ -96,7 +99,7 @@ void ServerThread()
 	}
 }
 
-void Inter_AddService::Add(Byte a, Byte b)
+void Inter_AddService::Add(Int32 a, Int32 b)
 {
 	Response.ReturnValue = a + b;
 }

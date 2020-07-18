@@ -27,8 +27,8 @@ const IField* DateTimeChangeStructDesc []=
 };
 const ObjectType DateTimeChangeStruct_Type(sizeof(DateTimeChangeStructDesc)/sizeof(IField*),DateTimeChangeStructDesc);
 
-const UInt8Field Inter_Add_Request_Field_a("Inter_Add_Request.a",offsetof(Inter_Add_Request,a));
-const UInt8Field Inter_Add_Request_Field_b("Inter_Add_Request.b",offsetof(Inter_Add_Request,b));
+const Int32Field Inter_Add_Request_Field_a("Inter_Add_Request.a",offsetof(Inter_Add_Request,a));
+const Int32Field Inter_Add_Request_Field_b("Inter_Add_Request.b",offsetof(Inter_Add_Request,b));
 const IField* Inter_Add_RequestDesc []=
 {
 &Inter_Add_Request_Field_a,
