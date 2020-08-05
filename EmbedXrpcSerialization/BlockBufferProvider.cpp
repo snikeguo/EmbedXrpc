@@ -61,7 +61,10 @@ bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, int16
 		return false;
 
 	int16_t putlen = 0;
-
+	if (rt_ringbuffer_space_len(&RingBuffer) < bufLen)
+	{
+		return false;
+	}
 	Porter->TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
 	putlen = rt_ringbuffer_put(&RingBuffer, buf, bufLen);
 	Porter->ReleaseMutex(Mutex);
