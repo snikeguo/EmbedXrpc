@@ -1,5 +1,5 @@
 #include "BlockBufferProvider.h"
-BlockRingBufferProvider::BlockRingBufferProvider(uint8_t* pool, int16_t size, IEmbeXrpcPort* porter)
+BlockRingBufferProvider::BlockRingBufferProvider(uint8_t* pool, uint16_t size, IEmbeXrpcPort* porter)
 {
 	if (size == 0 || pool == nullptr)
 		return;
@@ -45,7 +45,7 @@ bool BlockRingBufferProvider::Receive(BlockBufferItemInfo* item, uint32_t timeou
 	auto r = Porter->ReceiveQueue(Queue, item, sizeof(BlockBufferItemInfo), timeout) == QueueState_OK ? true : false;
 	return r;
 }
-uint32_t BlockRingBufferProvider::CalculateSum(uint8_t* d, int16_t len)
+uint32_t BlockRingBufferProvider::CalculateSum(uint8_t* d, uint16_t len)
 {
 	uint32_t sum = 0;
 	int16_t i = 0;
@@ -55,33 +55,50 @@ uint32_t BlockRingBufferProvider::CalculateSum(uint8_t* d, int16_t len)
 	}
 	return sum;
 }
-bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, int16_t bufLen)
+bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, uint16_t bufLen)
 {
 	if (Size == 0 || Pool == nullptr)
 		return false;
 
 	int16_t putlen = 0;
-	if (rt_ringbuffer_space_len(&RingBuffer) < bufLen)
-	{
-		return false;
-	}
+	bool insert_flag = false;
+	bool result = false;
+
 	Porter->TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
-	putlen = rt_ringbuffer_put(&RingBuffer, buf, bufLen);
-	Porter->ReleaseMutex(Mutex);
-	if (putlen != bufLen)
+	if (rt_ringbuffer_space_len(&RingBuffer) > bufLen)
 	{
-		return false;
+		insert_flag = true;
+		putlen = rt_ringbuffer_put(&RingBuffer, buf, bufLen);
 	}
-	item->DataLen = bufLen;
-	item->CheckSum = CalculateSum(buf, bufLen);
-	if (Porter->SendQueue(Queue, item, sizeof(BlockBufferItemInfo)) == QueueState_OK)
+	Porter->ReleaseMutex(Mutex);
+
+	if (insert_flag == true)
 	{
-		return true;
+		if (putlen != bufLen)
+		{
+			result=false;
+			goto _exi;
+		}
+		item->DataLen = bufLen;
+		item->CheckSum = CalculateSum(buf, bufLen);
+		if (Porter->SendQueue(Queue, item, sizeof(BlockBufferItemInfo)) == QueueState_OK)
+		{
+			result = true;
+			goto _exi;
+		}
+		else
+		{
+			result = false;
+			goto _exi;
+		}
 	}
 	else
 	{
-		return false;
+		result = false;
+		goto _exi;
 	}
+_exi:
+	return result;
 }
 void BlockRingBufferProvider::Reset()
 {

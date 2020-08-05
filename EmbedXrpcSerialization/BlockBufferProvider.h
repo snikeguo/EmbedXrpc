@@ -22,11 +22,11 @@ public:
 
     IEmbeXrpcPort *Porter;
 
-    BlockRingBufferProvider(uint8_t *pool,int16_t size,IEmbeXrpcPort *porter);
+    BlockRingBufferProvider(uint8_t *pool, uint16_t size,IEmbeXrpcPort *porter);
     ~BlockRingBufferProvider();
     bool GetChar(uint8_t *ch);  
     bool Receive(BlockBufferItemInfo *item, uint32_t timeout);
-    bool Send(BlockBufferItemInfo* item, uint8_t *buf, int16_t bufLen);
+    bool Send(BlockBufferItemInfo* item, uint8_t *buf, uint16_t bufLen);
     void Reset();
     
     void SetCalculateSum(uint32_t s) { CalculateSumValue = s; }
@@ -34,7 +34,7 @@ public:
     void SetReferenceSum(uint32_t ref) { ReferenceSumValue = ref; }
     uint32_t GetReferenceSum() { return ReferenceSumValue; }
 
-    static uint32_t CalculateSum(uint8_t *d,int16_t len);
+    static uint32_t CalculateSum(uint8_t *d, uint16_t len);
 private:
     
     uint32_t CalculateSumValue;
