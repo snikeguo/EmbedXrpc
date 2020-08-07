@@ -29,12 +29,12 @@ namespace EmbedXrpcIdlParser
     [Serializable]
     public class TargetField
     {
-        public string IdlType { get; set; }
+        public string SourceCodeType { get; set; }
         public string Name { get; set; }
         public bool IsArray { get; set; }
 
         public bool IsBaseValueType { get; set; }
-        public string ElementType { get; set; }
+        public string SourceCodeElementType { get; set; }
 
         public BitsFieldLengthAttribute BitsFieldLengthAttribute { get; set; }
         public BitsType BitsType { get; set; } = BitsType.NoBits;
@@ -42,10 +42,12 @@ namespace EmbedXrpcIdlParser
         //public FieldIndexAttribute FieldIndexAttribute { get; set; }
         public MaxCountAttribute MaxCountAttribute { get; set; }
 
+        public FieldNumberAttribute FieldNumberAttr { get; set; }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(String.Format($"Field: Type:{IdlType},Name:{Name},IsArray:{IsArray}"));
+            sb.Append(String.Format($"Field: Type:{SourceCodeType},Name:{Name},IsArray:{IsArray}"));
             if (IsArray == true)
             {
                 sb.Append(string.Format($",IsFixed: { MaxCountAttribute.IsFixed},MaxCount: { MaxCountAttribute.MaxCount},LenFieldName:{MaxCountAttribute.LenFieldName}"));
@@ -58,11 +60,12 @@ namespace EmbedXrpcIdlParser
     [Serializable]
     public class TargetReturnValue
     {
-        public string IdlType { get; set; }
+        public FieldNumberAttribute FieldNumberAttr { get; set; } = new FieldNumberAttribute(1);//先state 后返回字段
+        public string SourceCodeType { get; set; }
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(String.Format($"ReturnValue: Type:{IdlType}"));
+            sb.Append(String.Format($"ReturnValue: Type:{SourceCodeType}"));
             sb.Append("\n");
             return sb.ToString();
         }
@@ -79,14 +82,14 @@ namespace EmbedXrpcIdlParser
         /// <summary>
         /// 转换成整数后的类型
         /// </summary>
-        public string IntType { get; set; }
+        public string SourceCodeType { get; set; }
 
         public string Name { get; set; }
         public List<TargetEnumValue> TargetEnumValues { get; set; } = new List<TargetEnumValue>();
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(string.Format($"Enum: Name{Name},IntType : {IntType}\n"));
+            sb.Append(string.Format($"Enum: Name{Name},IntType : {SourceCodeType}\n"));
             foreach (var ev in TargetEnumValues)
             {
                 sb.Append(string.Format($"--------Description : {ev.Description},Value : {ev.Value}\n"));
@@ -307,13 +310,13 @@ namespace EmbedXrpcIdlParser
                     continue;
                 }
                 if (type.IsValueType == true)
-                {
+                {                    
                     if (type.IsEnum == true)
                     {
                         var vs = type.GetEnumValues();
                         TargetEnum te = new TargetEnum();
                         te.Name = type.Name;
-                        te.IntType = type.GetEnumUnderlyingType().Name;
+                        te.SourceCodeType = type.GetEnumUnderlyingType().Name;
                         foreach (var vsv in vs)
                         {
                             TargetEnumValue targetEnumValue = new TargetEnumValue();
@@ -335,22 +338,27 @@ namespace EmbedXrpcIdlParser
                         {
                             foreach (var field in fields)
                             {
+                                var FieldNumberAttr = field.GetCustomAttribute<FieldNumberAttribute>();
+                                if (FieldNumberAttr == null)
+                                {
+                                    throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");
+                                }
                                 //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
                                 TargetField targetField = new TargetField();
                                 //targetField.FieldIndexAttribute = fieldIndexAttribute;
                                 targetField.IsArray = field.FieldType.IsArray;
-                                targetField.IdlType = field.FieldType.Name;
+                                targetField.SourceCodeType = field.FieldType.Name;
                                 targetField.Name = field.Name;
                                 targetField.IsBaseValueType = IsBaseValueType(field.FieldType);
                                 if (targetField.IsArray == true)
                                 {
                                     var arratt = field.GetCustomAttribute<MaxCountAttribute>();
                                     targetField.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true } : arratt;
-                                    targetField.ElementType = field.FieldType.GetElementType().Name;
+                                    targetField.SourceCodeElementType = field.FieldType.GetElementType().Name;
                                 }
                                 if (field.FieldType.IsEnum == true)
                                 {
-                                    targetField.Enum = GetTargetEnum(targetField.IdlType, fileIdlInfo);
+                                    targetField.Enum = GetTargetEnum(targetField.SourceCodeType, fileIdlInfo);
                                 }
                                 var fieldtypelist = (from ft in types where field.FieldType == ft select ft).ToList();
                                 if(fieldtypelist.Count>0)
@@ -362,7 +370,7 @@ namespace EmbedXrpcIdlParser
                                         targetField.IsBaseValueType = true;
                                     }
                                 }
-                               
+                                targetField.FieldNumberAttr = FieldNumberAttr;
                                 targetStruct.TargetFields.Add(targetField);
                             }
                         }
@@ -372,7 +380,7 @@ namespace EmbedXrpcIdlParser
                             {
                                 //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
                                 TargetField targetField = new TargetField();
-                                targetField.IdlType = field.FieldType.Name;
+                                targetField.SourceCodeType = field.FieldType.Name;
                                 targetField.Name = field.Name;
                                 targetField.BitsFieldLengthAttribute = field.GetCustomAttribute<BitsFieldLengthAttribute>();
                                 targetField.IsBaseValueType = true;
@@ -402,7 +410,7 @@ namespace EmbedXrpcIdlParser
                         if (rt.Name != "Void")
                         {
                             TargetReturnValue returnValue = new TargetReturnValue();
-                            returnValue.IdlType = mt.ReturnType.Name;
+                            returnValue.SourceCodeType = mt.ReturnType.Name;
                             if (mt.ReturnType.IsArray == true)
                             {
                                 throw new Exception("return value does not support array type!");
@@ -423,14 +431,14 @@ namespace EmbedXrpcIdlParser
                             {
                                 var arratt = par.GetCustomAttribute<MaxCountAttribute>();
                                 field.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true } : arratt;
-                                field.ElementType = par.ParameterType.GetElementType().Name;
+                                field.SourceCodeElementType = par.ParameterType.GetElementType().Name;
                             }
-                            field.IdlType = par.ParameterType.Name;
+                            field.SourceCodeType = par.ParameterType.Name;
                             field.Name = par.Name;
                             field.IsBaseValueType = IsBaseValueType(par.ParameterType);
                             if (par.ParameterType.IsEnum == true)
                             {
-                                field.Enum = GetTargetEnum(field.IdlType, fileIdlInfo);
+                                field.Enum = GetTargetEnum(field.SourceCodeType, fileIdlInfo);
                             }
                             targetService.TargetFields.Add(field);
                         }
@@ -470,14 +478,14 @@ namespace EmbedXrpcIdlParser
                         {
                             var arratt = par.GetCustomAttribute<MaxCountAttribute>();
                             field.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true } : arratt;
-                            field.ElementType = par.ParameterType.GetElementType().Name;
+                            field.SourceCodeElementType = par.ParameterType.GetElementType().Name;
                         }
-                        field.IdlType = par.ParameterType.Name;
+                        field.SourceCodeType = par.ParameterType.Name;
                         field.Name = par.Name;
                         field.IsBaseValueType = IsBaseValueType(par.ParameterType);
                         if (par.ParameterType.IsEnum == true)
                         {
-                            field.Enum = GetTargetEnum(field.IdlType, fileIdlInfo);
+                            field.Enum = GetTargetEnum(field.SourceCodeType, fileIdlInfo);
                         }
                         targetDelegate.TargetFields.Add(field);
                     }

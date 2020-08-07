@@ -56,6 +56,21 @@ public:
     virtual uint32_t GetCalculateSum()=0;
 	virtual void SetReferenceSum(uint32_t refSum)=0;
 }*/
+class SerializationManager;
+class SerializeUnitInfo
+{
+public:
+	uint32_t FieldNumber;
+	Type_t   FieldType;
+	uint32_t	Len;
+	void* Value;
+private:
+	uint32_t FieldNumberIndex;
+	uint32_t FieldTypeIndex;
+	uint32_t LenIndex;
+	uint32_t ValueIndex;
+	friend class SerializationManager;
+};
 class SerializationManager
 {
 public:
@@ -63,7 +78,15 @@ public:
 	uint8_t* Buf = nullptr;
 	uint32_t BufferLen = 0;
 	BlockRingBufferProvider *BlockBufferProvider;
-	void Append(uint32_t  Tag, Type_t   Field, uint32_t	Len, void* v)
+	void SerializeTTL(uint32_t  FieldNumber, Type_t   Field, uint32_t	Len)
+	{
+
+	}
+	void SerializeV(uint32_t  Len, void* v)
+	{
+
+	}
+	void Append(uint32_t  FieldNumber, Type_t   Field, uint32_t	Len, void* v)
 	{
 		//Buf[Index++]=Tag;
 		//Buf[Index++]=Field;
@@ -92,8 +115,8 @@ class IType
 public:
 	virtual const char* GetTypeName() const = 0;
 	virtual const Type_t GetType() const = 0;
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen)  const  {}
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const {}
+	virtual void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v, uint32_t arrayLen)  const  {}
+	virtual void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const {}
 	virtual void Deserialize(SerializationManager& manager, void* v)const {}
 	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen)const {}
 	virtual void Free(void* ptr, uint32_t arrayLen=1)const {}
@@ -111,13 +134,14 @@ public:
 	virtual const IField* GetArrayLenField() const { return nullptr; }
 	virtual const uint8_t GetArrayLenFieldLen() const { return 0; }
 	virtual const bool IsFixed() const { return true; }
+	virtual const uint32_t GetFieldNumber() const { return 0; }
 
 	//type ²¿·Ö
 	virtual const char* GetTypeName() const = 0;
 	//virtual Type_t GetType() = 0;
 	virtual const IType* GetTypeInstance() const { return nullptr; }
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) const {}
-	virtual void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const {}
+	virtual void Serialize(SerializationManager& manager, void* v, uint32_t arrayLen) const {}
+	virtual void Serialize(SerializationManager& manager, void* v) const {}
 	virtual void Deserialize(SerializationManager& manager, void* v) const {}
 	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const {}
 
@@ -145,12 +169,12 @@ public:
 	{
 		return TYPE_ARRAY;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) const
+	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v, uint32_t arrayLen) const
 	{
 		for (uint32_t i = 0; i < arrayLen; i++)
 		{
 			uint8_t* d = (uint8_t*)v;
-			ArrayElementType->Serialize(manager, Tag, (void*)(d + i * ElementTypeLen));
+			ArrayElementType->Serialize(manager, fieldNumber, (void*)(d + i * ElementTypeLen));
 		}
 	}
 	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
@@ -188,16 +212,18 @@ public:
 	const IField* ArrayLenField;
 	const ArrayType t;
 	const bool _IsFixed;
-	ArrayField(const char* name, const bool isFixed, const IType* arrayElementType, const uint32_t elementTypeLen, const uint32_t offset,const IField* arrayLenField)
+	const uint32_t FieldNumber;
+	ArrayField(uint32_t fieldNumber,const char* name, const bool isFixed, const IType* arrayElementType, const uint32_t elementTypeLen, const uint32_t offset,const IField* arrayLenField)
 		:t(arrayElementType, elementTypeLen),
 		ArrayLenField(arrayLenField),
 		Offset(offset),
 		Name(name),
-		_IsFixed(isFixed)
+		_IsFixed(isFixed),
+		FieldNumber(fieldNumber)
 	{
 
 	}
-
+	const uint32_t GetFieldNumber() const { return FieldNumber; }
 	const char* GetName() const
 	{
 		return Name;
@@ -258,9 +284,9 @@ public:
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v, uint32_t arrayLen) const
+	void Serialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
 	{
-		t.Serialize(manager, Tag, v, arrayLen);
+		t.Serialize(manager, FieldNumber, v, arrayLen);
 	}
 	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
 	{
@@ -286,9 +312,9 @@ public:
 	{
 		return TYPE_UINT8;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
+	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const
 	{
-		manager.Append(Tag, TYPE_UINT8, 1, v);
+		manager.Append(fieldNumber, TYPE_UINT8, 1, v);
 	}
 	void Deserialize(SerializationManager& manager, void* v) const
 	{
@@ -318,10 +344,12 @@ public:
 	const char* Name;
 	const uint32_t Offset;
 	const UInt8Type t;
-	UInt8Field(const char* name, const uint32_t offset) :Name(name), Offset(offset)
+	const uint32_t FieldNumber;
+	UInt8Field(uint32_t fieldNumber,const char* name, const uint32_t offset) :FieldNumber(fieldNumber),Name(name), Offset(offset)
 	{
 
 	}
+	const uint32_t GetFieldNumber() const { return FieldNumber; }
 	const char* GetName() const
 	{
 		return Name;
@@ -341,9 +369,9 @@ public:
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
+	void Serialize(SerializationManager& manager,void* v) const
 	{
-		t.Serialize(manager, Tag, v);
+		t.Serialize(manager, FieldNumber, v);
 	}
 	void Deserialize(SerializationManager& manager, void* v) const
 	{
@@ -364,9 +392,9 @@ public:							\
 	{\
 		return type;\
 	}\
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const	\
+	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const	\
 	{	\
-		manager.Append(Tag, type, len, v);\
+		manager.Append(fieldNumber, type, len, v);\
 	}\
 	void Deserialize(SerializationManager& manager, void* v) const \
 	{\
@@ -394,9 +422,11 @@ public:\
 	const char* Name;\
 	const uint32_t Offset;\
 	const prefix##Type t;\
-	prefix##Field(const char* name, const uint32_t offset) :Name(name), Offset(offset)\
+	const uint32_t FieldNumber;\
+	prefix##Field(uint32_t fieldNumber,const char* name, const uint32_t offset) :FieldNumber(fieldNumber),Name(name), Offset(offset)\
 	{																			\
-	}																			\
+	}	\
+	const uint32_t GetFieldNumber() const { return FieldNumber; }\
 	const char* GetName() const \
 	{\
 		return Name;\
@@ -413,9 +443,9 @@ public:\
 	{	\
 		return &t;\
 	}\
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const \
+	void Serialize(SerializationManager& manager,  void* v) const \
 	{\
-		t.Serialize(manager, Tag, v);\
+		t.Serialize(manager, FieldNumber, v);\
 	}\
 	void Deserialize(SerializationManager& manager, void* v) const \
 	{\
@@ -454,7 +484,7 @@ public:
 	{
 
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
+	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
 		{
@@ -462,7 +492,7 @@ public:
 			Debug("Serialize:%s\n", SubFields[i]->GetName());
 			if (SubFields[i]->GetTypeInstance()->GetType() != TYPE_ARRAY)
 			{
-				SubFields[i]->Serialize(manager, Tag, d);
+				SubFields[i]->Serialize(manager, d);
 			}
 			else
 			{
@@ -480,7 +510,7 @@ public:
 				{
 					ptr = (*(ptr_t**)d);
 				}
-				SubFields[i]->Serialize(manager, Tag, ptr, len);
+				SubFields[i]->Serialize(manager,ptr, len);
 			}
 		}
 	}
@@ -546,13 +576,16 @@ public:
 	const char* Name;
 	const uint32_t Offset;
 	const ObjectType t;
-	ObjectField(const char* name, const uint32_t fc, const IField* ftds[], const uint32_t offset) :
+	const uint32_t FieldNumber;
+	ObjectField(uint32_t fieldNumber,const char* name, const uint32_t fc, const IField* ftds[], const uint32_t offset) :
 		t(fc, ftds),
 		Offset(offset),
-		Name(name)
+		Name(name),
+		FieldNumber(fieldNumber)
 	{
 
 	}
+	const uint32_t GetFieldNumber() const { return FieldNumber; }
 	const char* GetName() const
 	{
 		return Name;

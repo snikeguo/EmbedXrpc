@@ -252,13 +252,13 @@ namespace EmbedXrpcIdlParser
         private StreamWriter ServerCsw;
         private StreamWriter SerializeCsw;
         private StreamWriter SerializeHsw;
-        public static string IdlType2CppType(TargetField field)
+        public static string SourceCodeType2CppType(TargetField field)
         {
-            string cppType = field.IdlType;
+            string cppType = field.SourceCodeType;
 
             if (field.IsArray == true)
             {
-                cppType = field.IdlType.Replace("[", "");
+                cppType = field.SourceCodeType.Replace("[", "");
                 cppType = cppType.Replace("]", "");
                 if (field.MaxCountAttribute.IsFixed == false)
                 {
@@ -268,13 +268,13 @@ namespace EmbedXrpcIdlParser
             return cppType;
         }
 
-        public static string GetIdlTypeArrayElementType(TargetField field)
+        public static string GetSourceCodeTypeArrayElementType(TargetField field)
         {
-            string cppType = field.IdlType;
+            string cppType = field.SourceCodeType;
 
             if (field.IsArray == true)
             {
-                cppType = field.IdlType.Replace("[", "");
+                cppType = field.SourceCodeType.Replace("[", "");
                 cppType = cppType.Replace("]", "");
             }
             return cppType;
@@ -300,7 +300,7 @@ namespace EmbedXrpcIdlParser
                 foreach (var field in targetStruct.TargetFields)
                 {
                     string name = field.Name;
-                    string cppType = IdlType2CppType(field);
+                    string cppType = SourceCodeType2CppType(field);
 
                     if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
                     {
@@ -365,7 +365,7 @@ namespace EmbedXrpcIdlParser
                     string name = field.Name;
                     temp_fileds += name + ",";
 
-                    string cppType = IdlType2CppType(field);
+                    string cppType = SourceCodeType2CppType(field);
 
                     if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
                     {
@@ -426,7 +426,7 @@ namespace EmbedXrpcIdlParser
                     string name = field.Name;
                     temp_fileds += name + ",";
 
-                    string cppType = IdlType2CppType(field);
+                    string cppType = SourceCodeType2CppType(field);
 
                     if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
                     {
@@ -518,9 +518,9 @@ namespace EmbedXrpcIdlParser
 
                 TargetField ts = new TargetField();
                 ts.Name = "State";
-                ts.IdlType = "RequestResponseState";
+                ts.SourceCodeType = "RequestResponseState";
                 ts.IsArray = false;
-                ts.Enum = new TargetEnum() { IntType = "byte", Name = "RequestResponseState" };
+                ts.Enum = new TargetEnum() { SourceCodeType = "byte", Name = "RequestResponseState" };
                 ts.MaxCountAttribute = null;
                 targetStructResponse.TargetFields.Add(ts);
 
@@ -528,7 +528,7 @@ namespace EmbedXrpcIdlParser
                 {                               
                     TargetField returnValue = new TargetField();
                     returnValue.Name = "ReturnValue";
-                    returnValue.IdlType = service.ReturnValue.IdlType;
+                    returnValue.SourceCodeType = service.ReturnValue.SourceCodeType;
                     returnValue.IsArray = false;
                     returnValue.MaxCountAttribute = null;
                     targetStructResponse.TargetFields.Add(returnValue);
@@ -567,7 +567,7 @@ namespace EmbedXrpcIdlParser
                         string name = field.Name;
                         temp_fileds += name + ",";
 
-                        string cppType = IdlType2CppType(field);
+                        string cppType = SourceCodeType2CppType(field);
 
                         if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
                         {
@@ -699,7 +699,7 @@ namespace EmbedXrpcIdlParser
                         string name = field.Name;
                         temp_fileds += name + ",";
 
-                        string cppType = IdlType2CppType(field);
+                        string cppType = SourceCodeType2CppType(field);
 
                         if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
                         {

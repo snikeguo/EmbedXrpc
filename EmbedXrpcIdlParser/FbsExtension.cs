@@ -30,7 +30,7 @@ namespace EmbedXrpcIdlParser
         public static StringBuilder EmitEnum(TargetEnum targetEnum)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append("enum " + targetEnum.Name + ":" + FbsHelper.ReplaceDic[targetEnum.IntType] + Environment.NewLine);
+            stringBuilder.Append("enum " + targetEnum.Name + ":" + FbsHelper.ReplaceDic[targetEnum.SourceCodeType] + Environment.NewLine);
             stringBuilder.Append("{" + Environment.NewLine);
             foreach (var fbse in targetEnum.TargetEnumValues)
             {
@@ -40,9 +40,9 @@ namespace EmbedXrpcIdlParser
             return stringBuilder;
         }
 
-        public static string IdlType2FbsType(TargetField field)
+        public static string SourceCodeType2FbsType(TargetField field)
         {
-            string fbsType = field.IdlType;
+            string fbsType = field.SourceCodeType;
             if (field.IsArray == true)
             {
                 fbsType = fbsType.Replace("[]", "");
@@ -65,9 +65,9 @@ namespace EmbedXrpcIdlParser
             }
             return fbsType;
         }
-        public static string IdlType2FbsType(TargetReturnValue rv)
+        public static string SourceCodeType2FbsType(TargetReturnValue rv)
         {
-            string fbsType = rv.IdlType;
+            string fbsType = rv.SourceCodeType;
             if (FbsHelper.ReplaceDic.ContainsKey(fbsType) == true)
             {
                 fbsType = FbsHelper.ReplaceDic[fbsType];
@@ -94,7 +94,7 @@ namespace EmbedXrpcIdlParser
 
             TargetEnum e = new TargetEnum();
             e.Name = "PackageType_t";
-            e.IntType = "byte";
+            e.SourceCodeType = "byte";
             var evs = e.TargetEnumValues;
             evs.Add(new TargetEnumValue() { Description = "ServiceRequest", Value = 0 });
             evs.Add(new TargetEnumValue() { Description = "ServiceResponse", Value = 1});
@@ -155,7 +155,7 @@ namespace EmbedXrpcIdlParser
             {
                 FbsField ff = new FbsField();
                 ff.Name = field.Name;
-                ff.Type = FbsHelper.IdlType2FbsType(field);
+                ff.Type = FbsHelper.SourceCodeType2FbsType(field);
                 ffs.Add(ff);
             }
             return FbsHelper.EmitTable(targetStruct.Name, ffs);
@@ -173,7 +173,7 @@ namespace EmbedXrpcIdlParser
                 {
                     FbsField ff = new FbsField();
                     ff.Name = field.Name;
-                    ff.Type = FbsHelper.IdlType2FbsType(field);
+                    ff.Type = FbsHelper.SourceCodeType2FbsType(field);
                     ffs.Add(ff);
                 }
                 sb.Append(FbsHelper.EmitTable(targetInterface.Name + "_" + service.ServiceName + "_Request", ffs));
@@ -181,7 +181,7 @@ namespace EmbedXrpcIdlParser
 
                 var rff = new FbsField();
                 rff.Name = "ReturnValue";
-                rff.Type = FbsHelper.IdlType2FbsType(service.ReturnValue);
+                rff.Type = FbsHelper.SourceCodeType2FbsType(service.ReturnValue);
                 List<FbsField> rffs = new List<FbsField>();
                 rffs.Add(rff);
                 sb.Append(FbsHelper.EmitTable(targetInterface.Name + "_" + service.ServiceName + "_Response", rffs));
@@ -199,7 +199,7 @@ namespace EmbedXrpcIdlParser
             {
                 FbsField ff = new FbsField();
                 ff.Name = field.Name;
-                ff.Type = FbsHelper.IdlType2FbsType(field);
+                ff.Type = FbsHelper.SourceCodeType2FbsType(field);
                 ffs.Add(ff);
             }
             sb.Append(FbsHelper.EmitTable(targetDelegate.MethodName, ffs));

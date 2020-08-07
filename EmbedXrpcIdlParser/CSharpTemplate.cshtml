@@ -61,7 +61,7 @@
                 {
                     lenv = 1;
                 }
-                <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.ElementType  } [ @lenv ]; />
+                <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeElementType  } [ @lenv ]; />
             }
             else
             {
@@ -72,11 +72,11 @@
                 if (field.IsBaseValueType == true && field.BitsType == BitsType.NoBits)
                 {
 
-                    <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                    <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
                 }
                 else
                 {
-                    <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.IdlType  } (); />
+                    <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeType  } (); />
                 }
             }
         }
@@ -107,17 +107,17 @@
                 {
                     lenv = 1;
                 }
-                <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.ElementType  } [ @lenv ]; />
+                <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeElementType  } [ @lenv ]; />
             }
             else
             {
                 if (field.IsBaseValueType == true)
                 {
-                    <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                    <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
                 }
                 else
                 {
-                    <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.IdlType  } (); />
+                    <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeType  } (); />
                 }
             }
         }
@@ -141,7 +141,7 @@
             {
                 var par = del.TargetFields[pi];
                 pars += "request." + par.Name;
-                externstr += par.IdlType + " " + par.Name;
+                externstr += par.SourceCodeType + " " + par.Name;
                 if (pi + 1 < del.TargetFields.Count)
                 {
                     pars += ",";
@@ -168,7 +168,7 @@
             for (int pi = 0; pi < del.TargetFields.Count; pi++)
             {
                 var par = del.TargetFields[pi];
-                pars += par.IdlType + " " + par.Name;
+                pars += par.SourceCodeType + " " + par.Name;
                 if (pi + 1 < del.TargetFields.Count)
                 {
                     pars += ",";
@@ -237,30 +237,30 @@
                     {
                         lenv = 1;
                     }
-                    <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.ElementType  } [ @lenv ]; />
+                    <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeElementType  } [ @lenv ]; />
                 }
                 else
                 {
                     if (field.IsBaseValueType == true)
                     {
-                        <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                        <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
                     }
                     else
                     {
-                        <h1 public @field.IdlType @(field.Name + "{get;set;}")=new @{ @field.IdlType  } (); />
+                        <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeType  } (); />
                     }
                 }
             }
             <h1 } />
             TargetStruct returnstru = new TargetStruct();
             returnstru.Name = interf.Name + "_" + service.ServiceName + "_RequestResponseContent";
-            TargetField ResponseStateField = new TargetField() { IdlType = "RequestResponseState", IsArray = false, Name = "State" };
+            TargetField ResponseStateField = new TargetField() { SourceCodeType = "RequestResponseState", IsArray = false, Name = "State" };
             returnstru.TargetFields = new List<TargetField>();
             returnstru.TargetFields.Add(ResponseStateField);
             if (service.ReturnValue != null)
             {
 
-                TargetField returnField = new TargetField() { IdlType = service.ReturnValue.IdlType, IsArray = false, Name = "ReturnValue" };
+                TargetField returnField = new TargetField() { SourceCodeType = service.ReturnValue.SourceCodeType, IsArray = false, Name = "ReturnValue" };
 
                 returnstru.TargetFields.Add(returnField);
             }
@@ -274,7 +274,7 @@
 
                     <h1 @v />
                 }
-                <h1 public @field.IdlType @(field.Name + "{get;set;}") />
+                <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
             }
             <h1 } />
         }
@@ -305,7 +305,7 @@
                 {
                     var par = service.TargetFields[pi];
                     pars += "request." + par.Name;
-                    externstr += par.IdlType + " " + par.Name;
+                    externstr += par.SourceCodeType + " " + par.Name;
                     if (pi + 1 < service.TargetFields.Count)
                     {
                         pars += ",";
@@ -347,7 +347,7 @@
                 for (int pi = 0; pi < service.TargetFields.Count; pi++)
                 {
                     var par = service.TargetFields[pi];
-                    pars += par.IdlType + " " + par.Name;
+                    pars += par.SourceCodeType + " " + par.Name;
                     if (pi + 1 < service.TargetFields.Count)
                     {
                         pars += ",";

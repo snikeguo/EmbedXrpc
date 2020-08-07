@@ -107,7 +107,38 @@ namespace EmbedXrpcIdlParser
 
         public int ServiceIdStartNumber { get; set; } = 0x10;
 
-    } 
+    }
+    public enum DataType
+    {
+        TYPE_UINT8,
+        TYPE_INT8,
+
+        TYPE_UINT16,
+        TYPE_INT16,
+
+        TYPE_UINT32,
+        TYPE_INT32,
+
+        TYPE_UINT64,
+        TYPE_INT64,
+
+        TYPE_FLOAT,
+        TYPE_DOUBLE,
+
+        TYPE_ARRAY,   /*array*/
+        TYPE_OBJECT,  /*object*/
+    };
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    public class FieldNumberAttribute : Attribute
+    { 
+        public FieldNumberAttribute(int number)
+        {
+            Number = number;
+        }
+
+        // This is a named argument
+        public int Number { get; set; }
+    }
 
 
 }
