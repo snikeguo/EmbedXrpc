@@ -5,7 +5,7 @@
 #include "XrpcCodeGen/StudentService.EmbedXrpcSerialization.h"
 
 
-
+unsigned char sendBuf[1024];
 int main()
 {
     Student s,v;
@@ -13,8 +13,9 @@ int main()
     s.B = 2;
     s.C = 3;
     s.ChineseAchievement.Value = 101;
+    s.ChineseAchievement.test.Value2 = 116;
     SerializationManager Sm;
-    unsigned char sendBuf[1024];
+    
 
     Sm.Buf = sendBuf;
     Sm.BufferLen = 1024;
@@ -33,7 +34,7 @@ int main()
 
     Sm.BufferLen = Sm.Index;
     Sm.Reset();
-    Sm.Deserialize(&Student_Type, &v);
+    Sm.Deserialize(&Student_Type, &v, Sm.BufferLen);
     getchar();
 }
 

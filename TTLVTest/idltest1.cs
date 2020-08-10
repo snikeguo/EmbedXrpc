@@ -3,10 +3,18 @@ using System;
 using EmbedXrpcIdlParser;
 
 [FileName("idltest1.cs")]
+public struct Test
+{
+    [FieldNumber(9)]
+    byte Value2;
+}
+[FileName("idltest1.cs")]
 public struct Achievement
 {
     [FieldNumber(7)]
     byte Value;
+    [FieldNumber(8)]
+    Test test;
 }
 [FileName("idltest1.cs")]
 public struct Student

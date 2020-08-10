@@ -3,10 +3,19 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
-const UInt8Field Achievement_Field_Value(7,"Achievement.Value",offsetof(Achievement,Value),false);
+const UInt8Field Test_Field_Value2(9,"Test.Value2",offsetof(Test,Value2),false);
+const IField* TestDesc []=
+{
+&Test_Field_Value2,
+};
+const ObjectType Test_Type(sizeof(TestDesc)/sizeof(IField*),TestDesc);
+
+const UInt8Field Achievement_Field_Value(7,"Achievement.Value",offsetof(Achievement,Value), false);
+const ObjectField Achievement_Field_test(8,"Achievement.test",sizeof(TestDesc)/sizeof(IField*),TestDesc,offsetof(Achievement,test));
 const IField* AchievementDesc []=
 {
 &Achievement_Field_Value,
+&Achievement_Field_test,
 };
 const ObjectType Achievement_Type(sizeof(AchievementDesc)/sizeof(IField*),AchievementDesc);
 
