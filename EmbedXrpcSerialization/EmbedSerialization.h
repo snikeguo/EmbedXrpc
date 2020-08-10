@@ -377,6 +377,15 @@ public:
 		Buf[Index++] = Len;
 		printf("SerializeLen:%lld\n", Len);
 	}
+	void SerializeEndFlag()
+	{
+		Buf[Index++] = 0x7F;
+		printf("SerializeEnd\n");
+	}
+	bool IsEnd()
+	{
+		return Buf[Index] == 0x7F;
+	}
 	void SerializeValue(uint8_t  Len, void* v)//base value used
 	{
 		MEMCPY(&Buf[Index], v, Len);
@@ -454,6 +463,10 @@ public:
 	{
 		Index++;
 	}
+	void RemoveEndFlagFromSerializationManager()
+	{
+		Index++;
+	}
 	void Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber)
 	{
 		SerializeKey(fieldNumber, TYPE_OBJECT);
@@ -521,26 +534,31 @@ public:
 			{
 				ObjectField* of = (ObjectField*)objectType->SubFields[i];
 				ObjectType* ot = (ObjectType*)(of->GetTypeInstance());
-				SerializeKey(of->GetFieldNumber(), TYPE_OBJECT);
-				Serialize(ot, fieldData, 0);
+				Serialize(ot, fieldData, of->GetFieldNumber());
 			}
 		}
+		SerializeEndFlag();
 	}
-	void Deserialize(const ObjectType* objectType, void* objectPoint)
+	void Deserialize(const ObjectType* objectType, void* objectPoint,uint32_t recBuferLen)
 	{
 		uint32_t fn = 0;
 		Type_t tp = TYPE_UINT8;
 
-		GetKeyFromSerializationManager(&fn, &tp);
-		RemoveKeyFromSerializationManager();
-		EmbedSerializationAssert(tp == TYPE_OBJECT);
+		//GetKeyFromSerializationManager(&fn, &tp);
+		//RemoveKeyFromSerializationManager();
+		//EmbedSerializationAssert(tp == TYPE_OBJECT);
 
 		
-		while (Index < BufferLen)
+		while (!IsEnd() && Index < recBuferLen)//并没有到结构体定界符以及 没有遍历完数据流
 		{
 			GetKeyFromSerializationManager(&fn, &tp);
 			RemoveKeyFromSerializationManager();
-			if (tp <= TYPE_DOUBLE)
+			//EmbedSerializationAssert(tp == TYPE_OBJECT);
+			if (fn == 0 && tp==TYPE_OBJECT)
+			{
+				Deserialize(objectType, objectPoint, recBuferLen);//如果fieldNumber 为0 说明这是第一次进来,也就是最顶级的结构体，最顶级的结构体执行完毕后,就要退出
+			}
+			else if (tp <= TYPE_DOUBLE)
 			{
 				const IType* typeInstance = BaseValueInfos[tp].TypeInstance;//获取到对应的TP
 				void* d = nullptr;
@@ -630,11 +648,11 @@ public:
 					{
 						if (ptr != nullptr)
 						{
-							Deserialize(ot, (uint8_t*)ptr + j * arrayType->ElementTypeLen);
+							Deserialize(ot, (uint8_t*)ptr + j * arrayType->ElementTypeLen, recBuferLen);
 						}
 						else
 						{
-							Deserialize(ot, nullptr);
+							Deserialize(ot, nullptr, recBuferLen);
 						}
 					}
 				}
@@ -658,9 +676,11 @@ public:
 						}
 					}
 				}
-				Deserialize(objectType, d);
+				Deserialize(subObjectType, d, recBuferLen);
 			}
 		}
+		RemoveEndFlagFromSerializationManager();
+
 	}
 };
 
