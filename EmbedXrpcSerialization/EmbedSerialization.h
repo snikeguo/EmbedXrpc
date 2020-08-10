@@ -9,20 +9,8 @@
 #endif
 
 typedef  uint32_t ptr_t;
-/*
-用来测试
-static void* MALLOC(uint32_t size)
-{
-	void* ptr = malloc(size);
-	printf("malloc :0x%x\n", ptr);
-	return ptr;
-}
+class SerializationManager;
 
-static void FREE(void* ptr)
-{
-	printf("free :0x%x\n", ptr);
-	free(ptr);
-}*/
 typedef enum {
 	TYPE_UINT8,
 	TYPE_INT8,
@@ -44,85 +32,23 @@ typedef enum {
 
 
 } Type_t;
-
-
-/*class IBlockBufferProvider
-{
-public:
-	virtual bool Receive(BlockBufferItemInfo *item, uint32_t timeout) ;
-	virtual bool GetChar(uint8_t *ch) ;
-	virtual bool Send( uint8_t *buf, int16_t bufLen) ;
-	virtual void SetCalculateSum(uint32_t s)=0;
-    virtual uint32_t GetCalculateSum()=0;
-	virtual void SetReferenceSum(uint32_t refSum)=0;
-}*/
-class SerializationManager;
-class SerializeUnitInfo
-{
-public:
-	uint32_t FieldNumber;
-	Type_t   FieldType;
-	uint32_t	Len;
-	void* Value;
-private:
-	uint32_t FieldNumberIndex;
-	uint32_t FieldTypeIndex;
-	uint32_t LenIndex;
-	uint32_t ValueIndex;
-	friend class SerializationManager;
-};
-class SerializationManager
-{
-public:
-	uint32_t Index = 0;
-	uint8_t* Buf = nullptr;
-	uint32_t BufferLen = 0;
-	BlockRingBufferProvider *BlockBufferProvider;
-	void SerializeTTL(uint32_t  FieldNumber, Type_t   Field, uint32_t	Len)
-	{
-
-	}
-	void SerializeV(uint32_t  Len, void* v)
-	{
-
-	}
-	void Append(uint32_t  FieldNumber, Type_t   Field, uint32_t	Len, void* v)
-	{
-		//Buf[Index++]=Tag;
-		//Buf[Index++]=Field;
-		//Buf[Index++]=Len;
-		EmbedSerializationAssert(Index+Len<BufferLen);
-		MEMCPY(&Buf[Index], v, Len);
-		Index += Len;
-	}
-	void Reset()
-	{
-		Index = 0;
-	}
-};
-/*
-class SerializationField_t
-{
-public:
-	uint32_t		Tag;
-	Field_t     Field;
-	size_t			Len;
-	uint8_t		    *Data;
-};
-*/
 class IType
 {
 public:
 	virtual const char* GetTypeName() const = 0;
 	virtual const Type_t GetType() const = 0;
-	virtual void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v, uint32_t arrayLen)  const  {}
-	virtual void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const {}
-	virtual void Deserialize(SerializationManager& manager, void* v)const {}
-	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen)const {}
+
 	virtual void Free(void* ptr, uint32_t arrayLen=1)const {}
 	virtual void* Malloc(uint32_t arrayLen)const { return nullptr; }
 };
-
+extern const char* TypeString[12];
+class BaseValueInfo
+{
+public:
+	const IType* TypeInstance;
+	const uint8_t DataWidth;
+};
+extern const BaseValueInfo BaseValueInfos[10];
 class IField //:public IType
 {
 public:
@@ -130,9 +56,8 @@ public:
 	virtual const uint32_t GetOffset() const { return 0; }
 	virtual const char* GetName() const = 0;
 	
-
+	virtual const bool IsArrayLenField() const { return false; }
 	virtual const IField* GetArrayLenField() const { return nullptr; }
-	virtual const uint8_t GetArrayLenFieldLen() const { return 0; }
 	virtual const bool IsFixed() const { return true; }
 	virtual const uint32_t GetFieldNumber() const { return 0; }
 
@@ -140,10 +65,6 @@ public:
 	virtual const char* GetTypeName() const = 0;
 	//virtual Type_t GetType() = 0;
 	virtual const IType* GetTypeInstance() const { return nullptr; }
-	virtual void Serialize(SerializationManager& manager, void* v, uint32_t arrayLen) const {}
-	virtual void Serialize(SerializationManager& manager, void* v) const {}
-	virtual void Deserialize(SerializationManager& manager, void* v) const {}
-	virtual void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const {}
 
 	virtual void Free(void* ptr, uint32_t arrayLen=1) const {}
 	virtual void* Malloc(uint32_t arrayLen) const { return nullptr; }
@@ -169,24 +90,7 @@ public:
 	{
 		return TYPE_ARRAY;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v, uint32_t arrayLen) const
-	{
-		for (uint32_t i = 0; i < arrayLen; i++)
-		{
-			uint8_t* d = (uint8_t*)v;
-			ArrayElementType->Serialize(manager, fieldNumber, (void*)(d + i * ElementTypeLen));
-		}
-	}
-	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
-	{
-		for (uint32_t i = 0; i < arrayLen; i++)
-		{
-			//MEMCPY((void*)((uint8_t*)v + i * ElementTypeLen), &manager.Buf[manager.Index], ElementTypeLen);
-			ArrayElementType->Deserialize(manager, (void*)((uint8_t*)v + i * ElementTypeLen));
-			//manager.Index += ElementTypeLen;
-		}
 
-	}
 	
 	void* Malloc(uint32_t arrayLen) const
 	{
@@ -204,6 +108,8 @@ public:
 		FREE(ptr);
 	}
 };
+
+
 class ArrayField :public IField
 {
 public:
@@ -237,40 +143,7 @@ public:
 	{
 		return ArrayLenField;
 	}
-	const uint8_t GetArrayLenFieldLen() const
-	{
-		switch (ArrayLenField->GetTypeInstance()->GetType())
-		{
-		case TYPE_UINT8:
-			return 1;
-			break;
-		case TYPE_INT8:
-			return 1;
-			break;
-		case TYPE_UINT16:
-			return 2;
-			break;
-		case TYPE_INT16:
-			return 2;
-			break;
-		case TYPE_UINT32:
-			return 4;
-			break;
-		case TYPE_INT32:
-			return 4;
-			break;
-		case TYPE_UINT64:
-			return 8;
-			break;
-		case TYPE_INT64:
-			return 8;
-			break;
-		default:
-			return 0;
-			break;
-		}
-		return 0;
-	}
+	
 	const bool IsFixed() const
 	{
 		return _IsFixed;
@@ -284,14 +157,8 @@ public:
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
-	{
-		t.Serialize(manager, FieldNumber, v, arrayLen);
-	}
-	void Deserialize(SerializationManager& manager, void* v, uint32_t arrayLen) const
-	{
-		t.Deserialize(manager, v, arrayLen);
-	}
+	
+	
 	void* Malloc(uint32_t arrayLen) const
 	{
 		return t.Malloc(arrayLen);
@@ -312,30 +179,6 @@ public:
 	{
 		return TYPE_UINT8;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const
-	{
-		manager.Append(fieldNumber, TYPE_UINT8, 1, v);
-	}
-	void Deserialize(SerializationManager& manager, void* v) const
-	{
-		if(manager.BlockBufferProvider ==nullptr)
-		{
-			MEMCPY(v, &manager.Buf[manager.Index], 1);
-			manager.Index++;
-		}
-		else
-		{
-			uint8_t *u8v=(uint8_t *)v;
-			uint8_t d=0;
-			for(uint8_t i=0;i<1;i++)
-			{
-				EmbedSerializationAssert(manager.BlockBufferProvider->GetChar(&d)==true);
-				MEMCPY(&u8v[i],&d,1);
-			}
-		}
-		
-		
-	}
 };
 extern const UInt8Type UInt8TypeInstance;
 class UInt8Field : public IField
@@ -345,7 +188,8 @@ public:
 	const uint32_t Offset;
 	const UInt8Type t;
 	const uint32_t FieldNumber;
-	UInt8Field(uint32_t fieldNumber,const char* name, const uint32_t offset) :FieldNumber(fieldNumber),Name(name), Offset(offset)
+	const bool ArrayLenFieldFlag;
+	UInt8Field(const uint32_t fieldNumber,const char* name, const uint32_t offset,const bool isArrayLenField) :FieldNumber(fieldNumber),Name(name), Offset(offset),ArrayLenFieldFlag(isArrayLenField)
 	{
 
 	}
@@ -369,15 +213,7 @@ public:
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager,void* v) const
-	{
-		t.Serialize(manager, FieldNumber, v);
-	}
-	void Deserialize(SerializationManager& manager, void* v) const
-	{
-		t.Deserialize(manager, v);
-	}
-
+	const bool IsArrayLenField() const { return ArrayLenFieldFlag; }
 };
 
 #define CodeGenBaseValueClass(prefix,typeName,type,len)	\
@@ -392,28 +228,6 @@ public:							\
 	{\
 		return type;\
 	}\
-	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const	\
-	{	\
-		manager.Append(fieldNumber, type, len, v);\
-	}\
-	void Deserialize(SerializationManager& manager, void* v) const \
-	{\
-		if(manager.BlockBufferProvider==nullptr)\
-		{\
-			MEMCPY(v, &manager.Buf[manager.Index], len);\
-			manager.Index++;\
-		}\
-		else\
-		{\
-			uint8_t *u8v=(uint8_t *)v;\
-			uint8_t d=0;\
-			for(uint8_t i=0;i<len;i++)\
-			{\
-				EmbedSerializationAssert(manager.BlockBufferProvider->GetChar(&d)==true);\
-				MEMCPY(&u8v[i],&d,1);\
-			}\
-		}\
-	}\
 };\
 extern const prefix##Type prefix##TypeInstance; \
 class prefix##Field : public IField	\
@@ -423,7 +237,8 @@ public:\
 	const uint32_t Offset;\
 	const prefix##Type t;\
 	const uint32_t FieldNumber;\
-	prefix##Field(uint32_t fieldNumber,const char* name, const uint32_t offset) :FieldNumber(fieldNumber),Name(name), Offset(offset)\
+	const bool ArrayLenFieldFlag;\
+	prefix##Field(const uint32_t fieldNumber,const char* name, const uint32_t offset,const bool isArrayLenField) :FieldNumber(fieldNumber),Name(name), Offset(offset),ArrayLenFieldFlag(isArrayLenField)\
 	{																			\
 	}	\
 	const uint32_t GetFieldNumber() const { return FieldNumber; }\
@@ -443,14 +258,7 @@ public:\
 	{	\
 		return &t;\
 	}\
-	void Serialize(SerializationManager& manager,  void* v) const \
-	{\
-		t.Serialize(manager, FieldNumber, v);\
-	}\
-	void Deserialize(SerializationManager& manager, void* v) const \
-	{\
-		t.Deserialize(manager, v);\
-	}\
+	const bool IsArrayLenField() const { return ArrayLenFieldFlag; }\
 }
 CodeGenBaseValueClass(Int8, "int8_t", TYPE_INT8, 1);
 CodeGenBaseValueClass(UInt16, "uint16_t", TYPE_UINT16, 2);
@@ -484,67 +292,6 @@ public:
 	{
 
 	}
-	void Serialize(SerializationManager& manager, uint32_t  fieldNumber, void* v) const
-	{
-		for (uint32_t i = 0; i < FieldCount; i++)
-		{
-			void* d = (void*)((uint8_t*)v + SubFields[i]->GetOffset());
-			Debug("Serialize:%s\n", SubFields[i]->GetName());
-			if (SubFields[i]->GetTypeInstance()->GetType() != TYPE_ARRAY)
-			{
-				SubFields[i]->Serialize(manager, d);
-			}
-			else
-			{
-				ArrayField* arrayfield = (ArrayField*)SubFields[i];
-				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
-				uint32_t len = 1;
-				if (arrayLenField != nullptr)
-				{
-					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-					MEMCPY(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
-				}
-
-				ptr_t* ptr =(ptr_t*) d;
-				if (arrayfield->IsFixed() == false)
-				{
-					ptr = (*(ptr_t**)d);
-				}
-				SubFields[i]->Serialize(manager,ptr, len);
-			}
-		}
-	}
-	void Deserialize(SerializationManager& manager, void* v) const
-	{
-		for (uint32_t i = 0; i < FieldCount; i++)
-		{
-			void* d = (void*)((uint8_t*)v + SubFields[i]->GetOffset());
-			Debug("Deserialize:%s\n", SubFields[i]->GetName());
-			if (SubFields[i]->GetTypeInstance()->GetType() != TYPE_ARRAY)
-			{
-
-				SubFields[i]->Deserialize(manager, d);
-			}
-			else
-			{
-				ArrayField* arrayfield = (ArrayField*)SubFields[i];
-				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
-				uint32_t len = 1;
-				if (arrayLenField != nullptr)
-				{
-					void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-					MEMCPY(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
-				}
-				void* ptr = d;
-				if (arrayfield->IsFixed() == false)
-				{
-					ptr = arrayfield->Malloc(len);
-					MEMCPY((void *)((ptr_t*)d),&ptr,sizeof(ptr_t));
-				}
-				SubFields[i]->Deserialize(manager, ptr, len);
-			}
-		}
-	}
 	void Free(void* v, uint32_t arrayLen=1) const
 	{
 		for (uint32_t i = 0; i < FieldCount; i++)
@@ -559,7 +306,8 @@ public:
 					if (arrayLenField != nullptr)
 					{
 						void* voidLenPtr = (void*)((uint8_t*)v + arrayLenField->GetOffset());
-						MEMCPY(&len, voidLenPtr, arrayfield->GetArrayLenFieldLen());
+						EmbedSerializationAssert(arrayLenField->GetTypeInstance()->GetType() <= TYPE_INT64);
+						MEMCPY(&len, voidLenPtr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
 					}					
 					uint8_t** arrayfieldPtr = (uint8_t**)((uint8_t*)v + arrayfield->GetOffset());
 					arrayfield->Free(*arrayfieldPtr, len);
@@ -604,17 +352,315 @@ public:
 	{
 		return &t;
 	}
-	void Serialize(SerializationManager& manager, uint32_t  Tag, void* v) const
-	{
-		t.Serialize(manager, Tag, v);
-	}
-	void Deserialize(SerializationManager& manager, void* v) const
-	{
-		t.Deserialize(manager, v);
-	}
 	void Free(void* v, uint32_t arrayLen=1) const
 	{
 		t.Free(v, arrayLen);
+	}
+};
+
+class SerializationManager
+{
+public:
+	uint32_t Index = 0;
+	uint8_t* Buf = nullptr;
+	uint32_t BufferLen = 0;
+	BlockRingBufferProvider* BlockBufferProvider;
+
+	void SerializeKey(uint32_t  FieldNumber, Type_t   Field)
+	{
+		Buf[Index++] = FieldNumber;
+		Buf[Index++] = Field;
+		printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);
+	}
+	void SerializeLen(uint64_t  Len)
+	{
+		Buf[Index++] = Len;
+		printf("SerializeLen:%lld\n", Len);
+	}
+	void SerializeValue(uint8_t  Len, void* v)//base value used
+	{
+		MEMCPY(&Buf[Index], v, Len);
+		printf("SerializeValue:\n");
+		for (size_t i = Index; i < Len+Index; i++)
+		{
+			printf("%d,", Buf[i]);
+			if ((i-Index + 1) % 10 == 0)
+			{
+				printf("\n");
+			}
+		}
+		printf("\n");
+		Index += Len;
+	}
+	void Pop(uint8_t* out_buf, uint32_t len)
+	{
+		if (BlockBufferProvider == nullptr)
+		{
+			if (out_buf != nullptr)
+			{
+				MEMCPY(out_buf, &Buf[Index], len);
+			}
+			Index += len;
+		}
+		else
+		{
+			uint8_t d = 0;
+			if (out_buf != nullptr)
+			{
+				for (uint8_t i = 0; i < len; i++)
+				{
+					EmbedSerializationAssert(BlockBufferProvider->GetChar(&d) == true);
+					out_buf[i] = d;
+				}
+			}
+		}
+	}
+	void Reset()
+	{
+		Index = 0;
+	}
+	uint32_t GetKeyFromSerializationManager(uint32_t* fn, Type_t* type)
+	{
+		if (fn != nullptr)
+		{
+			*fn = Buf[Index];
+		}
+		if (type != nullptr)
+		{
+			*type = (Type_t)Buf[Index + 1];
+		}
+		return 2;
+	}
+	void RemoveKeyFromSerializationManager()
+	{
+		uint32_t ind = GetKeyFromSerializationManager(nullptr, nullptr);
+		Index += ind;
+	}
+	uint32_t GetArrayLenFromSerializationManager(uint32_t* arrayLen)
+	{
+		*arrayLen = Buf[Index];
+		return 1;
+	}
+	void RemoveArrayLenFromSerializationManager()
+	{
+		uint32_t ind = GetArrayLenFromSerializationManager(nullptr);
+		Index += ind;
+	}
+	uint8_t GetArrayElementFlag()
+	{
+		return Buf[Index];
+	}
+	void RemoveArrayElementFlagFromSerializationManager()
+	{
+		Index++;
+	}
+	void Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber)
+	{
+		SerializeKey(fieldNumber, TYPE_OBJECT);
+		for (uint32_t i = 0; i < objectType->FieldCount; i++)
+		{
+			void* fieldData = (void*)((uint8_t*)objectData + objectType->SubFields[i]->GetOffset());
+			Debug("Serialize:%s\n", objectType->SubFields[i]->GetName());
+			Type_t typeOfSubField = objectType->SubFields[i]->GetTypeInstance()->GetType();
+			if (typeOfSubField <= TYPE_DOUBLE && objectType->SubFields[i]->IsArrayLenField() == false)
+			{
+				SerializeKey(objectType->SubFields[i]->GetFieldNumber(), typeOfSubField);
+				SerializeValue(BaseValueInfos[typeOfSubField].DataWidth, fieldData);
+			}
+			else if (typeOfSubField == TYPE_ARRAY)
+			{
+				ArrayField* arrayfield = (ArrayField*)objectType->SubFields[i];
+				ArrayType* arrayType = (ArrayType*)(arrayfield->GetTypeInstance());
+				IType* arrayElementType = (IType*)(arrayType->ArrayElementType);
+
+				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
+				EmbedSerializationAssert(arrayLenField->GetTypeInstance()->GetType() <= TYPE_INT64);
+				uint8_t sizeOfLenField = BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth; //like:1,2,4,8
+
+				SerializeKey(objectType->SubFields[i]->GetFieldNumber(), TYPE_ARRAY);
+
+				uint64_t len = 1;
+
+				if (arrayLenField != nullptr)
+				{
+					void* voidLenPtr = (void*)((uint8_t*)objectData + arrayLenField->GetOffset());
+					MEMCPY(&len, voidLenPtr, sizeOfLenField);
+				}
+
+				ptr_t* ptr = (ptr_t*)fieldData;
+				if (arrayfield->IsFixed() == false)
+				{
+					ptr = (*(ptr_t**)fieldData);
+				}
+				SerializeLen(len);
+
+				uint8_t baseValueTypeFlag = 0;
+				if (arrayElementType->GetType() <= TYPE_DOUBLE)
+				{
+					baseValueTypeFlag = (arrayElementType->GetType() << 4) | 0x01;
+					SerializeValue(1, &baseValueTypeFlag);
+					for (uint32_t j = 0; j < len; j++)
+					{
+						SerializeValue(BaseValueInfos[arrayElementType->GetType()].DataWidth,
+							ptr + j * BaseValueInfos[arrayElementType->GetType()].DataWidth);
+					}
+				}
+				else
+				{
+					baseValueTypeFlag = 0x02;
+					SerializeValue(1, &baseValueTypeFlag);
+					ObjectType* ot = (ObjectType*)arrayElementType;
+
+					for (uint32_t j = 0; j < len; j++)
+					{
+						Serialize(ot, ptr + j * (arrayType->ElementTypeLen), 0);
+					}
+				}
+			}
+			else
+			{
+				ObjectField* of = (ObjectField*)objectType->SubFields[i];
+				ObjectType* ot = (ObjectType*)(of->GetTypeInstance());
+				SerializeKey(of->GetFieldNumber(), TYPE_OBJECT);
+				Serialize(ot, fieldData, 0);
+			}
+		}
+	}
+	void Deserialize(const ObjectType* objectType, void* objectPoint)
+	{
+		uint32_t fn = 0;
+		Type_t tp = TYPE_UINT8;
+
+		GetKeyFromSerializationManager(&fn, &tp);
+		RemoveKeyFromSerializationManager();
+		EmbedSerializationAssert(tp == TYPE_OBJECT);
+
+		
+		while (Index < BufferLen)
+		{
+			GetKeyFromSerializationManager(&fn, &tp);
+			RemoveKeyFromSerializationManager();
+			if (tp <= TYPE_DOUBLE)
+			{
+				const IType* typeInstance = BaseValueInfos[tp].TypeInstance;//获取到对应的TP
+				void* d = nullptr;
+				if (objectType != nullptr)
+				{
+					for (uint32_t i = 0; i < objectType->FieldCount; i++)
+					{
+						if (fn == objectType->SubFields[i]->GetFieldNumber() && tp == objectType->SubFields[i]->GetTypeInstance()->GetType())
+						{
+							d = (void*)((uint8_t*)objectPoint + objectType->SubFields[i]->GetOffset());
+							Debug("Deserialize:%s\n", objectType->SubFields[i]->GetName());
+							break;
+						}
+					}
+				}
+				Pop((uint8_t*)d, BaseValueInfos[tp].DataWidth);
+			}
+			else if (tp == TYPE_ARRAY)
+			{
+				uint32_t arraylen = 0;
+
+				GetArrayLenFromSerializationManager(&arraylen);
+				RemoveArrayLenFromSerializationManager();
+
+				uint8_t baseValueTypeFlag = GetArrayElementFlag();
+				RemoveArrayElementFlagFromSerializationManager();
+
+				EmbedSerializationAssert((((baseValueTypeFlag & 0x0F) == 1) && (baseValueTypeFlag <= TYPE_DOUBLE)) || (baseValueTypeFlag == 0x02));
+
+				void* d = nullptr;
+				ArrayField* arrayfield = nullptr;
+				ArrayType* arrayType = nullptr;
+				void* ptr = d;
+				IField* arrayLenField = nullptr;
+
+				if (objectType != nullptr)
+				{
+					for (uint32_t i = 0; i < objectType->FieldCount; i++)
+					{
+						if (fn == objectType->SubFields[i]->GetFieldNumber() && tp == objectType->SubFields[i]->GetTypeInstance()->GetType())
+						{
+							d = (void*)((uint8_t*)objectPoint + objectType->SubFields[i]->GetOffset());
+							ptr = d;
+							arrayfield = (ArrayField*)objectType->SubFields[i];
+							arrayType = (ArrayType*)(arrayfield->GetTypeInstance());
+							Debug("Deserialize:%s\n", objectType->SubFields[i]->GetName());
+							break;
+						}
+					}
+				}
+				if (arrayfield != nullptr)
+				{
+					arrayLenField = (IField*)arrayfield->GetArrayLenField();
+					if (arrayfield->IsFixed() == false)
+					{
+						ptr = arrayfield->Malloc(arraylen);
+						MEMCPY((void*)((ptr_t*)d), &ptr, sizeof(ptr_t));
+					}
+				}
+
+				if ((baseValueTypeFlag & 0x0F) == 0x01)//base value type
+				{
+					Type_t aet = (Type_t)(baseValueTypeFlag >> 4 & 0x0F);
+					EmbedSerializationAssert(aet <= TYPE_DOUBLE);
+					const IType* Instance = BaseValueInfos[aet].TypeInstance;
+					for (uint32_t j = 0; j < arraylen; j++)
+					{
+						if (ptr != nullptr)
+						{
+							Pop((uint8_t*)ptr + j * BaseValueInfos[aet].DataWidth, BaseValueInfos[aet].DataWidth);
+						}
+						else
+						{
+							Pop(nullptr, BaseValueInfos[aet].DataWidth);
+						}
+					}
+				}
+				else
+				{
+					
+					ObjectType* ot = nullptr;// (ObjectType*)(arrayType->ArrayElementType);
+					if (arrayType != nullptr)
+					{
+						ot = (ObjectType*)(arrayType->ArrayElementType);
+					}
+					for (uint32_t j = 0; j < arraylen; j++)
+					{
+						if (ptr != nullptr)
+						{
+							Deserialize(ot, (uint8_t*)ptr + j * arrayType->ElementTypeLen);
+						}
+						else
+						{
+							Deserialize(ot, nullptr);
+						}
+					}
+				}
+			}
+			else if (tp == TYPE_OBJECT)
+			{
+				void* d = nullptr;
+				ObjectField* subObjectField = nullptr;
+				ObjectType* subObjectType = nullptr;
+				if (objectType != nullptr)
+				{
+					for (uint32_t i = 0; i < objectType->FieldCount; i++)
+					{
+						if (fn == objectType->SubFields[i]->GetFieldNumber() && tp == objectType->SubFields[i]->GetTypeInstance()->GetType())
+						{
+							d = (void*)((uint8_t*)objectPoint + objectType->SubFields[i]->GetOffset());
+							subObjectField = (ObjectField*)objectType->SubFields[i];
+							subObjectType = (ObjectType*)subObjectField->GetTypeInstance();
+							Debug("Deserialize:%s\n", objectType->SubFields[i]->GetName());
+							break;
+						}
+					}
+				}
+				Deserialize(objectType, d);
+			}
+		}
 	}
 };
 

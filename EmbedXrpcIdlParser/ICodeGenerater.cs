@@ -34,6 +34,8 @@ namespace EmbedXrpcIdlParser
         public bool IsArray { get; set; }
 
         public bool IsBaseValueType { get; set; }
+
+        public bool IsArrayLenField { get; set; }//是否是Arraylen字段 
         public string SourceCodeElementType { get; set; }
 
         public BitsFieldLengthAttribute BitsFieldLengthAttribute { get; set; }
