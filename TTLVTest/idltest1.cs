@@ -5,29 +5,31 @@ using EmbedXrpcIdlParser;
 [FileName("idltest1.cs")]
 public struct Test
 {
-    [FieldNumber(9)]
-    byte Value2;
+    [FieldNumber(10)]
+    byte IntPtrsLen;
+
+    [FieldNumber(11)]
+    [MaxCount(LenFieldName = "IntPtrsLen", MaxCount = 2, IsFixed = false)]
+    int[] IntPtr;
 }
 [FileName("idltest1.cs")]
 public struct Achievement
 {
-    [FieldNumber(7)]
-    byte Value;
+
+    [FieldNumber(10)]
+    byte Arlen;
+
     [FieldNumber(8)]
-    Test test;
+    [MaxCount(LenFieldName="Arlen", MaxCount=2, IsFixed=false)]
+    Test[] Ar;
+
+
 }
 [FileName("idltest1.cs")]
 public struct Student
 {
     [FieldNumber(4)]
-    Achievement ChineseAchievement;
-    [FieldNumber(1)]
-    int A;
-    [FieldNumber(2)]
-    int B;
-    [FieldNumber(3)]
-    int C;
-    
+    Achievement ChineseAchievement; 
 }
 [FileName("idltest1.cs")]
 public class OptionProcess:IOptionProcess

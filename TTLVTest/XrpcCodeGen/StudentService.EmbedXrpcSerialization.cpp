@@ -3,32 +3,28 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
-const UInt8Field Test_Field_Value2(9,"Test.Value2",offsetof(Test,Value2),false);
+const UInt8Field Test_Field_IntPtrsLen(10,"Test.IntPtrsLen",offsetof(Test,IntPtrsLen),true);
+const ArrayField Test_Field_IntPtr(11,"Test.IntPtr",false,&Int32TypeInstance,sizeof(Int32),offsetof(Test,IntPtr),&Test_Field_IntPtrsLen);
 const IField* TestDesc []=
 {
-&Test_Field_Value2,
+&Test_Field_IntPtrsLen,
+&Test_Field_IntPtr,
 };
 const ObjectType Test_Type(sizeof(TestDesc)/sizeof(IField*),TestDesc);
 
-const UInt8Field Achievement_Field_Value(7,"Achievement.Value",offsetof(Achievement,Value), false);
-const ObjectField Achievement_Field_test(8,"Achievement.test",sizeof(TestDesc)/sizeof(IField*),TestDesc,offsetof(Achievement,test));
+const UInt8Field Achievement_Field_Arlen(10,"Achievement.Arlen",offsetof(Achievement,Arlen),true);
+const ArrayField Achievement_Field_Ar(8,"Achievement.Ar",false,&Test_Type,sizeof(Test),offsetof(Achievement,Ar),&Achievement_Field_Arlen);
 const IField* AchievementDesc []=
 {
-&Achievement_Field_Value,
-&Achievement_Field_test,
+&Achievement_Field_Arlen,
+&Achievement_Field_Ar,
 };
 const ObjectType Achievement_Type(sizeof(AchievementDesc)/sizeof(IField*),AchievementDesc);
 
 const ObjectField Student_Field_ChineseAchievement(4,"Student.ChineseAchievement",sizeof(AchievementDesc)/sizeof(IField*),AchievementDesc,offsetof(Student,ChineseAchievement));
-const Int32Field Student_Field_A(1,"Student.A",offsetof(Student,A), false);
-const Int32Field Student_Field_B(2,"Student.B",offsetof(Student,B), false);
-const Int32Field Student_Field_C(3,"Student.C",offsetof(Student,C), false);
 const IField* StudentDesc []=
 {
 &Student_Field_ChineseAchievement,
-&Student_Field_A,
-&Student_Field_B,
-&Student_Field_C,
 };
 const ObjectType Student_Type(sizeof(StudentDesc)/sizeof(IField*),StudentDesc);
 

@@ -7,19 +7,17 @@
 
 typedef struct _Test
 {
-Byte Value2;
+Byte IntPtrsLen;
+Int32* IntPtr;
 }Test;
 typedef struct _Achievement
 {
-Byte Value;
-Test test;
+Byte Arlen;
+Test* Ar;
 }Achievement;
 typedef struct _Student
 {
 Achievement ChineseAchievement;
-Int32 A;
-Int32 B;
-Int32 C;
 }Student;
 
 #endif

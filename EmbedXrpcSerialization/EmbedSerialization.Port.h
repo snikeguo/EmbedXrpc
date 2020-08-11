@@ -29,12 +29,15 @@ typedef bool Boolean;
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-#define MALLOC	malloc
-#define FREE	free
+
+#define MALLOC	MyMalloc
+#define FREE	MyFree
 #define MEMCPY	memcpy
-#define Debug  
+#define Debug  printf
 #define EmbedSerializationAssert assert
 #endif
 
+extern void *MyMalloc(size_t t);
+extern void MyFree(void* ptr);
 
 #endif // EmbedSerialization_Port_H

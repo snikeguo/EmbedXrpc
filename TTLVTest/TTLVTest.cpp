@@ -6,14 +6,44 @@
 
 
 unsigned char sendBuf[1024];
+Student s, v;
+void *MyMalloc(size_t size)
+{
+    void* ptr = malloc(size);
+    printf("malloc :0x%x\n", ptr);
+    return ptr;
+}
+void MyFree(void* ptr)
+{
+    printf("free :0x%x\n", ptr);
+    free(ptr);
+}
 int main()
 {
-    Student s,v;
-    s.A = 1;
-    s.B = 2;
-    s.C = 3;
-    s.ChineseAchievement.Value = 101;
-    s.ChineseAchievement.test.Value2 = 116;
+   
+    s.ChineseAchievement.Arlen = 3;
+
+    s.ChineseAchievement.Ar = (Test*)malloc(sizeof(Test)*2);
+    s.ChineseAchievement.Ar[0].IntPtrsLen = 10;
+    s.ChineseAchievement.Ar[0].IntPtr =(int *) malloc(sizeof(int)*10);
+    for (size_t i = 0; i < 10; i++)
+    {
+        s.ChineseAchievement.Ar[0].IntPtr[i] = 0x1A2B3C4D;
+    }
+
+    s.ChineseAchievement.Ar[1].IntPtrsLen = 7;
+    s.ChineseAchievement.Ar[1].IntPtr = (int*)malloc(sizeof(int)*7);
+    for (size_t i = 0; i < 7; i++)
+    {
+        s.ChineseAchievement.Ar[1].IntPtr[i] = 0x5A5A5A5A;
+    }
+
+    s.ChineseAchievement.Ar[2].IntPtrsLen = 7;
+    s.ChineseAchievement.Ar[2].IntPtr = (int*)malloc(sizeof(int) * 7);
+    for (size_t i = 0; i < 7; i++)
+    {
+        s.ChineseAchievement.Ar[2].IntPtr[i] = 0xBCBCBCBC;
+    }
     SerializationManager Sm;
     
 
@@ -34,7 +64,8 @@ int main()
 
     Sm.BufferLen = Sm.Index;
     Sm.Reset();
-    Sm.Deserialize(&Student_Type, &v, Sm.BufferLen);
+    Sm.Deserialize(&Student_Type, &v,0);
+    Sm.Free(&Student_Type, &v);
     getchar();
 }
 

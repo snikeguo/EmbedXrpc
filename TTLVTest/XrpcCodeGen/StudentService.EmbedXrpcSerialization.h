@@ -15,20 +15,18 @@
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
-extern const UInt8Field Test_Field_Value2;
-extern const IField* TestDesc [1];
+extern const UInt8Field Test_Field_IntPtrsLen;
+extern const ArrayField Test_Field_IntPtr;
+extern const IField* TestDesc [2];
 extern const ObjectType Test_Type;
 
-extern const UInt8Field Achievement_Field_Value;
-extern const ObjectField Achievement_Field_test;
+extern const UInt8Field Achievement_Field_Arlen;
+extern const ArrayField Achievement_Field_Ar;
 extern const IField* AchievementDesc [2];
 extern const ObjectType Achievement_Type;
 
 extern const ObjectField Student_Field_ChineseAchievement;
-extern const Int32Field Student_Field_A;
-extern const Int32Field Student_Field_B;
-extern const Int32Field Student_Field_C;
-extern const IField* StudentDesc [4];
+extern const IField* StudentDesc [1];
 extern const ObjectType Student_Type;
 
 

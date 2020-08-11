@@ -374,10 +374,18 @@ namespace EmbedXrpcIdlParser
                                 }
                                 targetField.FieldNumberAttr = FieldNumberAttr;
                                 targetStruct.TargetFields.Add(targetField);
+                                if(targetField.IsArray==true)
+                                {
+                                    var lenfield = GetArrayLenField(targetStruct.TargetFields, targetField);
+                                    if(lenfield!=null)
+                                    {
+                                        lenfield.IsArrayLenField = true;
+                                    }
+                                }
                             }
                         }
                         else
-                        {
+                        {//bit
                             foreach (var field in fields)
                             {
                                 //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
@@ -386,7 +394,7 @@ namespace EmbedXrpcIdlParser
                                 targetField.Name = field.Name;
                                 targetField.BitsFieldLengthAttribute = field.GetCustomAttribute<BitsFieldLengthAttribute>();
                                 targetField.IsBaseValueType = true;
-                                targetStruct.TargetFields.Add(targetField);
+                                targetStruct.TargetFields.Add(targetField);  
                             }
                         }
                         
@@ -443,6 +451,14 @@ namespace EmbedXrpcIdlParser
                                 field.Enum = GetTargetEnum(field.SourceCodeType, fileIdlInfo);
                             }
                             targetService.TargetFields.Add(field);
+                            if (field.IsArray == true)
+                            {
+                                var lenfield = GetArrayLenField(targetService.TargetFields, field);
+                                if (lenfield != null)
+                                {
+                                    lenfield.IsArrayLenField = true;
+                                }
+                            }
                         }
                         targetInterface.Services.Add(targetService);
                     }
@@ -490,6 +506,14 @@ namespace EmbedXrpcIdlParser
                             field.Enum = GetTargetEnum(field.SourceCodeType, fileIdlInfo);
                         }
                         targetDelegate.TargetFields.Add(field);
+                        if (field.IsArray == true)
+                        {
+                            var lenfield = GetArrayLenField(targetDelegate.TargetFields, field);
+                            if (lenfield != null)
+                            {
+                                lenfield.IsArrayLenField = true;
+                            }
+                        }
                     }
                     fileIdlInfo.TargetDelegates.Add(targetDelegate);
                     //Console.WriteLine(targetDelegate.ToString());

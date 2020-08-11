@@ -16,9 +16,11 @@ namespace EmbedXrpcIdlParser
         public string StructName { get; set; }
         public int FieldNumber { get; set; }
 
+        public bool IsArrayLenField { get; set; }
+
         public string ToCode()
         {
-           return $"const {EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",offsetof({StructName},{Name}));\n";
+           return $"const {EmbedXrpcSerializationHelper.FieldReplaceDic[Type]} {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",offsetof({StructName},{Name}),{IsArrayLenField.ToString().ToLower()});\n";
         }
         public string ToExtern()
         {
@@ -150,6 +152,7 @@ namespace EmbedXrpcIdlParser
                         baseValueField.StructName = name;
                         baseValueField.Name = $"{field.Name}";
                         baseValueField.FieldNumber = field.FieldNumberAttr.Number;
+                        baseValueField.IsArrayLenField = field.IsArrayLenField;
                         cfilestringBuilder.Append(baseValueField.ToCode());
                         hfilestringBuilder.Append(baseValueField.ToExtern());
                     }
@@ -173,6 +176,7 @@ namespace EmbedXrpcIdlParser
                             baseValueField.Name = $"{field.Name}";
                             baseValueField.StructName = name;
                             baseValueField.FieldNumber = field.FieldNumberAttr.Number;
+                            baseValueField.IsArrayLenField = field.IsArrayLenField;
                             cfilestringBuilder.Append(baseValueField.ToCode());
                             hfilestringBuilder.Append(baseValueField.ToExtern());
                         }
