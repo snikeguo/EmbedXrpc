@@ -848,21 +848,19 @@ private:
 				arrayType = (ArrayType*)(arrayfield->GetTypeInstance());
 				Debug("Deserialize:%s\n", objectType->SubFields[i]->GetName());
 
-				if (arrayfield != nullptr)
+				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
+				if (arrayLenField != nullptr)//如果len字段不为null 就把len数据赋给len字段
 				{
-					IField*  arrayLenField = (IField*)arrayfield->GetArrayLenField();
-					if (arrayLenField != nullptr)//如果len字段不为null 就把len数据赋给len字段
-					{
-						uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + arrayLenField->GetOffset());
-						MEMCPY(&arraylen, arrayLenAddr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
-					}
-					if (arrayfield->IsFixed() == false)
-					{
-						Debug("malloc:arrayfield:%s,", arrayfield->GetName());
-						ptr = MALLOC(arraylen * arrayType->LengthOfSingleElement);
-						MEMCPY((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
-					}
+					uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + arrayLenField->GetOffset());
+					MEMCPY(&arraylen, arrayLenAddr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
 				}
+				if (arrayfield->IsFixed() == false)
+				{
+					Debug("malloc:arrayfield:%s,", arrayfield->GetName());
+					ptr = MALLOC(arraylen * arrayType->LengthOfSingleElement);
+					MEMCPY((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
+				}
+
 				Type_t aet = arrayType->ElementType->GetType();
 				if (aet<=TYPE_DOUBLE)//base value type
 				{
