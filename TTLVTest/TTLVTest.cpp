@@ -21,6 +21,16 @@ void MyFree(void* ptr)
 int main()
 {
    
+    SerializationManager TestEncodeSm;
+    TestEncodeSm.Buf = sendBuf;
+    TestEncodeSm.BufferLen = 1024;
+    TestEncodeSm.Reset();
+    TestEncodeSm.SerializeKey(0x123456, TYPE_INT8);
+    TestEncodeSm.Reset();
+    uint32_t fn = 0;
+    Type_t tp = TYPE_UINT8;
+    TestEncodeSm.GetKeyFromSerializationManager(&fn, &tp);
+    return 0;
     s.ChineseAchievement.Arlen = 3;
 
     s.ChineseAchievement.Ar = (Test*)malloc(sizeof(Test)*2);

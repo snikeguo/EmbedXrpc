@@ -306,11 +306,42 @@ public:
 	uint32_t BufferLen = 0;
 	BlockRingBufferProvider* BlockBufferProvider;
 
+	/*
+		第一个字节：FieldNumber<<4|Field;如果FieldNumber超出了16,则最高位为1,下一字节也是FieldNumber
+		第二字节：继续FieldNumber.....
+		...
+	*/
 	void SerializeKey(uint32_t  FieldNumber, Type_t   Field)
 	{
-		Buf[Index++] = FieldNumber;
+		/*Buf[Index++] = FieldNumber;
 		Buf[Index++] = Field;
-		printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);
+		printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
+
+		uint32_t shiftfn = 0;
+		uint32_t next_shiftfn = 0;
+		if ((FieldNumber >> 3) != 0)
+		{
+			Buf[Index++] =(uint8_t)(0x80 | (FieldNumber<<4) | Field);
+		}
+		else
+		{
+			Buf[Index++] = (uint8_t)((FieldNumber <<4) | Field);
+		}
+		shiftfn = FieldNumber >> 3;
+		while(shiftfn!=0)
+		{
+			next_shiftfn= shiftfn >> 7;
+			if (next_shiftfn == 0)
+			{
+				Buf[Index++] = shiftfn & 0x7f;
+				break;
+			}
+			else
+			{
+				Buf[Index++] = shiftfn | 0x80;
+			}
+			shiftfn = shiftfn >> 7;
+		} 
 	}
 	void SerializeLen(uint64_t  Len)
 	{
@@ -381,22 +412,49 @@ public:
 	}
 	uint32_t GetKeyFromSerializationManager(uint32_t* fn, Type_t* type)
 	{
-		if (fn != nullptr)
+		/*if (fn != nullptr)
 		{
 			*fn = Buf[Index];
 		}
 		if (type != nullptr)
 		{
 			*type = (Type_t)Buf[Index + 1];
+		}*/
+		uint32_t f=0;
+		uint8_t used = 0;
+		uint8_t temp = 0;
+		if (type != nullptr)
+		{
+			*type = (Type_t)(Buf[Index] & 0x0F);
+			EmbedSerializationAssert(*type <= TYPE_OBJECT);
 		}
-		return 2;
+		temp = (Buf[Index] >> 4) & 0x07;//先把最低三位保存起来
+		used++;
+		if (((Buf[Index] >> 4) & 0x07) != 0)
+		{
+			do
+			{
+				f = ((Buf[Index + used] & 0x7f) << (used -1) * 7) | f;
+				if ((Buf[Index + used] & 0x80) == 0)
+				{
+					break;
+				}
+				used++;
+			} while (true);
+		}
+		f = f << 3 | temp;
+		if (fn != nullptr)
+		{
+			*fn = f;
+		}
+		return used;
 	}
 	void RemoveKeyFromSerializationManager()
 	{
 		uint32_t ind = GetKeyFromSerializationManager(nullptr, nullptr);
 		Index += ind;
 	}
-	uint32_t GetArrayLenFromSerializationManager(uint32_t* arrayLen)
+	uint32_t GetArrayLenFromSerializationManager(uint64_t* arrayLen)
 	{
 		if (arrayLen != nullptr)
 		{
@@ -545,9 +603,9 @@ private:
 			}
 			else if (tp == TYPE_ARRAY)
 			{
-				uint32_t arraylen = 0;
+				uint64_t arraylen = 0;
 				
-				GetArrayLenFromSerializationManager(&arraylen);
+				uint32_t sizeOfArrayLenInStream=GetArrayLenFromSerializationManager(&arraylen);
 				RemoveArrayLenFromSerializationManager();
 
 				uint8_t baseValueTypeFlag = GetArrayElementFlag();
@@ -582,7 +640,7 @@ private:
 					if (arrayLenField != nullptr)//如果len字段不为null 就把len数据赋给len字段
 					{
 						uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + arrayLenField->GetOffset());
-						*arrayLenAddr = arraylen;
+						MEMCPY(arrayLenAddr, &arraylen, sizeOfArrayLenInStream);
 					}
 					if (arrayfield->IsFixed() == false)
 					{
@@ -596,7 +654,6 @@ private:
 				{
 					Type_t aet = (Type_t)(baseValueTypeFlag >> 4 & 0x0F);
 					EmbedSerializationAssert(aet <= TYPE_DOUBLE);
-					const IType* Instance = BaseValueInfos[aet].TypeInstance;
 					for (uint32_t j = 0; j < arraylen; j++)
 					{
 						if (ptr != nullptr)
