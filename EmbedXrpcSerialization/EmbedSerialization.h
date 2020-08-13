@@ -345,8 +345,22 @@ public:
 	}
 	void SerializeLen(uint64_t  Len)
 	{
-		Buf[Index++] = Len;
-		printf("SerializeLen:%lld\n", Len);
+		uint64_t next_shiftlen = 0;		
+		do
+		{
+			next_shiftlen = Len >> 7;
+			if (next_shiftlen == 0)
+			{
+				Buf[Index++] = Len & 0x7f;
+				break;
+			}
+			else
+			{
+				Buf[Index++] = Len | 0x80;
+			}
+			
+			Len = Len >> 7;
+		}while (true);
 	}
 	void SerializeEndFlag()
 	{
@@ -430,16 +444,20 @@ public:
 		}
 		temp = (Buf[Index] >> 4) & 0x07;//先把最低三位保存起来
 		used++;
-		if (((Buf[Index] >> 4) & 0x07) != 0)
+		if ((Buf[Index] & 0x80) != 0)
 		{
 			do
 			{
 				f = ((Buf[Index + used] & 0x7f) << (used -1) * 7) | f;
 				if ((Buf[Index + used] & 0x80) == 0)
 				{
+					used++;
 					break;
 				}
-				used++;
+				else
+				{
+					used++;
+				}
 			} while (true);
 		}
 		f = f << 3 | temp;
@@ -456,11 +474,26 @@ public:
 	}
 	uint32_t GetArrayLenFromSerializationManager(uint64_t* arrayLen)
 	{
+		uint8_t used = 0;
+		uint64_t al = 0;
+		do
+		{
+			al = ((uint64_t)(Buf[Index + used] & 0x7f) << (used * 7)) | al;
+			if ((Buf[Index + used] & 0x80) == 0)
+			{
+				used++;
+				break;
+			}
+			else
+			{
+				used++;
+			}
+		} while (true);
 		if (arrayLen != nullptr)
 		{
-			*arrayLen = Buf[Index];
+			*arrayLen = al;
 		}
-		return 1;
+		return used;
 	}
 	void RemoveArrayLenFromSerializationManager()
 	{

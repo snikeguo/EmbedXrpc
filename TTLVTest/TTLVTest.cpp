@@ -21,16 +21,20 @@ void MyFree(void* ptr)
 int main()
 {
    
-    SerializationManager TestEncodeSm;
+    /*SerializationManager TestEncodeSm;
     TestEncodeSm.Buf = sendBuf;
     TestEncodeSm.BufferLen = 1024;
     TestEncodeSm.Reset();
-    TestEncodeSm.SerializeKey(0x123456, TYPE_INT8);
+    TestEncodeSm.SerializeKey(0x12345678, TYPE_INT8);
+    TestEncodeSm.SerializeLen(0x12345678);
     TestEncodeSm.Reset();
     uint32_t fn = 0;
     Type_t tp = TYPE_UINT8;
     TestEncodeSm.GetKeyFromSerializationManager(&fn, &tp);
-    return 0;
+    TestEncodeSm.RemoveKeyFromSerializationManager();
+    uint64_t len = 0;
+    TestEncodeSm.GetArrayLenFromSerializationManager(&len);
+    return 0;*/
     s.ChineseAchievement.Arlen = 3;
 
     s.ChineseAchievement.Ar = (Test*)malloc(sizeof(Test)*2);
