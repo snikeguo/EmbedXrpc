@@ -304,8 +304,8 @@ public:
 	uint32_t Index = 0;
 	uint8_t* Buf = nullptr;
 	uint32_t BufferLen = 0;
-	BlockRingBufferProvider* BlockBufferProvider;
-
+	BlockRingBufferProvider* BlockBufferProvider=nullptr;
+	bool IsEnableMataData = false;
 	/*
 		第一个字节：FieldNumber<<4|Field;如果FieldNumber超出了16,则最高位为1,下一字节也是FieldNumber
 		第二字节：继续FieldNumber.....
@@ -316,7 +316,6 @@ public:
 		/*Buf[Index++] = FieldNumber;
 		Buf[Index++] = Field;
 		printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
-
 		uint32_t shiftfn = 0;
 		uint32_t next_shiftfn = 0;
 		if ((FieldNumber >> 3) != 0)
@@ -426,14 +425,6 @@ public:
 	}
 	uint32_t GetKeyFromSerializationManager(uint32_t* fn, Type_t* type)
 	{
-		/*if (fn != nullptr)
-		{
-			*fn = Buf[Index];
-		}
-		if (type != nullptr)
-		{
-			*type = (Type_t)Buf[Index + 1];
-		}*/
 		uint32_t f=0;
 		uint8_t used = 0;
 		uint8_t temp = 0;
@@ -513,10 +504,17 @@ public:
 		Index++;
 	}
 public:
-	void Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber)
+	void Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber=0)
 	{
-		SerializeKey(fieldNumber, TYPE_OBJECT);
-		SerializeSubField(objectType, objectData);
+		if (IsEnableMataData == true)
+		{
+			SerializeKey(fieldNumber, TYPE_OBJECT);
+			SerializeSubField(objectType, objectData);
+		}
+		else
+		{
+			NoMataData_SerializeSubField(objectType, objectData);
+		}
 	}
 private:
 	void SerializeSubField(const ObjectType* objectType, void* objectData)
@@ -591,18 +589,97 @@ private:
 		}
 		SerializeEndFlag();
 	}
+	void NoMataData_SerializeSubField(const ObjectType* objectType, void* objectData)
+	{
+		for (uint32_t i = 0; i < objectType->FieldCount; i++)
+		{
+			void* fieldData = (void*)((uint8_t*)objectData + objectType->SubFields[i]->GetOffset());
+			Debug("Serialize:%s\n", objectType->SubFields[i]->GetName());
+			Type_t typeOfSubField = objectType->SubFields[i]->GetTypeInstance()->GetType();
+			if (typeOfSubField <= TYPE_DOUBLE)
+			{
+				//SerializeKey(objectType->SubFields[i]->GetFieldNumber(), typeOfSubField);
+				SerializeValue(BaseValueInfos[typeOfSubField].DataWidth, fieldData);
+			}
+			else if (typeOfSubField == TYPE_ARRAY)
+			{
+				ArrayField* arrayfield = (ArrayField*)objectType->SubFields[i];
+				ArrayType* arrayType = (ArrayType*)(arrayfield->GetTypeInstance());
+				IType* arrayElementType = (IType*)(arrayType->ElementType);
+
+				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
+				//EmbedSerializationAssert(arrayLenField->GetTypeInstance()->GetType() <= TYPE_INT64);
+				uint8_t sizeOfLenField = 0; //like:1,2,4,8
+
+				//SerializeKey(objectType->SubFields[i]->GetFieldNumber(), TYPE_ARRAY);
+
+				uint64_t len = 1;
+
+				if (arrayLenField != nullptr)
+				{
+					sizeOfLenField = BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth; //like:1,2,4,8
+					void* voidLenPtr = (void*)((uint8_t*)objectData + arrayLenField->GetOffset());
+					MEMCPY(&len, voidLenPtr, sizeOfLenField);
+				}
+
+				uint8_t* ptr = (uint8_t*)fieldData;
+				if (arrayfield->IsFixed() == false)
+				{
+					ptr = (*(uint8_t**)fieldData);
+				}
+				//SerializeLen(len);
+
+				uint8_t baseValueTypeFlag = 0;
+				if (arrayElementType->GetType() <= TYPE_DOUBLE)
+				{
+					baseValueTypeFlag = (arrayElementType->GetType() << 4) | 0x01;
+					//SerializeArrayElementFlag(baseValueTypeFlag);
+					for (uint32_t j = 0; j < len; j++)
+					{
+						SerializeValue(BaseValueInfos[arrayElementType->GetType()].DataWidth,
+							ptr + j * BaseValueInfos[arrayElementType->GetType()].DataWidth);
+					}
+				}
+				else
+				{
+					baseValueTypeFlag = 0x02;
+					//SerializeArrayElementFlag(baseValueTypeFlag);
+					ObjectType* ot = (ObjectType*)arrayElementType;
+
+					for (uint32_t j = 0; j < len; j++)
+					{
+						NoMataData_SerializeSubField(ot, ptr + j * (arrayType->LengthOfSingleElement));
+					}
+				}
+			}
+			else if (typeOfSubField == TYPE_OBJECT)
+			{
+				ObjectField* of = (ObjectField*)objectType->SubFields[i];
+				ObjectType* ot = (ObjectType*)(of->GetTypeInstance());
+				Serialize(ot, fieldData, of->GetFieldNumber());
+			}
+		}
+		//SerializeEndFlag();
+	}
 public:
 	bool Deserialize(const ObjectType* objectType, void* objectPoint,uint32_t fieldNumber=0)
 	{
-		uint32_t fn = 0;//Pop一次KEY 因为打包的时候是按照field打包的，所以这里要把KEY 要POP出来一次
-		Type_t tp = TYPE_UINT8;
-		GetKeyFromSerializationManager(&fn, &tp);
-		RemoveKeyFromSerializationManager();
-		EmbedSerializationAssert(tp == TYPE_OBJECT);
-		EmbedSerializationAssert(fieldNumber == fn);
-		if (fn == 0 && tp == TYPE_OBJECT)
+		if (IsEnableMataData == true)
 		{
-			return DeserializeSubField(objectType, objectPoint);//如果fieldNumber 为0 说明这是第一次进来,也就是最顶级的结构体，最顶级的结构体执行完毕后,就要退出
+			uint32_t fn = 0;//Pop一次KEY 因为打包的时候是按照field打包的，所以这里要把KEY 要POP出来一次
+			Type_t tp = TYPE_UINT8;
+			GetKeyFromSerializationManager(&fn, &tp);
+			RemoveKeyFromSerializationManager();
+			EmbedSerializationAssert(tp == TYPE_OBJECT);
+			EmbedSerializationAssert(fieldNumber == fn);
+			if (fn == 0 && tp == TYPE_OBJECT)
+			{
+				return DeserializeSubField(objectType, objectPoint);//如果fieldNumber 为0 说明这是第一次进来,也就是最顶级的结构体，最顶级的结构体执行完毕后,就要退出
+			}
+		}
+		else
+		{
+			return NoMataData_DeserializeSubField(objectType, objectPoint);
 		}
 		return false;
 	}
@@ -618,7 +695,7 @@ private:
 			RemoveKeyFromSerializationManager();
 			if (tp <= TYPE_DOUBLE)
 			{
-				const IType* typeInstance = BaseValueInfos[tp].TypeInstance;//获取到对应的TP
+				//const IType* typeInstance = BaseValueInfos[tp].TypeInstance;//获取到对应的TP
 				void* d = nullptr;
 				if (objectType != nullptr)
 				{
@@ -745,6 +822,94 @@ private:
 		}
 		RemoveEndFlagFromSerializationManager();
 		return true;
+	}
+	bool NoMataData_DeserializeSubField(const ObjectType* objectType, void* objectPoint)
+	{
+		void* d = nullptr;
+		Type_t tp = TYPE_UINT8;
+		for (uint32_t i = 0; i < objectType->FieldCount; i++)
+		{
+			tp = objectType->SubFields[i]->GetTypeInstance()->GetType();
+			d = (void*)((uint8_t*)objectPoint + objectType->SubFields[i]->GetOffset());
+			if (tp <= TYPE_DOUBLE)
+			{
+				Debug("Deserialize:%s\n", objectType->SubFields[i]->GetName());
+				FuntionReturn(Pop((uint8_t*)d, BaseValueInfos[tp].DataWidth));
+			}
+			else if (tp == TYPE_ARRAY)
+			{
+				ArrayField* arrayfield = nullptr;
+				ArrayType* arrayType = nullptr;
+				void* ptr = d;
+				uint64_t arraylen = 1;
+
+				ptr = d;
+				arrayfield = (ArrayField*)objectType->SubFields[i];
+				arrayType = (ArrayType*)(arrayfield->GetTypeInstance());
+				Debug("Deserialize:%s\n", objectType->SubFields[i]->GetName());
+
+				if (arrayfield != nullptr)
+				{
+					IField*  arrayLenField = (IField*)arrayfield->GetArrayLenField();
+					if (arrayLenField != nullptr)//如果len字段不为null 就把len数据赋给len字段
+					{
+						uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + arrayLenField->GetOffset());
+						MEMCPY(&arraylen, arrayLenAddr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
+					}
+					if (arrayfield->IsFixed() == false)
+					{
+						Debug("malloc:arrayfield:%s,", arrayfield->GetName());
+						ptr = MALLOC(arraylen * arrayType->LengthOfSingleElement);
+						MEMCPY((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
+					}
+				}
+				Type_t aet = arrayType->ElementType->GetType();
+				if (aet<=TYPE_DOUBLE)//base value type
+				{
+					for (uint32_t j = 0; j < arraylen; j++)
+					{
+						if (ptr != nullptr)
+						{
+							FuntionReturn(Pop((uint8_t*)ptr + j * BaseValueInfos[aet].DataWidth, BaseValueInfos[aet].DataWidth));
+						}
+						else
+						{
+							FuntionReturn(Pop(nullptr, BaseValueInfos[aet].DataWidth));
+						}
+					}
+				}
+				else
+				{
+
+					ObjectType* ot = nullptr;// (ObjectType*)(arrayType->ArrayElementType);
+					if (arrayType != nullptr)
+					{
+						ot = (ObjectType*)(arrayType->ElementType);
+					}
+					for (uint32_t j = 0; j < arraylen; j++)
+					{
+						//这里没有结构体的tag 所以调用的是DeserializeSubField
+						if (ptr != nullptr)
+						{
+							FuntionReturn(NoMataData_DeserializeSubField(ot, (uint8_t*)ptr + j * arrayType->LengthOfSingleElement));
+						}
+						else
+						{
+							FuntionReturn(NoMataData_DeserializeSubField(ot, nullptr));
+						}
+					}
+				}
+
+			}
+			else if (tp == TYPE_OBJECT)
+			{
+				ObjectField* subObjectField = nullptr;
+				ObjectType* subObjectType = nullptr;
+				subObjectField = (ObjectField*)objectType->SubFields[i];
+				subObjectType = (ObjectType*)subObjectField->GetTypeInstance();
+				FuntionReturn(NoMataData_DeserializeSubField(subObjectType, d));
+			}
+		}
 	}
 public:
 	void Free(const ObjectType* objectType, void* objectData)

@@ -129,7 +129,7 @@ namespace EmbedXrpcIdlParser
         TYPE_OBJECT,  /*object*/
     };
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
-    public class FieldNumberAttribute : Attribute
+    public sealed class FieldNumberAttribute : Attribute
     { 
         public FieldNumberAttribute(int number)
         {
