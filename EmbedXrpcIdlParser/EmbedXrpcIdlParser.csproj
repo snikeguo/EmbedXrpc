@@ -72,7 +72,6 @@
     <Compile Include="CppCodeGenerater.cs" />
     <Compile Include="CsCodeGenerater.cs" />
     <Compile Include="EmbedXrpcSerializationExtension.cs" />
-    <Compile Include="FbsExtension.cs" />
     <Compile Include="ICodeGenerater.cs" />
     <None Include="idltest1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

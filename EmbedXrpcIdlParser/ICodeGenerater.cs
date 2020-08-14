@@ -59,7 +59,7 @@ namespace EmbedXrpcIdlParser
         }
         
     }
-    [Serializable]
+    /*[Serializable]
     public class TargetReturnValue
     {
         public FieldNumberAttribute FieldNumberAttr { get; set; } = new FieldNumberAttribute(1);//先state 后返回字段
@@ -71,7 +71,7 @@ namespace EmbedXrpcIdlParser
             sb.Append("\n");
             return sb.ToString();
         }
-    }
+    }*/
     [Serializable]
     public class TargetEnumValue
     {
@@ -123,7 +123,7 @@ namespace EmbedXrpcIdlParser
     [Serializable]
     public class TargetService
     {
-        public TargetReturnValue ReturnValue { get; set; }
+        public TargetField ReturnValue { get; set; }
         public string ServiceName { get; set; }
 
         public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
@@ -419,7 +419,7 @@ namespace EmbedXrpcIdlParser
                         Type rt = mt.ReturnType;
                         if (rt.Name != "Void")
                         {
-                            TargetReturnValue returnValue = new TargetReturnValue();
+                            TargetField returnValue = new TargetField();
                             returnValue.SourceCodeType = mt.ReturnType.Name;
                             if (mt.ReturnType.IsArray == true)
                             {
@@ -432,6 +432,7 @@ namespace EmbedXrpcIdlParser
 
                         targetService.ServiceName = mt.Name;
                         var pars = mt.GetParameters();
+                        UInt32 fieldNumber = 1;
                         foreach (var par in pars)
                         {
                             TargetField field = new TargetField();
@@ -450,6 +451,8 @@ namespace EmbedXrpcIdlParser
                             {
                                 field.Enum = GetTargetEnum(field.SourceCodeType, fileIdlInfo);
                             }
+                            field.FieldNumberAttr = new FieldNumberAttribute(fieldNumber);
+                            fieldNumber++;
                             targetService.TargetFields.Add(field);
                             if (field.IsArray == true)
                             {
@@ -487,6 +490,7 @@ namespace EmbedXrpcIdlParser
                     ServiceId++;
                     targetDelegate.MethodName = type.Name;
                     var pars = invokemi.GetParameters();
+                    UInt32 fieldNumber = 1;
                     foreach (var par in pars)
                     {
                         TargetField field = new TargetField();
@@ -505,6 +509,8 @@ namespace EmbedXrpcIdlParser
                         {
                             field.Enum = GetTargetEnum(field.SourceCodeType, fileIdlInfo);
                         }
+                        field.FieldNumberAttr = new FieldNumberAttribute(fieldNumber);
+                        fieldNumber++;
                         targetDelegate.TargetFields.Add(field);
                         if (field.IsArray == true)
                         {

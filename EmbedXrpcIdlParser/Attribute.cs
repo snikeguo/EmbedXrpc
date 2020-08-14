@@ -131,13 +131,13 @@ namespace EmbedXrpcIdlParser
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
     public sealed class FieldNumberAttribute : Attribute
     { 
-        public FieldNumberAttribute(int number)
+        public FieldNumberAttribute(UInt32 number)
         {
             Number = number;
         }
 
         // This is a named argument
-        public int Number { get; set; }
+        public UInt32 Number { get; set; }
     }
 
 

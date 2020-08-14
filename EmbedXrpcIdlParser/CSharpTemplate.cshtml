@@ -24,7 +24,7 @@
     var ens = idlInfo.TargetEnums;
     foreach (var enu in ens)
     {
-        <h1 public enum @enu.Name :@enu.IntType />
+        <h1 public enum @enu.Name :@enu.SourceCodeType />
         <h1 { />
         foreach (var ev in enu.TargetEnumValues)
         {
@@ -61,6 +61,7 @@
                 {
                     lenv = 1;
                 }
+                <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
                 <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeElementType  } [ @lenv ]; />
             }
             else
@@ -71,11 +72,13 @@
                 }
                 if (field.IsBaseValueType == true && field.BitsType == BitsType.NoBits)
                 {
-
+                    <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
+                    <h1 [ArrayLenFieldFlag( @(field.IsArrayLenField.ToString().ToString().ToLower()) ) ] />
                     <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
                 }
                 else
                 {
+                    <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
                     <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeType  } (); />
                 }
             }
@@ -107,16 +110,20 @@
                 {
                     lenv = 1;
                 }
+                <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
                 <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeElementType  } [ @lenv ]; />
             }
             else
             {
                 if (field.IsBaseValueType == true)
                 {
+                    <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
+                    <h1 [ArrayLenFieldFlag( @(field.IsArrayLenField.ToString().ToString().ToLower()) ) ] />
                     <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
                 }
                 else
                 {
+                    <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
                     <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeType  } (); />
                 }
             }
@@ -237,16 +244,20 @@
                     {
                         lenv = 1;
                     }
+                    <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
                     <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeElementType  } [ @lenv ]; />
                 }
                 else
                 {
                     if (field.IsBaseValueType == true)
                     {
+                        <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
+                        <h1 [ArrayLenFieldFlag( @(field.IsArrayLenField.ToString().ToString().ToLower()) ) ] />
                         <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
                     }
                     else
                     {
+                        <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
                         <h1 public @field.SourceCodeType @(field.Name + "{get;set;}")=new @{ @field.SourceCodeType  } (); />
                     }
                 }
@@ -274,6 +285,7 @@
 
                     <h1 @v />
                 }
+                <h1 [FieldNumber( @field.FieldNumberAttr.Number ) ] />
                 <h1 public @field.SourceCodeType @(field.Name + "{get;set;}") />
             }
             <h1 } />
@@ -398,7 +410,7 @@
                     <h1 { />
                     <h1 reqresp=new @(interf.Name + "_" + service.ServiceName + "_RequestResponseContent()") ; />
                     <h1 } />
-                    <h1 reqresp.State=waitstate;/>
+                    <h1 reqresp.State=waitstate; />
                     <h1 goto exi; />
                 }
                 <h1 } />

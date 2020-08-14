@@ -7,17 +7,17 @@
 
 typedef struct _Test
 {
-Byte IntPtrsLen;
-Int32* IntPtr;
+Byte IntPtrsLen;   //FieldNumber:10
+Int32* IntPtr;   //FieldNumber:11
 }Test;
 typedef struct _Achievement
 {
-Byte Arlen;
-Test* Ar;
+Byte Arlen;   //FieldNumber:10
+Test* Ar;   //FieldNumber:8
 }Achievement;
 typedef struct _Student
 {
-Achievement ChineseAchievement;
+Achievement ChineseAchievement;   //FieldNumber:4
 }Student;
 
 #endif

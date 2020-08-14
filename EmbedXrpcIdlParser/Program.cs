@@ -39,7 +39,7 @@ namespace EmbedXrpcIdlParser
             args[8] = @"D:\VSProject\EmbedXrpcIdlParser\EmbedXrpc.CSharp.Test\";
 #endif
 #endif
-            //try
+            try
             {
                 /*var exitCode = Parser.Default.ParseArguments<CommandCppGenerater>(args)
                     .WithParsed(CommandCppGenerater.Parsed)
@@ -49,10 +49,10 @@ namespace EmbedXrpcIdlParser
                     .WithParsed(CommandGenerater.Parsed)
                     .WithNotParsed(CommandGenerater.NotParsed);
             }
-            //catch (Exception e)
+            catch (Exception e)
             {
 
-            //    Console.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
         }
     }

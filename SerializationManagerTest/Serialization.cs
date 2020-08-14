@@ -59,7 +59,7 @@ namespace EmbedXrpc
             data.Clear();
             Index = 0;
         }
-        bool IsEnableMataData { get; set; } = false;
+        public bool IsEnableMataData { get; set; } = false;
         void SerializeKey(UInt32 FieldNumber, Type_t Field)
         {
             /*Buf[Index++] = FieldNumber;
@@ -407,7 +407,7 @@ namespace EmbedXrpc
             }
             else
             {
-                //NoMataData_SerializeSubField(objectType, objectData);
+                NoMataData_SerializeSubField(s);
             }
         }
         void SerializeSubField(object s)
@@ -418,11 +418,12 @@ namespace EmbedXrpc
             {
                 object v = field.GetValue(s);
                 var vt = v.GetType();
-                FieldNumberAttribute fieldNumberAttribute = vt.GetCustomAttribute<FieldNumberAttribute>();
+                FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
+                ArrayLenFieldFlagAttribute IsArrayLenFieldAttribute = field.GetCustomAttribute<ArrayLenFieldFlagAttribute>();
                 if (vt.IsArray == false)
                 {
                     Type_t lost_t = Type_t.TYPE_OBJECT;
-                    if (IsBaseValueType(vt,ref lost_t) == true)
+                    if (IsBaseValueType(vt,ref lost_t) == true && IsArrayLenFieldAttribute.Flag == false)
                     {
                         SerializeKey(fieldNumberAttribute.Number, lost_t);
                         BaseValueSerialize(v);
@@ -474,62 +475,75 @@ namespace EmbedXrpc
                     
                 }
             }
+            SerializeEndFlag();
         }
-#if false
-        public void Serialize2(object s)
+        void NoMataData_SerializeSubField(object s)
         {
             Type st = s.GetType();
-            if (IsBaseValueType(st) == true)
+            var pros = st.GetProperties();
+            foreach (var field in pros)
             {
-                BaseValueSerialize(s);
-            }
-            else
-            {
-                var pros = st.GetProperties();
-                foreach (var field in pros)
+                object v = field.GetValue(s);
+                var vt = v.GetType();
+                FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
+                if (vt.IsArray == false)
                 {
-                    object v = field.GetValue(s);
-                    var vt = v.GetType();
-                    if (vt.IsArray == false)
+                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    if (IsBaseValueType(vt, ref lost_t) == true)
                     {
-                        if (IsBaseValueType(vt) == true)
+                        //SerializeKey(fieldNumberAttribute.Number, lost_t);
+                        BaseValueSerialize(v);
+                    }
+                    else
+                    {
+                        Serialize(v, fieldNumberAttribute.Number);
+                    }
+                }
+                else
+                {
+                    //object[] arrayValue = (object[])v;
+                    object[] arrayValue = ConvertArray(v as Array);
+                    ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
+                    if (att == null)
+                    {
+                        throw new Exception("ArrayPropertyAttribute is null!");
+                    }
+                    var lenfield = from lf in pros
+                                   where lf.Name == att.LenFieldName
+                                   select lf;
+                    Int64 len = 1;
+                    if (lenfield.ToList().Count != 0)
+                    {
+                        len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                    }
+                    //SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
+                    //SerializeLen(len);
+                    var aet = (v as Array).GetType().GetElementType();
+                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    if (IsBaseValueType(aet, ref lost_t) == true)
+                    {
+                        //SerializeArrayElementFlag((byte)((byte)lost_t << 4 | 0x01));
+                        for (Int64 i = 0; i < len; i++)
                         {
-                            BaseValueSerialize(v);
-                        }
-                        else
-                        {
-                            Serialize(sm, v);
+                            var aev = arrayValue[i];
+                            BaseValueSerialize(aev);
                         }
                     }
                     else
                     {
-                        //object[] arrayValue = (object[])v;
-                        object[] arrayValue = ConvertArray(v as Array);
-                        ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
-                        if (att == null)
-                        {
-                            throw new Exception("ArrayPropertyAttribute is null!");
-                        }
-                        var lenfield = from lf in pros
-                                       where lf.Name == att.LenFieldName
-                                       select lf;
-                        Int64 len = 1;
-                        if (lenfield.ToList().Count != 0)
-                        {
-                            len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
-                        }
+                        //SerializeArrayElementFlag(0x02);
                         for (Int64 i = 0; i < len; i++)
                         {
                             var aev = arrayValue[i];
-                            Serialize(sm, aev);
+                            NoMataData_SerializeSubField(aev);
                         }
                     }
 
                 }
             }
-
+            //SerializeEndFlag();
         }
-#endif    
+   
     }
     
 
@@ -569,7 +583,7 @@ namespace EmbedXrpc
             Length = len;
         }
     }
-    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class FieldNumberAttribute : Attribute
     {
         public FieldNumberAttribute(UInt32 number)
@@ -579,6 +593,17 @@ namespace EmbedXrpc
 
         // This is a named argument
         public UInt32 Number { get; set; }
+    }
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public sealed class ArrayLenFieldFlagAttribute : Attribute
+    {
+        public ArrayLenFieldFlagAttribute(bool f)
+        {
+            Flag = f;
+        }
+
+        // This is a named argument
+        public bool Flag { get; set; }
     }
 #if false
     public class Serialization

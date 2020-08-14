@@ -14,7 +14,7 @@ namespace EmbedXrpcIdlParser
         public string Prefix { get; set; } = "Field";
         public string Name { get; set; }
         public string StructName { get; set; }
-        public int FieldNumber { get; set; }
+        public UInt32 FieldNumber { get; set; }
 
         public bool IsArrayLenField { get; set; }
 
@@ -48,7 +48,7 @@ namespace EmbedXrpcIdlParser
         public string Prefix { get; set; } = "Field";
         public string StructName { get; set; }
         public TargetField LenField { get; set; }
-        public int FieldNumber { get; set; }
+        public UInt32 FieldNumber { get; set; }
         public new string ToCode()
         {
             var arrayLenFieldDesc = LenField == null ? "nullptr" : $"&{StructName}_{Prefix}_{LenField.Name}";
@@ -77,7 +77,7 @@ namespace EmbedXrpcIdlParser
     {
         public string Prefix { get; set; } = "Field";
         public string StructName { get; set; }
-        public int FieldNumber { get; set; }
+        public UInt32 FieldNumber { get; set; }
         public new string ToCode()
         {
             return $"const ObjectField {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",{FieldCount},{FieldDesc},offsetof({StructName},{Name}));\n";

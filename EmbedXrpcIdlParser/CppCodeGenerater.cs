@@ -307,7 +307,7 @@ namespace EmbedXrpcIdlParser
                         name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
                     }
 
-                    CommonHsw.WriteLine(cppType + " " + name + ";");
+                    CommonHsw.WriteLine(cppType + " " + name + ";   //FieldNumber:" + field.FieldNumberAttr.Number);
 
                 }
                 CommonHsw.WriteLine("}" + targetStruct.Name + ";");
@@ -522,6 +522,7 @@ namespace EmbedXrpcIdlParser
                 ts.IsArray = false;
                 ts.Enum = new TargetEnum() { SourceCodeType = "byte", Name = "RequestResponseState" };
                 ts.MaxCountAttribute = null;
+                ts.FieldNumberAttr = new FieldNumberAttribute(1);//state 的Field Number为1
                 targetStructResponse.TargetFields.Add(ts);
 
                 if (service.ReturnValue!=null)//添加返回值
@@ -531,6 +532,7 @@ namespace EmbedXrpcIdlParser
                     returnValue.SourceCodeType = service.ReturnValue.SourceCodeType;
                     returnValue.IsArray = false;
                     returnValue.MaxCountAttribute = null;
+                    returnValue.FieldNumberAttr = new FieldNumberAttribute(2);
                     targetStructResponse.TargetFields.Add(returnValue);
                 }
 
