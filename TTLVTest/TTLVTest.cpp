@@ -43,31 +43,16 @@ int main()
     TestEncodeSm.GetArrayLenFromSerializationManager(&len);
     return 0;*/
 
-    Sm.IsEnableMataData = true;
+    Sm.IsEnableMataData = false;
 
-    s.ChineseAchievement.Arlen = 3;
+    s.ChineseAchievement.Arlen = 1;
 
     s.ChineseAchievement.Ar = (Test*)malloc(sizeof(Test)*2);
-    s.ChineseAchievement.Ar[0].IntPtrsLen = 10;
-    s.ChineseAchievement.Ar[0].IntPtr =(int *) malloc(sizeof(int)*10);
-    for (size_t i = 0; i < 10; i++)
-    {
-        s.ChineseAchievement.Ar[0].IntPtr[i] = 0x1A2B3C4D;
-    }
+    s.ChineseAchievement.Ar[0].IntPtrsLen = 2;
+    s.ChineseAchievement.Ar[0].IntPtr =(int *) malloc(sizeof(int)*2);
+    s.ChineseAchievement.Ar[0].IntPtr[0] = 0x3;
+    s.ChineseAchievement.Ar[0].IntPtr[1] = 0x4;
 
-    s.ChineseAchievement.Ar[1].IntPtrsLen = 7;
-    s.ChineseAchievement.Ar[1].IntPtr = (int*)malloc(sizeof(int)*7);
-    for (size_t i = 0; i < 7; i++)
-    {
-        s.ChineseAchievement.Ar[1].IntPtr[i] = 0x5A5A5A5A;
-    }
-
-    s.ChineseAchievement.Ar[2].IntPtrsLen = 7;
-    s.ChineseAchievement.Ar[2].IntPtr = (int*)malloc(sizeof(int) * 7);
-    for (size_t i = 0; i < 7; i++)
-    {
-        s.ChineseAchievement.Ar[2].IntPtr[i] = 0xBCBCBCBC;
-    }
     Sm.Buf = sendBuf;
     Sm.BufferLen = 1024;
     Sm.Reset();
@@ -83,8 +68,8 @@ int main()
         }
     }
     
-    Sm.Buf = TestData;
-    Sm.BufferLen = sizeof(TestData);
+    /*Sm.Buf = TestData;
+    Sm.BufferLen = sizeof(TestData);*/
     Sm.Reset();
     Sm.Deserialize(&Student_Type, &v,0);
     Sm.Free(&Student_Type, &v);

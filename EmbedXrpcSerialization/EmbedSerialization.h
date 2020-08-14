@@ -231,9 +231,9 @@ CodeGenBaseValueClass(Int8, "int8_t", TYPE_INT8, 1);
 CodeGenBaseValueClass(UInt16, "uint16_t", TYPE_UINT16, 2);
 CodeGenBaseValueClass(Int16, "int16_t", TYPE_INT16, 2);
 CodeGenBaseValueClass(UInt32, "uint32_t", TYPE_UINT32, 4);
-CodeGenBaseValueClass(Int32, "int32_t", TYPE_UINT32, 4);
+CodeGenBaseValueClass(Int32, "int32_t", TYPE_INT32, 4);
 CodeGenBaseValueClass(UInt64, "uint64_t", TYPE_UINT64, 8);
-CodeGenBaseValueClass(Int64, "int64_t", TYPE_UINT64, 8);
+CodeGenBaseValueClass(Int64, "int64_t", TYPE_INT64, 8);
 CodeGenBaseValueClass(Float, "float", TYPE_FLOAT, 4);
 CodeGenBaseValueClass(Double, "double", TYPE_DOUBLE, 8);
 
@@ -316,6 +316,7 @@ public:
 		/*Buf[Index++] = FieldNumber;
 		Buf[Index++] = Field;
 		printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
+		Debug("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);
 		uint32_t shiftfn = 0;
 		uint32_t next_shiftfn = 0;
 		if ((FieldNumber >> 3) != 0)
@@ -344,6 +345,7 @@ public:
 	}
 	void SerializeLen(uint64_t  Len)
 	{
+		Debug("SerializeLen:%lld\n", Len);
 		uint64_t next_shiftlen = 0;		
 		do
 		{
@@ -364,7 +366,7 @@ public:
 	void SerializeEndFlag()
 	{
 		Buf[Index++] = 0x7F;
-		printf("SerializeEnd\n");
+		Debug("SerializeEnd\n");
 	}
 	bool IsEnd()
 	{
@@ -374,12 +376,12 @@ public:
 	{
 		Buf[Index] = flag;
 		Index += 1;
-		printf("SerializeArrayElementFlag:0x%x\n", flag);
+		Debug("SerializeArrayElementFlag:0x%x\n", flag);
 	}
 	void SerializeValue(uint8_t  Len, void* v)//base value used
 	{
 		MEMCPY(&Buf[Index], v, Len);
-		printf("SerializeValue:\n");
+		Debug("SerializeValue:\n");
 		for (size_t i = Index; i < Len+Index; i++)
 		{
 			printf("%d,", Buf[i]);
@@ -463,7 +465,7 @@ public:
 		uint32_t ind = GetKeyFromSerializationManager(nullptr, nullptr);
 		Index += ind;
 	}
-	uint32_t GetArrayLenFromSerializationManager(uint64_t* arrayLen)
+	uint8_t GetArrayLenFromSerializationManager(uint64_t* arrayLen)
 	{
 		uint8_t used = 0;
 		uint64_t al = 0;
@@ -488,7 +490,7 @@ public:
 	}
 	void RemoveArrayLenFromSerializationManager()
 	{
-		uint32_t ind = GetArrayLenFromSerializationManager(nullptr);
+		uint8_t ind = GetArrayLenFromSerializationManager(nullptr);
 		Index += ind;
 	}
 	uint8_t GetArrayElementFlag()
@@ -522,7 +524,7 @@ private:
 		for (uint32_t i = 0; i < objectType->FieldCount; i++)
 		{
 			void* fieldData = (void*)((uint8_t*)objectData + objectType->SubFields[i]->GetOffset());
-			Debug("Serialize:%s\n", objectType->SubFields[i]->GetName());
+			//Debug("Serialize:%s\n", objectType->SubFields[i]->GetName());
 			Type_t typeOfSubField = objectType->SubFields[i]->GetTypeInstance()->GetType();
 			if (typeOfSubField <= TYPE_DOUBLE && objectType->SubFields[i]->IsArrayLenField() == false)
 			{
@@ -715,7 +717,7 @@ private:
 			{
 				uint64_t arraylen = 0;
 				
-				uint32_t sizeOfArrayLenInStream=GetArrayLenFromSerializationManager(&arraylen);
+				uint8_t sizeOfArrayLenInStream=GetArrayLenFromSerializationManager(&arraylen);
 				RemoveArrayLenFromSerializationManager();
 
 				uint8_t baseValueTypeFlag = GetArrayElementFlag();
@@ -764,7 +766,7 @@ private:
 				{
 					Type_t aet = (Type_t)(baseValueTypeFlag >> 4 & 0x0F);
 					EmbedSerializationAssert(aet <= TYPE_DOUBLE);
-					for (uint32_t j = 0; j < arraylen; j++)
+					for (uint64_t j = 0; j < arraylen; j++)
 					{
 						if (ptr != nullptr)
 						{
@@ -784,7 +786,7 @@ private:
 					{
 						ot = (ObjectType*)(arrayType->ElementType);
 					}
-					for (uint32_t j = 0; j < arraylen; j++)
+					for (uint64_t j = 0; j < arraylen; j++)
 					{
 						//这里没有结构体的tag 所以调用的是DeserializeSubField
 						if (ptr != nullptr)
@@ -864,7 +866,7 @@ private:
 				Type_t aet = arrayType->ElementType->GetType();
 				if (aet<=TYPE_DOUBLE)//base value type
 				{
-					for (uint32_t j = 0; j < arraylen; j++)
+					for (uint64_t j = 0; j < arraylen; j++)
 					{
 						if (ptr != nullptr)
 						{
@@ -884,7 +886,7 @@ private:
 					{
 						ot = (ObjectType*)(arrayType->ElementType);
 					}
-					for (uint32_t j = 0; j < arraylen; j++)
+					for (uint64_t j = 0; j < arraylen; j++)
 					{
 						//这里没有结构体的tag 所以调用的是DeserializeSubField
 						if (ptr != nullptr)
