@@ -17,9 +17,9 @@ namespace EmbedXrpc
     }
     public enum ReceiveType
     {
-        Request=0x1,
-        Response=0x2,
-        Delegate=0x3,
+        Request,
+        Response,
+        Delegate,
     };
     public abstract class IDelegate
     {

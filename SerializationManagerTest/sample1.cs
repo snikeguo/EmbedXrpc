@@ -16,6 +16,7 @@ struct DateTime_t
     [FieldNumber(6)]
     int Sec;
 }
+
 [FileName("sample1.cs")]
 delegate void DateTimeChange(DateTime_t[] now);
 
@@ -30,7 +31,7 @@ interface Inter
 }
 
 [FileName("sample1.cs")]
-public class OptionProcess:IOptionProcess
+public class OptionProcess : IOptionProcess
 {
     public GenerationOption Process()
     {

@@ -17,14 +17,14 @@ InterClientImpl(EmbedXrpcObject *rpcobj)
 {
 this->RpcObject=rpcobj;
 }
-Inter_Add_RequestResponseContent& Add(Int32 a,Int32 b);
-void Free_Add(Inter_Add_RequestResponseContent *response);
+Inter_Add_Return& Add(Int32 a,Int32 b);
+void Free_Add(Inter_Add_Return *response);
 
-Inter_NoArg_RequestResponseContent& NoArg();
-void Free_NoArg(Inter_NoArg_RequestResponseContent *response);
+Inter_NoArg_Return& NoArg();
+void Free_NoArg(Inter_NoArg_Return *response);
 
-Inter_NoReturn_RequestResponseContent& NoReturn();
-Inter_NoArgAndReturn_RequestResponseContent& NoArgAndReturn();
+Inter_NoReturn_Return& NoReturn(Int32 a);
+Inter_NoArgAndReturn_Return& NoArgAndReturn();
 };
 #define Inter_ResponseDelegateMessages_Count 5
 extern ResponseDelegateMessageMap Inter_ResponseDelegateMessages[Inter_ResponseDelegateMessages_Count];

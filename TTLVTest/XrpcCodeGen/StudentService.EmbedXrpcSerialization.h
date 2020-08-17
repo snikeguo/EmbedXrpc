@@ -29,5 +29,21 @@ extern const ObjectField Student_Field_ChineseAchievement;
 extern const IField* StudentDesc [1];
 extern const ObjectType Student_Type;
 
+extern const Int32Field DelegateTestStruct_Field_index;
+extern const ObjectField DelegateTestStruct_Field_student;
+extern const IField* DelegateTestStructDesc [2];
+extern const ObjectType DelegateTestStruct_Type;
+
+#define DelegateTest_ServiceId 16
+extern const Int32Field MyInerface_GetStudent_Request_Field_index;
+extern const IField* MyInerface_GetStudent_RequestDesc [1];
+extern const ObjectType MyInerface_GetStudent_Request_Type;
+
+#define MyInerface_GetStudent_ServiceId 17
+extern const UInt8Field MyInerface_GetStudent_RequestResponseContent_Field_State;
+extern const ObjectField MyInerface_GetStudent_RequestResponseContent_Field_ReturnValue;
+extern const IField* MyInerface_GetStudent_RequestResponseContentDesc [2];
+extern const ObjectType MyInerface_GetStudent_RequestResponseContent_Type;
+
 
 #endif

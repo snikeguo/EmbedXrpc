@@ -32,6 +32,7 @@ EmbedXrpcObject ClientRpc(ClientSend,
 	rdCollection,
 	1,
 	&Win32Port,
+	true,
 	nullptr);//client rpc 对象
 
 void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server广播后，client接受到的
@@ -53,9 +54,9 @@ void ClientThread()
 		{
 			printf("%d+%d=%d\n", a,b,sum.ReturnValue);
 		}
-		Client.NoArg();
+		/*Client.NoArg();
 		Client.NoReturn();
-		Client.NoArgAndReturn();
+		Client.NoArgAndReturn();*/
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 }
@@ -65,6 +66,11 @@ uint8_t ServerSendBuffer[2048];//发送buffer
 uint8_t ServerRequestBuffer[2048];//server接收到client发送的Request数据流后，要把数据临时存到这个数组里
 bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
+	/*for (size_t i = 4; i < dataLen; i++)
+	{
+		printf("ServerSend:0x%.2x\n", data[i]);
+
+	}*/
 	ClientRpc.ReceivedMessage(dataLen, data);
 	return true;
 }
@@ -78,6 +84,7 @@ EmbedXrpcObject ServerRpc(ServerSend,
 	rmCollection,
 	1,
 	&Win32Port,
+	true,
 	nullptr);//server rpc 对象
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()
@@ -107,7 +114,7 @@ void Inter_NoArgService::NoArg()
 {
 	Response.ReturnValue = true;
 }
-void Inter_NoReturnService::NoReturn()
+void Inter_NoReturnService::NoReturn(int a)
 {
 
 }
@@ -129,9 +136,21 @@ int main(int argc, char *argv[])
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 }
+
+void* MyMalloc(size_t size)
+{
+	void* ptr = malloc(size);
+	printf("malloc :0x%x\n", (uint32_t)ptr);
+	return ptr;
+}
+void MyFree(void* ptr)
+{
+	printf("free :0x%x\n", (uint32_t)ptr);
+	free(ptr);
+}
+
 /*
 运行提示QObject::startTimer: Timers cannot be started from another thread  
 是因为QT不允许其他线程操作QT的定时器，你可以临时把Win32EmbedXrpcPort.cpp的
 t->Start(interval);、t->Reset();、t->Stop();注释掉  这样就没有这个问题了。
-
 */

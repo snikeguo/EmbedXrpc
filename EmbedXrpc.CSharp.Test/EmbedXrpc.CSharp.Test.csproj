@@ -15,7 +15,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="sample1.cs" />
     <Compile Remove="StudentService.gen.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="sample1.cs" />
   </ItemGroup>
 
   <ItemGroup>

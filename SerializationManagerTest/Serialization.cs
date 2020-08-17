@@ -60,7 +60,7 @@ namespace EmbedXrpc
             data.Clear();
             Index = 0;
         }
-        public bool IsEnableMataData { get; set; } = false;
+        public bool IsEnableMataDataEncode { get; set; } = false;
         void SerializeKey(UInt32 FieldNumber, Type_t Field)
         {
             /*Buf[Index++] = FieldNumber;
@@ -101,10 +101,10 @@ namespace EmbedXrpc
                 shiftfn = shiftfn >> 7;
             }
         }
-        void SerializeLen(Int64 Len)
+        void SerializeLen(UInt32 Len)
         {
             Console.WriteLine($"SerializeLen:{Len}");
-            Int64 next_shiftlen = 0;
+            UInt32 next_shiftlen = 0;
             do
             {
                 next_shiftlen = Len >> 7;
@@ -181,7 +181,7 @@ namespace EmbedXrpc
             {
                 do
                 {
-                    f = (UInt32)(((Data[Index + used] & 0x7f) << (used - 1) * 7) | f);
+                    f = (UInt32)(((UInt32)(Data[Index + used] & 0x7f) << (used - 1) * 7) | f);
                     if ((Data[Index + used] & 0x80) == 0)
                     {
                         used++;
@@ -204,13 +204,13 @@ namespace EmbedXrpc
             UInt32 ind = GetKeyFromSerializationManager(ref fn, ref t);
             Index += (int)ind;
         }
-        byte GetArrayLenFromSerializationManager(ref UInt64 arrayLen)
+        byte GetArrayLenFromSerializationManager(ref UInt32 arrayLen)
         {
             byte used = 0;
-            UInt64 al = 0;
+            UInt32 al = 0;
             do
             {
-                al = ((UInt64)(Data[Index + used] & 0x7f) << (used * 7)) | al;
+                al = ((UInt32)(Data[Index + used] & 0x7f) << (used * 7)) | al;
                 if ((Data[Index + used] & 0x80) == 0)
                 {
                     used++;
@@ -226,7 +226,7 @@ namespace EmbedXrpc
         }
         void RemoveArrayLenFromSerializationManager()
         {
-            UInt64 al = 0;
+            UInt32 al = 0;
             byte ind = GetArrayLenFromSerializationManager(ref al);
             Index += ind;
         }
@@ -243,9 +243,12 @@ namespace EmbedXrpc
             Index++;
         }
         private Assembly Assembly;
-        public SerializationManager(Assembly assembly)
+        public SerializationManager(Assembly assembly,bool isEnableMataDataEncode,List<byte> data)
         {
             Assembly = assembly;
+            IsEnableMataDataEncode = isEnableMataDataEncode;
+            Data = data;
+            Reset();
         }
         public void ToBytes( bool d)
         {
@@ -450,7 +453,7 @@ namespace EmbedXrpc
         }
         public void Serialize(object s,UInt32 fieldNumber)
         {
-            if (IsEnableMataData == true)
+            if (IsEnableMataDataEncode == true)
             {
                 SerializeKey(fieldNumber,Type_t.TYPE_OBJECT);
                 SerializeSubField(s);
@@ -496,10 +499,10 @@ namespace EmbedXrpc
                     var lenfield = from lf in pros
                                    where lf.Name == att.LenFieldName
                                    select lf;
-                    Int64 len = 1;
+                    UInt32 len = 1;
                     if (lenfield.ToList().Count != 0)
                     {
-                        len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                        len = Convert.ToUInt32(lenfield.ToList()[0].GetValue(s));
                     }
                     SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
                     SerializeLen(len);
@@ -563,10 +566,10 @@ namespace EmbedXrpc
                     var lenfield = from lf in pros
                                    where lf.Name == att.LenFieldName
                                    select lf;
-                    Int64 len = 1;
+                    UInt32 len = 1;
                     if (lenfield.ToList().Count != 0)
                     {
-                        len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                        len = Convert.ToUInt32(lenfield.ToList()[0].GetValue(s));
                     }
                     //SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
                     //SerializeLen(len);
@@ -624,10 +627,15 @@ namespace EmbedXrpc
             }
             throw new InvalidDataException($"len is {len},but len only support 1/2/4/8");
         }
+
+        public T Deserialize<T>()
+        {
+            return (T)Deserialize(typeof(T));
+        }
         public object Deserialize(Type st)
         {
             var s = Assembly.CreateInstance(st.FullName);
-            if (IsEnableMataData == true)
+            if (IsEnableMataDataEncode == true)
             {
                 UInt32 fn = 0;//Pop一次KEY 因为打包的时候是按照field打包的，所以这里要把KEY 要POP出来一次
                 Type_t tp = Type_t.TYPE_UINT8;
@@ -669,7 +677,7 @@ namespace EmbedXrpc
                 }
                 else if(tp== Type_t.TYPE_ARRAY)
                 {
-                    UInt64 arraylen = 0;
+                    UInt32 arraylen = 0;
 
                     byte sizeOfArrayLenInStream = GetArrayLenFromSerializationManager(ref arraylen);
                     RemoveArrayLenFromSerializationManager();
@@ -793,7 +801,7 @@ namespace EmbedXrpc
                 }
                 else if (tp == Type_t.TYPE_ARRAY)
                 {
-                    UInt64 arraylen = 0;
+                    UInt32 arraylen = 0;
                     Array arrayfield = null;
                     Type arrayElementTypeOfLocalType = null;
                     ArrayPropertyAttribute att = fieldinfo.GetCustomAttribute<ArrayPropertyAttribute>();
@@ -809,7 +817,7 @@ namespace EmbedXrpc
                     {
                         //执行到这一步的时候 len字段的值必须被设置好(也就是说必须被反序列化完毕)
                         //从编写IDL文件方面来说，len字段必须放到array字段的前面;
-                        arraylen = Convert.ToUInt64(lenfield.ToList()[0].GetValue(localstruct));
+                        arraylen = Convert.ToUInt32(lenfield.ToList()[0].GetValue(localstruct));
                     }
                     arrayElementTypeOfLocalType = fieldinfo.PropertyType.GetElementType();
                     arrayfield = Array.CreateInstance(arrayElementTypeOfLocalType, (int)arraylen);

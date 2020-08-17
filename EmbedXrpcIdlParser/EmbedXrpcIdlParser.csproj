@@ -84,7 +84,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="CSharpTemplate.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

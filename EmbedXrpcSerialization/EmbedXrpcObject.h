@@ -36,7 +36,7 @@ public:
 
 	bool DeInitFlag;
 
-
+	bool IsEnableMataDataEncode;
 
 	//server:
 	EmbedXrpc_Thread_t ResponseServiceThreadHandle;
@@ -75,7 +75,7 @@ public:
 		uint32_t requestMessageMapsCount,//server
 
 		IEmbeXrpcPort* port,
-		
+		bool isEnableMataDataEncode,
 		void* ud = nullptr):Send(send),
 		TimeOut(timeOut),
 		DataLinkLayoutBuffer(dataLinkLayoutBuffer),
@@ -91,6 +91,7 @@ public:
 		RequestRingBuffer(requestRingBuffer),
 		RequestRingBufferSize(requestRingBufferSize),
 		porter(port),
+		IsEnableMataDataEncode(isEnableMataDataEncode),
 		UserData(ud),
 		//last
 		DeInitFlag(false),
@@ -121,6 +122,7 @@ public:
 		uint32_t collectionCount,
 
 		IEmbeXrpcPort* port,
+		bool isEnableMataDataEncode,
 		void* ud = nullptr):EmbedXrpcObject(send,
 			timeOut,
 
@@ -143,6 +145,7 @@ public:
 			0,
 
 			port,
+			isEnableMataDataEncode,
 			ud
 		)
 	{
@@ -162,6 +165,7 @@ public:
 		uint32_t collectionCount,
 
 		IEmbeXrpcPort* port,
+		bool isEnableMataDataEncode,
 		void* ud = nullptr):EmbedXrpcObject(send,
 			timeOut,
 
@@ -184,6 +188,7 @@ public:
 			collectionCount,
 
 			port,
+			isEnableMataDataEncode,
 			ud
 		)
 	{
@@ -242,14 +247,15 @@ public:
 			return false;
 		bool FindFlag = false;
 		bool SendQueueResult = false;
-		if (ResponseDelegateMessageMapsCount > 0)
-		{
-			BlockBufferItemInfo raw;
-			uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
-			uint16_t targettimeout = (uint16_t)(allData[2] | allData[3] << 8);
-			uint32_t dataLen = allDataLen - 4;
-			uint8_t* data = &allData[4];
 
+		BlockBufferItemInfo raw;
+		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
+		uint16_t targettimeout = (uint16_t)(allData[2] | allData[3] << 8)&0x3FFF;
+		uint32_t dataLen = allDataLen - 4;
+		uint8_t* data = &allData[4];
+		ReceiveType_t rt = (ReceiveType_t)(allData[3] >> 6);
+		if (rt== ReceiveType_Response|| rt == ReceiveType_Delegate)
+		{
 			//XrpcDebug("Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 			if (serviceId == EmbedXrpcSuspendSid)
 			{
@@ -284,13 +290,8 @@ public:
 				}
 			}
 		}
-		else if (RequestMessageMapsCount>0)//server
+		else if (rt == ReceiveType_Request)//server
 		{
-			BlockBufferItemInfo raw;
-			uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
-			uint16_t targettimeout = (uint16_t)(allData[2] | allData[3] << 8);
-			uint32_t dataLen = allDataLen - 4;
-			uint8_t* data = &allData[4];
 			//XrpcDebug("Server ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 			raw.Sid = serviceId;
 			raw.DataLen = dataLen;
@@ -308,7 +309,8 @@ public:
 		sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 		sb[1] = (uint8_t)(EmbedXrpcSuspendSid >> 8 & 0xff);
 		sb[2] = (uint8_t)(obj->TimeOut & 0xff);
-		sb[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
+		sb[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff)&0x3FFF);
+		sb[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
 		obj->Send(obj, 4, sb);
 		//obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
 	}
@@ -329,6 +331,7 @@ public:
 						if ((MessageMaps[i].ReceiveType == ReceiveType_Delegate) && (MessageMaps[i].Delegate->GetSid() == recData.Sid))
 						{
 							SerializationManager rsm;
+							rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 							rsm.Reset();
 							rsm.BufferLen = recData.DataLen;
 							rsm.BlockBufferProvider=obj->DelegateBlockBufferProvider;
@@ -368,12 +371,14 @@ public:
 
 						SerializationManager rsm;
 						SerializationManager sendsm;
+						rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 						rsm.Reset();
 						rsm.BufferLen = recData.DataLen;
 						rsm.BlockBufferProvider = obj->RequestBlockBufferProvider;
 						rsm.BlockBufferProvider->SetCalculateSum(0);
 						rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
 						obj->porter->TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
+						sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 						sendsm.Reset();
 						sendsm.Buf = &obj->DataLinkLayoutBuffer[4];
 						sendsm.BufferLen = obj->DataLinkLayoutBufferLen - 4;
@@ -388,7 +393,8 @@ public:
 							obj->DataLinkLayoutBuffer[0] = (uint8_t)(recData.Sid >> 0 & 0xff);
 							obj->DataLinkLayoutBuffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
 							obj->DataLinkLayoutBuffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
-							obj->DataLinkLayoutBuffer[3] = (uint8_t)(obj->TimeOut >> 8 & 0xff);
+							obj->DataLinkLayoutBuffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
+							obj->DataLinkLayoutBuffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
 							obj->Send(obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
 						}
 						obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
@@ -400,7 +406,7 @@ public:
 			//XrpcDebug("Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
 	}
-	RequestResponseState Wait(uint32_t sid, const IType *type,void * response)
+	RequestResponseState Wait(uint32_t sid, const ObjectType *type,void * response)
 	{
 		RequestResponseState ret= ResponseState_Ok;
 		BlockBufferItemInfo recData;
@@ -429,12 +435,13 @@ public:
 		if (ret == ResponseState_Ok)
 		{
 			SerializationManager rsm;
+			rsm.IsEnableMataDataEncode = IsEnableMataDataEncode;
 			rsm.Reset();
 			rsm.BufferLen = recData.DataLen;
 			rsm.BlockBufferProvider = ResponseBlockBufferProvider;
 			rsm.BlockBufferProvider->SetCalculateSum(0);
 			rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
-			type->Deserialize(rsm, response);
+			rsm.Deserialize(type, response, 0);
 			EmbedSerializationAssert(rsm.BlockBufferProvider->GetReferenceSum() == rsm.BlockBufferProvider->GetCalculateSum());
 		}
 		return ret;

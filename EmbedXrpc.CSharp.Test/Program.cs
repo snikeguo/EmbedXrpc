@@ -22,9 +22,10 @@ namespace Sample1
     }
     public partial class Inter_AddService : IService
     {
-        public void Add(Byte a, Byte b)
+        public void Add(int a, int b)
         {
             Response.ReturnValue = a + b;
+            
         }
     }
     public partial class Inter_NoArgService : IService
@@ -36,7 +37,7 @@ namespace Sample1
     }
     public partial class Inter_NoReturnService : IService
     {
-        public void NoReturn()
+        public void NoReturn(int a)
         {
 
         }
@@ -56,9 +57,9 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new EmbedXrpcObject(1000, clientSend, Assembly.GetExecutingAssembly());
+            client = new EmbedXrpcObject(1000, clientSend, Assembly.GetExecutingAssembly(),true);
             client.Start();
-            server = new Server(2000, serverSend, Assembly.GetExecutingAssembly());
+            server = new EmbedXrpcObject(2000, serverSend, Assembly.GetExecutingAssembly(),true);
             server.Start();
             Task.Run(() =>
             {
@@ -70,12 +71,16 @@ namespace EmbedXrpc
                     {
                         throw new Exception("send failed!");
                     }
-                    var reNoArg = inter.NoArg();
+                    else if(reAdd.State == RequestResponseState.ResponseState_Ok)
+                    {
+                        Console.WriteLine($"{1}+{2}={reAdd.ReturnValue}");
+                    }
+                    /*var reNoArg = inter.NoArg();
                     if (reNoArg.State == RequestResponseState.RequestState_Failed)
                     {
                         throw new Exception("send failed!");
                     }
-                    var reNoReturn = inter.NoReturn();
+                    var reNoReturn = inter.NoReturn(3);
                     if (reNoReturn.State == RequestResponseState.RequestState_Failed)
                     {
                         throw new Exception("send failed!");
@@ -84,8 +89,8 @@ namespace EmbedXrpc
                     if (reNoArgAndReturn.State == RequestResponseState.RequestState_Failed)
                     {
                         throw new Exception("send failed!");
-                    }
-                    Thread.Sleep(0);
+                    }*/
+                    Thread.Sleep(10);
                 }
             });
 
@@ -94,6 +99,7 @@ namespace EmbedXrpc
                 DateTimeChangeDelegate broadcastDataTimeDelegate = new DateTimeChangeDelegate(server);
                 while (true)
                 {
+                    Thread.Sleep(10);
                     broadcastDataTimeDelegate.Invoke(new DateTime_t[1] {
                     new DateTime_t()
                     {
@@ -104,7 +110,7 @@ namespace EmbedXrpc
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second
                     }});
-                    Thread.Sleep(1);
+                    
                 }
             });
 
@@ -116,7 +122,7 @@ namespace EmbedXrpc
         }
 
         static EmbedXrpcObject client;
-        static Server server;
+        static EmbedXrpcObject server;
         public static bool clientSend(int dataLen, int offset, byte[] data)
         {
             //Console.WriteLine($"clientSend {sid}");

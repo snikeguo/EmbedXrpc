@@ -24,43 +24,45 @@ extern const Int32Field DateTime_t_Field_Sec;
 extern const IField* DateTime_tDesc [6];
 extern const ObjectType DateTime_t_Type;
 
-extern const ArrayField DateTimeChangeStruct_Field_now;
-extern const IField* DateTimeChangeStructDesc [1];
-extern const ObjectType DateTimeChangeStruct_Type;
+extern const ArrayField DateTimeChange_Parameter_Field_now;
+extern const IField* DateTimeChange_ParameterDesc [1];
+extern const ObjectType DateTimeChange_Parameter_Type;
 
 #define DateTimeChange_ServiceId 16
-extern const Int32Field Inter_Add_Request_Field_a;
-extern const Int32Field Inter_Add_Request_Field_b;
-extern const IField* Inter_Add_RequestDesc [2];
-extern const ObjectType Inter_Add_Request_Type;
+extern const Int32Field Inter_Add_Parameter_Field_a;
+extern const Int32Field Inter_Add_Parameter_Field_b;
+extern const IField* Inter_Add_ParameterDesc [2];
+extern const ObjectType Inter_Add_Parameter_Type;
 
 #define Inter_Add_ServiceId 17
-extern const UInt8Field Inter_Add_RequestResponseContent_Field_State;
-extern const Int32Field Inter_Add_RequestResponseContent_Field_ReturnValue;
-extern const IField* Inter_Add_RequestResponseContentDesc [2];
-extern const ObjectType Inter_Add_RequestResponseContent_Type;
+extern const UInt8Field Inter_Add_Return_Field_State;
+extern const Int32Field Inter_Add_Return_Field_ReturnValue;
+extern const IField* Inter_Add_ReturnDesc [2];
+extern const ObjectType Inter_Add_Return_Type;
 
-extern const ObjectType Inter_NoArg_Request_Type;
+extern const ObjectType Inter_NoArg_Parameter_Type;
 
 #define Inter_NoArg_ServiceId 18
-extern const UInt8Field Inter_NoArg_RequestResponseContent_Field_State;
-extern const UInt8Field Inter_NoArg_RequestResponseContent_Field_ReturnValue;
-extern const IField* Inter_NoArg_RequestResponseContentDesc [2];
-extern const ObjectType Inter_NoArg_RequestResponseContent_Type;
+extern const UInt8Field Inter_NoArg_Return_Field_State;
+extern const UInt8Field Inter_NoArg_Return_Field_ReturnValue;
+extern const IField* Inter_NoArg_ReturnDesc [2];
+extern const ObjectType Inter_NoArg_Return_Type;
 
-extern const ObjectType Inter_NoReturn_Request_Type;
+extern const Int32Field Inter_NoReturn_Parameter_Field_a;
+extern const IField* Inter_NoReturn_ParameterDesc [1];
+extern const ObjectType Inter_NoReturn_Parameter_Type;
 
 #define Inter_NoReturn_ServiceId 19
-extern const UInt8Field Inter_NoReturn_RequestResponseContent_Field_State;
-extern const IField* Inter_NoReturn_RequestResponseContentDesc [1];
-extern const ObjectType Inter_NoReturn_RequestResponseContent_Type;
+extern const UInt8Field Inter_NoReturn_Return_Field_State;
+extern const IField* Inter_NoReturn_ReturnDesc [1];
+extern const ObjectType Inter_NoReturn_Return_Type;
 
-extern const ObjectType Inter_NoArgAndReturn_Request_Type;
+extern const ObjectType Inter_NoArgAndReturn_Parameter_Type;
 
 #define Inter_NoArgAndReturn_ServiceId 20
-extern const UInt8Field Inter_NoArgAndReturn_RequestResponseContent_Field_State;
-extern const IField* Inter_NoArgAndReturn_RequestResponseContentDesc [1];
-extern const ObjectType Inter_NoArgAndReturn_RequestResponseContent_Type;
+extern const UInt8Field Inter_NoArgAndReturn_Return_Field_State;
+extern const IField* Inter_NoArgAndReturn_ReturnDesc [1];
+extern const ObjectType Inter_NoArgAndReturn_Return_Type;
 
 
 #endif

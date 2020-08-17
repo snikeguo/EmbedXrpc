@@ -23,7 +23,6 @@ namespace EmbedXrpc
         //server
         private Timer SuspendTimer;
         private Thread RequestServiceThreadHandle;
-        private Thread DelegateServiceThreadHandle;
         private Win32Queue<EmbeXrpcRawData> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData>(10);
         private RequestMessageMap[] RequestMessageMaps;
         public bool IsEnableMataDataEncode { get; set; }
@@ -97,20 +96,18 @@ namespace EmbedXrpc
                 sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 8 & 0xff);
                 sendBytes[2] = (byte)(server.TimeOut >> 0 & 0xff);
                 sendBytes[3] = (byte)(server.TimeOut >> 8 & 0xff);
-                //Send(sendBytes.Length, 0, sendBytes);
+                Send(sendBytes.Length, 0, sendBytes);
             }
         }
 
-        
+        private Thread DelegateServiceThreadHandle;
         public void Start()
         {
             DelegateServiceThreadHandle.Start();
-            RequestServiceThreadHandle.Start();
         }
         public void Stop()
         {
             DelegateServiceThreadHandle.Abort();
-            RequestServiceThreadHandle.Abort();
         }
         public RequestResponseState Wait<T>(UInt32 sid,out T response)
         {
@@ -149,13 +146,13 @@ namespace EmbedXrpc
             {
                 goto sqs;
             }
-            UInt16 serviceId = (UInt16)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8);
-            UInt16 targettimeout = (UInt16)((alldata[2 + offset] << 0 | alldata[3 + offset] << 8)&0x3FF);
-            UInt32 dataLen = validdataLen - 4;
-            EmbeXrpcRawData raw = new EmbeXrpcRawData();
-            ReceiveType rt = (ReceiveType)(alldata[3 + offset] >> 6);
-            if (rt== ReceiveType.Delegate|| rt== ReceiveType.Response)
+            if (ResponseDelegateMessageMaps.Length>0)
             {
+                UInt16 serviceId = (UInt16)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8);
+                UInt16 targettimeout = (UInt16)(alldata[2 + offset] << 0 | alldata[3 + offset] << 8);
+                UInt32 dataLen = validdataLen - 4;
+                EmbeXrpcRawData raw = new EmbeXrpcRawData();
+
                 if (serviceId == EmbedXrpcCommon.EmbedXrpcSuspendSid)
                 {
                     raw.Sid = serviceId;
@@ -196,8 +193,12 @@ namespace EmbedXrpc
                     }
                 }
             }
-            else if(rt == ReceiveType.Request)
+            else if(RequestMessageMaps.Length>0)
             {
+                UInt16 serviceId = (UInt16)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8);
+                UInt16 targettimeout = (UInt16)(alldata[2 + offset] << 0 | alldata[3 + offset] << 8);
+                UInt32 dataLen = validdataLen - 4;
+                EmbeXrpcRawData raw = new EmbeXrpcRawData();
                 raw.Sid = serviceId;
                 raw.Data = new byte[dataLen];
                 Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
@@ -271,8 +272,7 @@ namespace EmbedXrpc
                                     sendBytes[0] = (byte)(recData.Sid >> 0 & 0xff);
                                     sendBytes[1] = (byte)(recData.Sid >> 8 & 0xff);
                                     sendBytes[2] = (byte)(this.TimeOut >> 0 & 0xff);
-                                    sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff)&(0x3F));
-                                    sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
+                                    sendBytes[3] = (byte)(this.TimeOut >> 8 & 0xff);
                                     Array.Copy(sendsm.Data.ToArray(), 0, sendBytes, 4, sendsm.Index);
                                     Send(sendBytes.Length, 0, sendBytes);
                                 }

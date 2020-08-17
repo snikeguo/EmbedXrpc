@@ -17,9 +17,9 @@
  };
  enum ReceiveType_t
  {
-     ReceiveType_Request,
-	 ReceiveType_Response,
-	 ReceiveType_Delegate,
+     ReceiveType_Request=0x1,
+	 ReceiveType_Response=0x2,
+	 ReceiveType_Delegate=0x3,
  };
  class IDelegate
  {

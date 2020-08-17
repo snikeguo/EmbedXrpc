@@ -123,29 +123,23 @@ namespace EmbedXrpcIdlParser
     [Serializable]
     public class TargetService
     {
-        public TargetField ReturnValue { get; set; }
+        //public TargetField ReturnValue { get; set; }
+        public TargetStruct ReturnStruct { get; set; } = new TargetStruct();
         public string ServiceName { get; set; }
 
-        public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
-
+        public string FullName { get; set; }
+        //public List<TargetField> TargetFields { get; set; } = new List<TargetField>();//参数
+        public TargetStruct ParameterStruct { get; set; } = new TargetStruct();
         public int ServiceId { get; internal set; }
 
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(String.Format($"Service: Name:{ServiceName},ReturnValue{ReturnValue.ToString()}"));
-            foreach (var field in TargetFields)
-            {
-                sb.Append(string.Format("--------" + field.ToString() + "\n"));
-            }
-            return sb.ToString();
-        }
     }
     [Serializable]
     public class TargetInterface
     {
         public string Name { get; set; }
         public List<TargetService> Services { get; set; } = new List<TargetService>();
+
+        
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -162,17 +156,9 @@ namespace EmbedXrpcIdlParser
     {
         public int ServiceId { get; internal set; }
         public string MethodName { get; set; }
-        public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(String.Format($"Delegate: Name:{MethodName}\n"));
-            foreach (var field in TargetFields)
-            {
-                sb.Append(string.Format("--------" + field.ToString() + "\n"));
-            }
-            return sb.ToString();
-        }
+        //public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
+        public TargetStruct ParameterStruct { get; set; } = new TargetStruct();
+        
     }
     /// <summary>
     /// 本文件中所有的资源
@@ -417,20 +403,41 @@ namespace EmbedXrpcIdlParser
                         ServiceId++;
                         var mt = (service as MethodInfo);
                         Type rt = mt.ReturnType;
+                        targetService.ServiceName = mt.Name;
+                        targetService.FullName = type.Name + "_" + targetService.ServiceName;
+                        targetService.ReturnStruct.Name = type.Name+"_" + targetService.ServiceName + "_Return";
+
+                        TargetField ts = new TargetField();
+                        ts.Name = "State";
+                        ts.SourceCodeType = "RequestResponseState";
+                        ts.IsArray = false;
+                        ts.Enum = new TargetEnum() { SourceCodeType = "byte", Name = "RequestResponseState" };
+                        ts.MaxCountAttribute = null;
+                        ts.IsArrayLenField = false;
+                        ts.IsBaseValueType = true;
+                        ts.FieldNumberAttr = new FieldNumberAttribute(1);//state 的Field Number为1
+                        targetService.ReturnStruct.TargetFields.Add(ts);
+
                         if (rt.Name != "Void")
                         {
                             TargetField returnValue = new TargetField();
+                            returnValue.Name = "ReturnValue";
                             returnValue.SourceCodeType = mt.ReturnType.Name;
                             if (mt.ReturnType.IsArray == true)
                             {
                                 throw new Exception("return value does not support array type!");
                             }
-
-                            targetService.ReturnValue = returnValue;
+                            returnValue.IsArray = false;
+                            returnValue.MaxCountAttribute = null;
+                            returnValue.IsArrayLenField = false;
+                            returnValue.IsBaseValueType = IsBaseValueType(mt.ReturnType);
+                            returnValue.FieldNumberAttr = new FieldNumberAttribute(2);
+                            targetService.ReturnStruct.TargetFields.Add(returnValue);
                         }
 
 
-                        targetService.ServiceName = mt.Name;
+                        
+                        targetService.ParameterStruct.Name = type.Name + "_" + targetService.ServiceName + "_Parameter";
                         var pars = mt.GetParameters();
                         UInt32 fieldNumber = 1;
                         foreach (var par in pars)
@@ -453,10 +460,10 @@ namespace EmbedXrpcIdlParser
                             }
                             field.FieldNumberAttr = new FieldNumberAttribute(fieldNumber);
                             fieldNumber++;
-                            targetService.TargetFields.Add(field);
+                            targetService.ParameterStruct.TargetFields.Add(field);
                             if (field.IsArray == true)
                             {
-                                var lenfield = GetArrayLenField(targetService.TargetFields, field);
+                                var lenfield = GetArrayLenField(targetService.ParameterStruct.TargetFields, field);
                                 if (lenfield != null)
                                 {
                                     lenfield.IsArrayLenField = true;
@@ -491,6 +498,7 @@ namespace EmbedXrpcIdlParser
                     targetDelegate.MethodName = type.Name;
                     var pars = invokemi.GetParameters();
                     UInt32 fieldNumber = 1;
+                    targetDelegate.ParameterStruct.Name = targetDelegate.MethodName+ "_Parameter";
                     foreach (var par in pars)
                     {
                         TargetField field = new TargetField();
@@ -511,10 +519,10 @@ namespace EmbedXrpcIdlParser
                         }
                         field.FieldNumberAttr = new FieldNumberAttribute(fieldNumber);
                         fieldNumber++;
-                        targetDelegate.TargetFields.Add(field);
+                        targetDelegate.ParameterStruct.TargetFields.Add(field);
                         if (field.IsArray == true)
                         {
-                            var lenfield = GetArrayLenField(targetDelegate.TargetFields, field);
+                            var lenfield = GetArrayLenField(targetDelegate.ParameterStruct.TargetFields, field);
                             if (lenfield != null)
                             {
                                 lenfield.IsArrayLenField = true;
@@ -534,9 +542,17 @@ namespace EmbedXrpcIdlParser
         Server,
         All
     }
+    //FileIdlInfo fileIdlInfo, GenType genType,string outputpath
+    public class CodeGenParameter
+    {
+        public FileIdlInfo FileIdlInfo { get; set; }
+        public GenType GenType { get; set; }
+        public string OutPutPath { get; set; }
+        //public bool IsEnableMataDataEncode { get; set; }
+    }
     public interface ICodeGenerater
     {
-        void CodeGen(FileIdlInfo fileIdlInfo,GenType genType,string outputpath);
+        void CodeGen(CodeGenParameter parameter);
     }
     
     

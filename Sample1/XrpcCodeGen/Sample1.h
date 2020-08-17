@@ -8,48 +8,49 @@
 
 typedef struct _DateTime_t
 {
-Int32 Year;
-Int32 Month;
-Int32 Day;
-Int32 Hour;
-Int32 Min;
-Int32 Sec;
+Int32 Year;   //FieldNumber:10086
+Int32 Month;   //FieldNumber:2
+Int32 Day;   //FieldNumber:3
+Int32 Hour;   //FieldNumber:4
+Int32 Min;   //FieldNumber:5
+Int32 Sec;   //FieldNumber:6
 }DateTime_t;
-typedef struct _DateTimeChangeStruct
+typedef struct _DateTimeChange_Parameter
 {
-DateTime_t now[1];
-}DateTimeChangeStruct;
-typedef struct _Inter_Add_Request
+DateTime_t now[1];   //FieldNumber:1
+}DateTimeChange_Parameter;
+typedef struct _Inter_Add_Parameter
 {
-Int32 a;
-Int32 b;
-}Inter_Add_Request;
-typedef struct _Inter_Add_RequestResponseContent
+Int32 a;   //FieldNumber:1
+Int32 b;   //FieldNumber:2
+}Inter_Add_Parameter;
+typedef struct _Inter_Add_Return
 {
-RequestResponseState State;
-Int32 ReturnValue;
-}Inter_Add_RequestResponseContent;
-typedef struct _Inter_NoArg_Request
+RequestResponseState State;   //FieldNumber:1
+Int32 ReturnValue;   //FieldNumber:2
+}Inter_Add_Return;
+typedef struct _Inter_NoArg_Parameter
 {
-}Inter_NoArg_Request;
-typedef struct _Inter_NoArg_RequestResponseContent
+}Inter_NoArg_Parameter;
+typedef struct _Inter_NoArg_Return
 {
-RequestResponseState State;
-Boolean ReturnValue;
-}Inter_NoArg_RequestResponseContent;
-typedef struct _Inter_NoReturn_Request
+RequestResponseState State;   //FieldNumber:1
+Boolean ReturnValue;   //FieldNumber:2
+}Inter_NoArg_Return;
+typedef struct _Inter_NoReturn_Parameter
 {
-}Inter_NoReturn_Request;
-typedef struct _Inter_NoReturn_RequestResponseContent
+Int32 a;   //FieldNumber:1
+}Inter_NoReturn_Parameter;
+typedef struct _Inter_NoReturn_Return
 {
-RequestResponseState State;
-}Inter_NoReturn_RequestResponseContent;
-typedef struct _Inter_NoArgAndReturn_Request
+RequestResponseState State;   //FieldNumber:1
+}Inter_NoReturn_Return;
+typedef struct _Inter_NoArgAndReturn_Parameter
 {
-}Inter_NoArgAndReturn_Request;
-typedef struct _Inter_NoArgAndReturn_RequestResponseContent
+}Inter_NoArgAndReturn_Parameter;
+typedef struct _Inter_NoArgAndReturn_Return
 {
-RequestResponseState State;
-}Inter_NoArgAndReturn_RequestResponseContent;
+RequestResponseState State;   //FieldNumber:1
+}Inter_NoArgAndReturn_Return;
 
 #endif

@@ -2,7 +2,7 @@ using EmbedXrpc;
 using System;
 using System.Reflection;
 using System.Collections.Generic;
-// auto code gen ! DO NOT modify this file! create time 2020-08-17 20:58:28.781 ; 
+// auto code gen ! DO NOT modify this file! create time 2020-08-17 19:29:06.425 ; 
 namespace Sample1
 {
     public class DateTime_t
@@ -60,7 +60,7 @@ namespace Sample1
             sendBytes.Add((byte)(DateTimeChange_ServiceId & 0xff));
             sendBytes.Add((byte)(DateTimeChange_ServiceId >> 8 & 0xff));
             sendBytes.Add((byte)(Server.TimeOut >> 0 & 0xff));
-            sendBytes.Add((byte)(((Server.TimeOut >> 8 & 0xff) & 0x3F) | ((byte)ReceiveType.Delegate) << 6));
+            sendBytes.Add((byte)(Server.TimeOut >> 8 & 0xff));
             sendBytes.AddRange(sm.Data);
             Server.Send(sendBytes.Count, 0, sendBytes.ToArray());
         }
@@ -77,10 +77,8 @@ namespace Sample1
     public class Inter_Add_Return
     {
         [FieldNumber(1)]
-        [ArrayLenFieldFlag(false)]
         public RequestResponseState State { get; set; }
         [FieldNumber(2)]
-        [ArrayLenFieldFlag(false)]
         public Int32 ReturnValue { get; set; }
     }
     public class Inter_NoArg_Parameter
@@ -89,10 +87,9 @@ namespace Sample1
     public class Inter_NoArg_Return
     {
         [FieldNumber(1)]
-        [ArrayLenFieldFlag(false)]
         public RequestResponseState State { get; set; }
         [FieldNumber(2)]
-        public Boolean ReturnValue { get; set; } = new Boolean();
+        public Boolean ReturnValue { get; set; }
     }
     public class Inter_NoReturn_Parameter
     {
@@ -103,7 +100,6 @@ namespace Sample1
     public class Inter_NoReturn_Return
     {
         [FieldNumber(1)]
-        [ArrayLenFieldFlag(false)]
         public RequestResponseState State { get; set; }
     }
     public class Inter_NoArgAndReturn_Parameter
@@ -112,7 +108,6 @@ namespace Sample1
     public class Inter_NoArgAndReturn_Return
     {
         [FieldNumber(1)]
-        [ArrayLenFieldFlag(false)]
         public RequestResponseState State { get; set; }
     }
     [ServiceInfo(Name = "Inter_Add")]
@@ -192,7 +187,7 @@ namespace Sample1
                 sendBytes.Add((byte)(Add_ServiceId & 0xff));
                 sendBytes.Add((byte)(Add_ServiceId >> 8 & 0xff));
                 sendBytes.Add((byte)(Client.TimeOut >> 0 & 0xff));
-                sendBytes.Add((byte)(((Client.TimeOut >> 8 & 0xff) & 0x3F) | ((byte)ReceiveType.Request) << 6));
+                sendBytes.Add((byte)(Client.TimeOut >> 8 & 0xff));
                 sendBytes.AddRange(sm.Data);
                 if (Client.Send(sendBytes.Count, 0, sendBytes.ToArray()) == false)
                 {
@@ -228,7 +223,7 @@ namespace Sample1
                 sendBytes.Add((byte)(NoArg_ServiceId & 0xff));
                 sendBytes.Add((byte)(NoArg_ServiceId >> 8 & 0xff));
                 sendBytes.Add((byte)(Client.TimeOut >> 0 & 0xff));
-                sendBytes.Add((byte)(((Client.TimeOut >> 8 & 0xff) & 0x3F) | ((byte)ReceiveType.Request) << 6));
+                sendBytes.Add((byte)(Client.TimeOut >> 8 & 0xff));
                 sendBytes.AddRange(sm.Data);
                 if (Client.Send(sendBytes.Count, 0, sendBytes.ToArray()) == false)
                 {
@@ -265,7 +260,7 @@ namespace Sample1
                 sendBytes.Add((byte)(NoReturn_ServiceId & 0xff));
                 sendBytes.Add((byte)(NoReturn_ServiceId >> 8 & 0xff));
                 sendBytes.Add((byte)(Client.TimeOut >> 0 & 0xff));
-                sendBytes.Add((byte)(((Client.TimeOut >> 8 & 0xff) & 0x3F) | ((byte)ReceiveType.Request) << 6));
+                sendBytes.Add((byte)(Client.TimeOut >> 8 & 0xff));
                 sendBytes.AddRange(sm.Data);
                 if (Client.Send(sendBytes.Count, 0, sendBytes.ToArray()) == false)
                 {
@@ -294,7 +289,7 @@ namespace Sample1
                 sendBytes.Add((byte)(NoArgAndReturn_ServiceId & 0xff));
                 sendBytes.Add((byte)(NoArgAndReturn_ServiceId >> 8 & 0xff));
                 sendBytes.Add((byte)(Client.TimeOut >> 0 & 0xff));
-                sendBytes.Add((byte)(((Client.TimeOut >> 8 & 0xff) & 0x3F) | ((byte)ReceiveType.Request) << 6));
+                sendBytes.Add((byte)(Client.TimeOut >> 8 & 0xff));
                 sendBytes.AddRange(sm.Data);
                 if (Client.Send(sendBytes.Count, 0, sendBytes.ToArray()) == false)
                 {

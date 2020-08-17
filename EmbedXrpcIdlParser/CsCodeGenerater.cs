@@ -11,12 +11,10 @@ namespace EmbedXrpcIdlParser
 {
     public class CsCodeGenerater : ICodeGenerater
     {
-        public FileIdlInfo IdlInfo { get; set; }
-        public GenType GenType { get; set; }
-        public void CodeGen(FileIdlInfo fileIdlInfo, GenType genType,string outputpath)
+        public CodeGenParameter CodeGenParameter { get; set; }
+        public void CodeGen(CodeGenParameter codeGenParameter)
         {
-            this.IdlInfo = fileIdlInfo;
-            this.GenType = genType;
+            CodeGenParameter = codeGenParameter;
 #if false
             var engine = new RazorLightEngineBuilder()
                 .UseFileSystemProject(Directory.GetCurrentDirectory())
@@ -24,7 +22,7 @@ namespace EmbedXrpcIdlParser
                 .Build();
             var result = engine.CompileRenderStringAsync("templateKey", File.ReadAllText("CSharpTemplate.cshtml"), this).Result;
 #endif
-            foreach (var str in fileIdlInfo.TargetStructs)
+            foreach (var str in codeGenParameter.FileIdlInfo.TargetStructs)
             {
                 if(str.BitsAttribute!=null)
                 {
@@ -39,8 +37,8 @@ namespace EmbedXrpcIdlParser
 
             result = result.Replace("<h1", string.Empty);
             result = result.Replace("/>", string.Empty);
-            File.WriteAllText(outputpath+
-                fileIdlInfo.GenerationOption.OutPutFileName + ".gen.cs", result);
+            File.WriteAllText(codeGenParameter.OutPutPath+
+                codeGenParameter.FileIdlInfo.GenerationOption.OutPutFileName + ".gen.cs", result);
         }
     }
 }

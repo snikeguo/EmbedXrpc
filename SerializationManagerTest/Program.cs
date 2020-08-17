@@ -5,33 +5,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using EmbedXrpc;
-using StudentService;
 namespace SerializationManagerTest
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Student s = new Student();
-            s.ChineseAchievement.Arlen = 1;
-            s.ChineseAchievement.Ar = new Test[] { new Test()};
-            s.ChineseAchievement.Ar[0].IntPtrsLen = 2;
-            s.ChineseAchievement.Ar[0].IntPtr = new int[2];
-            s.ChineseAchievement.Ar[0].IntPtr[0] = 3;
-            s.ChineseAchievement.Ar[0].IntPtr[1] = 4;
-            SerializationManager sm = new SerializationManager(Assembly.GetExecutingAssembly());
-            sm.IsEnableMataData = false;
-            sm.Serialize(s, 0);
-            for (int i = 0; i < sm.Index; i++)
-            {
-                Console.Write("0x{0:X},", sm.Data[i]);
-                if((i+1)%10==0)
-                {
-                    Console.Write("\n");
-                }
-            }
-            sm.Index = 0;
-            var r=sm.Deserialize(typeof(Student));
+            SerializationManager sm = new SerializationManager(Assembly.GetExecutingAssembly(),true,new List<byte>());
             Console.ReadLine();
         }
     }
@@ -40,6 +20,9 @@ namespace SerializationManagerTest
  *
  0x01,0x02,0x03,0x00,0x00,0x00,0x04,0x00,0x00,0x00,
  *
+ 0xB,0x4B,0x8A,0x1,0x1,0x2,0xBA,0x1,0x2,0x51,
+0x3,0x0,0x0,0x0,0x4,0x0,0x0,0x0,0x7F,0x7F,
+0x7F,
  * 
 SerializeKey FieldNumber:0,Type:TYPE_OBJECT
 SerializeKey FieldNumber:4,Type:TYPE_OBJECT

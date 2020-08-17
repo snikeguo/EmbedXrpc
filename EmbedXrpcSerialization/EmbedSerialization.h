@@ -305,7 +305,7 @@ public:
 	uint8_t* Buf = nullptr;
 	uint32_t BufferLen = 0;
 	BlockRingBufferProvider* BlockBufferProvider=nullptr;
-	bool IsEnableMataData = false;
+	bool IsEnableMataDataEncode = false;
 	/*
 		第一个字节：FieldNumber<<4|Field;如果FieldNumber超出了16,则最高位为1,下一字节也是FieldNumber
 		第二字节：继续FieldNumber.....
@@ -315,7 +315,7 @@ public:
 	{
 		/*Buf[Index++] = FieldNumber;
 		Buf[Index++] = Field;
-		printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
+		Debug("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
 		Debug("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);
 		uint32_t shiftfn = 0;
 		uint32_t next_shiftfn = 0;
@@ -343,10 +343,10 @@ public:
 			shiftfn = shiftfn >> 7;
 		} 
 	}
-	void SerializeLen(uint64_t  Len)
+	void SerializeLen(uint32_t  Len)
 	{
-		Debug("SerializeLen:%lld\n", Len);
-		uint64_t next_shiftlen = 0;		
+		Debug("SerializeLen:%d\n", Len);
+		uint32_t next_shiftlen = 0;	
 		do
 		{
 			next_shiftlen = Len >> 7;
@@ -357,7 +357,7 @@ public:
 			}
 			else
 			{
-				Buf[Index++] = Len | 0x80;
+				Buf[Index++] = (uint8_t)(Len | 0x80);
 			}
 			
 			Len = Len >> 7;
@@ -370,7 +370,18 @@ public:
 	}
 	bool IsEnd()
 	{
-		return Buf[Index] == 0x7F;
+		if (BlockBufferProvider != nullptr)
+		{
+			uint8_t end = 0;
+			BlockBufferProvider->ViewChar(&end, 0);
+			return end == 0x7f;
+		}
+		else
+		{
+			uint8_t* pbuf = Buf;
+			return pbuf[Index] == 0x7F;
+		}
+		
 	}
 	void SerializeArrayElementFlag(uint8_t flag)
 	{
@@ -384,17 +395,18 @@ public:
 		Debug("SerializeValue:\n");
 		for (size_t i = Index; i < Len+Index; i++)
 		{
-			printf("%d,", Buf[i]);
+			Debug("%d,", Buf[i]);
 			if ((i-Index + 1) % 10 == 0)
 			{
-				printf("\n");
+				Debug("\n");
 			}
 		}
-		printf("\n");
+		Debug("\n");
 		Index += Len;
 	}
 	bool Pop(uint8_t* out_buf, uint32_t len)
 	{
+
 		if (len + Index > BufferLen)
 		{
 			return false;
@@ -424,25 +436,41 @@ public:
 	void Reset()
 	{
 		Index = 0;
+		if (BlockBufferProvider != nullptr)
+		{
+			BlockBufferProvider->Reset();
+		}
 	}
+#define ViewCharFromBuffer(ch,offset)	\
+		if(BlockBufferProvider!=nullptr)\
+		{\
+			BlockBufferProvider->ViewChar(&ch,offset);\
+		}\
+		else\
+		{\
+			ch = Buf[Index + offset];\
+		}
 	uint32_t GetKeyFromSerializationManager(uint32_t* fn, Type_t* type)
 	{
 		uint32_t f=0;
 		uint8_t used = 0;
 		uint8_t temp = 0;
+		uint8_t Elementvalue = 0;
+		ViewCharFromBuffer(Elementvalue, 0);
 		if (type != nullptr)
 		{
-			*type = (Type_t)(Buf[Index] & 0x0F);
+			*type = (Type_t)(Elementvalue & 0x0F);
 			EmbedSerializationAssert(*type <= TYPE_OBJECT);
 		}
-		temp = (Buf[Index] >> 4) & 0x07;//先把最低三位保存起来
+		temp = (Elementvalue >> 4) & 0x07;//先把最低三位保存起来
 		used++;
-		if ((Buf[Index] & 0x80) != 0)
+		if ((Elementvalue & 0x80) != 0)
 		{
 			do
 			{
-				f = ((Buf[Index + used] & 0x7f) << (used -1) * 7) | f;
-				if ((Buf[Index + used] & 0x80) == 0)
+				ViewCharFromBuffer(Elementvalue, used);
+				f = ((Elementvalue & 0x7f) << (used - 1) * 7) | f;
+				if ((Elementvalue & 0x80) == 0)
 				{
 					used++;
 					break;
@@ -463,16 +491,20 @@ public:
 	void RemoveKeyFromSerializationManager()
 	{
 		uint32_t ind = GetKeyFromSerializationManager(nullptr, nullptr);
+		if(BlockBufferProvider!=nullptr)
+			BlockBufferProvider->PopChars(nullptr, ind);
 		Index += ind;
 	}
-	uint8_t GetArrayLenFromSerializationManager(uint64_t* arrayLen)
+	uint8_t GetArrayLenFromSerializationManager(uint32_t* arrayLen)
 	{
 		uint8_t used = 0;
-		uint64_t al = 0;
+		uint32_t al = 0;
+		uint8_t Elementvalue = 0;
 		do
 		{
-			al = ((uint64_t)(Buf[Index + used] & 0x7f) << (used * 7)) | al;
-			if ((Buf[Index + used] & 0x80) == 0)
+			ViewCharFromBuffer(Elementvalue, used);
+			al = ((uint64_t)(Elementvalue & 0x7f) << (used * 7)) | al;
+			if ((Elementvalue & 0x80) == 0)
 			{
 				used++;
 				break;
@@ -486,29 +518,39 @@ public:
 		{
 			*arrayLen = al;
 		}
+
 		return used;
 	}
 	void RemoveArrayLenFromSerializationManager()
 	{
 		uint8_t ind = GetArrayLenFromSerializationManager(nullptr);
+		if (BlockBufferProvider != nullptr)
+			BlockBufferProvider->PopChars(nullptr, ind);
 		Index += ind;
 	}
 	uint8_t GetArrayElementFlag()
 	{
-		return Buf[Index];
+		uint8_t Elementvalue = 0;
+		ViewCharFromBuffer(Elementvalue, 0);
+		return Elementvalue;
+		
 	}
 	void RemoveArrayElementFlagFromSerializationManager()
 	{
+		if (BlockBufferProvider != nullptr)
+			BlockBufferProvider->GetChar(nullptr);
 		Index++;
 	}
 	void RemoveEndFlagFromSerializationManager()
 	{
+		if (BlockBufferProvider != nullptr)
+			BlockBufferProvider->GetChar(nullptr);
 		Index++;
 	}
 public:
 	void Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber=0)
 	{
-		if (IsEnableMataData == true)
+		if (IsEnableMataDataEncode == true)
 		{
 			SerializeKey(fieldNumber, TYPE_OBJECT);
 			SerializeSubField(objectType, objectData);
@@ -543,7 +585,7 @@ private:
 
 				SerializeKey(objectType->SubFields[i]->GetFieldNumber(), TYPE_ARRAY);
 
-				uint64_t len = 1;
+				uint32_t len = 1;
 
 				if (arrayLenField != nullptr)
 				{
@@ -666,7 +708,7 @@ private:
 public:
 	bool Deserialize(const ObjectType* objectType, void* objectPoint,uint32_t fieldNumber=0)
 	{
-		if (IsEnableMataData == true)
+		if (IsEnableMataDataEncode == true)
 		{
 			uint32_t fn = 0;//Pop一次KEY 因为打包的时候是按照field打包的，所以这里要把KEY 要POP出来一次
 			Type_t tp = TYPE_UINT8;
@@ -715,7 +757,7 @@ private:
 			}
 			else if (tp == TYPE_ARRAY)
 			{
-				uint64_t arraylen = 0;
+				uint32_t arraylen = 0;
 				
 				uint8_t sizeOfArrayLenInStream=GetArrayLenFromSerializationManager(&arraylen);
 				RemoveArrayLenFromSerializationManager();
@@ -843,7 +885,7 @@ private:
 				ArrayField* arrayfield = nullptr;
 				ArrayType* arrayType = nullptr;
 				void* ptr = d;
-				uint64_t arraylen = 1;
+				uint32_t arraylen = 1;
 
 				ptr = d;
 				arrayfield = (ArrayField*)objectType->SubFields[i];
@@ -910,9 +952,10 @@ private:
 				FuntionReturn(NoMataData_DeserializeSubField(subObjectType, d));
 			}
 		}
+		return true;
 	}
 public:
-	void Free(const ObjectType* objectType, void* objectData)
+	static void Free(const ObjectType* objectType, void* objectData)
 	{
 		for (uint32_t i = 0; i < objectType->FieldCount; i++)
 		{

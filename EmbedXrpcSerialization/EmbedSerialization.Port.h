@@ -33,7 +33,7 @@ typedef bool Boolean;
 #define MALLOC	MyMalloc
 #define FREE	MyFree
 #define MEMCPY	memcpy
-#define Debug  printf
+#define Debug  //printf
 #define EmbedSerializationAssert assert
 #endif
 

@@ -34,9 +34,44 @@ bool BlockRingBufferProvider::GetChar(uint8_t* ch)
 	{
 		return false;
 	}
-	*ch = tch;
+	if(ch!=nullptr)
+		*ch = tch;
 	CalculateSumValue += tch;
 	return  true;
+}
+bool BlockRingBufferProvider::ViewChar(uint8_t* ch,uint16_t offset)
+{
+	if (Size == 0 || Pool == nullptr)
+		return false;
+	uint8_t tch = 0;
+	uint32_t size = 0;
+	Porter->TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
+	size = rt_ringbuffer_viewchar(&RingBuffer, &tch,offset);
+	Porter->ReleaseMutex(Mutex);
+	if (size == 0)
+	{
+		return false;
+	}
+	if (ch != nullptr)
+		*ch = tch;
+	return  true;
+}
+bool BlockRingBufferProvider::PopChars(uint8_t* ch, uint16_t len)
+{
+	for (uint16_t i = 0; i < len; i++)
+	{
+		if (ch != nullptr)
+		{
+			if (GetChar(&ch[i]) == false) 
+				return false;
+		}
+		else
+		{
+			if (GetChar(nullptr) == false)
+				return false;
+		}
+	}
+	return true;
 }
 bool BlockRingBufferProvider::Receive(BlockBufferItemInfo* item, uint32_t timeout)
 {

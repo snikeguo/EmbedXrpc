@@ -17,7 +17,7 @@ class Inter_AddService:public IService
 {
 public:
 uint16_t GetSid(){return Inter_Add_ServiceId;}
-Inter_Add_RequestResponseContent Response;
+Inter_Add_Return Response;
 void Add(Int32 a,Int32 b);
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };
@@ -25,7 +25,7 @@ class Inter_NoArgService:public IService
 {
 public:
 uint16_t GetSid(){return Inter_NoArg_ServiceId;}
-Inter_NoArg_RequestResponseContent Response;
+Inter_NoArg_Return Response;
 void NoArg();
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };
@@ -33,7 +33,7 @@ class Inter_NoReturnService:public IService
 {
 public:
 uint16_t GetSid(){return Inter_NoReturn_ServiceId;}
-void NoReturn();
+void NoReturn(Int32 a);
 void Invoke(SerializationManager &recManager, SerializationManager& sendManager);
 };
 class Inter_NoArgAndReturnService:public IService

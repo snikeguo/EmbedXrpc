@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -54,17 +55,14 @@ namespace EmbedXrpc
             Index++;
             data.Add(d);
         }*/
-        public void Reset()
-        {
-            data.Clear();
-            Index = 0;
-        }
-        bool IsEnableMataData { get; set; } = false;
+        
+        public bool IsEnableMataDataEncode { get; set; } = false;
         void SerializeKey(UInt32 FieldNumber, Type_t Field)
         {
             /*Buf[Index++] = FieldNumber;
             Buf[Index++] = Field;
             printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
+            //Console.WriteLine($"SerializeKey:{FieldNumber},{Field.ToString()}");
             UInt32 shiftfn = 0;
             UInt32 next_shiftfn = 0;
             if ((FieldNumber >> 3) != 0)
@@ -99,9 +97,10 @@ namespace EmbedXrpc
                 shiftfn = shiftfn >> 7;
             }
         }
-        void SerializeLen(Int64 Len)
+        void SerializeLen(UInt32 Len)
         {
-            Int64 next_shiftlen = 0;
+            //Console.WriteLine($"SerializeLen:{Len}");
+            UInt32 next_shiftlen = 0;
             do
             {
                 next_shiftlen = Len >> 7;
@@ -124,6 +123,7 @@ namespace EmbedXrpc
         }
         void SerializeEndFlag()
         {
+            //Console.WriteLine("SerializeEndFlag");
             byte data = 0x7F;
             Data.Add(data);
             Index++;
@@ -135,12 +135,14 @@ namespace EmbedXrpc
         }
         void SerializeArrayElementFlag(byte flag)
         {
+            //Console.WriteLine("SerializeArrayElementFlag:0x{0:X}",flag);
             Data.Add(flag);
             Index += 1;
             //printf("SerializeArrayElementFlag:0x%x\n", flag);
         }
         void SerializeValue(byte[] v)//base value used
         {
+            //Console.WriteLine("SerializeValue");
             Data.AddRange(v);            
             Index += v.Length;
         }
@@ -154,15 +156,95 @@ namespace EmbedXrpc
             if (out_buf != null)
             {
                 MEMCPY(out_buf, &Buf[Index], len);
-                Array.Copy
+                Array.Copy()
             }
             Index += len;
             return true;
         }*/
+        UInt32 GetKeyFromSerializationManager(ref UInt32 fn, ref Type_t type)
+        {
+            UInt32 f = 0;
+            byte used = 0;
+            byte temp = 0;
+            type = (Type_t)(Data[Index] & 0x0F);
+            if(type> Type_t.TYPE_OBJECT)
+            {
+                throw new InvalidDataException();
+            }
+            temp = (byte)((Data[Index] >> 4) & 0x07);//先把最低三位保存起来
+            used++;
+            if ((Data[Index] & 0x80) != 0)
+            {
+                do
+                {
+                    f = (UInt32)(((UInt32)(Data[Index + used] & 0x7f) << (used - 1) * 7) | f);
+                    if ((Data[Index + used] & 0x80) == 0)
+                    {
+                        used++;
+                        break;
+                    }
+                    else
+                    {
+                        used++;
+                    }
+                } while (true);
+            }
+            f = f << 3 | temp;
+            fn = f;
+            return used;
+        }
+        void RemoveKeyFromSerializationManager()
+        {
+            UInt32 fn=0;
+            Type_t t = Type_t.TYPE_OBJECT;
+            UInt32 ind = GetKeyFromSerializationManager(ref fn, ref t);
+            Index += (int)ind;
+        }
+        byte GetArrayLenFromSerializationManager(ref UInt32 arrayLen)
+        {
+            byte used = 0;
+            UInt32 al = 0;
+            do
+            {
+                al = ((UInt32)(Data[Index + used] & 0x7f) << (used * 7)) | al;
+                if ((Data[Index + used] & 0x80) == 0)
+                {
+                    used++;
+                    break;
+                }
+                else
+                {
+                    used++;
+                }
+            } while (true);
+            arrayLen = al;
+            return used;
+        }
+        void RemoveArrayLenFromSerializationManager()
+        {
+            UInt32 al = 0;
+            byte ind = GetArrayLenFromSerializationManager(ref al);
+            Index += ind;
+        }
+        byte GetArrayElementFlag()
+        {
+            return Data[Index];
+        }
+        void RemoveArrayElementFlagFromSerializationManager()
+        {
+            Index++;
+        }
+        void RemoveEndFlagFromSerializationManager()
+        {
+            Index++;
+        }
         private Assembly Assembly;
-        public SerializationManager(Assembly assembly)
+        public SerializationManager(Assembly assembly,bool isEnableMataDataEncode,List<byte> data)
         {
             Assembly = assembly;
+            IsEnableMataDataEncode = isEnableMataDataEncode;
+            Data = data;
+            Index = 0;
         }
         public void ToBytes( bool d)
         {
@@ -240,50 +322,7 @@ namespace EmbedXrpc
             Data.Add((byte)(d >> 56 & 0xFF));
             Index += 8;
         }
-        /*private bool IsBaseValueType(Type t)
-        {
-            if (t.IsEnum == true)
-            {
-                return true;
-            }
-            if (t == typeof(bool))
-            {
-                return true;
-            }
-            if (t == typeof(byte))
-            {
-                return true;
-            }
-            if (t == typeof(sbyte))
-            {
-                return true;
-            }
-            if (t == typeof(UInt16))
-            {
-                return true;
-            }
-            if (t == typeof(Int16))
-            {
-                return true;
-            }
-            if (t == typeof(UInt32))
-            {
-                return true;
-            }
-            if (t == typeof(Int32))
-            {
-                return true;
-            }
-            if (t == typeof(UInt64))
-            {
-                return true;
-            }
-            if (t == typeof(Int64))
-            {
-                return true;
-            }
-            return false;
-        }*/
+        
         private bool IsBaseValueType(Type vt,ref Type_t mytype)
         {
             if (vt.IsEnum == true)
@@ -335,9 +374,19 @@ namespace EmbedXrpc
                 mytype = Type_t.TYPE_INT64;
                 return true;
             }
+            else if(vt.IsArray==true)
+            {
+                mytype = Type_t.TYPE_ARRAY;
+                return false;
+            }
+            else if (vt.IsClass == true)
+            {
+                mytype = Type_t.TYPE_OBJECT;
+                return false;
+            }
             else
             {
-                return false;
+                throw new InvalidDataException();
             }
         }
         private void BaseValueSerialize(object v)
@@ -400,14 +449,14 @@ namespace EmbedXrpc
         }
         public void Serialize(object s,UInt32 fieldNumber)
         {
-            if (IsEnableMataData == true)
+            if (IsEnableMataDataEncode == true)
             {
                 SerializeKey(fieldNumber,Type_t.TYPE_OBJECT);
                 SerializeSubField(s);
             }
             else
             {
-                //NoMataData_SerializeSubField(objectType, objectData);
+                NoMataData_SerializeSubField(s);
             }
         }
         void SerializeSubField(object s)
@@ -418,16 +467,18 @@ namespace EmbedXrpc
             {
                 object v = field.GetValue(s);
                 var vt = v.GetType();
-                FieldNumberAttribute fieldNumberAttribute = vt.GetCustomAttribute<FieldNumberAttribute>();
+                FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
+                ArrayLenFieldFlagAttribute IsArrayLenFieldAttribute = field.GetCustomAttribute<ArrayLenFieldFlagAttribute>();
                 if (vt.IsArray == false)
                 {
                     Type_t lost_t = Type_t.TYPE_OBJECT;
-                    if (IsBaseValueType(vt,ref lost_t) == true)
+                    bool isBaseValueTypeFlag = IsBaseValueType(vt, ref lost_t);
+                    if (isBaseValueTypeFlag == true && IsArrayLenFieldAttribute.Flag == false)
                     {
                         SerializeKey(fieldNumberAttribute.Number, lost_t);
                         BaseValueSerialize(v);
                     }
-                    else
+                    else if(lost_t== Type_t.TYPE_OBJECT)
                     {
                         Serialize(v, fieldNumberAttribute.Number);
                     }
@@ -444,10 +495,10 @@ namespace EmbedXrpc
                     var lenfield = from lf in pros
                                    where lf.Name == att.LenFieldName
                                    select lf;
-                    Int64 len = 1;
+                    UInt32 len = 1;
                     if (lenfield.ToList().Count != 0)
                     {
-                        len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                        len = Convert.ToUInt32(lenfield.ToList()[0].GetValue(s));
                     }
                     SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
                     SerializeLen(len);
@@ -474,62 +525,400 @@ namespace EmbedXrpc
                     
                 }
             }
+            SerializeEndFlag();
         }
-#if false
-        public void Serialize2(object s)
+        void NoMataData_SerializeSubField(object s)
         {
             Type st = s.GetType();
-            if (IsBaseValueType(st) == true)
+            var pros = st.GetProperties();
+            foreach (var field in pros)
             {
-                BaseValueSerialize(s);
-            }
-            else
-            {
-                var pros = st.GetProperties();
-                foreach (var field in pros)
+                object v = field.GetValue(s);
+                var vt = v.GetType();
+                FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
+                if (vt.IsArray == false)
                 {
-                    object v = field.GetValue(s);
-                    var vt = v.GetType();
-                    if (vt.IsArray == false)
+                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    bool isBaseValueTypeFlag = IsBaseValueType(vt, ref lost_t);
+                    if (isBaseValueTypeFlag == true)
                     {
-                        if (IsBaseValueType(vt) == true)
+                        //SerializeKey(fieldNumberAttribute.Number, lost_t);
+                        BaseValueSerialize(v);
+                    }
+                    else if(lost_t== Type_t.TYPE_OBJECT)
+                    {
+                        Serialize(v, fieldNumberAttribute.Number);
+                    }
+                }
+                else
+                {
+                    //object[] arrayValue = (object[])v;
+                    object[] arrayValue = ConvertArray(v as Array);
+                    ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
+                    if (att == null)
+                    {
+                        throw new Exception("ArrayPropertyAttribute is null!");
+                    }
+                    var lenfield = from lf in pros
+                                   where lf.Name == att.LenFieldName
+                                   select lf;
+                    UInt32 len = 1;
+                    if (lenfield.ToList().Count != 0)
+                    {
+                        len = Convert.ToUInt32(lenfield.ToList()[0].GetValue(s));
+                    }
+                    //SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
+                    //SerializeLen(len);
+                    var aet = (v as Array).GetType().GetElementType();
+                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    if (IsBaseValueType(aet, ref lost_t) == true)
+                    {
+                        //SerializeArrayElementFlag((byte)((byte)lost_t << 4 | 0x01));
+                        for (Int64 i = 0; i < len; i++)
                         {
-                            BaseValueSerialize(v);
-                        }
-                        else
-                        {
-                            Serialize(sm, v);
+                            var aev = arrayValue[i];
+                            BaseValueSerialize(aev);
                         }
                     }
                     else
                     {
-                        //object[] arrayValue = (object[])v;
-                        object[] arrayValue = ConvertArray(v as Array);
-                        ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
-                        if (att == null)
-                        {
-                            throw new Exception("ArrayPropertyAttribute is null!");
-                        }
-                        var lenfield = from lf in pros
-                                       where lf.Name == att.LenFieldName
-                                       select lf;
-                        Int64 len = 1;
-                        if (lenfield.ToList().Count != 0)
-                        {
-                            len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
-                        }
+                        //SerializeArrayElementFlag(0x02);
                         for (Int64 i = 0; i < len; i++)
                         {
                             var aev = arrayValue[i];
-                            Serialize(sm, aev);
+                            NoMataData_SerializeSubField(aev);
                         }
                     }
 
                 }
             }
-
+            //SerializeEndFlag();
         }
-#endif    
+        public object FromBytes(int len)
+        {
+            if (len == 1)
+            {
+                var v = Data[Index];
+                Index++;
+                return v;
+            }
+            else if (len == 2)
+            {
+                var v = Data[Index + 1] << 8 | Data[Index];
+                Index += 2;
+                return v;
+            }
+            else if (len == 4)
+            {
+                var v = Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index];
+                Index += 4;
+                return v;
+            }
+            else if (len == 8)
+            {
+                var v = Data[Index + 7] << 56 | Data[Index + 6] << 48 | Data[Index + 5] << 40 | Data[Index + 4] << 32
+                    | Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index];
+                Index += 8;
+                return v;
+            }
+            throw new InvalidDataException($"len is {len},but len only support 1/2/4/8");
+        }
+
+        public T Deserialize<T>()
+        {
+            return (T)Deserialize(typeof(T));
+        }
+        public object Deserialize(Type st)
+        {
+            var s = Assembly.CreateInstance(st.FullName);
+            if (IsEnableMataDataEncode == true)
+            {
+                UInt32 fn = 0;//Pop一次KEY 因为打包的时候是按照field打包的，所以这里要把KEY 要POP出来一次
+                Type_t tp = Type_t.TYPE_UINT8;
+                GetKeyFromSerializationManager(ref fn, ref tp);
+                RemoveKeyFromSerializationManager();
+                if (fn == 0 && tp ==  Type_t.TYPE_OBJECT)
+                {
+                    DeserializeSubField(st, s);//如果fieldNumber 为0 说明这是第一次进来,也就是最顶级的结构体，最顶级的结构体执行完毕后,就要退出
+                }
+            }
+            else
+            {
+                NoMataData_DeserializeSubField(st, s);
+            }
+            return s;
+        }
+        public bool DeserializeSubField(Type st,object localstruct)
+        {
+            UInt32 fn = 0;
+            Type_t tp =  Type_t.TYPE_UINT8;
+            PropertyInfo[] pros = new PropertyInfo[0];
+            if(st!=null)//st有可能是null 要给pros赋一个长度为0的数组
+            {
+                pros = st.GetProperties();
+            }
+            
+            while (!IsEnd())//并没有到结构体定界符以及 没有遍历完数据流	&& Index < BufferLen
+            {
+                GetKeyFromSerializationManager(ref fn, ref tp);
+                RemoveKeyFromSerializationManager();
+                var targetfieldinfos = (from bs in pros where bs.GetCustomAttribute<FieldNumberAttribute>().Number == fn select bs).ToList();
+                if (tp <=  Type_t.TYPE_DOUBLE)
+                {
+                    var fieldValue=BaseValueDeserialize(tp);
+                    if (targetfieldinfos.Count>0 && localstruct!=null)
+                    {
+                        targetfieldinfos[0].SetValue(localstruct, fieldValue);
+                    }
+                }
+                else if(tp== Type_t.TYPE_ARRAY)
+                {
+                    UInt32 arraylen = 0;
+
+                    byte sizeOfArrayLenInStream = GetArrayLenFromSerializationManager(ref arraylen);
+                    RemoveArrayLenFromSerializationManager();
+
+                    byte baseValueTypeFlag = GetArrayElementFlag();
+                    RemoveArrayElementFlagFromSerializationManager();
+
+                    if(! ((((baseValueTypeFlag & 0x0F) == 1) && ((Type_t)(baseValueTypeFlag >> 4) <= Type_t.TYPE_DOUBLE)) || (baseValueTypeFlag == 0x02)))
+                    {
+                        throw new InvalidDataException();
+                    }
+
+                    Array arrayfield = null;
+                    Type arrayElementTypeOfLocalType = null;
+                    if (targetfieldinfos.Count>0)
+                    {
+                        ArrayPropertyAttribute att = targetfieldinfos[0].GetCustomAttribute<ArrayPropertyAttribute>();
+                        if (att == null)
+                        {
+                            throw new Exception("ArrayPropertyAttribute is null!");
+                        }
+                        var lenfield = (from lf in pros
+                                       where lf.Name == att.LenFieldName
+                                       select lf).ToList();
+                        //UInt64 len = 1;
+                        if (lenfield.Count != 0)
+                        {
+                            //执行到这一步的时候 len字段的值必须被设置好(也就是说必须被反序列化完毕)
+                            //从编写IDL文件方面来说，len字段必须放到array字段的前面;
+                            //len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
+                            if (localstruct != null)
+                            { 
+                                lenfield[0].SetValue(localstruct,Convert.ChangeType(arraylen, lenfield[0].PropertyType));//设置len字段
+                            }
+                        }
+                        arrayElementTypeOfLocalType = targetfieldinfos[0].PropertyType.GetElementType();
+                        arrayfield = Array.CreateInstance(arrayElementTypeOfLocalType, (int)arraylen);
+                        /*
+                        arrayfield = Array.CreateInstance(aet, (int)len);
+                        for (UInt64 i = 0; i < len; i++)
+                        {
+                            var item = Deserialize(aet);
+                            arrayfield.SetValue(item, (int)i);
+                        }
+                        targetfields[0].SetValue(s, arrayfield);*/
+                    }
+                    if ((baseValueTypeFlag & 0x0F) == 0x01)//base value type
+                    {
+                        Type_t aet = (Type_t)(baseValueTypeFlag >> 4 & 0x0F);
+                        if(aet>Type_t.TYPE_DOUBLE)
+                        {
+                            throw new InvalidDataException();
+                        }
+                        for (UInt64 j = 0; j < arraylen; j++)
+                        {
+                            var aev=BaseValueDeserialize(aet);
+                            if(arrayfield!=null)
+                            {
+                                arrayfield.SetValue(aev, (int)j);
+                            }
+                        }
+                        if(targetfieldinfos.Count>0 && localstruct != null)
+                        {
+                            targetfieldinfos[0].SetValue(localstruct, arrayfield);
+                        }
+                    }
+                    else
+                    {
+                        
+                        for (UInt64 j = 0; j < arraylen; j++)
+                        {
+                            if(arrayfield!=null)
+                            {
+                                var arrayElementObject=Assembly.CreateInstance(arrayElementTypeOfLocalType.FullName);
+                                DeserializeSubField(arrayElementTypeOfLocalType, arrayElementObject);
+                                arrayfield.SetValue(arrayElementObject, (int)j);
+                            }
+                            else
+                            {
+                                DeserializeSubField(null, null);
+                            }
+                        }
+                        if (targetfieldinfos.Count > 0 && localstruct != null)
+                        {
+                            targetfieldinfos[0].SetValue(localstruct, arrayfield);
+                        }
+                    }
+                }
+                else if(tp== Type_t.TYPE_OBJECT)
+                {
+                    if (targetfieldinfos.Count > 0 && localstruct != null)
+                    {
+                        var sof = Assembly.CreateInstance(targetfieldinfos[0].PropertyType.FullName);
+                        DeserializeSubField(targetfieldinfos[0].PropertyType, sof);
+                        targetfieldinfos[0].SetValue(localstruct, sof);
+                    }
+                    else
+                    {
+                        DeserializeSubField(null, null);
+                    }
+                }
+            }
+            RemoveEndFlagFromSerializationManager();
+            return true;
+        }
+        public bool NoMataData_DeserializeSubField(Type st, object localstruct)
+        {
+            PropertyInfo[] pros = new PropertyInfo[0];
+            if (st != null)//st有可能是null 要给pros赋一个长度为0的数组
+            {
+                pros = st.GetProperties();
+            }
+            foreach (var fieldinfo in pros)
+            {
+                Type_t tp = Type_t.TYPE_OBJECT;
+                IsBaseValueType(fieldinfo.PropertyType, ref tp);
+                if(tp <= Type_t.TYPE_DOUBLE)
+                {
+                    var fieldValue = BaseValueDeserialize(tp);
+                    fieldinfo.SetValue(localstruct, fieldValue);
+                }
+                else if (tp == Type_t.TYPE_ARRAY)
+                {
+                    UInt32 arraylen = 0;
+                    Array arrayfield = null;
+                    Type arrayElementTypeOfLocalType = null;
+                    ArrayPropertyAttribute att = fieldinfo.GetCustomAttribute<ArrayPropertyAttribute>();
+                    if (att == null)
+                    {
+                        throw new Exception("ArrayPropertyAttribute is null!");
+                    }
+                    var lenfield = (from lf in pros
+                                    where lf.Name == att.LenFieldName
+                                    select lf).ToList();
+                    //UInt64 len = 1;
+                    if (lenfield.Count != 0)
+                    {
+                        //执行到这一步的时候 len字段的值必须被设置好(也就是说必须被反序列化完毕)
+                        //从编写IDL文件方面来说，len字段必须放到array字段的前面;
+                        arraylen = Convert.ToUInt32(lenfield.ToList()[0].GetValue(localstruct));
+                    }
+                    arrayElementTypeOfLocalType = fieldinfo.PropertyType.GetElementType();
+                    arrayfield = Array.CreateInstance(arrayElementTypeOfLocalType, (int)arraylen);
+                    Type_t aet = Type_t.TYPE_OBJECT;
+                    bool isbaseValueTypeOfArrayElementType = IsBaseValueType(arrayElementTypeOfLocalType, ref aet);
+                    if (isbaseValueTypeOfArrayElementType)//base value type
+                    {
+                        if (aet > Type_t.TYPE_DOUBLE)
+                        {
+                            throw new InvalidDataException();
+                        }
+                        for (UInt64 j = 0; j < arraylen; j++)
+                        {
+                            var aev = BaseValueDeserialize(aet);
+                            if (arrayfield != null)
+                            {
+                                arrayfield.SetValue(aev, (int)j);
+                            }
+                        }
+                        fieldinfo.SetValue(localstruct, arrayfield);
+                    }
+                    else
+                    {
+
+                        for (UInt64 j = 0; j < arraylen; j++)
+                        {
+                            if (arrayfield != null)
+                            {
+                                var arrayElementObject = Assembly.CreateInstance(arrayElementTypeOfLocalType.FullName);
+                                NoMataData_DeserializeSubField(arrayElementTypeOfLocalType, arrayElementObject);
+                                arrayfield.SetValue(arrayElementObject, (int)j);
+                            }
+                            else
+                            {
+                                NoMataData_DeserializeSubField(null, null);
+                            }
+                        }
+                        fieldinfo.SetValue(localstruct, arrayfield);
+                    }
+                }
+                else if (tp == Type_t.TYPE_OBJECT)
+                {
+                    var sof = Assembly.CreateInstance(fieldinfo.PropertyType.FullName);
+                    NoMataData_DeserializeSubField(fieldinfo.PropertyType, sof);
+                    fieldinfo.SetValue(localstruct, sof);
+                }
+            }
+            return true;
+        }
+        private object BaseValueDeserialize(Type_t vt)
+        {
+            if (vt ==  Type_t.TYPE_UINT8)
+            {
+                return Convert.ToByte(FromBytes( 1));
+                //field.SetValue(s, Convert.ToByte(FromBytes( 1)));
+            }
+            else if(vt == Type_t.TYPE_INT8)
+            {
+                return Convert.ToSByte(FromBytes(1));
+            }
+            else if (vt == Type_t.TYPE_UINT16)
+            {
+                return Convert.ToUInt16(FromBytes( 2));
+            }
+            else if (vt == Type_t.TYPE_INT16)
+            {
+                return Convert.ToInt16(FromBytes(2));
+            }
+            else if (vt == Type_t.TYPE_UINT32)
+            {
+                return Convert.ToUInt32(FromBytes( 4));
+                //field.SetValue(s, Convert.ToInt16(FromBytes( 2)));
+            }
+            else if (vt == Type_t.TYPE_INT32)
+            {
+                return Convert.ToInt32(FromBytes(4));
+            }
+            else if (vt == Type_t.TYPE_FLOAT)
+            {
+                return Convert.ToDouble(FromBytes(4));
+                //field.SetValue(s, Convert.ToInt16(FromBytes( 2)));
+            }
+            else if (vt == Type_t.TYPE_UINT64)
+            {
+                return Convert.ToUInt64(FromBytes( 8));
+                //field.SetValue(s, Convert.ToUInt32(FromBytes( 4)));
+            }
+            else if (vt == Type_t.TYPE_INT64)
+            {
+                return Convert.ToInt64(FromBytes(8));
+                //field.SetValue(s, Convert.ToUInt32(FromBytes( 4)));
+            }
+            else if (vt == Type_t.TYPE_DOUBLE)
+            {
+                return Convert.ToDouble(FromBytes(8));
+                //field.SetValue(s, Convert.ToUInt32(FromBytes( 4)));
+            }
+            else
+            {
+                throw new Exception("not support!");
+                //var subobj = Assembly.CreateInstance(vt.FullName);
+                //subobj = Deserialize(vt, sm);
+                //field.SetValue(s, subobj);
+            }
+        }
     }
     
 
@@ -569,7 +958,7 @@ namespace EmbedXrpc
             Length = len;
         }
     }
-    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class FieldNumberAttribute : Attribute
     {
         public FieldNumberAttribute(UInt32 number)
@@ -580,132 +969,15 @@ namespace EmbedXrpc
         // This is a named argument
         public UInt32 Number { get; set; }
     }
-#if false
-    public class Serialization
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public sealed class ArrayLenFieldFlagAttribute : Attribute
     {
+        public ArrayLenFieldFlagAttribute(bool f)
+        {
+            Flag = f;
+        }
 
-
-        public T Deserialize<T>(SerializationManager sm)
-        {
-            return (T)Deserialize(typeof(T), sm);
-        }
-        
-        private object BaseValueDeserialize(Type vt, SerializationManager sm)
-        {
-            if (vt.IsEnum == true)
-            {
-                vt = vt.GetEnumUnderlyingType();
-            }
-            if (vt == typeof(bool))
-            {
-                return Convert.ToBoolean(FromBytes(sm, 1));
-                //field.SetValue(s, Convert.ToByte(FromBytes(sm, 1)));
-            }
-            else if (vt == typeof(byte))
-            {
-                return Convert.ToByte(FromBytes(sm, 1));
-                //field.SetValue(s, Convert.ToByte(FromBytes(sm, 1)));
-            }
-            else if (vt == typeof(sbyte))
-            {
-                Convert.ToSByte(FromBytes(sm, 1));
-                //field.SetValue(s, Convert.ToSByte(FromBytes(sm, 1)));
-            }
-            else if (vt == typeof(UInt16))
-            {
-                return Convert.ToUInt16(FromBytes(sm, 2));
-                //field.SetValue(s, Convert.ToUInt16(FromBytes(sm, 2)));
-            }
-            else if (vt == typeof(Int16))
-            {
-                return Convert.ToInt16(FromBytes(sm, 2));
-                //field.SetValue(s, Convert.ToInt16(FromBytes(sm, 2)));
-            }
-            else if (vt == typeof(UInt32))
-            {
-                return Convert.ToUInt32(FromBytes(sm, 4));
-                //field.SetValue(s, Convert.ToUInt32(FromBytes(sm, 4)));
-            }
-            else if (vt == typeof(Int32))
-            {
-                return Convert.ToInt32(FromBytes(sm, 4));
-                //field.SetValue(s, Convert.ToInt32(FromBytes(sm, 4)));
-            }
-            else if (vt == typeof(UInt64))
-            {
-                return Convert.ToUInt64(FromBytes(sm, 8));
-                //field.SetValue(s, Convert.ToUInt64(FromBytes(sm, 8)));
-            }
-            else if (vt == typeof(Int64))
-            {
-                return Convert.ToInt64(FromBytes(sm, 8));
-                //field.SetValue(s, Convert.ToInt64(FromBytes(sm, 8)));
-            }
-            else
-            {
-                throw new Exception("not support!");
-                //var subobj = Assembly.CreateInstance(vt.FullName);
-                //subobj = Deserialize(vt, sm);
-                //field.SetValue(s, subobj);
-            }
-            return null;
-        }
-        public object Deserialize(Type st,SerializationManager sm)
-        {
-            if(IsBaseValueType (st)== true)
-            {
-                var re= BaseValueDeserialize(st, sm);
-                return re;
-            }
-            var s = Assembly.CreateInstance(st.FullName);
-            var pros = st.GetProperties();
-            foreach (var field in pros)
-            {
-                var vt = field.PropertyType;
-                if(vt.IsArray==false)
-                {
-                    if(IsBaseValueType(field.PropertyType) ==true)
-                    {
-                        field.SetValue(s, BaseValueDeserialize(vt, sm));
-                    }
-                    else
-                    {
-                        var subobj = Assembly.CreateInstance(vt.FullName);
-                        subobj = Deserialize(vt, sm);
-                        field.SetValue(s, subobj);
-                    }
-                }
-                else
-                {
-                    ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
-                    if (att == null)
-                    {
-                        throw new Exception("ArrayPropertyAttribute is null!");
-                    }
-                    var lenfield = from lf in pros
-                                   where lf.Name == att.LenFieldName
-                                   select lf;
-                    Int64 len = 1;
-                    if (lenfield.ToList().Count != 0)
-                    {
-                        //执行到这一步的时候 len字段的值必须被设置好(也就是说必须被反序列化完毕)
-                        //从编写IDL文件方面来说，len字段必须放到array字段的前面;
-                        len = Convert.ToInt64(lenfield.ToList()[0].GetValue(s));
-                    }
-                    var arrayfield = Array.CreateInstance(vt.GetElementType(), len);
-                    for (Int64 i = 0; i < len; i++)
-                    {
-                        var arrayElementType = vt.GetElementType();
-                        var item=Deserialize(arrayElementType, sm);
-                        arrayfield.SetValue(item, i);
-                    }
-                    field.SetValue(s, arrayfield);
-                }
-                
-            }
-            return s;
-        }
-        
+        // This is a named argument
+        public bool Flag { get; set; }
     }
-#endif
 }

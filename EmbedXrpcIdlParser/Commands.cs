@@ -56,7 +56,14 @@ namespace EmbedXrpcIdlParser
                 CppCodeGenerater cpp = new CppCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
-                    cpp.CodeGen(idlInfo.ParsedFiles[i], gt, generater.OutputPath);
+                    CodeGenParameter parameter = new CodeGenParameter()
+                    {
+                        FileIdlInfo = idlInfo.ParsedFiles[i],
+                        GenType = gt,
+                        OutPutPath = generater.OutputPath,
+                        //IsEnableMataDataEncode = generater.IsEnableMataDataEncode
+                    };
+                    cpp.CodeGen(parameter);
                 }
                 
             }
@@ -65,7 +72,14 @@ namespace EmbedXrpcIdlParser
                 CsCodeGenerater cs = new CsCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
-                    cs.CodeGen(idlInfo.ParsedFiles[i], gt, generater.OutputPath);
+                    CodeGenParameter parameter = new CodeGenParameter()
+                    {
+                        FileIdlInfo = idlInfo.ParsedFiles[i],
+                        GenType = gt,
+                        OutPutPath = generater.OutputPath,
+                        //IsEnableMataDataEncode = generater.IsEnableMataDataEncode
+                    };
+                    cs.CodeGen(parameter);
                 }
                 
             }

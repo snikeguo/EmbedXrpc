@@ -24,7 +24,9 @@ public:
 
     BlockRingBufferProvider(uint8_t *pool, uint16_t size,IEmbeXrpcPort *porter);
     ~BlockRingBufferProvider();
-    bool GetChar(uint8_t *ch);  
+    bool GetChar(uint8_t *ch);
+    bool ViewChar(uint8_t* ch, uint16_t offset);
+    bool PopChars(uint8_t* ch, uint16_t len);
     bool Receive(BlockBufferItemInfo *item, uint32_t timeout);
     bool Send(BlockBufferItemInfo* item, uint8_t *buf, uint16_t bufLen);
     void Reset();

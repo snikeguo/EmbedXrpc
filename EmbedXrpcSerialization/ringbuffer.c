@@ -256,9 +256,11 @@ rt_size_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, rt_uint8_t *ch)
         return 0;
 
     /* put character */
-    *ch = rb->buffer_ptr[rb->read_index];
-
-    if (rb->read_index == rb->buffer_size-1)
+    if (ch != NULL)
+    {
+        *ch = rb->buffer_ptr[rb->read_index];
+    }
+    if (rb->read_index == rb->buffer_size - 1)
     {
         rb->read_mirror = ~rb->read_mirror;
         rb->read_index = 0;
@@ -267,7 +269,21 @@ rt_size_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, rt_uint8_t *ch)
     {
         rb->read_index++;
     }
+    return 1;
+}
+rt_size_t rt_ringbuffer_viewchar(struct rt_ringbuffer* rb, rt_uint8_t* ch, uint16_t offset)
+{
+    RT_ASSERT(rb != RT_NULL);
 
+    /* ringbuffer is empty */
+    if (!rt_ringbuffer_data_len(rb))
+        return 0;
+
+    /* put character */
+    if (ch != NULL)
+    {
+        *ch = rb->buffer_ptr[rb->read_index+ offset];
+    }
     return 1;
 }
 //RTM_EXPORT(rt_ringbuffer_getchar);

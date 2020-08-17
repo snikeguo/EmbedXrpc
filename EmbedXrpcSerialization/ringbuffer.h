@@ -74,6 +74,7 @@ rt_size_t rt_ringbuffer_putchar(struct rt_ringbuffer *rb, const rt_uint8_t ch);
 rt_size_t rt_ringbuffer_putchar_force(struct rt_ringbuffer *rb, const rt_uint8_t ch);
 rt_size_t rt_ringbuffer_get(struct rt_ringbuffer *rb, rt_uint8_t *ptr, rt_uint16_t length);
 rt_size_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, rt_uint8_t *ch);
+rt_size_t rt_ringbuffer_viewchar(struct rt_ringbuffer* rb, rt_uint8_t* ch,uint16_t offset);
 rt_size_t rt_ringbuffer_data_len(struct rt_ringbuffer *rb);
 
 

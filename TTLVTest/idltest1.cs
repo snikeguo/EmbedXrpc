@@ -32,6 +32,13 @@ public struct Student
     Achievement ChineseAchievement; 
 }
 [FileName("idltest1.cs")]
+public delegate void DelegateTest(int index,  Student student);
+[FileName("idltest1.cs")]
+public interface MyInerface
+{
+    Student GetStudent(int index);
+}
+[FileName("idltest1.cs")]
 public class OptionProcess:IOptionProcess
 {
     public GenerationOption Process()
