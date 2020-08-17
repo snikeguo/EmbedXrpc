@@ -2,6 +2,7 @@
 using Sample1;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -67,14 +68,8 @@ namespace EmbedXrpc
                 while (true)
                 {
                     var reAdd = inter.Add(1,2);
-                    if(reAdd.State==RequestResponseState.RequestState_Failed)
-                    {
-                        throw new Exception("send failed!");
-                    }
-                    else if(reAdd.State == RequestResponseState.ResponseState_Ok)
-                    {
-                        Console.WriteLine($"{1}+{2}={reAdd.ReturnValue}");
-                    }
+                    Debug.Assert(reAdd.State == RequestResponseState.ResponseState_Ok);
+                    Console.WriteLine($"{1}+{2}={reAdd.ReturnValue}");
                     /*var reNoArg = inter.NoArg();
                     if (reNoArg.State == RequestResponseState.RequestState_Failed)
                     {
