@@ -319,10 +319,12 @@ public:
 		EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
 		BlockBufferItemInfo recData;
 		uint32_t i = 0;
+		bool isContain = false;
 		for (;;)
 		{
 			if (obj->DelegateBlockBufferProvider->Receive(&recData, 1)==true)
 			{
+				isContain = false;
 				for (uint32_t collectionIndex = 0; collectionIndex < obj->ResponseDelegateMessageMapsCount; collectionIndex++)
 				{
 					auto MessageMaps = obj->ResponseDelegateMessageMaps[collectionIndex].Map;
@@ -338,8 +340,15 @@ public:
 							rsm.BlockBufferProvider->SetCalculateSum(0);
 							rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
 							MessageMaps[i].Delegate->Invoke(rsm);
+							isContain = true;
+							goto _break;
 						}
 					}
+				}
+				_break:
+				if (isContain == false)
+				{
+					obj->DelegateBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 				}
 				//obj->porter->Free(recData.Data);
 				//XrpcDebug("Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
@@ -355,12 +364,14 @@ public:
 		EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
 		BlockBufferItemInfo recData;
 		uint32_t i = 0;
+		bool isContain = false;
 		for (;;)
 		{
 			if (obj->RequestBlockBufferProvider->Receive(&recData, EmbedXrpc_WAIT_FOREVER) != true)
 			{
 				continue;
 			}
+			isContain = false;
 			for (uint32_t collectionIndex = 0; collectionIndex < obj->RequestMessageMapsCount; collectionIndex++)
 			{
 				auto MessageMaps = obj->RequestMessageMaps[collectionIndex].Map;
@@ -398,10 +409,17 @@ public:
 							obj->Send(obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
 						}
 						obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
+
+						isContain = true;
+						goto _break;
 					}
 				}
 			}
-
+		_break:
+			if (isContain == false)
+			{
+				obj->RequestBlockBufferProvider->PopChars(nullptr, recData.DataLen);
+			}
 			//obj->porter->Free(recData.Data);
 			//XrpcDebug("Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}

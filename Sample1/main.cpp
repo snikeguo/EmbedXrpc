@@ -54,9 +54,6 @@ void ClientThread()
 		{
 			printf("%d+%d=%d\n", a,b,sum.ReturnValue);
 		}
-		/*Client.NoArg();
-		Client.NoReturn();
-		Client.NoArgAndReturn();*/
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 }

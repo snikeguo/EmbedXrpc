@@ -157,19 +157,26 @@ rt_size_t rt_ringbuffer_get(struct rt_ringbuffer *rb,
     if (rb->buffer_size - rb->read_index > length)
     {
         /* copy all of data */
-        memcpy(ptr, &rb->buffer_ptr[rb->read_index], length);
+        if (ptr != NULL)
+        {
+            memcpy(ptr, &rb->buffer_ptr[rb->read_index], length);
+        }
         /* this should not cause overflow because there is enough space for
          * length of data in current mirror */
         rb->read_index += length;
         return length;
     }
 
-    memcpy(&ptr[0],
-           &rb->buffer_ptr[rb->read_index],
-           rb->buffer_size - rb->read_index);
-    memcpy(&ptr[rb->buffer_size - rb->read_index],
-           &rb->buffer_ptr[0],
-           length - (rb->buffer_size - rb->read_index));
+    if (ptr != NULL)
+    {
+        memcpy(&ptr[0],
+            &rb->buffer_ptr[rb->read_index],
+            rb->buffer_size - rb->read_index);
+        memcpy(&ptr[rb->buffer_size - rb->read_index],
+            &rb->buffer_ptr[0],
+            length - (rb->buffer_size - rb->read_index));
+    }
+    
 
     /* we are going into the other side of the mirror */
     rb->read_mirror = ~rb->read_mirror;
