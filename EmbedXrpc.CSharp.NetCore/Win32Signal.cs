@@ -13,7 +13,7 @@ namespace David.Common
     }*/
     public class Win32BinarySignal:Win32Queue<int>
     {
-        public Win32BinarySignal():base(1)
+        public Win32BinarySignal():base()
         {          
         }
         public QueueStatus Send()

@@ -13,8 +13,8 @@ namespace EmbedXrpc
     {
         public UInt32 TimeOut { get; set; }
         public object ObjectMutex { get; private set; } = new object();
-        public Win32Queue<EmbeXrpcRawData> DelegateMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>(10);
-        public Win32Queue<EmbeXrpcRawData> ResponseMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>(10);
+        public Win32Queue<EmbeXrpcRawData> DelegateMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>();
+        public Win32Queue<EmbeXrpcRawData> ResponseMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>();
         private ResponseDelegateMessageMap[] ResponseDelegateMessageMaps { get; set; }
 
         public Send Send;
@@ -24,7 +24,7 @@ namespace EmbedXrpc
         private Timer SuspendTimer;
         private Thread RequestServiceThreadHandle;
         private Thread DelegateServiceThreadHandle;
-        private Win32Queue<EmbeXrpcRawData> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData>(10);
+        private Win32Queue<EmbeXrpcRawData> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData>();
         private RequestMessageMap[] RequestMessageMaps;
         public bool IsEnableMataDataEncode { get; set; }
         public EmbedXrpcObject(UInt32 timeout, Send send, Assembly assembly,bool isEnableMataDataEncode)

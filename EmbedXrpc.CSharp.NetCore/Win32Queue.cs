@@ -18,11 +18,10 @@ namespace David.Common
     {
         public static UInt32 Zero = 0;
         public static UInt32 MAX_Delay = 0xFFFFFFFF;
-        public Win32Queue(int capacity)
+        public Win32Queue()
         {
             //queue = new ConcurrentQueue<T>();
-            queue = new BlockingCollection<T>(new ConcurrentQueue<T>(), capacity);
-            this.capacity = capacity;
+            queue = new BlockingCollection<T>(new ConcurrentQueue<T>(),int.MaxValue);
         }
         public void Reset()
         {
@@ -33,7 +32,6 @@ namespace David.Common
             }
         }
         public int Count { get { return queue.Count; } }
-        private int capacity = 0;
         private BlockingCollection<T> queue = null;
         public QueueStatus Receive(out T r, UInt32 delayMillisecond)
         {
@@ -49,7 +47,7 @@ namespace David.Common
         }
         public QueueStatus Send(T msg)
         {
-            if (queue.Count >= this.capacity)
+            if (queue.Count > queue.BoundedCapacity)
                 return QueueStatus.Full;
             queue.TryAdd(msg,0);
             return QueueStatus.OK;
