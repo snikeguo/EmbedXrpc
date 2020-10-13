@@ -1,7 +1,7 @@
 #ifndef BlockBufferProvider_H
 #define BlockBufferProvider_H
 #include "ringbuffer.h"
-#include "EmbedXrpc.Port.h"
+#include "EmbedXrpcPortInterface.h"
 struct BlockBufferItemInfo
 {
     uint32_t DataLen=0;

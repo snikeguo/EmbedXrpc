@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.;.\FreeRTOS.Port\include;$(IncludePath)</IncludePath>
+    <IncludePath>.;.\FreeRTOS.Port\include;.\Win32.Port;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -162,16 +162,21 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlockBufferProvider.h" />
-    <ClInclude Include="EmbedSerialization.Port.h" />
-    <ClInclude Include="EmbedXrpc.Port.h" />
+    <ClInclude Include="EmbedXrpcPortInterface.h" />
     <ClInclude Include="EmbedXrpcCommon.h" />
     <ClInclude Include="EmbedXrpcObject.h" />
     <ClInclude Include="EmbedSerialization.h" />
     <ClInclude Include="EmbedXrpcServerObject.h" />
+    <ClInclude Include="FreeRTOS.Port\EmbedSerialization.Port.h" />
+    <ClInclude Include="FreeRTOS.Port\EmbedXrpc.Port.h" />
     <ClInclude Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.h" />
     <ClInclude Include="ringbuffer.h" />
+    <ClInclude Include="RT-Thread.Port\EmbedSerialization.Port.h" />
+    <ClInclude Include="RT-Thread.Port\EmbedXrpc.Port.h" />
     <ClInclude Include="RT-Thread.Port\EmbedXrpcPort.Rtt.h" />
     <ClInclude Include="Win32.Port\BlockQueue.h" />
+    <ClInclude Include="Win32.Port\EmbedSerialization.Port.h" />
+    <ClInclude Include="Win32.Port\EmbedXrpc.Port.h" />
     <ClInclude Include="Win32.Port\Semaphore.h" />
     <ClInclude Include="Win32.Port\Win32EmbedXrpcPort.h" />
   </ItemGroup>

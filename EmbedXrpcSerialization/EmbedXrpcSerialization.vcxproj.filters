@@ -24,9 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EmbedXrpc.Port.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="EmbedXrpcCommon.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -34,9 +31,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="EmbedSerialization.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="EmbedSerialization.Port.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BlockBufferProvider.h">
@@ -61,6 +55,27 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Win32.Port\Semaphore.h">
+      <Filter>WIN32.Port</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32.Port\EmbedSerialization.Port.h">
+      <Filter>WIN32.Port</Filter>
+    </ClInclude>
+    <ClInclude Include="RT-Thread.Port\EmbedSerialization.Port.h">
+      <Filter>RT-Thread.Port</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeRTOS.Port\EmbedSerialization.Port.h">
+      <Filter>FreeRTOS.Port</Filter>
+    </ClInclude>
+    <ClInclude Include="EmbedXrpcPortInterface.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeRTOS.Port\EmbedXrpc.Port.h">
+      <Filter>FreeRTOS.Port</Filter>
+    </ClInclude>
+    <ClInclude Include="RT-Thread.Port\EmbedXrpc.Port.h">
+      <Filter>RT-Thread.Port</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32.Port\EmbedXrpc.Port.h">
       <Filter>WIN32.Port</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,31 +1,10 @@
 #pragma once
-#ifndef EmbedXrpc_Port_H
-#define EmbedXrpc_Port_H
+#ifndef EmbedXrpc_PortInterface_H
+#define EmbedXrpc_PortInterface_H
 #include "EmbedSerialization.Port.h"
+#include "EmbedXrpc.Port.h"
 
-#define USE_RTOS	1
 
-
-typedef void* EmbedXrpc_Semaphore_t;
-typedef void* EmbedXrpc_Mutex_t;
-typedef void* EmbedXrpc_Thread_t;
-typedef void* EmbedXrpc_Queue_t;
-typedef void* EmbedXrpc_Semaphore_t;
-typedef void* EmbedXrpc_Timer_t;
-#define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
-#ifdef WIN32
-#include <cstdio>
-#define  XrpcDebug	//printf
-#else
-#define  XrpcDebug	//rt_kprintf
-#endif
-
-#define Server_ThreadPriority				0x6
-#define Server_RequestQueue_MaxItemNumber	20
-
-#define Client_ThreadPriority				0x6
-#define Client_DelegateMessageQueue_MaxItemNumber	20
-#define Client_ResponseMessageQueue_MaxItemNumber	20
 enum QueueState
 {
 	QueueState_Empty,
@@ -33,7 +12,7 @@ enum QueueState
 	QueueState_OK,
 	QueueState_Timeout,
 };
-#if USE_RTOS==1
+
 class IEmbeXrpcPort
 {
 public:
@@ -73,9 +52,4 @@ public:
 	virtual void Memcpy(void* d, const void* s, uint32_t size)=0;
 
 };
-#else
-
-#endif
-
-
 #endif

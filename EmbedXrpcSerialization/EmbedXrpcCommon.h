@@ -2,7 +2,7 @@
 #define EmbedXrpcCommon_H
 
 
-#include "EmbedXrpc.Port.h"
+#include "EmbedXrpcPortInterface.h"
 #include "EmbedSerialization.h"
 #define EmbedXrpcSuspendSid 0x01
 #define EmbedXrpcUnsupportedSid 0x2

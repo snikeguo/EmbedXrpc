@@ -1,6 +1,6 @@
 #ifndef Win32EmbedXrpcPort_H
 #define  Win32EmbedXrpcPort_H
-#include "EmbedXrpc.Port.h"
+#include "EmbedXrpcPortInterface.h"
 #include "BlockQueue.h"
 
 class Win32EmbedXrpcPort :public  IEmbeXrpcPort

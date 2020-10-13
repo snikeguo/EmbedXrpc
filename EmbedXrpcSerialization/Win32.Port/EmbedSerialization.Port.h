@@ -18,14 +18,7 @@ typedef  int64_t Int64;
 typedef  float Float;
 typedef  double Double;
 typedef bool Boolean;
-#ifndef WIN32
-#include <rtthread.h>
-#define MALLOC	rt_malloc
-#define FREE	rt_free
-#define MEMCPY	rt_memcpy
-#define Debug  rt_kprintf
-#define EmbedSerializationAssert RT_ASSERT
-#else 
+
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
@@ -33,11 +26,10 @@ typedef bool Boolean;
 #define MALLOC	MyMalloc
 #define FREE	MyFree
 #define MEMCPY	memcpy
-#define Debug  //printf
+#define Debug(filter_string,...)  //printf(...)
 #define EmbedSerializationAssert assert
-#endif
 
-extern void *MyMalloc(size_t t);
-extern void MyFree(void* ptr);
+void* MyMalloc(size_t size);
+void MyFree(void* ptr);
 
 #endif // EmbedSerialization_Port_H

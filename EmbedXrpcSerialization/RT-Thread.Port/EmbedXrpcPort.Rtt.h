@@ -1,6 +1,6 @@
 #ifndef EmbedXrpcPort_RTT_H
 #define EmbedXrpcPort_RTT_H
-#include "EmbedXrpc.Port.h"
+#include "EmbedXrpcPortInterface.h"
 
 class RttEmbedXrpcPort :public  IEmbeXrpcPort
 {
