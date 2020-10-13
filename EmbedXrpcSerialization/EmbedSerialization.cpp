@@ -1,4 +1,8 @@
 #include "EmbedSerialization.h"
+
+#include "EmbedSerialization.Port.h"
+#include <cstdarg>
+
 DefineBaseValueInstance(UInt8);
 DefineBaseValueInstance(Int8);
 DefineBaseValueInstance(UInt16);
@@ -43,3 +47,17 @@ const BaseValueInfo BaseValueInfos[] =
 	{&FloatTypeInstance,4},
 	{&DoubleTypeInstance,8},
 };
+static const char* FilterStrings[] = FilterStringHeader;
+void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	for (int i = 0; i < sizeof(FilterStrings) / sizeof(const char*); i++)
+	{
+		if (strcmp(FilterStrings[i], filter_string) == 0)
+		{
+			StringOutput(fmt,args);
+		}
+	}
+	va_end(args);
+}

@@ -10,6 +10,8 @@
 #define offsetof(s, m) (uint32_t)((char*)(&((s*)0)->m))
 #endif
 
+void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...);
+
 typedef  uint32_t ptr_t;
 class SerializationManager;
 
@@ -315,8 +317,8 @@ public:
 	{
 		/*Buf[Index++] = FieldNumber;
 		Buf[Index++] = Field;
-		Debug("SerializationManager","SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
-		Debug("SerializationManager","SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);
+		EmbedSerializationShowMessage("SerializationManager","SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
+		EmbedSerializationShowMessage("SerializationManager","SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);
 		uint32_t shiftfn = 0;
 		uint32_t next_shiftfn = 0;
 		if ((FieldNumber >> 3) != 0)
@@ -345,7 +347,7 @@ public:
 	}
 	void SerializeLen(uint32_t  Len)
 	{
-		Debug("SerializationManager", "SerializeLen:%d\n", Len);
+		EmbedSerializationShowMessage("SerializationManager", "SerializeLen:%d\n", Len);
 		uint32_t next_shiftlen = 0;	
 		do
 		{
@@ -366,7 +368,7 @@ public:
 	void SerializeEndFlag()
 	{
 		Buf[Index++] = 0x7F;
-		Debug("SerializationManager", "SerializeEnd\n");
+		EmbedSerializationShowMessage("SerializationManager", "SerializeEnd\n");
 	}
 	bool IsEnd()
 	{
@@ -387,21 +389,21 @@ public:
 	{
 		Buf[Index] = flag;
 		Index += 1;
-		Debug("SerializationManager", "SerializeArrayElementFlag:0x%x\n", flag);
+		EmbedSerializationShowMessage("SerializationManager", "SerializeArrayElementFlag:0x%x\n", flag);
 	}
 	void SerializeValue(uint8_t  Len, void* v)//base value used
 	{
 		MEMCPY(&Buf[Index], v, Len);
-		Debug("SerializationManager", "SerializeValue:\n");
+		EmbedSerializationShowMessage("SerializationManager", "SerializeValue:\n");
 		for (size_t i = Index; i < Len+Index; i++)
 		{
-			Debug("SerializationManager", "%d,", Buf[i]);
+			EmbedSerializationShowMessage("SerializationManager", "%d,", Buf[i]);
 			if ((i-Index + 1) % 10 == 0)
 			{
-				Debug("SerializationManager", "\n");
+				EmbedSerializationShowMessage("SerializationManager", "\n");
 			}
 		}
-		Debug("SerializationManager", "\n");
+		EmbedSerializationShowMessage("SerializationManager", "\n");
 		Index += Len;
 	}
 	bool Pop(uint8_t* out_buf, uint32_t len)
@@ -566,7 +568,7 @@ private:
 		for (uint32_t i = 0; i < objectType->FieldCount; i++)
 		{
 			void* fieldData = (void*)((uint8_t*)objectData + objectType->SubFields[i]->GetOffset());
-			//Debug("SerializationManager","Serialize:%s\n", objectType->SubFields[i]->GetName());
+			//EmbedSerializationShowMessage("SerializationManager","Serialize:%s\n", objectType->SubFields[i]->GetName());
 			Type_t typeOfSubField = objectType->SubFields[i]->GetTypeInstance()->GetType();
 			if (typeOfSubField <= TYPE_DOUBLE && objectType->SubFields[i]->IsArrayLenField() == false)
 			{
@@ -638,7 +640,7 @@ private:
 		for (uint32_t i = 0; i < objectType->FieldCount; i++)
 		{
 			void* fieldData = (void*)((uint8_t*)objectData + objectType->SubFields[i]->GetOffset());
-			Debug("SerializationManager", "Serialize:%s\n", objectType->SubFields[i]->GetName());
+			EmbedSerializationShowMessage("SerializationManager", "Serialize:%s\n", objectType->SubFields[i]->GetName());
 			Type_t typeOfSubField = objectType->SubFields[i]->GetTypeInstance()->GetType();
 			if (typeOfSubField <= TYPE_DOUBLE)
 			{
@@ -748,7 +750,7 @@ private:
 						if (fn == objectType->SubFields[i]->GetFieldNumber() && tp == objectType->SubFields[i]->GetTypeInstance()->GetType())
 						{
 							d = (void*)((uint8_t*)objectPoint + objectType->SubFields[i]->GetOffset());
-							Debug("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
+							EmbedSerializationShowMessage("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
 							break;
 						}
 					}
@@ -783,7 +785,7 @@ private:
 							ptr = d;
 							arrayfield = (ArrayField*)objectType->SubFields[i];
 							arrayType = (ArrayType*)(arrayfield->GetTypeInstance());
-							Debug("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
+							EmbedSerializationShowMessage("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
 							break;
 						}
 					}
@@ -798,7 +800,7 @@ private:
 					}
 					if (arrayfield->IsFixed() == false)
 					{
-						Debug("SerializationManager", "malloc:arrayfield:%s,", arrayfield->GetName());
+						EmbedSerializationShowMessage("SerializationManager", "malloc:arrayfield:%s,", arrayfield->GetName());
 						ptr = MALLOC(arraylen* arrayType->LengthOfSingleElement);
 						MEMCPY((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
 					}					
@@ -856,7 +858,7 @@ private:
 							d = (void*)((uint8_t*)objectPoint + objectType->SubFields[i]->GetOffset());
 							subObjectField = (ObjectField*)objectType->SubFields[i];
 							subObjectType = (ObjectType*)subObjectField->GetTypeInstance();
-							Debug("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
+							EmbedSerializationShowMessage("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
 							break;
 						}
 					}
@@ -877,7 +879,7 @@ private:
 			d = (void*)((uint8_t*)objectPoint + objectType->SubFields[i]->GetOffset());
 			if (tp <= TYPE_DOUBLE)
 			{
-				Debug("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
+				EmbedSerializationShowMessage("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
 				FuntionReturn(Pop((uint8_t*)d, BaseValueInfos[tp].DataWidth));
 			}
 			else if (tp == TYPE_ARRAY)
@@ -890,7 +892,7 @@ private:
 				ptr = d;
 				arrayfield = (ArrayField*)objectType->SubFields[i];
 				arrayType = (ArrayType*)(arrayfield->GetTypeInstance());
-				Debug("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
+				EmbedSerializationShowMessage("SerializationManager", "Deserialize:%s\n", objectType->SubFields[i]->GetName());
 
 				IField* arrayLenField = (IField*)arrayfield->GetArrayLenField();
 				if (arrayLenField != nullptr)//如果len字段不为null 就把len数据赋给len字段
@@ -900,7 +902,7 @@ private:
 				}
 				if (arrayfield->IsFixed() == false)
 				{
-					Debug("SerializationManager", "malloc:arrayfield:%s,", arrayfield->GetName());
+					EmbedSerializationShowMessage("SerializationManager", "malloc:arrayfield:%s,", arrayfield->GetName());
 					ptr = MALLOC(arraylen * arrayType->LengthOfSingleElement);
 					MEMCPY((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
 				}

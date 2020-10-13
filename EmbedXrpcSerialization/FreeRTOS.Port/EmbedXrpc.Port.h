@@ -9,7 +9,6 @@ typedef void* EmbedXrpc_Semaphore_t;
 typedef void* EmbedXrpc_Timer_t;
 #define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
-#define  XrpcDebug	Debug
 
 #define Server_ThreadPriority				0x6
 #define Server_RequestQueue_MaxItemNumber	20

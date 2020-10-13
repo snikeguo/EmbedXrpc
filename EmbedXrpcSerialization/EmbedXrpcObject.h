@@ -256,7 +256,7 @@ public:
 		ReceiveType_t rt = (ReceiveType_t)(allData[3] >> 6);
 		if (rt== ReceiveType_Response|| rt == ReceiveType_Delegate)
 		{
-			//XrpcDebug("EmbedXrpcObject","Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
+			//EmbedSerializationShowMessage("EmbedXrpcObject","Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 			if (serviceId == EmbedXrpcSuspendSid)
 			{
 				raw.Sid = serviceId;
@@ -292,7 +292,7 @@ public:
 		}
 		else if (rt == ReceiveType_Request)//server
 		{
-			//XrpcDebug("EmbedXrpcObject","Server ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
+			//EmbedSerializationShowMessage("EmbedXrpcObject","Server ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 			raw.Sid = serviceId;
 			raw.DataLen = dataLen;
 			raw.TargetTimeout = targettimeout;
@@ -351,7 +351,7 @@ public:
 					obj->DelegateBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 				}
 				//obj->porter->Free(recData.Data);
-				//XrpcDebug("EmbedXrpcObject","Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
+				//EmbedSerializationShowMessage("EmbedXrpcObject","Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 			}
 			if (obj->DeInitFlag == true)
 			{
@@ -421,7 +421,7 @@ public:
 				obj->RequestBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 			}
 			//obj->porter->Free(recData.Data);
-			//XrpcDebug("EmbedXrpcObject","Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
+			//EmbedSerializationShowMessage("EmbedXrpcObject","Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
 	}
 	RequestResponseState Wait(uint32_t sid, const ObjectType *type,void * response)
@@ -436,7 +436,7 @@ public:
 			}
 			if (recData.Sid == EmbedXrpcSuspendSid)
 			{
-				XrpcDebug("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcSuspendSid\n");
+				EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcSuspendSid\n");
 				continue;
 			}
 			if (sid != recData.Sid)
@@ -445,7 +445,7 @@ public:
 			}
 			else
 			{
-				XrpcDebug("EmbedXrpcObject", "sid == recData.Sid\n");
+				EmbedSerializationShowMessage("EmbedXrpcObject", "sid == recData.Sid\n");
 				ret = ResponseState_Ok;
 			}
 			break;

@@ -20,10 +20,11 @@ typedef  double Double;
 typedef bool Boolean;
 
 #include <rtthread.h>
+#define FilterStringHeader	{"NONE"}
+#define StringOutput(...)  rt_printf(__VA_ARGS__)
 #define MALLOC	rt_malloc
 #define FREE	rt_free
 #define MEMCPY	rt_memcpy
-#define Debug(filter_string,...)  //rt_kprintf(...)
 #define EmbedSerializationAssert RT_ASSERT
 
 

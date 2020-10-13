@@ -143,7 +143,7 @@ QueueState RttEmbedXrpcPort::SendQueue(EmbedXrpc_Queue_t queue, void *item, uint
 	}
 	else
 	{
-		XrpcDebug("RttEmbedXrpcPort::SendQueue r:%d\n", r);
+		EmbedSerializationShowMessage("EmbedXrpcPort","RttEmbedXrpcPort::SendQueue r:%d\n", r);
 		//while(true);
 	}
 	return QueueState_Full;
@@ -158,13 +158,13 @@ void *RttEmbedXrpcPort::Malloc(uint32_t size)
 {
 	auto x = rt_malloc(size);
 	RT_ASSERT(x != RT_NULL);
-	XrpcDebug("RttEmbedXrpcPort::Malloc %x\n", x);
+	EmbedSerializationShowMessage("EmbedXrpcPort", "RttEmbedXrpcPort::Malloc %x\n", x);
 	MallocCount++;
 	return x;
 }
 void RttEmbedXrpcPort::Free(void *ptr)
 {
-	XrpcDebug("RttEmbedXrpcPort::Free %x\n", ptr);
+	EmbedSerializationShowMessage("EmbedXrpcPort", "RttEmbedXrpcPort::Free %x\n", ptr);
 	rt_free(ptr);
 }
 void RttEmbedXrpcPort::Memcpy(void *d, const void *s, uint32_t size)

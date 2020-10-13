@@ -42,9 +42,6 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.cpp">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>

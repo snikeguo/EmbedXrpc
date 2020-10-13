@@ -161,13 +161,13 @@ void *FreeRtosEmbedXrpcPort::Malloc(uint32_t size)
 {
 	auto x = pvPortMalloc(size);
 	RT_ASSERT(x != RT_NULL);
-	XrpcDebug("FreeRtosEmbedXrpcPort::Malloc %x\n", x);
+	EmbedSerializationShowMessage("EmbedXrpcPort","FreeRtosEmbedXrpcPort::Malloc %x\n", x);
 	MallocCount++;
 	return x;
 }
 void FreeRtosEmbedXrpcPort::Free(void *ptr)
 {
-	XrpcDebug("FreeRtosEmbedXrpcPort::Free %x\n", ptr);
+	EmbedSerializationShowMessage("EmbedXrpcPort","FreeRtosEmbedXrpcPort::Free %x\n", ptr);
 	vPortFree(ptr);
 }
 void FreeRtosEmbedXrpcPort::Memcpy(void *d, const void *s, uint32_t size)

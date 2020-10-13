@@ -83,9 +83,6 @@
     <ClCompile Include="test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="EmbedXrpc.Port.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="EmbedSerialization.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

@@ -20,10 +20,11 @@ typedef  double Double;
 typedef bool Boolean;
 
 #include <FreeRTOS.h>
+#define FilterStringHeader	{"NONE"}
+#define StringOutput(...)  //printf(__VA_ARGS__)
 #define MALLOC	pvPortMalloc
 #define FREE	vPortFree
 #define MEMCPY	memcpy
-#define Debug(filter_string,...)  //rt_kprintf
 #define EmbedSerializationAssert configASSERT
 
 

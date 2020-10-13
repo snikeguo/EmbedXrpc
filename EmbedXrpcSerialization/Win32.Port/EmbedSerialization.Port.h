@@ -22,11 +22,12 @@ typedef bool Boolean;
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-
+#include <cstdio>
+#define FilterStringHeader	{"NONE"}
+#define StringOutput(...)  vprintf(__VA_ARGS__)
 #define MALLOC	MyMalloc
 #define FREE	MyFree
 #define MEMCPY	memcpy
-#define Debug(filter_string,...)  //printf(...)
 #define EmbedSerializationAssert assert
 
 void* MyMalloc(size_t size);
