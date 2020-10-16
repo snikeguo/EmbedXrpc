@@ -2,9 +2,7 @@
 #define RINGBUFFER_H
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 #include "EmbedSerialization.Port.h"
 #define RT_ALIGN_DOWN(size, align)      ((size) & ~((align) - 1))
 
@@ -78,11 +76,5 @@ inline uint16_t rt_ringbuffer_get_size(struct rt_ringbuffer *rb)
 
 /** return the size of empty space in rb */
 #define rt_ringbuffer_space_len(rb) ((rb)->buffer_size - rt_ringbuffer_data_len(rb))
-
-
-#ifdef __cplusplus
-}
-#endif
-
 
 #endif // RINGBUFFER_H

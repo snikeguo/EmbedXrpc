@@ -3,10 +3,19 @@
 
 #ifdef __cplusplus
 #include <cstdint>
+#include <cstring>
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+typedef bool Boolean;
 #else
 #include "stdint.h"
+#include <string.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+typedef uint8_t Boolean;
 #endif
-
 typedef  uint8_t Byte;
 typedef  int8_t SByte;
 typedef  uint16_t UInt16;
@@ -17,20 +26,16 @@ typedef  uint64_t UInt64;
 typedef  int64_t Int64;
 typedef  float Float;
 typedef  double Double;
-typedef bool Boolean;
 
-#include <cstring>
-#include <cstdlib>
-#include <cassert>
-#include <cstdio>
+
+
 #define FilterStringHeader	{"NONE"}
 #define StringOutput(...)  vprintf(__VA_ARGS__)
-#define MALLOC	MyMalloc
-#define FREE	MyFree
+#define MALLOC	malloc
+#define FREE	free
 #define MEMCPY	memcpy
 #define EmbedSerializationAssert assert
 
-void* MyMalloc(size_t size);
-void MyFree(void* ptr);
+
 
 #endif // EmbedSerialization_Port_H
