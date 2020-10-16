@@ -5,22 +5,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "stdint.h"
-#include "assert.h"
-#define RT_ASSERT   assert
-#define RTM_EXPORT
+#include "EmbedSerialization.Port.h"
 #define RT_ALIGN_DOWN(size, align)      ((size) & ~((align) - 1))
-typedef  uint8_t rt_uint8_t;
-typedef  uint16_t rt_uint16_t;
-typedef  int16_t rt_int16_t;
-typedef  uint32_t rt_size_t;
-#define RT_NULL 0
+
 #define RT_ALIGN_SIZE                    (4)
 /* ring buffer */
 struct rt_ringbuffer
 {
-    rt_uint8_t *buffer_ptr;
+    uint8_t *buffer_ptr;
     /* use the msb of the {read,write}_index as mirror bit. You can see this as
      * if the buffer adds a virtual mirror and the pointers point either to the
      * normal or to the mirrored buffer. If the write_index has the same value
@@ -43,13 +35,13 @@ struct rt_ringbuffer
      * But it should be enough for most of the cases.
      *
      * Ref: http://en.wikipedia.org/wiki/Circular_buffer#Mirroring */
-    rt_uint16_t read_mirror : 1;
-    rt_uint16_t read_index : 15;
-    rt_uint16_t write_mirror : 1;
-    rt_uint16_t write_index : 15;
+    uint16_t read_mirror : 1;
+    uint16_t read_index : 15;
+    uint16_t write_mirror : 1;
+    uint16_t write_index : 15;
     /* as we use msb of index as mirror bit, the size should be signed and
      * could only be positive. */
-    rt_int16_t buffer_size;
+    int16_t buffer_size;
 };
 
 enum rt_ringbuffer_state
@@ -66,21 +58,21 @@ enum rt_ringbuffer_state
  * Please note that the ring buffer implementation of RT-Thread
  * has no thread wait or resume feature.
  */
-void rt_ringbuffer_init(struct rt_ringbuffer *rb, rt_uint8_t *pool, rt_int16_t size);
+void rt_ringbuffer_init(struct rt_ringbuffer *rb, uint8_t *pool, int16_t size);
 void rt_ringbuffer_reset(struct rt_ringbuffer *rb);
-rt_size_t rt_ringbuffer_put(struct rt_ringbuffer *rb, const rt_uint8_t *ptr, rt_uint16_t length);
-rt_size_t rt_ringbuffer_put_force(struct rt_ringbuffer *rb, const rt_uint8_t *ptr, rt_uint16_t length);
-rt_size_t rt_ringbuffer_putchar(struct rt_ringbuffer *rb, const rt_uint8_t ch);
-rt_size_t rt_ringbuffer_putchar_force(struct rt_ringbuffer *rb, const rt_uint8_t ch);
-rt_size_t rt_ringbuffer_get(struct rt_ringbuffer *rb, rt_uint8_t *ptr, rt_uint16_t length);
-rt_size_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, rt_uint8_t *ch);
-rt_size_t rt_ringbuffer_viewchar(struct rt_ringbuffer* rb, rt_uint8_t* ch,uint16_t offset);
-rt_size_t rt_ringbuffer_data_len(struct rt_ringbuffer *rb);
+uint32_t rt_ringbuffer_put(struct rt_ringbuffer *rb, const uint8_t *ptr, uint16_t length);
+uint32_t rt_ringbuffer_put_force(struct rt_ringbuffer *rb, const uint8_t *ptr, uint16_t length);
+uint32_t rt_ringbuffer_putchar(struct rt_ringbuffer *rb, const uint8_t ch);
+uint32_t rt_ringbuffer_putchar_force(struct rt_ringbuffer *rb, const uint8_t ch);
+uint32_t rt_ringbuffer_get(struct rt_ringbuffer *rb, uint8_t *ptr, uint16_t length);
+uint32_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, uint8_t *ch);
+uint32_t rt_ringbuffer_viewchar(struct rt_ringbuffer* rb, uint8_t* ch,uint16_t offset);
+uint32_t rt_ringbuffer_data_len(struct rt_ringbuffer *rb);
 
 
-inline rt_uint16_t rt_ringbuffer_get_size(struct rt_ringbuffer *rb)
+inline uint16_t rt_ringbuffer_get_size(struct rt_ringbuffer *rb)
 {
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
     return rb->buffer_size;
 }
 

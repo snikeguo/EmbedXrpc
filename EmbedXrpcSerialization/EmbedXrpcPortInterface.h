@@ -1,4 +1,3 @@
-#pragma once
 #ifndef EmbedXrpc_PortInterface_H
 #define EmbedXrpc_PortInterface_H
 #include "EmbedSerialization.Port.h"

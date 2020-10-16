@@ -7,6 +7,10 @@
 #include "stdint.h"
 #endif
 
+#include "FreeRTOS.h"
+#include "task.h"
+#include "string.h"
+
 typedef  uint8_t Byte;
 typedef  int8_t SByte;
 typedef  uint16_t UInt16;
@@ -17,9 +21,8 @@ typedef  uint64_t UInt64;
 typedef  int64_t Int64;
 typedef  float Float;
 typedef  double Double;
-typedef bool Boolean;
+typedef BaseType_t Boolean;
 
-#include <FreeRTOS.h>
 #define FilterStringHeader	{"NONE"}
 #define StringOutput(...)  //printf(__VA_ARGS__)
 #define MALLOC	pvPortMalloc

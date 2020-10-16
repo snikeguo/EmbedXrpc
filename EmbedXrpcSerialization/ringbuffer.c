@@ -13,11 +13,11 @@ enum rt_ringbuffer_state rt_ringbuffer_status(struct rt_ringbuffer *rb)
 }
 
 void rt_ringbuffer_init(struct rt_ringbuffer *rb,
-                        rt_uint8_t           *pool,
-                        rt_int16_t            size)
+                        uint8_t           *pool,
+                        int16_t            size)
 {
-    RT_ASSERT(rb != RT_NULL);
-    RT_ASSERT(size > 0);
+    EmbedSerializationAssert(rb != NULL);
+    EmbedSerializationAssert(size > 0);
 
     /* initialize read and write index */
     rb->read_mirror = rb->read_index = 0;
@@ -32,13 +32,13 @@ void rt_ringbuffer_init(struct rt_ringbuffer *rb,
 /**
  * put a block of data into ring buffer
  */
-rt_size_t rt_ringbuffer_put(struct rt_ringbuffer *rb,
-                            const rt_uint8_t     *ptr,
-                            rt_uint16_t           length)
+uint32_t rt_ringbuffer_put(struct rt_ringbuffer *rb,
+                            const uint8_t     *ptr,
+                            uint16_t           length)
 {
-    rt_uint16_t size;
+    uint16_t size;
 
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     /* whether has enough space */
     size = rt_ringbuffer_space_len(rb);
@@ -81,13 +81,13 @@ rt_size_t rt_ringbuffer_put(struct rt_ringbuffer *rb,
  *
  * When the buffer is full, it will discard the old data.
  */
-rt_size_t rt_ringbuffer_put_force(struct rt_ringbuffer *rb,
-                            const rt_uint8_t     *ptr,
-                            rt_uint16_t           length)
+uint32_t rt_ringbuffer_put_force(struct rt_ringbuffer *rb,
+                            const uint8_t     *ptr,
+                            uint16_t           length)
 {
-    rt_uint16_t space_length;
+    uint16_t space_length;
 
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     space_length = rt_ringbuffer_space_len(rb);
 
@@ -135,13 +135,13 @@ rt_size_t rt_ringbuffer_put_force(struct rt_ringbuffer *rb,
 /**
  *  get data from ring buffer
  */
-rt_size_t rt_ringbuffer_get(struct rt_ringbuffer *rb,
-                            rt_uint8_t           *ptr,
-                            rt_uint16_t           length)
+uint32_t rt_ringbuffer_get(struct rt_ringbuffer *rb,
+                            uint8_t           *ptr,
+                            uint16_t           length)
 {
-    rt_size_t size;
+    uint32_t size;
 
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     /* whether has enough data  */
     size = rt_ringbuffer_data_len(rb);
@@ -189,9 +189,9 @@ rt_size_t rt_ringbuffer_get(struct rt_ringbuffer *rb,
 /**
  * put a character into ring buffer
  */
-rt_size_t rt_ringbuffer_putchar(struct rt_ringbuffer *rb, const rt_uint8_t ch)
+uint32_t rt_ringbuffer_putchar(struct rt_ringbuffer *rb, const uint8_t ch)
 {
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     /* whether has enough space */
     if (!rt_ringbuffer_space_len(rb))
@@ -219,11 +219,11 @@ rt_size_t rt_ringbuffer_putchar(struct rt_ringbuffer *rb, const rt_uint8_t ch)
  *
  * When the buffer is full, it will discard one old data.
  */
-rt_size_t rt_ringbuffer_putchar_force(struct rt_ringbuffer *rb, const rt_uint8_t ch)
+uint32_t rt_ringbuffer_putchar_force(struct rt_ringbuffer *rb, const uint8_t ch)
 {
     enum rt_ringbuffer_state old_state;
 
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     old_state = rt_ringbuffer_status(rb);
 
@@ -254,9 +254,9 @@ rt_size_t rt_ringbuffer_putchar_force(struct rt_ringbuffer *rb, const rt_uint8_t
 /**
  * get a character from a ringbuffer
  */
-rt_size_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, rt_uint8_t *ch)
+uint32_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, uint8_t *ch)
 {
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     /* ringbuffer is empty */
     if (!rt_ringbuffer_data_len(rb))
@@ -278,9 +278,9 @@ rt_size_t rt_ringbuffer_getchar(struct rt_ringbuffer *rb, rt_uint8_t *ch)
     }
     return 1;
 }
-rt_size_t rt_ringbuffer_viewchar(struct rt_ringbuffer* rb, rt_uint8_t* ch, uint16_t offset)
+uint32_t rt_ringbuffer_viewchar(struct rt_ringbuffer* rb, uint8_t* ch, uint16_t offset)
 {
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     /* ringbuffer is empty */
     if (!rt_ringbuffer_data_len(rb))
@@ -298,7 +298,7 @@ rt_size_t rt_ringbuffer_viewchar(struct rt_ringbuffer* rb, rt_uint8_t* ch, uint1
 /**
  * get the size of data in rb
  */
-rt_size_t rt_ringbuffer_data_len(struct rt_ringbuffer *rb)
+uint32_t rt_ringbuffer_data_len(struct rt_ringbuffer *rb)
 {
     switch (rt_ringbuffer_status(rb))
     {
@@ -321,7 +321,7 @@ rt_size_t rt_ringbuffer_data_len(struct rt_ringbuffer *rb)
  */
 void rt_ringbuffer_reset(struct rt_ringbuffer *rb)
 {
-    RT_ASSERT(rb != RT_NULL);
+    EmbedSerializationAssert(rb != NULL);
 
     rb->read_mirror = 0;
     rb->read_index = 0;

@@ -28,11 +28,25 @@ EmbedXrpc_Queue_t FreeRtosEmbedXrpcPort::CreateQueue(const char *queueName,
 	QueueHandle_t queue = xQueueCreate(maxItemLen, queueItemSize);;
 	return queue;
 }
+struct FreeRtosTimer_t
+{
+	void *arg;
+	TimerHandle_t timer;
+	void (*timercb)(void* arg);
+};
 
+static void FreeRtosTimerCallBack(TimerHandle_t xTimer)
+{
+	FreeRtosTimer_t * frt=(FreeRtosTimer_t *)pvTimerGetTimerID(xTimer);
+	frt->timercb(frt->arg);
+}
 EmbedXrpc_Timer_t FreeRtosEmbedXrpcPort::CreateTimer(const char *timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
 {
-	
-	TimerHandle_t timer = xTimerCreate(timerName, timeout, pdTRUE, nullptr, timercb);
+	FreeRtosTimer_t * frt=(FreeRtosTimer_t *)pvPortMalloc(sizeof(FreeRtosTimer_t));
+	TimerHandle_t timer = xTimerCreate(timerName, timeout, pdTRUE, frt, FreeRtosTimerCallBack);
+	frt->timer=timer;
+	frt->arg=Arg;
+	frt->timercb=timercb;
 	return timer;
 }
 EmbedXrpc_Semaphore_t  FreeRtosEmbedXrpcPort::CreateSemaphore(const char* SemaphoreName)
@@ -59,7 +73,10 @@ void FreeRtosEmbedXrpcPort::DeleteSemaphore(EmbedXrpc_Semaphore_t sem)
 }
 void FreeRtosEmbedXrpcPort::DeleteTimer(EmbedXrpc_Timer_t timer) 
 {
-
+	TimerHandle_t  xtimer=(TimerHandle_t )timer;
+	xTimerStop(xtimer,0);
+	FreeRtosTimer_t * frt=(FreeRtosTimer_t *)pvTimerGetTimerID(xtimer);
+	vPortFree(frt);
 }
 void FreeRtosEmbedXrpcPort::ThreadStart(EmbedXrpc_Thread_t thread)
 {
@@ -68,18 +85,18 @@ void FreeRtosEmbedXrpcPort::ThreadStart(EmbedXrpc_Thread_t thread)
 }
 void FreeRtosEmbedXrpcPort::TimerStart(EmbedXrpc_Timer_t timer, uint16_t interval)
 {
-	auto t = static_cast<TimerHandle_t>(timer);
-	xTimerStart(t);
+	TimerHandle_t  xtimer = (TimerHandle_t)timer;
+	xTimerStart(xtimer,0);
 }
 void FreeRtosEmbedXrpcPort::TimerReset(EmbedXrpc_Timer_t timer)
 {
-	auto t = static_cast<TimerHandle_t>(timer);
-	xTimerReset(t, 0);
+	TimerHandle_t  xtimer = (TimerHandle_t)timer;
+	xTimerReset(xtimer, 0);
 }
 void FreeRtosEmbedXrpcPort::TimerStop(EmbedXrpc_Timer_t timer)
 {
-	auto t = static_cast<TimerHandle_t>(timer);
-	xTimerStop(t);
+	TimerHandle_t  xtimer = (TimerHandle_t)timer;
+	xTimerStop(xtimer,0);
 }
 bool FreeRtosEmbedXrpcPort::TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
 {
@@ -140,7 +157,7 @@ QueueState FreeRtosEmbedXrpcPort::SendQueue(EmbedXrpc_Queue_t queue, void *item,
 {
 	auto q = static_cast<QueueHandle_t>(queue);
 	auto r = xQueueSend(q, item, 0);
-	//RT_ASSERT(r==RT_EOK);
+	//configASSERT(r==RT_EOK);
 	if (r == pdPASS)
 	{
 		return QueueState_OK;
@@ -160,7 +177,7 @@ uint32_t MallocCount=0;
 void *FreeRtosEmbedXrpcPort::Malloc(uint32_t size)
 {
 	auto x = pvPortMalloc(size);
-	RT_ASSERT(x != RT_NULL);
+	configASSERT(x != NULL);
 	EmbedSerializationShowMessage("EmbedXrpcPort","FreeRtosEmbedXrpcPort::Malloc %x\n", x);
 	MallocCount++;
 	return x;
