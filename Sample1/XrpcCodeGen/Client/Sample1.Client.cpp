@@ -17,7 +17,7 @@ sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 static Inter_Add_Return reqresp;
 auto result=false;
 auto waitstate=ResponseState_Timeout;
-RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 RpcObject->ResponseBlockBufferProvider->Reset();
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -44,7 +44,7 @@ reqresp.State=RequestState_Ok;
 waitstate=RpcObject->Wait(Inter_Add_ServiceId,&Inter_Add_Return_Type,&reqresp);
 reqresp.State=waitstate;
 exi:
-RpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);
+EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return reqresp;
 }
 void InterClientImpl::Free_Add(Inter_Add_Return *response)
@@ -65,7 +65,7 @@ sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 static Inter_NoArg_Return reqresp;
 auto result=false;
 auto waitstate=ResponseState_Timeout;
-RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 RpcObject->ResponseBlockBufferProvider->Reset();
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -90,7 +90,7 @@ reqresp.State=RequestState_Ok;
 waitstate=RpcObject->Wait(Inter_NoArg_ServiceId,&Inter_NoArg_Return_Type,&reqresp);
 reqresp.State=waitstate;
 exi:
-RpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);
+EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return reqresp;
 }
 void InterClientImpl::Free_NoArg(Inter_NoArg_Return *response)
@@ -110,7 +110,7 @@ SerializationManager sm;
 sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 static Inter_NoReturn_Return reqresp;
 auto result=false;
-RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 RpcObject->ResponseBlockBufferProvider->Reset();
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -134,7 +134,7 @@ else
 reqresp.State=RequestState_Ok;
 }
 exi:
-RpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);
+EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return reqresp;
 }
 
@@ -147,7 +147,7 @@ SerializationManager sm;
 sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 static Inter_NoArgAndReturn_Return reqresp;
 auto result=false;
-RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 RpcObject->ResponseBlockBufferProvider->Reset();
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -170,7 +170,7 @@ else
 reqresp.State=RequestState_Ok;
 }
 exi:
-RpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);
+EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return reqresp;
 }
 

@@ -20,9 +20,8 @@ public:
     uint8_t *Pool;
     int16_t Size;
 
-    IEmbeXrpcPort *Porter;
 
-    BlockRingBufferProvider(uint8_t *pool, uint16_t size,IEmbeXrpcPort *porter);
+    BlockRingBufferProvider(uint8_t *pool, uint16_t size,uint32_t queue_item_size);
     ~BlockRingBufferProvider();
     bool GetChar(uint8_t *ch);
     bool ViewChar(uint8_t* ch, uint16_t offset);

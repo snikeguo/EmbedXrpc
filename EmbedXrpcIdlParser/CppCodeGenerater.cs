@@ -449,7 +449,7 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine($"static {targetDelegate.ParameterStruct.Name} sendData;");
                 ServerCsw.WriteLine($"SerializationManager sm;");
                 ServerCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
-                ServerCsw.WriteLine("RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
+                ServerCsw.WriteLine("EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                 ServerCsw.WriteLine("sm.Reset();\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
                         "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
@@ -490,7 +490,7 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);");
                 ServerCsw.WriteLine($"RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
                 ServerCsw.WriteLine("sm.Reset();");
-                ServerCsw.WriteLine("RpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);");
+                ServerCsw.WriteLine("EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);");
                 ServerCsw.WriteLine("}");//function end
 
 
@@ -599,10 +599,10 @@ namespace EmbedXrpcIdlParser
                     {
                         ClientCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
                     }
-                    ClientCsw.WriteLine("RpcObject->porter->TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
+                    ClientCsw.WriteLine("EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                     
                     ClientCsw.WriteLine("RpcObject->ResponseBlockBufferProvider->Reset();");
-                    //ClientCsw.WriteLine("RpcObject->porter->ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
+                    //ClientCsw.WriteLine("ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("sm.Reset();\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
                         "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
@@ -662,7 +662,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine("reqresp.State=waitstate;");
                     }
 
-                    ClientCsw.WriteLine("exi:\nRpcObject->porter->ReleaseMutex(RpcObject->ObjectMutexHandle);");
+                    ClientCsw.WriteLine("exi:\nEmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);");
                     ClientCsw.WriteLine("return reqresp;");
                     ClientCsw.WriteLine("}");
 

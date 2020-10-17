@@ -1,11 +1,7 @@
 #include <thread>
 #include "Sample1.Client.h"
 #include "Sample1.Server.h"
-#include "Win32EmbedXrpcPort.h"
 
-
-
-Win32EmbedXrpcPort Win32Port;
 extern EmbedXrpcObject ClientRpc;
 extern EmbedXrpcObject ServerRpc;
 
@@ -31,7 +27,6 @@ EmbedXrpcObject ClientRpc(ClientSend,
 	2048,
 	rdCollection,
 	1,
-	&Win32Port,
 	true,
 	nullptr);//client rpc 对象
 
@@ -80,7 +75,6 @@ EmbedXrpcObject ServerRpc(ServerSend,
 	2048, 
 	rmCollection,
 	1,
-	&Win32Port,
 	true,
 	nullptr);//server rpc 对象
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);

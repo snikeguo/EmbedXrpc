@@ -42,15 +42,6 @@
     <ClInclude Include="Win32.Port\BlockQueue.h">
       <Filter>WIN32.Port</Filter>
     </ClInclude>
-    <ClInclude Include="Win32.Port\Win32EmbedXrpcPort.h">
-      <Filter>WIN32.Port</Filter>
-    </ClInclude>
-    <ClInclude Include="RT-Thread.Port\EmbedXrpcPort.Rtt.h">
-      <Filter>RT-Thread.Port</Filter>
-    </ClInclude>
-    <ClInclude Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.h">
-      <Filter>FreeRTOS.Port</Filter>
-    </ClInclude>
     <ClInclude Include="EmbedXrpcObject.h">
       <Filter>头文件</Filter>
     </ClInclude>

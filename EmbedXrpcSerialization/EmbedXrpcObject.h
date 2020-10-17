@@ -14,7 +14,6 @@ public:
 
 	uint32_t TimeOut;
 	SendPack_t Send;
-	IEmbeXrpcPort* porter;
 	EmbedXrpc_Mutex_t ObjectMutexHandle;
 
 	uint8_t *DelegateRingBuffer;
@@ -74,7 +73,6 @@ public:
 		RequestMessageMapCollection* requestMessageMaps,//server 请求的services
 		uint32_t requestMessageMapsCount,//server
 
-		IEmbeXrpcPort* port,
 		bool isEnableMataDataEncode,
 		void* ud = nullptr):Send(send),
 		TimeOut(timeOut),
@@ -90,7 +88,6 @@ public:
 		RequestMessageMapsCount(requestMessageMapsCount),
 		RequestRingBuffer(requestRingBuffer),
 		RequestRingBufferSize(requestRingBufferSize),
-		porter(port),
 		IsEnableMataDataEncode(isEnableMataDataEncode),
 		UserData(ud),
 		//last
@@ -121,7 +118,6 @@ public:
 		ResponseDelegateMessageMapCollection* mapCollection,
 		uint32_t collectionCount,
 
-		IEmbeXrpcPort* port,
 		bool isEnableMataDataEncode,
 		void* ud = nullptr):EmbedXrpcObject(send,
 			timeOut,
@@ -144,7 +140,6 @@ public:
 			nullptr,
 			0,
 
-			port,
 			isEnableMataDataEncode,
 			ud
 		)
@@ -164,7 +159,6 @@ public:
 		RequestMessageMapCollection* mapCollection,
 		uint32_t collectionCount,
 
-		IEmbeXrpcPort* port,
 		bool isEnableMataDataEncode,
 		void* ud = nullptr):EmbedXrpcObject(send,
 			timeOut,
@@ -187,7 +181,6 @@ public:
 			mapCollection,
 			collectionCount,
 
-			port,
 			isEnableMataDataEncode,
 			ud
 		)
@@ -199,23 +192,23 @@ public:
 	{
 		DeInitFlag = false;
 
-		ObjectMutexHandle = porter->CreateMutex("ObjectMutex");
+		ObjectMutexHandle = EmbedXrpc_CreateMutex("ObjectMutex");
 
 		if (ResponseDelegateMessageMapsCount > 0)
 		{
-			DelegateServiceThreadHandle = porter->CreateThread("DelegateServiceThread", Client_ThreadPriority, DelegateServiceThread, this);
-			DelegateBlockBufferProvider = new BlockRingBufferProvider(DelegateRingBuffer, DelegateRingBufferSize, porter);
-			ResponseBlockBufferProvider = new BlockRingBufferProvider(ResponseRingBuffer, ResponseRingBufferSize, porter);
-			porter->ThreadStart(DelegateServiceThreadHandle);
+			DelegateServiceThreadHandle = EmbedXrpc_CreateThread("DelegateServiceThread", Client_ThreadPriority, DelegateServiceThread, this);
+			DelegateBlockBufferProvider = new BlockRingBufferProvider(DelegateRingBuffer, DelegateRingBufferSize, Client_DelegateMessageQueue_MaxItemNumber);
+			ResponseBlockBufferProvider = new BlockRingBufferProvider(ResponseRingBuffer, ResponseRingBufferSize, Client_ResponseMessageQueue_MaxItemNumber);
+			EmbedXrpc_ThreadStart(DelegateServiceThreadHandle);
 		}
 		
 		if (RequestMessageMapsCount > 0)
 		{
 			//server
-			ResponseServiceThreadHandle = porter->CreateThread("ResponseServiceThread", Server_ThreadPriority, ResponseServiceThread, this);
-			RequestBlockBufferProvider = new BlockRingBufferProvider(RequestRingBuffer, RequestRingBufferSize, porter);
-			SuspendTimer = porter->CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER, SuspendTimerCallBack, this);
-			porter->ThreadStart(ResponseServiceThreadHandle);
+			ResponseServiceThreadHandle = EmbedXrpc_CreateThread("ResponseServiceThread", Server_ThreadPriority, ResponseServiceThread, this);
+			RequestBlockBufferProvider = new BlockRingBufferProvider(RequestRingBuffer, RequestRingBufferSize, Server_RequestQueue_MaxItemNumber);
+			SuspendTimer = EmbedXrpc_CreateTimer("SuspendTimer", EmbedXrpc_WAIT_FOREVER, SuspendTimerCallBack, this);
+			EmbedXrpc_ThreadStart(ResponseServiceThreadHandle);
 		}
 		
 
@@ -223,10 +216,10 @@ public:
 	void DeInit()
 	{
 		DeInitFlag = true;
-		porter->DeleteMutex(ObjectMutexHandle);
+		EmbedXrpc_DeleteMutex(ObjectMutexHandle);
 		if (ResponseDelegateMessageMapsCount > 0)
 		{
-			porter->DeleteThread(DelegateServiceThreadHandle);
+			EmbedXrpc_DeleteThread(DelegateServiceThreadHandle);
 			delete DelegateBlockBufferProvider;
 			delete ResponseBlockBufferProvider;
 		}
@@ -234,8 +227,8 @@ public:
 		if (RequestMessageMapsCount > 0)
 		{
 			//server
-			porter->DeleteThread(ResponseServiceThreadHandle);
-			porter->DeleteMutex(ObjectMutexHandle);
+			EmbedXrpc_DeleteThread(ResponseServiceThreadHandle);
+			EmbedXrpc_DeleteMutex(ObjectMutexHandle);
 			delete RequestBlockBufferProvider;
 		}
 		
@@ -246,7 +239,7 @@ public:
 		if (allDataLen < 4)
 			return false;
 		bool FindFlag = false;
-		bool SendQueueResult = false;
+		bool EmbedXrpc_SendQueueResult = false;
 
 		BlockBufferItemInfo raw;
 		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
@@ -279,11 +272,11 @@ public:
 						raw.TargetTimeout = targettimeout;
 						if (iter->ReceiveType == ReceiveType_Response)
 						{
-							SendQueueResult = ResponseBlockBufferProvider->Send(&raw, data, dataLen);
+							EmbedXrpc_SendQueueResult = ResponseBlockBufferProvider->Send(&raw, data, dataLen);
 						}
 						else if (iter->ReceiveType == ReceiveType_Delegate)
 						{
-							SendQueueResult = DelegateBlockBufferProvider->Send(&raw, data, dataLen);
+							EmbedXrpc_SendQueueResult = DelegateBlockBufferProvider->Send(&raw, data, dataLen);
 						}
 						goto sqr;
 					}
@@ -296,15 +289,15 @@ public:
 			raw.Sid = serviceId;
 			raw.DataLen = dataLen;
 			raw.TargetTimeout = targettimeout;
-			SendQueueResult=RequestBlockBufferProvider->Send(&raw, data, dataLen);
+			EmbedXrpc_SendQueueResult=RequestBlockBufferProvider->Send(&raw, data, dataLen);
 		}
 		sqr:
-		return SendQueueResult;
+		return EmbedXrpc_SendQueueResult;
 	}
 	static void SuspendTimerCallBack(void* arg)
 	{
 		EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
-		//obj->porter->TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//不需要加锁 这里不使用obj->buffer全局buffer
+		//obj->EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//不需要加锁 这里不使用obj->buffer全局buffer
 		uint8_t sb[4];
 		sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 		sb[1] = (uint8_t)(EmbedXrpcSuspendSid >> 8 & 0xff);
@@ -312,7 +305,7 @@ public:
 		sb[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff)&0x3FFF);
 		sb[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
 		obj->Send(obj, 4, sb);
-		//obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
+		//obj->EmbedXrpc_ReleaseMutex(obj->ObjectMutexHandle);
 	}
 	static void DelegateServiceThread(void* arg)
 	{
@@ -350,7 +343,7 @@ public:
 				{
 					obj->DelegateBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 				}
-				//obj->porter->Free(recData.Data);
+				//obj->Free(recData.Data);
 				//EmbedSerializationShowMessage("EmbedXrpcObject","Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 			}
 			if (obj->DeInitFlag == true)
@@ -388,16 +381,16 @@ public:
 						rsm.BlockBufferProvider = obj->RequestBlockBufferProvider;
 						rsm.BlockBufferProvider->SetCalculateSum(0);
 						rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
-						obj->porter->TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
+						EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
 						sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 						sendsm.Reset();
 						sendsm.Buf = &obj->DataLinkLayoutBuffer[4];
 						sendsm.BufferLen = obj->DataLinkLayoutBufferLen - 4;
 
-						obj->porter->TimerReset(obj->SuspendTimer);
-						obj->porter->TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
+						EmbedXrpc_TimerReset(obj->SuspendTimer);
+						EmbedXrpc_TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
 						MessageMaps[i].Service->Invoke(rsm, sendsm);
-						obj->porter->TimerStop(obj->SuspendTimer);
+						EmbedXrpc_TimerStop(obj->SuspendTimer);
 
 						if (sendsm.Index > 0)//
 						{
@@ -408,7 +401,7 @@ public:
 							obj->DataLinkLayoutBuffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
 							obj->Send(obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
 						}
-						obj->porter->ReleaseMutex(obj->ObjectMutexHandle);
+						EmbedXrpc_ReleaseMutex(obj->ObjectMutexHandle);
 
 						isContain = true;
 						goto _break;
@@ -420,7 +413,7 @@ public:
 			{
 				obj->RequestBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 			}
-			//obj->porter->Free(recData.Data);
+			//obj->Free(recData.Data);
 			//EmbedSerializationShowMessage("EmbedXrpcObject","Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
 	}

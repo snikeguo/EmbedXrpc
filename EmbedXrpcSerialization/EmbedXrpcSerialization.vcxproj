@@ -168,16 +168,13 @@
     <ClInclude Include="EmbedXrpcServerObject.h" />
     <ClInclude Include="FreeRTOS.Port\EmbedSerialization.Port.h" />
     <ClInclude Include="FreeRTOS.Port\EmbedXrpc.Port.h" />
-    <ClInclude Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.h" />
     <ClInclude Include="ringbuffer.h" />
     <ClInclude Include="RT-Thread.Port\EmbedSerialization.Port.h" />
     <ClInclude Include="RT-Thread.Port\EmbedXrpc.Port.h" />
-    <ClInclude Include="RT-Thread.Port\EmbedXrpcPort.Rtt.h" />
     <ClInclude Include="Win32.Port\BlockQueue.h" />
     <ClInclude Include="Win32.Port\EmbedSerialization.Port.h" />
     <ClInclude Include="Win32.Port\EmbedXrpc.Port.h" />
     <ClInclude Include="Win32.Port\Semaphore.h" />
-    <ClInclude Include="Win32.Port\Win32EmbedXrpcPort.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FreeRTOS.Port\readme.md" />

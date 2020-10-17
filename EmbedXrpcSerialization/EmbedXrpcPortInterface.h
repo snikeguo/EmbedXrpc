@@ -12,43 +12,38 @@ enum QueueState
 	QueueState_Timeout,
 };
 
-class IEmbeXrpcPort
-{
-public:
-	virtual EmbedXrpc_Thread_t CreateThread(const char* threadName,uint8_t priority,void (*Thread)(void *),void *Arg)=0;
-	//virtual EmbedXrpc_Mutex_t CreateSemaphore(const char* semaphoreName)=0;
-	virtual EmbedXrpc_Mutex_t CreateMutex(const char* mutexName)=0;
-	virtual EmbedXrpc_Queue_t CreateQueue(const char* queueName,uint32_t queueItemSize,uint32_t maxItemLen) = 0;
-	virtual EmbedXrpc_Semaphore_t CreateSemaphore(const char* SemaphoreName) = 0;
-	virtual EmbedXrpc_Timer_t CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg),void *Arg)=0;
+EmbedXrpc_Thread_t EmbedXrpc_CreateThread(const char* threadName, uint8_t priority, void (*Thread)(void*), void* Arg) ;
+EmbedXrpc_Mutex_t EmbedXrpc_CreateSemaphore(const char* semaphoreName);
+EmbedXrpc_Mutex_t EmbedXrpc_CreateMutex(const char* mutexName) ;
+EmbedXrpc_Queue_t EmbedXrpc_CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen) ;
+EmbedXrpc_Timer_t EmbedXrpc_CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg) ;
 
-	virtual void DeleteThread(EmbedXrpc_Thread_t thread) = 0;
-	virtual void DeleteMutex(EmbedXrpc_Mutex_t) = 0;
-	virtual void DeleteQueue(EmbedXrpc_Queue_t) = 0;
-	virtual void DeleteSemaphore(EmbedXrpc_Semaphore_t) = 0;
-	virtual void DeleteTimer(EmbedXrpc_Timer_t) = 0;
+void EmbedXrpc_DeleteThread(EmbedXrpc_Thread_t thread) ;
+void EmbedXrpc_DeleteMutex(EmbedXrpc_Mutex_t) ;
+void EmbedXrpc_DeleteQueue(EmbedXrpc_Queue_t) ;
+void EmbedXrpc_DeleteSemaphore(EmbedXrpc_Semaphore_t) ;
+void EmbedXrpc_DeleteTimer(EmbedXrpc_Timer_t) ;
 
-	virtual void ThreadStart(EmbedXrpc_Thread_t thread) = 0;
+void EmbedXrpc_ThreadStart(EmbedXrpc_Thread_t thread) ;
 
-	virtual void TimerStart(EmbedXrpc_Timer_t timer,uint16_t interval) = 0;
-	virtual void TimerReset(EmbedXrpc_Timer_t timer) = 0;
-	virtual void TimerStop(EmbedXrpc_Timer_t timer) = 0;
-	virtual bool TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout) = 0;
-	virtual void ReleaseSemaphore(EmbedXrpc_Semaphore_t sem) = 0;
-	virtual void ResetSemaphore(EmbedXrpc_Semaphore_t sem) = 0;
-	virtual bool TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout) = 0;
-	virtual bool ReleaseMutex(EmbedXrpc_Mutex_t mutex) = 0;
+void EmbedXrpc_TimerStart(EmbedXrpc_Timer_t timer, uint16_t interval) ;
+void EmbedXrpc_TimerReset(EmbedXrpc_Timer_t timer) ;
+void EmbedXrpc_TimerStop(EmbedXrpc_Timer_t timer) ;
 
-	//virtual bool TakeMutex(EmbedXrpc_Semaphore_t sem, uint32_t timeout) = 0;
-	//virtual bool ReleaseMutex(EmbedXrpc_Semaphore_t sem) = 0;
+bool EmbedXrpc_TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout) ;
+void EmbedXrpc_ReleaseSemaphore(EmbedXrpc_Semaphore_t sem) ;
+void EmbedXrpc_ResetSemaphore(EmbedXrpc_Semaphore_t sem) ;
 
-	virtual QueueState ReceiveQueue(EmbedXrpc_Queue_t queue, void * item,uint32_t itemlen,uint32_t timeout) = 0;
-	virtual QueueState SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen) = 0;
-	virtual void ResetQueue(EmbedXrpc_Queue_t queue) = 0;
+bool EmbedXrpc_TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout) ;
+bool EmbedXrpc_ReleaseMutex(EmbedXrpc_Mutex_t mutex) ;
 
-	virtual void* Malloc(uint32_t size) = 0;
-	virtual void Free(void* ptr) = 0;
-	virtual void Memcpy(void* d, const void* s, uint32_t size)=0;
 
-};
+
+QueueState EmbedXrpc_ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen, uint32_t timeout) ;
+QueueState EmbedXrpc_SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen) ;
+void EmbedXrpc_ResetQueue(EmbedXrpc_Queue_t queue) ;
+uint32_t EmbedXrpc_QueueSpacesAvailable(EmbedXrpc_Queue_t queue);
+void* Malloc(uint32_t size) ;
+void Free(void* ptr) ;
+void Memcpy(void* d, const void* s, uint32_t size) ;
 #endif

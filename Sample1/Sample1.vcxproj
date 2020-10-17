@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c" />
+    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.cpp" />
