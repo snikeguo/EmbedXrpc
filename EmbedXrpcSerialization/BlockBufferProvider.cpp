@@ -99,7 +99,7 @@ bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, uint1
 	bool insert_flag = false;
 	bool result = false;
 
-	//EmbedXrpc_TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
+	EmbedXrpc_TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
 	if (rt_ringbuffer_space_len(&RingBuffer) > bufLen)
 	{
 		insert_flag = true;
@@ -110,7 +110,7 @@ bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, uint1
 		result = false;
 		goto _exi;
 	}
-	//EmbedXrpc_ReleaseMutex(Mutex);
+	EmbedXrpc_ReleaseMutex(Mutex);
 
 	if (insert_flag == true)
 	{

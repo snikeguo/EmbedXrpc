@@ -11,7 +11,7 @@ typedef void* EmbedXrpc_Timer_t;
 
 
 #define Server_ThreadPriority				0x3
-#define Server_RequestQueue_MaxItemNumber	20
+#define Server_RequestQueue_MaxItemNumber	500
 
 #define Client_ThreadPriority				0x3
 #define Client_DelegateMessageQueue_MaxItemNumber	20
