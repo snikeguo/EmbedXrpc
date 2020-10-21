@@ -108,43 +108,34 @@ bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, uint1
 		return false;
 
 	int16_t putlen = 0;
-	bool insert_flag = false;
+	//bool insert_flag = false;
 	bool result = false;
 
 	EmbedXrpc_TakeMutex(Mutex, EmbedXrpc_WAIT_FOREVER);
-	if (rt_ringbuffer_space_len(&RingBuffer) > bufLen && EmbedXrpc_QueueSpacesAvailable(Queue)>0)
+	if (rt_ringbuffer_space_len(&RingBuffer) >= bufLen && EmbedXrpc_QueueSpacesAvailable(Queue)>0)
 	{
-		insert_flag = true;
+		//insert_flag = true;
 		putlen = rt_ringbuffer_put(&RingBuffer, buf, bufLen);
-	}
-	EmbedXrpc_ReleaseMutex(Mutex);
-
-	if (insert_flag == true)
-	{
 		if (putlen != bufLen)
 		{
 			result=false;
-			goto _exi;
+			goto _unlock;
 		}
 		item->DataLen = bufLen;
 		item->CheckSum = CalculateSum(buf, bufLen);
 		if (EmbedXrpc_SendQueue(Queue, item, sizeof(BlockBufferItemInfo)) == QueueState_OK)
 		{
 			result = true;
-			goto _exi;
+			goto _unlock;
 		}
 		else
 		{
 			result = false;
-			goto _exi;
+			goto _unlock;
 		}
 	}
-	else
-	{
-		result = false;
-		goto _exi;
-	}
-_exi:
+_unlock:
+	EmbedXrpc_ReleaseMutex(Mutex);
 	return result;
 }
 void BlockRingBufferProvider::Reset()

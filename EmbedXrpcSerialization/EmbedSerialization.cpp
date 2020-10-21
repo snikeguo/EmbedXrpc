@@ -50,6 +50,7 @@ const BaseValueInfo BaseValueInfos[] =
 static const char* FilterStrings[] = FilterStringHeader;
 void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...)
 {
+	return;
 	va_list args;
 	va_start(args, fmt);
 	for (int i = 0; i < sizeof(FilterStrings) / sizeof(const char*); i++)
