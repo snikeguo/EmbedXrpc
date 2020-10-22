@@ -9,12 +9,12 @@ EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recM
 EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
 #endif
 DateTimeChange(request.now);
-SerializationManager::Free(&DateTimeChange_Parameter_Type,&request);
+SerializationManager::FreeData(&DateTimeChange_Parameter_Type,&request);
 }
 DateTimeChangeClientImpl DateTimeChangeClientImplInstance;
-Inter_Add_Return& InterClientImpl::Add(Int32 a,Int32 b)
+Inter_Add_Return& InterClientImpl::Add(Int32 a,Int32 b,Int32 dataLen,Byte* data)
 {
-//write serialization code:Add(a,b,)
+//write serialization code:Add(a,b,dataLen,data,)
 static Inter_Add_Parameter sendData;
 SerializationManager sm;
 sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
@@ -32,6 +32,8 @@ sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
 sm.BufferLen = EmbedXrpc_SendBufferSize-4;
 sendData.a=a;
 sendData.b=b;
+sendData.dataLen=dataLen;
+sendData.data=data;
 sm.Serialize(&Inter_Add_Parameter_Type,&sendData,0);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_Add_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_Add_ServiceId>>8&0xff);
@@ -59,7 +61,7 @@ void InterClientImpl::Free_Add(Inter_Add_Return *response)
 {
 if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
 {
-SerializationManager::Free(&Inter_Add_Return_Type,&response);
+SerializationManager::FreeData(&Inter_Add_Return_Type,response);
 }
 }
 
@@ -109,7 +111,7 @@ void InterClientImpl::Free_NoArg(Inter_NoArg_Return *response)
 {
 if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
 {
-SerializationManager::Free(&Inter_NoArg_Return_Type,&response);
+SerializationManager::FreeData(&Inter_NoArg_Return_Type,&response);
 }
 }
 

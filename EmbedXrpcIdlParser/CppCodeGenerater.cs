@@ -404,7 +404,7 @@ namespace EmbedXrpcIdlParser
                 }
                 ClientCsw.WriteLine(");");//生成调用目标函数。
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
-                ClientCsw.WriteLine($"SerializationManager::Free(&{targetDelegate.ParameterStruct.Name}_Type,&request);");
+                ClientCsw.WriteLine($"SerializationManager::FreeData(&{targetDelegate.ParameterStruct.Name}_Type,&request);");
 
                 ClientCsw.WriteLine("}");//函数生成完毕
 
@@ -465,10 +465,17 @@ namespace EmbedXrpcIdlParser
                         var lenField=IdlInfo.GetArrayLenField(targetDelegate.ParameterStruct.TargetFields, field);
                         if(lenField!=null)
                         {
-                            ServerCsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
-                            ServerCsw.WriteLine("{");
-                            ServerCsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
-                            ServerCsw.WriteLine("}");
+                            if(field.MaxCountAttribute.IsFixed == true)
+                            {
+                                ServerCsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
+                                ServerCsw.WriteLine("{");
+                                ServerCsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
+                                ServerCsw.WriteLine("}");
+                            }
+                            else
+                            {
+                                ServerCsw.WriteLine($"sendData.{field.Name}={field.Name};");
+                            }
                         }
                         else
                         {
@@ -633,10 +640,17 @@ namespace EmbedXrpcIdlParser
                             var lenField = IdlInfo.GetArrayLenField(service.ParameterStruct.TargetFields, field);
                             if (lenField != null)
                             {
-                                ClientCsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
-                                ClientCsw.WriteLine("{");
-                                ClientCsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
-                                ClientCsw.WriteLine("}");
+                                if (field.MaxCountAttribute.IsFixed == true)
+                                {
+                                    ClientCsw.WriteLine($"for(auto index=0;index<{lenField.Name};index++)");
+                                    ClientCsw.WriteLine("{");
+                                    ClientCsw.WriteLine($"  sendData.{field.Name}[index]={field.Name}[index];");
+                                    ClientCsw.WriteLine("}");
+                                }
+                                else 
+                                {
+                                    ClientCsw.WriteLine($"sendData.{field.Name}={field.Name};");
+                                }
                             }
                             else
                             {
@@ -680,7 +694,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine($"void {targetInterface.Name}ClientImpl::Free_{service.ServiceName}({service.ReturnStruct.Name} *response)");
                         ClientCsw.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
                         //ClientCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(response);");
-                        ClientCsw.WriteLine($"SerializationManager::Free(&{service.ReturnStruct.Name}_Type,&response);");
+                        ClientCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStruct.Name}_Type,response);");
                         ClientCsw.WriteLine("}\n}");
                     }
                     ClientCsw.WriteLine("\n"); //client interface end class
@@ -754,13 +768,13 @@ namespace EmbedXrpcIdlParser
                     ServerCsw.WriteLine(");");//生成调用目标函数。
 
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Free(&request);");//free
-                    ServerCsw.WriteLine($"SerializationManager::Free(&{service.ParameterStruct.Name}_Type,&request);");//free
+                    ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ParameterStruct.Name}_Type,&request);");//free
                     if (service.ReturnStruct.TargetFields.Count>1)
                     {
                         //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
                         ServerCsw.WriteLine($"sendManager.Serialize(&{service.ReturnStruct.Name}_Type,&Response,0);");//生成返回值序列化
                         //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(&Response);");//生成返回值序列化
-                        ServerCsw.WriteLine($"SerializationManager::Free(&{service.ReturnStruct.Name}_Type,&Response);");//生成返回值序列化
+                        ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStruct.Name}_Type,&Response);");//生成返回值序列化
                     }
 
                     ServerCsw.WriteLine("}");//end function

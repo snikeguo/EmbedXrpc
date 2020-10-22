@@ -395,7 +395,7 @@ public:
 	}
 	void SerializeValue(uint8_t  Len, void* v)//base value used
 	{
-		MEMCPY(&Buf[Index], v, Len);
+		Memcpy(&Buf[Index], v, Len);
 		EmbedSerializationShowMessage("SerializationManager", "SerializeValue:\n");
 		for (size_t i = Index; i < Len+Index; i++)
 		{
@@ -419,7 +419,7 @@ public:
 		{
 			if (out_buf != nullptr)
 			{
-				MEMCPY(out_buf, &Buf[Index], len);
+				Memcpy(out_buf, &Buf[Index], len);
 			}
 			CalculateSum += GetSum(&Buf[Index], len);
 			Index += len;
@@ -606,7 +606,7 @@ private:
 				{
 					sizeOfLenField = BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth; //like:1,2,4,8
 					void* voidLenPtr = (void*)((uint8_t*)objectData + arrayLenField->GetOffset());
-					MEMCPY(&len, voidLenPtr, sizeOfLenField);
+					Memcpy(&len, voidLenPtr, sizeOfLenField);
 				}
 
 				uint8_t* ptr = (uint8_t*)fieldData;
@@ -678,7 +678,7 @@ private:
 				{
 					sizeOfLenField = BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth; //like:1,2,4,8
 					void* voidLenPtr = (void*)((uint8_t*)objectData + arrayLenField->GetOffset());
-					MEMCPY(&len, voidLenPtr, sizeOfLenField);
+					Memcpy(&len, voidLenPtr, sizeOfLenField);
 				}
 
 				uint8_t* ptr = (uint8_t*)fieldData;
@@ -809,13 +809,13 @@ private:
 					if (arrayLenField != nullptr)//如果len字段不为null 就把len数据赋给len字段
 					{
 						uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + arrayLenField->GetOffset());
-						MEMCPY(arrayLenAddr, &arraylen, sizeOfArrayLenInStream);
+						Memcpy(arrayLenAddr, &arraylen, sizeOfArrayLenInStream);
 					}
 					if (arrayfield->IsFixed() == false)
 					{
 						EmbedSerializationShowMessage("SerializationManager", "malloc:arrayfield:%s,", arrayfield->GetName());
-						ptr = MALLOC(arraylen* arrayType->LengthOfSingleElement);
-						MEMCPY((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
+						ptr = Malloc(arraylen* arrayType->LengthOfSingleElement);
+						Memcpy((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
 					}					
 				}
 
@@ -911,13 +911,13 @@ private:
 				if (arrayLenField != nullptr)//如果len字段不为null 就把len数据赋给len字段
 				{
 					uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + arrayLenField->GetOffset());
-					MEMCPY(&arraylen, arrayLenAddr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
+					Memcpy(&arraylen, arrayLenAddr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
 				}
 				if (arrayfield->IsFixed() == false)
 				{
 					EmbedSerializationShowMessage("SerializationManager", "malloc:arrayfield:%s,", arrayfield->GetName());
-					ptr = MALLOC(arraylen * arrayType->LengthOfSingleElement);
-					MEMCPY((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
+					ptr = Malloc(arraylen * arrayType->LengthOfSingleElement);
+					Memcpy((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
 				}
 
 				Type_t aet = arrayType->ElementType->GetType();
@@ -970,7 +970,7 @@ private:
 		return true;
 	}
 public:
-	static void Free(const ObjectType* objectType, void* objectData)
+	static void FreeData(const ObjectType* objectType, void* objectData)
 	{
 		for (uint32_t i = 0; i < objectType->FieldCount; i++)
 		{
@@ -985,7 +985,7 @@ public:
 					{
 						void* voidLenPtr = (void*)((uint8_t*)objectData + arrayLenField->GetOffset());
 						EmbedSerializationAssert(arrayLenField->GetTypeInstance()->GetType() <= TYPE_INT64);
-						MEMCPY(&len, voidLenPtr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
+						Memcpy(&len, voidLenPtr, BaseValueInfos[arrayLenField->GetTypeInstance()->GetType()].DataWidth);
 					}
 
 					const ArrayType* at = (const ArrayType*)arrayfield->GetTypeInstance();
@@ -998,17 +998,17 @@ public:
 						for (uint64_t j = 0; j < len; j++)
 						{
 							const ObjectType* elementObjectType = (const ObjectType*)elementType;
-							Free(elementObjectType, (uint8_t*)(*arrayfieldDataPoint) + j * at->LengthOfSingleElement);
+							FreeData(elementObjectType, (uint8_t*)(*arrayfieldDataPoint) + j * at->LengthOfSingleElement);
 						}
 					}
-					FREE((uint8_t*)(*arrayfieldDataPoint));
+					Free((uint8_t*)(*arrayfieldDataPoint));//这里最后释放指针
 				}
 			}
 			else if (objectType->SubFields[i]->GetTypeInstance()->GetType() == TYPE_OBJECT)
 			{
 				void* fieldData = (void*)((uint8_t*)objectData + objectType->SubFields[i]->GetOffset());
 				const ObjectType* subObjectType = (const ObjectType*)objectType->SubFields[i]->GetTypeInstance();
-				Free(subObjectType, fieldData);
+				FreeData(subObjectType, fieldData);
 			}
 		}
 	}

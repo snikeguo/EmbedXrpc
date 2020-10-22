@@ -20,6 +20,17 @@ const IField* DateTime_tDesc []=
 };
 const ObjectType DateTime_t_Type(sizeof(DateTime_tDesc)/sizeof(IField*),DateTime_tDesc);
 
+const Int32Field AddResult_Field_Sum(1,"AddResult.Sum",offsetof(AddResult,Sum),false);
+const Int32Field AddResult_Field_dataLen(2,"AddResult.dataLen",offsetof(AddResult,dataLen),true);
+const ArrayField AddResult_Field_data(3,"AddResult.data",false,&UInt8TypeInstance,sizeof(Byte),offsetof(AddResult,data),&AddResult_Field_dataLen);
+const IField* AddResultDesc []=
+{
+&AddResult_Field_Sum,
+&AddResult_Field_dataLen,
+&AddResult_Field_data,
+};
+const ObjectType AddResult_Type(sizeof(AddResultDesc)/sizeof(IField*),AddResultDesc);
+
 const ArrayField DateTimeChange_Parameter_Field_now(1,"DateTimeChange_Parameter.now",true,&DateTime_t_Type,sizeof(DateTime_t),offsetof(DateTimeChange_Parameter,now),nullptr);
 const IField* DateTimeChange_ParameterDesc []=
 {
@@ -29,15 +40,19 @@ const ObjectType DateTimeChange_Parameter_Type(sizeof(DateTimeChange_ParameterDe
 
 const Int32Field Inter_Add_Parameter_Field_a(1,"Inter_Add_Parameter.a",offsetof(Inter_Add_Parameter,a),false);
 const Int32Field Inter_Add_Parameter_Field_b(2,"Inter_Add_Parameter.b",offsetof(Inter_Add_Parameter,b),false);
+const Int32Field Inter_Add_Parameter_Field_dataLen(3,"Inter_Add_Parameter.dataLen",offsetof(Inter_Add_Parameter,dataLen),true);
+const ArrayField Inter_Add_Parameter_Field_data(4,"Inter_Add_Parameter.data",false,&UInt8TypeInstance,sizeof(Byte),offsetof(Inter_Add_Parameter,data),&Inter_Add_Parameter_Field_dataLen);
 const IField* Inter_Add_ParameterDesc []=
 {
 &Inter_Add_Parameter_Field_a,
 &Inter_Add_Parameter_Field_b,
+&Inter_Add_Parameter_Field_dataLen,
+&Inter_Add_Parameter_Field_data,
 };
 const ObjectType Inter_Add_Parameter_Type(sizeof(Inter_Add_ParameterDesc)/sizeof(IField*),Inter_Add_ParameterDesc);
 
 const UInt8Field Inter_Add_Return_Field_State(1,"Inter_Add_Return.State",offsetof(Inter_Add_Return,State),false);
-const Int32Field Inter_Add_Return_Field_ReturnValue(2,"Inter_Add_Return.ReturnValue",offsetof(Inter_Add_Return,ReturnValue),false);
+const ObjectField Inter_Add_Return_Field_ReturnValue(2,"Inter_Add_Return.ReturnValue",sizeof(AddResultDesc)/sizeof(IField*),AddResultDesc,offsetof(Inter_Add_Return,ReturnValue));
 const IField* Inter_Add_ReturnDesc []=
 {
 &Inter_Add_Return_Field_State,

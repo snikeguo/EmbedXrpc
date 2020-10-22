@@ -24,6 +24,12 @@ extern const Int32Field DateTime_t_Field_Sec;
 extern const IField* DateTime_tDesc [6];
 extern const ObjectType DateTime_t_Type;
 
+extern const Int32Field AddResult_Field_Sum;
+extern const Int32Field AddResult_Field_dataLen;
+extern const ArrayField AddResult_Field_data;
+extern const IField* AddResultDesc [3];
+extern const ObjectType AddResult_Type;
+
 extern const ArrayField DateTimeChange_Parameter_Field_now;
 extern const IField* DateTimeChange_ParameterDesc [1];
 extern const ObjectType DateTimeChange_Parameter_Type;
@@ -31,12 +37,14 @@ extern const ObjectType DateTimeChange_Parameter_Type;
 #define DateTimeChange_ServiceId 16
 extern const Int32Field Inter_Add_Parameter_Field_a;
 extern const Int32Field Inter_Add_Parameter_Field_b;
-extern const IField* Inter_Add_ParameterDesc [2];
+extern const Int32Field Inter_Add_Parameter_Field_dataLen;
+extern const ArrayField Inter_Add_Parameter_Field_data;
+extern const IField* Inter_Add_ParameterDesc [4];
 extern const ObjectType Inter_Add_Parameter_Type;
 
 #define Inter_Add_ServiceId 17
 extern const UInt8Field Inter_Add_Return_Field_State;
-extern const Int32Field Inter_Add_Return_Field_ReturnValue;
+extern const ObjectField Inter_Add_Return_Field_ReturnValue;
 extern const IField* Inter_Add_ReturnDesc [2];
 extern const ObjectType Inter_Add_Return_Type;
 

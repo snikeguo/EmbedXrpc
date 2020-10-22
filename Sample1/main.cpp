@@ -34,16 +34,18 @@ void ClientThread()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	int a=1000, b = 5000;
+	uint8_t Bytes[7] = "123456";
 	while (true)
 	{
 		a ++;
 		b ++;
-		auto sum=Client.Add(a, b);
+		auto sum=Client.Add(a, b,3, Bytes);
 		if (sum.State == ResponseState_Ok)
 		{
 			printf("%d+%d=%d\n", a,b,sum.ReturnValue);
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		Client.Free_Add(&sum);
+		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	}
 }
 //--------------------------------------------------------------------
@@ -73,7 +75,7 @@ void ServerThread()
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	while (true)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 		DateTime_t t;
 		auto ti = (time(nullptr));
 		auto localti = localtime(&ti);
@@ -87,9 +89,13 @@ void ServerThread()
 	}
 }
 
-void Inter_AddService::Add(Int32 a, Int32 b)
+void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, Byte* data)
 {
-	Response.ReturnValue = a + b;
+	Response.ReturnValue.Sum = a + b;
+	Response.ReturnValue.dataLen = dataLen + 1;
+	Response.ReturnValue.data = (uint8_t *)Malloc(Response.ReturnValue.dataLen);
+	strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
+	printf("len:%d, content:%s\n", dataLen, data);
 }
 void Inter_NoArgService::NoArg()
 {
@@ -116,18 +122,6 @@ int main(int argc, char *argv[])
 	s.detach();
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
-}
-
-void* MyMalloc(size_t size)
-{
-	void* ptr = malloc(size);
-	printf("malloc :0x%x\n", (uint32_t)ptr);
-	return ptr;
-}
-void MyFree(void* ptr)
-{
-	printf("free :0x%x\n", (uint32_t)ptr);
-	free(ptr);
 }
 
 /*

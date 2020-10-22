@@ -31,9 +31,9 @@ typedef  double Double;
 
 #define FilterStringHeader	{"NONE"}
 #define StringOutput(...)  vprintf(__VA_ARGS__)
-#define MALLOC	malloc
-#define FREE	free
-#define MEMCPY	memcpy
+void* Malloc(uint32_t size);
+void Free(void* ptr);
+void Memcpy(void* d, const void* s, uint32_t size);
 #define EmbedSerializationAssert assert
 
 

@@ -266,7 +266,7 @@ namespace EmbedXrpcIdlParser
                 var filename = type.GetCustomAttribute<FileNameAttribute>();
                 if (filename == null)
                 {
-                    throw new Exception("you must add FileNameAttribute into every class/struct!");
+                    throw new Exception($"{filename} you must add FileNameAttribute into every class/struct!");
                 }
                 if (filename.FileNameString != file)
                 {
@@ -290,7 +290,7 @@ namespace EmbedXrpcIdlParser
                 var filename = type.GetCustomAttribute<FileNameAttribute>();
                 if (filename == null)
                 {
-                    throw new Exception("you must add FileNameAttribute into every class/struct!");
+                    throw new Exception($"{filename} you must add FileNameAttribute into every class/struct!");
                 }
                 if (filename.FileNameString != file)
                 {
@@ -367,6 +367,13 @@ namespace EmbedXrpcIdlParser
                                     {
                                         lenfield.IsArrayLenField = true;
                                     }
+                                    else 
+                                    {
+                                        if(targetField.MaxCountAttribute.IsFixed==false)
+                                        {
+                                            throw new Exception($"{targetField.Name}当数组不固定的时候,必须制定数组的长度字段!");
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -425,7 +432,7 @@ namespace EmbedXrpcIdlParser
                             returnValue.SourceCodeType = mt.ReturnType.Name;
                             if (mt.ReturnType.IsArray == true)
                             {
-                                throw new Exception("return value does not support array type!");
+                                throw new Exception($"{service.Name}:return value does not support array type!");
                             }
                             returnValue.IsArray = false;
                             returnValue.MaxCountAttribute = null;
@@ -468,6 +475,13 @@ namespace EmbedXrpcIdlParser
                                 {
                                     lenfield.IsArrayLenField = true;
                                 }
+                                else
+                                {
+                                    if (field.MaxCountAttribute.IsFixed == false)
+                                    {
+                                        throw new Exception($"{field.Name}当数组不固定的时候,必须制定数组的长度字段!");
+                                    }
+                                }
                             }
                         }
                         targetInterface.Services.Add(targetService);
@@ -489,7 +503,7 @@ namespace EmbedXrpcIdlParser
                     }
                     if (invokemi == null)
                     {
-                        throw new NullReferenceException("invokemi is null");
+                        throw new NullReferenceException($"{type.Name}:invokemi is null");
                     }
                     var serviceIdAttr = type.GetCustomAttribute<ServiceIdAttribute>();
                     TargetDelegate targetDelegate = new TargetDelegate();
@@ -526,6 +540,13 @@ namespace EmbedXrpcIdlParser
                             if (lenfield != null)
                             {
                                 lenfield.IsArrayLenField = true;
+                            }
+                            else
+                            {
+                                if (field.MaxCountAttribute.IsFixed == false)
+                                {
+                                    throw new Exception($"{field.Name}当数组不固定的时候,必须制定数组的长度字段!");
+                                }
                             }
                         }
                     }

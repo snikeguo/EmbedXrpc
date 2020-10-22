@@ -25,9 +25,9 @@ typedef BaseType_t Boolean;
 
 #define FilterStringHeader	{"NONE"}
 #define StringOutput(...)  //printf(__VA_ARGS__)
-#define MALLOC	pvPortMalloc
-#define FREE	vPortFree
-#define MEMCPY	memcpy
+void* Malloc(uint32_t size);
+void Free(void* ptr);
+void Memcpy(void* d, const void* s, uint32_t size);
 #define EmbedSerializationAssert configASSERT
 
 

@@ -29,10 +29,10 @@ EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recM
 #else
 EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
 #endif
-Add(request.a,request.b);
-SerializationManager::Free(&Inter_Add_Parameter_Type,&request);
+Add(request.a,request.b,request.dataLen,request.data);
+SerializationManager::FreeData(&Inter_Add_Parameter_Type,&request);
 sendManager.Serialize(&Inter_Add_Return_Type,&Response,0);
-SerializationManager::Free(&Inter_Add_Return_Type,&Response);
+SerializationManager::FreeData(&Inter_Add_Return_Type,&Response);
 }
 Inter_AddService Inter_AddServiceInstance;
 void Inter_NoArgService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
@@ -45,9 +45,9 @@ EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recM
 EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
 #endif
 NoArg();
-SerializationManager::Free(&Inter_NoArg_Parameter_Type,&request);
+SerializationManager::FreeData(&Inter_NoArg_Parameter_Type,&request);
 sendManager.Serialize(&Inter_NoArg_Return_Type,&Response,0);
-SerializationManager::Free(&Inter_NoArg_Return_Type,&Response);
+SerializationManager::FreeData(&Inter_NoArg_Return_Type,&Response);
 }
 Inter_NoArgService Inter_NoArgServiceInstance;
 void Inter_NoReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
@@ -60,7 +60,7 @@ EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recM
 EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
 #endif
 NoReturn(request.a);
-SerializationManager::Free(&Inter_NoReturn_Parameter_Type,&request);
+SerializationManager::FreeData(&Inter_NoReturn_Parameter_Type,&request);
 }
 Inter_NoReturnService Inter_NoReturnServiceInstance;
 void Inter_NoArgAndReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
@@ -73,7 +73,7 @@ EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recM
 EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
 #endif
 NoArgAndReturn();
-SerializationManager::Free(&Inter_NoArgAndReturn_Parameter_Type,&request);
+SerializationManager::FreeData(&Inter_NoArgAndReturn_Parameter_Type,&request);
 }
 Inter_NoArgAndReturnService Inter_NoArgAndReturnServiceInstance;
 RequestMessageMap Inter_RequestMessages[]=

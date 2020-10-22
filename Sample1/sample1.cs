@@ -20,9 +20,23 @@ struct DateTime_t
 delegate void DateTimeChange(DateTime_t[] now);
 
 [FileName("sample1.cs")]
+struct AddResult
+{
+    [FieldNumber(1)]
+    int Sum;
+    [FieldNumber(2)]
+    Int32 dataLen;
+    [FieldNumber(3)]
+    [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
+    byte[] data;
+
+}
+[FileName("sample1.cs")]
 interface Inter
 {
-    Int32 Add(Int32 a, Int32 b);
+    AddResult Add(Int32 a, Int32 b,Int32 dataLen,
+        [MaxCount(LenFieldName="dataLen",IsFixed=false)]
+        byte[]data);
 
     bool NoArg();
     void NoReturn(int a);

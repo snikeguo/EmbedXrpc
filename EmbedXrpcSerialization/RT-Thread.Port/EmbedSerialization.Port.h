@@ -22,9 +22,9 @@ typedef bool Boolean;
 #include <rtthread.h>
 #define FilterStringHeader	{"NONE"}
 #define StringOutput(...)  rt_printf(__VA_ARGS__)
-#define MALLOC	rt_malloc
-#define FREE	rt_free
-#define MEMCPY	rt_memcpy
+void* Malloc(uint32_t size);
+void Free(void* ptr);
+void Memcpy(void* d, const void* s, uint32_t size);
 #define EmbedSerializationAssert RT_ASSERT
 
 
