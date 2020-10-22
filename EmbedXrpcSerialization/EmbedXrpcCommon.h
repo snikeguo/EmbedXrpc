@@ -6,6 +6,7 @@
 #include "EmbedSerialization.h"
 #define EmbedXrpcSuspendSid 0x01
 #define EmbedXrpcUnsupportedSid 0x2
+
  enum RequestResponseState
  {
      RequestState_Ok=1,

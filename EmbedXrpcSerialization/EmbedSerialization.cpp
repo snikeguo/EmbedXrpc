@@ -47,6 +47,15 @@ const BaseValueInfo BaseValueInfos[] =
 	{&FloatTypeInstance,4},
 	{&DoubleTypeInstance,8},
 };
+uint32_t GetSum(uint8_t* d, uint32_t len)
+{
+	uint32_t sum = 0;
+	for (uint32_t i = 0; i < len; i++)
+	{
+		sum += d[i];
+	}
+	return sum;
+}
 static const char* FilterStrings[] = FilterStringHeader;
 void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...)
 {

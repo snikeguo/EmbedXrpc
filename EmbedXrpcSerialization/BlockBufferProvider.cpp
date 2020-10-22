@@ -10,7 +10,7 @@ BlockRingBufferProvider::BlockRingBufferProvider(uint8_t* pool, uint16_t size, u
 	Size = size;
 
 	rt_ringbuffer_init(&RingBuffer, pool, size);
-	Queue = EmbedXrpc_CreateQueue("ringbufqueue", sizeof(BlockBufferItemInfo), queue_item_size);
+	Queue = EmbedXrpc_CreateQueue("ringbufqueue", sizeof(ReceiveItemInfo), queue_item_size);
 	Mutex = EmbedXrpc_CreateMutex("ringbufmutex");
 }
 BlockRingBufferProvider::~BlockRingBufferProvider()
@@ -85,11 +85,11 @@ bool BlockRingBufferProvider::PopChars(uint8_t* ch, uint16_t len)
 	EmbedXrpc_ReleaseMutex(Mutex);
 	return true;
 }
-bool BlockRingBufferProvider::Receive(BlockBufferItemInfo* item, uint32_t timeout)
+bool BlockRingBufferProvider::Receive(ReceiveItemInfo* item, uint32_t timeout)
 {
 	if (Size == 0 || Pool == nullptr)
 		return false;
-	auto r = EmbedXrpc_ReceiveQueue(Queue, item, sizeof(BlockBufferItemInfo), timeout) == QueueState_OK ? true : false;
+	auto r = EmbedXrpc_ReceiveQueue(Queue, item, sizeof(ReceiveItemInfo), timeout) == QueueState_OK ? true : false;
 	return r;
 }
 uint32_t BlockRingBufferProvider::CalculateSum(uint8_t* d, uint16_t len)
@@ -102,7 +102,7 @@ uint32_t BlockRingBufferProvider::CalculateSum(uint8_t* d, uint16_t len)
 	}
 	return sum;
 }
-bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, uint16_t bufLen)
+bool BlockRingBufferProvider::Send(ReceiveItemInfo* item,uint8_t* buf, uint16_t bufLen)
 {
 	if (Size == 0 || Pool == nullptr)
 		return false;
@@ -121,9 +121,9 @@ bool BlockRingBufferProvider::Send(BlockBufferItemInfo* item,uint8_t* buf, uint1
 			result=false;
 			goto _unlock;
 		}
-		item->DataLen = bufLen;
-		item->CheckSum = CalculateSum(buf, bufLen);
-		if (EmbedXrpc_SendQueue(Queue, item, sizeof(BlockBufferItemInfo)) == QueueState_OK)
+		//item->DataLen = bufLen;
+		//item->CheckSum = CalculateSum(buf, bufLen);
+		if (EmbedXrpc_SendQueue(Queue, item, sizeof(ReceiveItemInfo)) == QueueState_OK)
 		{
 			result = true;
 			goto _unlock;

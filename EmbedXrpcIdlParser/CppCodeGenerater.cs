@@ -387,7 +387,11 @@ namespace EmbedXrpcIdlParser
 
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
                 ClientCsw.WriteLine($"recManager.Deserialize(&{targetDelegate.ParameterStruct.Name}_Type,&request);");
+                ClientCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
                 ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
+                ClientCsw.WriteLine("#else");
+                ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);");
+                ClientCsw.WriteLine("#endif");
                 ClientCsw.Write($"{targetDelegate.MethodName}(");
                 for (int i = 0; i < targetDelegate.ParameterStruct.TargetFields.Count; i++)
                 {
@@ -452,7 +456,7 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine("EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                 ServerCsw.WriteLine("sm.Reset();\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
-                        "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
+                        "sm.BufferLen = EmbedXrpc_SendBufferSize-4;");
                 foreach (var field in targetDelegate.ParameterStruct.TargetFields)
                 {
                     //if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
@@ -600,12 +604,16 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
                     }
                     ClientCsw.WriteLine("EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
-                    
+
+                    ClientCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
                     ClientCsw.WriteLine("RpcObject->ResponseBlockBufferProvider->Reset();");
+                    ClientCsw.WriteLine("#else");
+                    ClientCsw.WriteLine("EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);");
+                    ClientCsw.WriteLine("#endif");
                     //ClientCsw.WriteLine("ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("sm.Reset();\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
-                        "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
+                        "sm.BufferLen = EmbedXrpc_SendBufferSize-4;");
 
                     foreach (var field in service.ParameterStruct.TargetFields)
                     {
@@ -726,7 +734,11 @@ namespace EmbedXrpcIdlParser
                     ServerCsw.WriteLine($"static {service.ParameterStruct.Name} request;");
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Deserialize(recManager,&request);");
                     ServerCsw.WriteLine($"recManager.Deserialize(&{service.ParameterStruct.Name}_Type,&request);");
+                    ServerCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
                     ServerCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
+                    ServerCsw.WriteLine("#else");
+                    ServerCsw.WriteLine($"EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);");
+                    ServerCsw.WriteLine("#endif");
                     //if (service.ReturnValue != null)
                     //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");
                     ServerCsw.Write($"{service.ServiceName}(");

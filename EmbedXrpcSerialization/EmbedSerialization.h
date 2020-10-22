@@ -11,7 +11,7 @@
 #endif
 
 void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...);
-
+uint32_t GetSum(uint8_t* d, uint32_t len);
 typedef  uint32_t ptr_t;
 class SerializationManager;
 
@@ -307,6 +307,8 @@ public:
 	uint8_t* Buf = nullptr;
 	uint32_t BufferLen = 0;
 	BlockRingBufferProvider* BlockBufferProvider=nullptr;
+	uint32_t ReferenceSum = 0;
+	uint32_t CalculateSum = 0;
 	bool IsEnableMataDataEncode = false;
 	/*
 		第一个字节：FieldNumber<<4|Field;如果FieldNumber超出了16,则最高位为1,下一字节也是FieldNumber
@@ -419,6 +421,7 @@ public:
 			{
 				MEMCPY(out_buf, &Buf[Index], len);
 			}
+			CalculateSum += GetSum(&Buf[Index], len);
 			Index += len;
 		}
 		else
@@ -438,6 +441,8 @@ public:
 	void Reset()
 	{
 		Index = 0;
+		ReferenceSum = 0;
+		CalculateSum = 0;
 		if (BlockBufferProvider != nullptr)
 		{
 			BlockBufferProvider->Reset();
@@ -495,6 +500,7 @@ public:
 		uint32_t ind = GetKeyFromSerializationManager(nullptr, nullptr);
 		if(BlockBufferProvider!=nullptr)
 			BlockBufferProvider->PopChars(nullptr, ind);
+		CalculateSum += GetSum(&Buf[Index], ind);
 		Index += ind;
 	}
 	uint8_t GetArrayLenFromSerializationManager(uint32_t* arrayLen)
@@ -528,6 +534,7 @@ public:
 		uint8_t ind = GetArrayLenFromSerializationManager(nullptr);
 		if (BlockBufferProvider != nullptr)
 			BlockBufferProvider->PopChars(nullptr, ind);
+		CalculateSum += GetSum(&Buf[Index], ind);
 		Index += ind;
 	}
 	uint8_t GetArrayElementFlag()
@@ -541,12 +548,14 @@ public:
 	{
 		if (BlockBufferProvider != nullptr)
 			BlockBufferProvider->GetChar(nullptr);
+		CalculateSum += GetSum(&Buf[Index], 1);
 		Index++;
 	}
 	void RemoveEndFlagFromSerializationManager()
 	{
 		if (BlockBufferProvider != nullptr)
 			BlockBufferProvider->GetChar(nullptr);
+		CalculateSum += GetSum(&Buf[Index], 1);
 		Index++;
 	}
 public:

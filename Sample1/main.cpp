@@ -12,19 +12,13 @@ uint8_t ClientResponseBuffer[2048];//Client½ÓÊÕµ½Server·¢ËÍµÄResponse»Ø¸´ºó£¬Òª°
 uint8_t ClientDelegateBuffer[2048];//Client½ÓÊÕµ½Server·¢ËÍµÄDelegate¹ã²¥ºó£¬Òª°ÑÊı¾İ·Åµ½Õâ¸öÀïÃæ£¬Èç¹ûÄãµÄĞ­ÒéÃ»ÓĞ¹ã²¥£¬Õâ¸ö¿ÉÒÔÎªnull
 bool ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ×îÖÕÍ¨¹ıÕâ¸öº¯Êı·¢ËÍ³öÈ¥
 {
-	ServerRpc.ReceivedMessage(dataLen, data);
+	assert(ServerRpc.ReceivedMessage(dataLen, data)==true);
 	return true;
 }
 ResponseDelegateMessageMapCollection rdCollection[1] = { {Inter_ResponseDelegateMessages_Count,Inter_ResponseDelegateMessages} };//client¿ÉÒÔ´¦ÀíµÄservice¼¯ºÏ
 
 EmbedXrpcObject ClientRpc(ClientSend,
 	500,
-	ClientSendBuffer,
-	2048,
-	ClientResponseBuffer,
-	2048,
-	ClientDelegateBuffer,
-	2048,
 	rdCollection,
 	1,
 	true,
@@ -55,7 +49,7 @@ void ClientThread()
 //--------------------------------------------------------------------
 //server
 uint8_t ServerSendBuffer[2048];//·¢ËÍbuffer
-uint8_t ServerRequestBuffer[2048];//server½ÓÊÕµ½client·¢ËÍµÄRequestÊı¾İÁ÷ºó£¬Òª°ÑÊı¾İÁÙÊ±´æµ½Õâ¸öÊı×éÀï
+uint8_t ServerRequestBuffer[14];//server½ÓÊÕµ½client·¢ËÍµÄRequestÊı¾İÁ÷ºó£¬Òª°ÑÊı¾İÁÙÊ±´æµ½Õâ¸öÊı×éÀï
 bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ×îÖÕÍ¨¹ıÕâ¸öº¯Êı·¢ËÍ³öÈ¥£¬Èç¹ûÄãµÄĞ­ÒéÃ»ÓĞclientµÄrequestÇëÇó£¬Õâ¸ö¿ÉÒÔÎªnull
 {
 	/*for (size_t i = 4; i < dataLen; i++)
@@ -69,10 +63,6 @@ bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ×îÖÕÍ¨¹ıÕ
 RequestMessageMapCollection rmCollection[1] = { {Inter_RequestMessages_Count,Inter_RequestMessages} };
 EmbedXrpcObject ServerRpc(ServerSend,
 	500,
-	ServerSendBuffer,
-	2048,
-	ServerRequestBuffer,
-	2048, 
 	rmCollection,
 	1,
 	true,

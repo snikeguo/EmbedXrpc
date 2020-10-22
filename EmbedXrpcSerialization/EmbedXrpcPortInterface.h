@@ -11,6 +11,16 @@ enum QueueState
 	QueueState_OK,
 	QueueState_Timeout,
 };
+struct ReceiveItemInfo
+{
+    uint32_t DataLen = 0;
+    uint32_t CheckSum = 0;
+    uint16_t Sid = 0;
+    uint16_t TargetTimeout = 0;
+#if EmbedXrpc_UseRingBufferWhenReceiving==0
+    uint8_t* Data;
+#endif
+};
 
 EmbedXrpc_Thread_t EmbedXrpc_CreateThread(const char* threadName, uint8_t priority, void (*Thread)(void*), void* Arg) ;
 EmbedXrpc_Mutex_t EmbedXrpc_CreateSemaphore(const char* semaphoreName);
@@ -39,8 +49,8 @@ bool EmbedXrpc_ReleaseMutex(EmbedXrpc_Mutex_t mutex) ;
 
 
 
-QueueState EmbedXrpc_ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen, uint32_t timeout) ;
-QueueState EmbedXrpc_SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemlen) ;
+QueueState EmbedXrpc_ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout) ;
+QueueState EmbedXrpc_SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize) ;
 void EmbedXrpc_ResetQueue(EmbedXrpc_Queue_t queue) ;
 uint32_t EmbedXrpc_QueueSpacesAvailable(EmbedXrpc_Queue_t queue);
 void* Malloc(uint32_t size) ;
