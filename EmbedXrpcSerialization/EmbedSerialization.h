@@ -500,7 +500,8 @@ public:
 		uint32_t ind = GetKeyFromSerializationManager(nullptr, nullptr);
 		if(BlockBufferProvider!=nullptr)
 			BlockBufferProvider->PopChars(nullptr, ind);
-		CalculateSum += GetSum(&Buf[Index], ind);
+		else
+			CalculateSum += GetSum(&Buf[Index], ind);
 		Index += ind;
 	}
 	uint8_t GetArrayLenFromSerializationManager(uint32_t* arrayLen)
@@ -534,7 +535,8 @@ public:
 		uint8_t ind = GetArrayLenFromSerializationManager(nullptr);
 		if (BlockBufferProvider != nullptr)
 			BlockBufferProvider->PopChars(nullptr, ind);
-		CalculateSum += GetSum(&Buf[Index], ind);
+		else
+			CalculateSum += GetSum(&Buf[Index], ind);
 		Index += ind;
 	}
 	uint8_t GetArrayElementFlag()
@@ -548,14 +550,16 @@ public:
 	{
 		if (BlockBufferProvider != nullptr)
 			BlockBufferProvider->GetChar(nullptr);
-		CalculateSum += GetSum(&Buf[Index], 1);
+		else
+			CalculateSum += GetSum(&Buf[Index], 1);
 		Index++;
 	}
 	void RemoveEndFlagFromSerializationManager()
 	{
 		if (BlockBufferProvider != nullptr)
 			BlockBufferProvider->GetChar(nullptr);
-		CalculateSum += GetSum(&Buf[Index], 1);
+		else
+			CalculateSum += GetSum(&Buf[Index], 1);
 		Index++;
 	}
 public:

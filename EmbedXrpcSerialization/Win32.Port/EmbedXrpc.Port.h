@@ -23,7 +23,7 @@ typedef void* EmbedXrpc_Timer_t;
 #define Client_ThreadPriority				0x6
 
 
-#define EmbedXrpc_UseRingBufferWhenReceiving 0
+#define EmbedXrpc_UseRingBufferWhenReceiving 1
 
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 //client
