@@ -111,7 +111,7 @@ void InterClientImpl::Free_NoArg(Inter_NoArg_Return *response)
 {
 if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
 {
-SerializationManager::FreeData(&Inter_NoArg_Return_Type,&response);
+SerializationManager::FreeData(&Inter_NoArg_Return_Type,response);
 }
 }
 
