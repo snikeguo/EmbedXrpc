@@ -882,7 +882,7 @@ bool SerializationManager::DeserializeSubField(const ObjectType* objectType, voi
 			{
 				for (uint32_t i = 0; i < objectType->FieldCount; i++)
 				{
-					BaseValueType* bvt = (BaseValueType*)GetTypeInstance(objectType->SubFields[i]);
+					bvt = (BaseValueType*)GetTypeInstance(objectType->SubFields[i]);
 					if (fn == GetFieldNumber(objectType->SubFields[i]) && tp == GetType((IType*)bvt))
 					{
 						d = (void*)((uint8_t*)objectPoint + GetOffset(objectType->SubFields[i]));
