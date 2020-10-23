@@ -21,7 +21,7 @@ EmbedXrpcObject ClientRpc(ClientSend,
 	500,
 	rdCollection,
 	1,
-	true,
+	false,
 	nullptr);//client rpc 对象
 
 void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server广播后，client接受到的
@@ -67,7 +67,7 @@ EmbedXrpcObject ServerRpc(ServerSend,
 	500,
 	rmCollection,
 	1,
-	true,
+	false,
 	nullptr);//server rpc 对象
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()

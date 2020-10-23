@@ -1,5 +1,15 @@
 ﻿using System;
 using EmbedXrpcIdlParser;
+
+[FileName("sample1.cs")]
+struct Student
+{
+    [FieldNumber(1)]
+    int a;
+    [FieldNumber(2)]
+    int b;
+}
+
 [FileName("sample1.cs")]
 struct DateTime_t
 {
@@ -15,6 +25,8 @@ struct DateTime_t
     int Min;
     [FieldNumber(6)]
     int Sec;
+    [FieldNumber(7)]
+    Student David;
 }
 [FileName("sample1.cs")]
 delegate void DateTimeChange(DateTime_t[] now);
@@ -34,7 +46,7 @@ struct AddResult
 [FileName("sample1.cs")]
 interface Inter
 {
-    AddResult Add(Int32 a, Int32 b,Int32 dataLen,
+    AddResult Add(Int32 a, Int32 b, Int32 dataLen,
         [MaxCount(LenFieldName="dataLen",IsFixed=false)]
         byte[]data);
 
@@ -44,7 +56,7 @@ interface Inter
 }
 
 [FileName("sample1.cs")]
-public class OptionProcess:IOptionProcess
+public class OptionProcess : IOptionProcess
 {
     public GenerationOption Process()
     {

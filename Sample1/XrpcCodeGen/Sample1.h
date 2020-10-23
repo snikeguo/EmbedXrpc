@@ -6,6 +6,11 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
+typedef struct _Student
+{
+Int32 a;   //FieldNumber:1
+Int32 b;   //FieldNumber:2
+}Student;
 typedef struct _DateTime_t
 {
 Int32 Year;   //FieldNumber:10086
@@ -14,6 +19,7 @@ Int32 Day;   //FieldNumber:3
 Int32 Hour;   //FieldNumber:4
 Int32 Min;   //FieldNumber:5
 Int32 Sec;   //FieldNumber:6
+Student David;   //FieldNumber:7
 }DateTime_t;
 typedef struct _AddResult
 {

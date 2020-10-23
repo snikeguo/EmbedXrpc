@@ -15,62 +15,68 @@
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
+extern const Int32Field Student_Field_a;
+extern const Int32Field Student_Field_b;
+extern const IField* Student_Object_Type_Desc [2];
+extern const ObjectType Student_Object_Type;
+
 extern const Int32Field DateTime_t_Field_Year;
 extern const Int32Field DateTime_t_Field_Month;
 extern const Int32Field DateTime_t_Field_Day;
 extern const Int32Field DateTime_t_Field_Hour;
 extern const Int32Field DateTime_t_Field_Min;
 extern const Int32Field DateTime_t_Field_Sec;
-extern const IField* DateTime_tDesc [6];
-extern const ObjectType DateTime_t_Type;
+extern const ObjectField DateTime_t_Field_David;
+extern const IField* DateTime_t_Object_Type_Desc [7];
+extern const ObjectType DateTime_t_Object_Type;
 
 extern const Int32Field AddResult_Field_Sum;
 extern const Int32Field AddResult_Field_dataLen;
 extern const ArrayField AddResult_Field_data;
-extern const IField* AddResultDesc [3];
-extern const ObjectType AddResult_Type;
+extern const IField* AddResult_Object_Type_Desc [3];
+extern const ObjectType AddResult_Object_Type;
 
 extern const ArrayField DateTimeChange_Parameter_Field_now;
-extern const IField* DateTimeChange_ParameterDesc [1];
-extern const ObjectType DateTimeChange_Parameter_Type;
+extern const IField* DateTimeChange_Parameter_Object_Type_Desc [1];
+extern const ObjectType DateTimeChange_Parameter_Object_Type;
 
-#define DateTimeChange_ServiceId 16
+#define DateTimeChange_ServiceId 16   //0x10
 extern const Int32Field Inter_Add_Parameter_Field_a;
 extern const Int32Field Inter_Add_Parameter_Field_b;
 extern const Int32Field Inter_Add_Parameter_Field_dataLen;
 extern const ArrayField Inter_Add_Parameter_Field_data;
-extern const IField* Inter_Add_ParameterDesc [4];
-extern const ObjectType Inter_Add_Parameter_Type;
+extern const IField* Inter_Add_Parameter_Object_Type_Desc [4];
+extern const ObjectType Inter_Add_Parameter_Object_Type;
 
-#define Inter_Add_ServiceId 17
+#define Inter_Add_ServiceId 17   //0x11
 extern const UInt8Field Inter_Add_Return_Field_State;
 extern const ObjectField Inter_Add_Return_Field_ReturnValue;
-extern const IField* Inter_Add_ReturnDesc [2];
-extern const ObjectType Inter_Add_Return_Type;
+extern const IField* Inter_Add_Return_Object_Type_Desc [2];
+extern const ObjectType Inter_Add_Return_Object_Type;
 
-extern const ObjectType Inter_NoArg_Parameter_Type;
+extern const ObjectType Inter_NoArg_Parameter_Object_Type;
 
-#define Inter_NoArg_ServiceId 18
+#define Inter_NoArg_ServiceId 18   //0x12
 extern const UInt8Field Inter_NoArg_Return_Field_State;
 extern const UInt8Field Inter_NoArg_Return_Field_ReturnValue;
-extern const IField* Inter_NoArg_ReturnDesc [2];
-extern const ObjectType Inter_NoArg_Return_Type;
+extern const IField* Inter_NoArg_Return_Object_Type_Desc [2];
+extern const ObjectType Inter_NoArg_Return_Object_Type;
 
 extern const Int32Field Inter_NoReturn_Parameter_Field_a;
-extern const IField* Inter_NoReturn_ParameterDesc [1];
-extern const ObjectType Inter_NoReturn_Parameter_Type;
+extern const IField* Inter_NoReturn_Parameter_Object_Type_Desc [1];
+extern const ObjectType Inter_NoReturn_Parameter_Object_Type;
 
-#define Inter_NoReturn_ServiceId 19
+#define Inter_NoReturn_ServiceId 19   //0x13
 extern const UInt8Field Inter_NoReturn_Return_Field_State;
-extern const IField* Inter_NoReturn_ReturnDesc [1];
-extern const ObjectType Inter_NoReturn_Return_Type;
+extern const IField* Inter_NoReturn_Return_Object_Type_Desc [1];
+extern const ObjectType Inter_NoReturn_Return_Object_Type;
 
-extern const ObjectType Inter_NoArgAndReturn_Parameter_Type;
+extern const ObjectType Inter_NoArgAndReturn_Parameter_Object_Type;
 
-#define Inter_NoArgAndReturn_ServiceId 20
+#define Inter_NoArgAndReturn_ServiceId 20   //0x14
 extern const UInt8Field Inter_NoArgAndReturn_Return_Field_State;
-extern const IField* Inter_NoArgAndReturn_ReturnDesc [1];
-extern const ObjectType Inter_NoArgAndReturn_Return_Type;
+extern const IField* Inter_NoArgAndReturn_Return_Object_Type_Desc [1];
+extern const ObjectType Inter_NoArgAndReturn_Return_Object_Type;
 
 
 #endif
