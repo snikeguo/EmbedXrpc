@@ -32,7 +32,7 @@ void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server¹ã²¥ºó£¬
 InterClientImpl Client(&ClientRpc);
 void ClientThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	int a=1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
 	while (true)
@@ -42,7 +42,7 @@ void ClientThread()
 		auto sum=Client.Add(a, b,3, Bytes);
 		if (sum.State == ResponseState_Ok)
 		{
-			printf("%d+%d=%d\n", a,b,sum.ReturnValue);
+			printf("%d+%d=%d,%s\n", a,b,sum.ReturnValue.Sum,sum.ReturnValue.data);
 		}
 		Client.Free_Add(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
@@ -74,8 +74,7 @@ void ServerThread()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	while (true)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+	{		
 		DateTime_t t;
 		auto ti = (time(nullptr));
 		auto localti = localtime(&ti);
@@ -85,7 +84,10 @@ void ServerThread()
 		t.Month = localti->tm_mon;
 		t.Sec = localti->tm_sec;
 		t.Year = localti->tm_year+1900;
+		t.David.a = 1;
+		t.David.b = 3;
 		DateTimeChanger.Invoke(&t);
+		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	}
 }
 

@@ -158,7 +158,7 @@ const Type_t ObjectType_GetType()
 }
 
 
-const uint32_t ObjectField_GetFieldNumber(const IField* const a) {return ((ObjectField*)a)->FieldNumber; }
+const uint32_t ObjectField_GetFieldNumber(const IField* const a) { return ((ObjectField*)a)->FieldNumber; }
 const char* ObjectField_GetName(const IField* const  a)
 {
 	return ((ObjectField*)a)->Name;
@@ -545,9 +545,9 @@ bool SerializationManager::Pop(uint8_t* out_buf, uint32_t len)
 	{
 		if (out_buf != nullptr)
 		{
-				Memcpy(out_buf, &Buf[Index], len);
+			Memcpy(out_buf, &Buf[Index], len);
 		}
-			CalculateSum += GetSum(&Buf[Index], len);
+		CalculateSum += GetSum(&Buf[Index], len);
 		Index += len;
 	}
 	else
@@ -567,8 +567,8 @@ bool SerializationManager::Pop(uint8_t* out_buf, uint32_t len)
 void SerializationManager::Reset()
 {
 	Index = 0;
-		ReferenceSum = 0;
-		CalculateSum = 0;
+	ReferenceSum = 0;
+	CalculateSum = 0;
 	if (BlockBufferProvider != nullptr)
 	{
 		BlockBufferProvider->Reset();
@@ -617,8 +617,8 @@ void SerializationManager::RemoveKeyFromSerializationManager()
 	uint32_t ind = GetKeyFromSerializationManager(nullptr, nullptr);
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->PopChars(nullptr, ind);
-		else
-			CalculateSum += GetSum(&Buf[Index], ind);
+	else
+		CalculateSum += GetSum(&Buf[Index], ind);
 	Index += ind;
 }
 uint8_t SerializationManager::GetArrayLenFromSerializationManager(uint32_t* arrayLen)
@@ -652,8 +652,8 @@ void SerializationManager::RemoveArrayLenFromSerializationManager()
 	uint8_t ind = GetArrayLenFromSerializationManager(nullptr);
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->PopChars(nullptr, ind);
-		else
-			CalculateSum += GetSum(&Buf[Index], ind);
+	else
+		CalculateSum += GetSum(&Buf[Index], ind);
 	Index += ind;
 }
 uint8_t SerializationManager::GetArrayElementFlag()
@@ -667,16 +667,16 @@ void SerializationManager::RemoveArrayElementFlagFromSerializationManager()
 {
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->GetChar(nullptr);
-		else
-			CalculateSum += GetSum(&Buf[Index], 1);
+	else
+		CalculateSum += GetSum(&Buf[Index], 1);
 	Index++;
 }
 void SerializationManager::RemoveEndFlagFromSerializationManager()
 {
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->GetChar(nullptr);
-		else
-			CalculateSum += GetSum(&Buf[Index], 1);
+	else
+		CalculateSum += GetSum(&Buf[Index], 1);
 	Index++;
 }
 void SerializationManager::Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber)
@@ -710,7 +710,7 @@ void SerializationManager::SerializeSubField(const ObjectType* objectType, void*
 		{
 			const IField* arrayfield = objectType->SubFields[i];
 			ArrayType* arrayType = (ArrayType*)(GetTypeInstance(arrayfield));
-			IType* arrayElementType = (IType*)(arrayType->ElementType);
+			IType* arrayElementTypeInstance = (IType*)(arrayType->ElementTypeInstance);
 
 			const IField* arrayLenField = GetArrayLenField(arrayfield);
 			//EmbedSerializationAssert(arrayLenField->GetTypeInstance()->GetType() <= TYPE_INT64);
@@ -736,13 +736,13 @@ void SerializationManager::SerializeSubField(const ObjectType* objectType, void*
 			SerializeLen(len);
 
 			uint8_t baseValueTypeFlag = 0;
-			if (GetType(arrayElementType) <= TYPE_DOUBLE)
+			if (GetType(arrayElementTypeInstance) <= TYPE_DOUBLE)
 			{
-				baseValueTypeFlag = (GetType(arrayElementType) << 4) | 0x01;
+				baseValueTypeFlag = (GetType(arrayElementTypeInstance) << 4) | 0x01;
 				SerializeArrayElementFlag(baseValueTypeFlag);
 				for (uint32_t j = 0; j < len; j++)
 				{
-					BaseValueType* bvt = (BaseValueType*)arrayElementType;
+					BaseValueType* bvt = (BaseValueType*)arrayElementTypeInstance;
 					uint32_t dw = bvt->DataWidth;
 					SerializeValue(dw,
 						ptr + j * dw);
@@ -752,7 +752,7 @@ void SerializationManager::SerializeSubField(const ObjectType* objectType, void*
 			{
 				baseValueTypeFlag = 0x02;
 				SerializeArrayElementFlag(baseValueTypeFlag);
-				ObjectType* ot = (ObjectType*)arrayElementType;
+				ObjectType* ot = (ObjectType*)arrayElementTypeInstance;
 
 				for (uint32_t j = 0; j < len; j++)
 				{
@@ -786,7 +786,7 @@ void SerializationManager::NoMataData_SerializeSubField(const ObjectType* object
 		{
 			const IField* arrayfield = objectType->SubFields[i];
 			ArrayType* arrayType = (ArrayType*)(GetTypeInstance(arrayfield));
-			IType* arrayElementType = (IType*)(arrayType->ElementType);
+			IType* arrayElementTypeInstance = (IType*)(arrayType->ElementTypeInstance);
 
 			const IField* arrayLenField = GetArrayLenField(arrayfield);
 			//EmbedSerializationAssert(arrayLenField->GetTypeInstance()->GetType() <= TYPE_INT64);
@@ -812,11 +812,11 @@ void SerializationManager::NoMataData_SerializeSubField(const ObjectType* object
 			//SerializeLen(len);
 
 			uint8_t baseValueTypeFlag = 0;
-			if (GetType(arrayElementType) <= TYPE_DOUBLE)
+			if (GetType(arrayElementTypeInstance) <= TYPE_DOUBLE)
 			{
-				baseValueTypeFlag = (GetType(arrayElementType) << 4) | 0x01;
+				baseValueTypeFlag = (GetType(arrayElementTypeInstance) << 4) | 0x01;
 				//SerializeArrayElementFlag(baseValueTypeFlag);
-				BaseValueType* bvt = (BaseValueType*)arrayElementType;
+				BaseValueType* bvt = (BaseValueType*)arrayElementTypeInstance;
 				uint32_t dw = bvt->DataWidth;
 				for (uint32_t j = 0; j < len; j++)
 				{
@@ -827,7 +827,7 @@ void SerializationManager::NoMataData_SerializeSubField(const ObjectType* object
 			{
 				baseValueTypeFlag = 0x02;
 				//SerializeArrayElementFlag(baseValueTypeFlag);
-				ObjectType* ot = (ObjectType*)arrayElementType;
+				ObjectType* ot = (ObjectType*)arrayElementTypeInstance;
 
 				for (uint32_t j = 0; j < len; j++)
 				{
@@ -844,7 +844,7 @@ void SerializationManager::NoMataData_SerializeSubField(const ObjectType* object
 	}
 	//SerializeEndFlag();
 }
-bool SerializationManager::Deserialize(const ObjectType* objectType, void* objectPoint, uint32_t fieldNumber )
+bool SerializationManager::Deserialize(const ObjectType* objectType, void* objectPoint, uint32_t fieldNumber)
 {
 	if (IsEnableMataDataEncode == true)
 	{
@@ -963,10 +963,10 @@ bool SerializationManager::DeserializeSubField(const ObjectType* objectType, voi
 			else
 			{
 
-				ObjectType* ot = nullptr;// (ObjectType*)(arrayType->ArrayElementType);
+				ObjectType* ot = nullptr;// (ObjectType*)(arrayType->ArrayElementTypeInstance);
 				if (arrayType != nullptr)
 				{
-					ot = (ObjectType*)(arrayType->ElementType);
+					ot = (ObjectType*)(arrayType->ElementTypeInstance);
 				}
 				for (uint64_t j = 0; j < arraylen; j++)
 				{
@@ -1045,7 +1045,7 @@ bool SerializationManager::NoMataData_DeserializeSubField(const ObjectType* obje
 				Memcpy((void*)((uint8_t*)d), &ptr, sizeof(uint8_t*));
 			}
 
-			Type_t aet = GetType(arrayType->ElementType);
+			Type_t aet = GetType(arrayType->ElementTypeInstance);
 			if (aet <= TYPE_DOUBLE)//base value type
 			{
 				for (uint64_t j = 0; j < arraylen; j++)
@@ -1063,10 +1063,10 @@ bool SerializationManager::NoMataData_DeserializeSubField(const ObjectType* obje
 			else
 			{
 
-				ObjectType* ot = nullptr;// (ObjectType*)(arrayType->ArrayElementType);
+				ObjectType* ot = nullptr;// (ObjectType*)(arrayType->ArrayElementTypeInstance);
 				if (arrayType != nullptr)
 				{
-					ot = (ObjectType*)(arrayType->ElementType);
+					ot = (ObjectType*)(arrayType->ElementTypeInstance);
 				}
 				for (uint64_t j = 0; j < arraylen; j++)
 				{
@@ -1114,14 +1114,14 @@ void SerializationManager::FreeData(const ObjectType* objectType, void* objectDa
 
 				const ArrayType* at = (const ArrayType*)GetTypeInstance(arrayfield);
 				uint8_t** arrayfieldDataPoint = (uint8_t**)((uint8_t*)objectData + GetOffset(arrayfield));
-				const IType* elementType = at->ElementType;
-				EmbedSerializationAssert(GetType(elementType) <= TYPE_DOUBLE || GetType(elementType) == TYPE_OBJECT);
+				const IType* elementTypeInstance = at->ElementTypeInstance;
+				EmbedSerializationAssert(GetType(elementTypeInstance) <= TYPE_DOUBLE || GetType(elementTypeInstance) == TYPE_OBJECT);
 
-				if (GetType(elementType) == TYPE_OBJECT)//如果数组元素是对象，就先free每个元素，最后释放指针
+				if (GetType(elementTypeInstance) == TYPE_OBJECT)//如果数组元素是对象，就先free每个元素，最后释放指针
 				{
 					for (uint64_t j = 0; j < len; j++)
 					{
-						const ObjectType* elementObjectType = (const ObjectType*)elementType;
+						const ObjectType* elementObjectType = (const ObjectType*)elementTypeInstance;
 						FreeData(elementObjectType, (uint8_t*)(*arrayfieldDataPoint) + j * at->LengthOfSingleElement);
 					}
 				}

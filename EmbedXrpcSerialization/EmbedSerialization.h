@@ -61,7 +61,7 @@ struct IField //:public IType
 struct ArrayType
 {
 	const IType BaseClass;
-	const IType* ElementType;
+	const IType* ElementTypeInstance;
 	const uint32_t LengthOfSingleElement;
 };
 struct ArrayField
