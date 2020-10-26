@@ -416,9 +416,8 @@ namespace EmbedXrpcIdlParser
                 //生成服务端代码
                 ServerHsw.WriteLine("class " + targetDelegate.MethodName + "Delegate");
                 ServerHsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
-                ServerHsw.WriteLine(targetDelegate.MethodName + "Delegate" + "(EmbedXrpcObject *rpcobj)");
-                ServerHsw.WriteLine("{\nthis->RpcObject=rpcobj;");
-                ServerHsw.WriteLine("}");
+                ServerHsw.WriteLine(targetDelegate.MethodName + "Delegate" + "(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)");
+                ServerHsw.WriteLine("{}");
                 ServerHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
 
                 ServerHsw.Write($"void  Invoke(");
@@ -563,10 +562,8 @@ namespace EmbedXrpcIdlParser
                 //这里生产client 部分代码
                 ClientHsw.WriteLine("class " + targetInterface.Name + "ClientImpl");
                 ClientHsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
-                ClientHsw.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcObject *rpcobj)");
-                ClientHsw.WriteLine("{\nthis->RpcObject=rpcobj;");
-
-                ClientHsw.WriteLine("}");
+                ClientHsw.WriteLine(targetInterface.Name + "ClientImpl" + "(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)");
+                ClientHsw.WriteLine("{}");
 
                 foreach (var service in targetInterface.Services)
                 {

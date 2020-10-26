@@ -6,10 +6,8 @@ class DateTimeChangeDelegate
 {
 public:
 EmbedXrpcObject *RpcObject=nullptr;
-DateTimeChangeDelegate(EmbedXrpcObject *rpcobj)
-{
-this->RpcObject=rpcobj;
-}
+DateTimeChangeDelegate(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
+{}
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
 void  Invoke(DateTime_t now[1]);
 };
