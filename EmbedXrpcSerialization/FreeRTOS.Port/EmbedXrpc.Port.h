@@ -11,20 +11,20 @@ typedef void* EmbedXrpc_Timer_t;
 #define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
 //common
-#define EmbedXrpc_SendBufferSize			1024//发送Buffer大小
+#define EmbedXrpc_SendBufferSize			128//发送Buffer大小
 
 //client部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
-#define EmbedXrpc_DelegateBlockQueue_MaxItemNumber	20
-#define EmbedXrpc_ResponseBlockQueue_MaxItemNumber	20
+#define EmbedXrpc_DelegateBlockQueue_MaxItemNumber	0
+#define EmbedXrpc_ResponseBlockQueue_MaxItemNumber	0
 
 //server部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
-#define EmbedXrpc_RequestBlockQueue_MaxItemNumber	50
+#define EmbedXrpc_RequestBlockQueue_MaxItemNumber	100
 
-#define Server_ThreadPriority				0x6
+#define Server_ThreadPriority				0x2
 #define Client_ThreadPriority				0x6
 
 
-#define EmbedXrpc_UseRingBufferWhenReceiving 1
+#define EmbedXrpc_UseRingBufferWhenReceiving 0
 
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 //client

@@ -214,11 +214,11 @@ public:
 				raw.CheckSum = GetSum(data, dataLen);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 				EmbedXrpc_SendQueueResult=ResponseBlockBufferProvider->Send(&raw, nullptr, 0);
-				goto sqr;
 #else
 				raw.Data = nullptr;
 				EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
 #endif
+				goto sqr;
 			}
 			for (uint32_t collectionIndex = 0; collectionIndex < ResponseDelegateMessageMapsCount; collectionIndex++)
 			{
@@ -242,11 +242,11 @@ public:
 							if (dataLen > 0)
 							{
 								raw.Data = (uint8_t *)Malloc(dataLen);
-								Memcpy(raw.Data, data, dataLen);
 								if (raw.Data == nullptr)
 								{
 									goto sqr;
 								}
+								Memcpy(raw.Data, data, dataLen);
 							}
 							EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
 #endif
@@ -259,11 +259,11 @@ public:
 							if (dataLen > 0)
 							{
 								raw.Data = (uint8_t*)Malloc(dataLen);
-								Memcpy(raw.Data, data, dataLen);
 								if (raw.Data == nullptr)
 								{
 									goto sqr;
 								}
+								Memcpy(raw.Data, data, dataLen);
 							}
 							EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(DelegateBlockQueue, &raw, sizeof(ReceiveItemInfo));
 #endif
@@ -286,11 +286,11 @@ public:
 			if (dataLen > 0)
 			{
 				raw.Data = (uint8_t*)Malloc(dataLen);
-				Memcpy(raw.Data, data, dataLen);
 				if (raw.Data == nullptr)
 				{
 					goto sqr;
 				}
+				Memcpy(raw.Data, data, dataLen);
 			}
 			EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(RequestBlockQueue, &raw, sizeof(ReceiveItemInfo));
 #endif
@@ -359,7 +359,8 @@ public:
 					obj->DelegateBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 				}
 #else
-				Free(recData.Data);
+				if(recData.DataLen>0)
+					Free(recData.Data);
 #endif
 				//EmbedSerializationShowMessage("EmbedXrpcObject","Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 			}
@@ -442,7 +443,8 @@ public:
 				obj->RequestBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 			}
 #else
-			Free(recData.Data);
+			if(recData.DataLen>0)
+				Free(recData.Data);
 #endif
 			//EmbedSerializationShowMessage("EmbedXrpcObject","Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
@@ -494,7 +496,8 @@ public:
 			rsm.CalculateSum = 0;
 			rsm.ReferenceSum = recData.CheckSum;
 			rsm.Deserialize(type, response, 0);
-			Free(recData.Data);
+			if(recData.DataLen>0)
+				Free(recData.Data);
 #endif
 			
 		}

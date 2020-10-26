@@ -21,7 +21,7 @@ namespace EmbedXrpcIdlParser
         public string ToCode()
         {
             //return $"const {EmbedXrpcSerializationHelper.TypeReplaceDic[Type]}Field {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",offsetof({StructName},{Name}),{IsArrayLenField.ToString().ToLower()});\n";
-            return $"const {EmbedXrpcSerializationHelper.TypeReplaceDic[Type]}Field {StructName}_{Prefix}_{Name}=\r\n" +
+            return $"extern const {EmbedXrpcSerializationHelper.TypeReplaceDic[Type]}Field {StructName}_{Prefix}_{Name}=\r\n" +
                 $"{{ \r\n" +
                 $"  {{ \r\n" +
                 $"    TYPE_{EmbedXrpcSerializationHelper.TypeReplaceDic[Type].ToString().ToUpper()},\r\n" +
@@ -53,7 +53,7 @@ namespace EmbedXrpcIdlParser
                 return string.Empty;
             }
             GeneratedTypes.Add($"{TypeName}_Array_Type");
-            return $"const ArrayType {TypeName}_Array_Type= \r\n" +
+            return $"extern const ArrayType {TypeName}_Array_Type= \r\n" +  //修复C++中的const限定符导致的链接问题
                 $"{{\r\n" +
                 $"  {{ \r\n" +
                 $"    TYPE_ARRAY,\r\n" +
@@ -80,7 +80,8 @@ namespace EmbedXrpcIdlParser
         {
             var arrayLenFieldDesc = LenField == null ? "nullptr" : $"(const IField*)&{StructName}_{Prefix}_{LenField.Name}";
             //return $"const ArrayField {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{arrayLenFieldDesc});\n";
-            return $"const ArrayField {StructName}_{Prefix}_{FieldName}=\r\n" +
+            string s= $"extern const ArrayType {TypeName}_Array_Type;\r\n";
+            s+= $"extern const ArrayField {StructName}_{Prefix}_{FieldName}=\r\n" +
                 $"{{ \r\n" +
                 $"  {{\r\n" +
                 $"    TYPE_ARRAY,\r\n" +
@@ -92,6 +93,7 @@ namespace EmbedXrpcIdlParser
                 $"  {IsFixed.ToString().ToLower()},\r\n" +
                 $"  {FieldNumber},\r\n" +
                 $"}};\r\n";
+            return s;
         }
         public new string ToExtern()
         {
@@ -113,7 +115,7 @@ namespace EmbedXrpcIdlParser
             }
             GeneratedTypes.Add($"{TypeName}_Object_Type");
             //return $"const ObjectType {Name}({FieldCount},{FieldDesc});\n";
-            return $"const ObjectType {TypeName}_Object_Type=\r\n" +
+            return $"extern const ObjectType {TypeName}_Object_Type=\r\n" +
                 $"{{    \r\n" +
                 $"  {{\r\n" +
                 $"    TYPE_OBJECT,\r\n" +
@@ -135,8 +137,8 @@ namespace EmbedXrpcIdlParser
         public UInt32 FieldNumber { get; set; }
         public new string ToCode()
         {
-
-            return $"const ObjectField {StructName}_{Prefix}_{FieldName}=\r\n" +
+            string s = $"extern const ObjectType {TypeName}_Object_Type;\r\n";
+            s+= $"extern const ObjectField {StructName}_{Prefix}_{FieldName}=\r\n" +
                 $"{{ \r\n" +
                 $"  {{\r\n" +
                 $"    TYPE_OBJECT,\r\n" +
@@ -146,6 +148,7 @@ namespace EmbedXrpcIdlParser
                 $"  &{TypeName}_Object_Type,\r\n" +
                 $"  {FieldNumber},\r\n" +
                 $"}};\r\n";
+            return s;
         }
         public new string ToExtern()
         {

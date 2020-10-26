@@ -151,7 +151,7 @@ QueueState EmbedXrpc_SendQueue(EmbedXrpc_Queue_t queue, void *item, uint32_t ite
 {
 	auto q = static_cast<QueueHandle_t>(queue);
 	auto r = xQueueSend(q, item, 0);
-	configASSERT(r == pdPASS);
+	//configASSERT(r == pdPASS);
 	if (r == pdPASS)
 	{
 		return QueueState_OK;
@@ -176,13 +176,15 @@ uint32_t MallocCount = 0;
 void *Malloc(uint32_t size)
 {
 	auto x = pvPortMalloc(size);
-	configASSERT(x != NULL);
+	//configASSERT(x != NULL);
 	EmbedSerializationShowMessage("EmbedXrpcPort", "Malloc %x\n", x);
 	MallocCount++;
 	return x;
 }
+uint32_t FreeCount = 0;
 void Free(void *ptr)
 {
+	FreeCount++;
 	EmbedSerializationShowMessage("EmbedXrpcPort", "Free %x\n", ptr);
 	vPortFree(ptr);
 }

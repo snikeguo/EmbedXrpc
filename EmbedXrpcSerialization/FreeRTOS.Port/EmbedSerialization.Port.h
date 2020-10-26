@@ -10,7 +10,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "string.h"
-
+#include "stdio.h"
 typedef  uint8_t Byte;
 typedef  int8_t SByte;
 typedef  uint16_t UInt16;
@@ -23,8 +23,9 @@ typedef  float Float;
 typedef  double Double;
 typedef BaseType_t Boolean;
 
-#define FilterStringHeader	{"NONE"}
-#define StringOutput(...)  //printf(__VA_ARGS__)
+#define FilterStringHeader	{"EmbedXrpcPort"}
+extern "C" void rt_kprintf(const char *fmt, ...);
+#define StringOutput(...)  vprintf(__VA_ARGS__)
 void* Malloc(uint32_t size);
 void Free(void* ptr);
 void Memcpy(void* d, const void* s, uint32_t size);
