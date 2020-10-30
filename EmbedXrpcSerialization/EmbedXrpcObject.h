@@ -216,7 +216,10 @@ public:
 				EmbedXrpc_SendQueueResult=ResponseBlockBufferProvider->Send(&raw, nullptr, 0);
 #else
 				raw.Data = nullptr;
-				EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
+				if(EmbedXrpc_QueueSpacesAvailable(ResponseBlockQueue)>0)
+				{
+					EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
+				}				
 #endif
 				goto sqr;
 			}
@@ -239,16 +242,19 @@ public:
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 							EmbedXrpc_SendQueueResult = ResponseBlockBufferProvider->Send(&raw, data, dataLen);
 #else
-							if (dataLen > 0)
+							if(EmbedXrpc_QueueSpacesAvailable(ResponseBlockQueue)>0)
 							{
-								raw.Data = (uint8_t *)Malloc(dataLen);
-								if (raw.Data == nullptr)
+								if (dataLen > 0)
 								{
-									goto sqr;
+									raw.Data = (uint8_t *)Malloc(dataLen);
+									if (raw.Data == nullptr)
+									{
+										goto sqr;
+									}
+									Memcpy(raw.Data, data, dataLen);
 								}
-								Memcpy(raw.Data, data, dataLen);
-							}
-							EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
+								EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
+							}							
 #endif
 						}
 						else if (iter->ReceiveType == ReceiveType_Delegate)
@@ -256,16 +262,19 @@ public:
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 							EmbedXrpc_SendQueueResult = DelegateBlockBufferProvider->Send(&raw, data, dataLen);
 #else
-							if (dataLen > 0)
+							if(EmbedXrpc_QueueSpacesAvailable(DelegateBlockQueue)>0)
 							{
-								raw.Data = (uint8_t*)Malloc(dataLen);
-								if (raw.Data == nullptr)
+								if (dataLen > 0)
 								{
-									goto sqr;
+									raw.Data = (uint8_t*)Malloc(dataLen);
+									if (raw.Data == nullptr)
+									{
+										goto sqr;
+									}
+									Memcpy(raw.Data, data, dataLen);
 								}
-								Memcpy(raw.Data, data, dataLen);
-							}
-							EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(DelegateBlockQueue, &raw, sizeof(ReceiveItemInfo));
+								EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(DelegateBlockQueue, &raw, sizeof(ReceiveItemInfo));
+							}							
 #endif
 						}
 						goto sqr;
@@ -282,17 +291,20 @@ public:
 			raw.CheckSum = GetSum(data, dataLen);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 			EmbedXrpc_SendQueueResult=RequestBlockBufferProvider->Send(&raw, data, dataLen);
-#else 
-			if (dataLen > 0)
+#else 		
+			if(EmbedXrpc_QueueSpacesAvailable(RequestBlockQueue)>0)
 			{
-				raw.Data = (uint8_t*)Malloc(dataLen);
-				if (raw.Data == nullptr)
+				if (dataLen > 0)
 				{
-					goto sqr;
+					raw.Data = (uint8_t*)Malloc(dataLen);
+					if (raw.Data == nullptr)
+					{
+						goto sqr;
+					}
+					Memcpy(raw.Data, data, dataLen);
 				}
-				Memcpy(raw.Data, data, dataLen);
-			}
-			EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(RequestBlockQueue, &raw, sizeof(ReceiveItemInfo));
+				EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(RequestBlockQueue, &raw, sizeof(ReceiveItemInfo));
+			}			
 #endif
 		}
 		sqr:
