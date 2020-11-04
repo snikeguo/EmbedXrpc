@@ -329,7 +329,8 @@ namespace EmbedXrpcIdlParser
                                 var FieldNumberAttr = field.GetCustomAttribute<FieldNumberAttribute>();
                                 if (FieldNumberAttr == null)
                                 {
-                                    throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");
+                                    FieldNumberAttr = new FieldNumberAttribute(0);//如果没有fieldNumber说明用户并不打算使用TTLV编码
+                                    //throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");
                                 }
                                 //var fieldIndexAttribute = field.GetCustomAttribute<FieldIndexAttribute>();
                                 TargetField targetField = new TargetField();
