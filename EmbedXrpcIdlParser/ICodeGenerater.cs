@@ -79,7 +79,7 @@ namespace EmbedXrpcIdlParser
     {
         public TargetType_t TargetType { get;private set; } = TargetType_t.TYPE_ARRAY;
         public string TypeName { get; set; }
-        public TargetType_t ElementType { get; set; }
+        public ITargetType ElementType { get; set; }
     }
 
     public class ObjectType_TargetType:ITargetType
@@ -368,7 +368,20 @@ namespace EmbedXrpcIdlParser
                     {
                         attt = new ArrayType_TargetType();
                         attt.TypeName = field.FieldType.Name;
-                        attt.ElementType = ClrBaseValueTypeToTargetType_t(field.FieldType.GetElementType());
+                        if(IsNumberType(field.FieldType.GetElementType()) == true)
+                        {
+                            attt.ElementType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(field.FieldType.GetElementType()));
+                        }
+                        else
+                        {
+                            ObjectType_TargetType ottt = fileIdlInfo.GetTargetStruct(field.FieldType.GetElementType().Name);
+                            if (ottt == null)
+                            {
+                                StructTypeParse(field.FieldType.GetElementType(), fileIdlInfo);//如果list中没有targetstruct 那就去parse
+                            }
+                            ottt = fileIdlInfo.GetTargetStruct(field.FieldType.GetElementType().Name);
+                            attt.ElementType = ottt;
+                        }
                         fileIdlInfo.TargetArrayTypes.Add(attt);
                     }
                     Array_TargetField arrayField = new Array_TargetField();
@@ -388,6 +401,7 @@ namespace EmbedXrpcIdlParser
                     }
                     ottt = fileIdlInfo.GetTargetStruct(field.FieldType.Name);
                     Object_TargetField objectFiled = new Object_TargetField();
+                    objectFiled.TargetType = ottt;
                     objectFiled.FieldName = field.Name;
                     objectFiled.FieldNumberAttr = FieldNumberAttr;
                     targetStruct.TargetFields.Add(objectFiled);
@@ -431,8 +445,20 @@ namespace EmbedXrpcIdlParser
                     {
                         attt = new ArrayType_TargetType();
                         attt.TypeName = parameter.ParameterType.Name;
-                        attt.ElementType = ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetElementType());
-                        fileIdlInfo.TargetArrayTypes.Add(attt);
+                        if (IsNumberType(parameter.ParameterType.GetElementType()) == true)
+                        {
+                            attt.ElementType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetElementType()));
+                        }
+                        else
+                        {
+                            ObjectType_TargetType ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.GetElementType().Name);
+                            if (ottt == null)
+                            {
+                                StructTypeParse(parameter.ParameterType.GetElementType(), fileIdlInfo);//如果list中没有targetstruct 那就去parse
+                            }
+                            ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.GetElementType().Name);
+                            attt.ElementType = ottt;
+                        }
                     }
                     Array_TargetField arrayField = new Array_TargetField();
                     arrayField.TargetType = attt;
@@ -451,6 +477,7 @@ namespace EmbedXrpcIdlParser
                     }
                     ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.Name);
                     Object_TargetField objectFiled = new Object_TargetField();
+                    objectFiled.TargetType = ottt;
                     objectFiled.FieldName = parameter.Name;
                     objectFiled.FieldNumberAttr = FieldNumberAttr;
                     targetStruct.TargetFields.Add(objectFiled);
