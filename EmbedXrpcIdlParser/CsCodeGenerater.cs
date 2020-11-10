@@ -9,12 +9,12 @@ using RazorEngine.Text;
 
 namespace EmbedXrpcIdlParser
 {
-    public class CsCodeGenerater : ICodeGenerater
+    public class CsCodeGenerater
     {
-        public CodeGenParameter CodeGenParameter { get; set; }
-        public void CodeGen(CodeGenParameter codeGenParameter)
+        public CSharpCodeGenParameter CSharpCodeGenParameter { get; set; }
+        public void CodeGen(CSharpCodeGenParameter codeGenParameter)
         {
-            CodeGenParameter = codeGenParameter;
+            CSharpCodeGenParameter = codeGenParameter;
 #if false
             var engine = new RazorLightEngineBuilder()
                 .UseFileSystemProject(Directory.GetCurrentDirectory())

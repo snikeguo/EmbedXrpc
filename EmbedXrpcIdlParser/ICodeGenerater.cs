@@ -470,7 +470,8 @@ namespace EmbedXrpcIdlParser
                             fieldNumber++;
                             targetService.ParameterStruct.TargetFields.Add(field);
                             if (field.IsArray == true)
-                            {
+                            {   //如果数组长度字段是null 那么按照固定长度且长度为1去处理
+                                //当数组长度字段不是null,按照数组长度字段结合动态或静态情况处理
                                 var lenfield = GetArrayLenField(targetService.ParameterStruct.TargetFields, field);
                                 if (lenfield != null)
                                 {
@@ -480,7 +481,7 @@ namespace EmbedXrpcIdlParser
                                 {
                                     if (field.MaxCountAttribute.IsFixed == false)
                                     {
-                                        throw new Exception($"{field.Name}当数组不固定的时候,必须制定数组的长度字段!");
+                                        throw new Exception($"{field.Name}当数组不固定的时候,必须指定数组的长度字段!");
                                     }
                                 }
                             }
@@ -565,18 +566,22 @@ namespace EmbedXrpcIdlParser
         All
     }
     //FileIdlInfo fileIdlInfo, GenType genType,string outputpath
-    public class CodeGenParameter
+    public class CSharpCodeGenParameter
     {
         public FileIdlInfo FileIdlInfo { get; set; }
         public GenType GenType { get; set; }
         public string OutPutPath { get; set; }
-        //public bool IsEnableMataDataEncode { get; set; }
+        
     }
-    public interface ICodeGenerater
+    public class CppCodeGenParameter
     {
-        void CodeGen(CodeGenParameter parameter);
+        public FileIdlInfo FileIdlInfo { get; set; }
+        public GenType GenType { get; set; }
+        public string OutPutPath { get; set; }
+
+        public bool IsRuntimeVersion { get; set; }
+
     }
-    
-    
+
 }
 

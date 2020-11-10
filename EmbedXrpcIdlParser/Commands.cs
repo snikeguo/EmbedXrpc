@@ -21,7 +21,7 @@ namespace EmbedXrpcIdlParser
         [Option('g', "GenType", HelpText = "enum:client/server/all")]
         public string GenType { get; set; }// client /server/all
 
-        [Option('l', "GenLanguageType", HelpText = "enum:cpp/cs")]
+        [Option('l', "GenLanguageType", HelpText = "enum:cpp-rt:need a small runtime\r\n/cpp:no need runtime\r\n/cs")]
         public string GenLanguageType { get; set; } //  cpp/cs
 
         [Option('o', "OutputPath", HelpText = "Output Path")]
@@ -51,28 +51,44 @@ namespace EmbedXrpcIdlParser
             {
                 Directory.CreateDirectory(generater.OutputPath);
             }
-            if(generater.GenLanguageType.ToLower()=="cpp")
+            if(generater.GenLanguageType.ToLower()=="cpp-rt")
             {
                 CppCodeGenerater cpp = new CppCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
-                    CodeGenParameter parameter = new CodeGenParameter()
+                    CppCodeGenParameter parameter = new CppCodeGenParameter()
                     {
                         FileIdlInfo = idlInfo.ParsedFiles[i],
                         GenType = gt,
                         OutPutPath = generater.OutputPath,
-                        //IsEnableMataDataEncode = generater.IsEnableMataDataEncode
+                        IsRuntimeVersion=true,
                     };
                     cpp.CodeGen(parameter);
                 }
                 
+            }
+            else if (generater.GenLanguageType.ToLower() == "cpp")
+            {
+                CppCodeGenerater cpp = new CppCodeGenerater();
+                for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
+                {
+                    CppCodeGenParameter parameter = new CppCodeGenParameter()
+                    {
+                        FileIdlInfo = idlInfo.ParsedFiles[i],
+                        GenType = gt,
+                        OutPutPath = generater.OutputPath,
+                        IsRuntimeVersion = false,
+                    };
+                    cpp.CodeGen(parameter);
+                }
+
             }
             else if (generater.GenLanguageType.ToLower() == "cs")
             {
                 CsCodeGenerater cs = new CsCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
-                    CodeGenParameter parameter = new CodeGenParameter()
+                    CSharpCodeGenParameter parameter = new CSharpCodeGenParameter()
                     {
                         FileIdlInfo = idlInfo.ParsedFiles[i],
                         GenType = gt,

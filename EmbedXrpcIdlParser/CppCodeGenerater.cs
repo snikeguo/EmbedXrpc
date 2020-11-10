@@ -23,7 +23,7 @@ namespace EmbedXrpcIdlParser
         //public string IType { get; set; }
 
     }
-    public class CppCodeGenerater : ICodeGenerater
+    public class CppCodeGenerater 
     {
 
         private static Dictionary<string, string> ReplaceDic = new Dictionary<string, string>();
@@ -43,14 +43,22 @@ namespace EmbedXrpcIdlParser
         {
             sw.WriteLine("#define {0}_ServiceId {1}   //0x{2:X}", defineName, ServiceId, ServiceId);
         }
-        public CodeGenParameter codeGenParameter;
-        public void CodeGen(CodeGenParameter parameter)
-        {
-
-            
-
+        public CppCodeGenParameter codeGenParameter;
+        public IEmbedXrpcSerializationGenerator embedXrpcSerializationGenerator;
+        public void CodeGen(CppCodeGenParameter parameter)
+        {         
             codeGenParameter = parameter;
-
+            if(embedXrpcSerializationGenerator==null)
+            {
+                if(parameter.IsRuntimeVersion==true)
+                {
+                    embedXrpcSerializationGenerator = new EmbedXrpcNeedRuntimeSerializer();
+                }
+                else
+                {
+                    embedXrpcSerializationGenerator = new EmbedXrpcNoRuntimeSerializer();
+                }
+            }
             Console.WriteLine($"cpp code gen:   {parameter.FileIdlInfo.FileName}");
             var outputattr = parameter.FileIdlInfo.GenerationOption;
 
@@ -171,7 +179,7 @@ namespace EmbedXrpcIdlParser
             {
                 //EmitFbsTable(stru);
                 //fbsStreamWriter.WriteLine(stru.ToFbs().ToString());
-                EmbedXrpcSerializationHelper.EmitStruct(stru,
+                embedXrpcSerializationGenerator.EmitStruct(stru,
                     SerializeCsw, 
                     SerializeHsw);
                 EmitStruct(stru);
@@ -185,7 +193,7 @@ namespace EmbedXrpcIdlParser
                 targetStruct.TargetFields = del.TargetFields;*/
                 EmitStruct(del.ParameterStruct);
                 EmitDelegate(del);
-                EmbedXrpcSerializationHelper.EmitStruct(del.ParameterStruct,
+                embedXrpcSerializationGenerator.EmitStruct(del.ParameterStruct,
                     SerializeCsw,
                     SerializeHsw);
                 AddMessageMap(del.MethodName, ReceiveType_t.ReceiveType_Delegate);
@@ -517,7 +525,7 @@ namespace EmbedXrpcIdlParser
                 /*TargetStruct targetStructRequest = new TargetStruct();
                 targetStructRequest.Name = GeneratServiceName + "_Request";
                 targetStructRequest.TargetFields.AddRange(service.TargetFields);*/
-                EmbedXrpcSerializationHelper.EmitStruct(service.ParameterStruct,
+                embedXrpcSerializationGenerator.EmitStruct(service.ParameterStruct,
                     SerializeCsw,
                     SerializeHsw);
                 EmitStruct(service.ParameterStruct);
@@ -547,7 +555,7 @@ namespace EmbedXrpcIdlParser
                     targetStructResponse.TargetFields.Add(returnValue);
                 }*/
 
-                EmbedXrpcSerializationHelper.EmitStruct(service.ReturnStruct,
+                embedXrpcSerializationGenerator.EmitStruct(service.ReturnStruct,
                     SerializeCsw,
                     SerializeHsw);
 

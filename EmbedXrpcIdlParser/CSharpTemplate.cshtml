@@ -4,9 +4,9 @@
 @using EmbedXrpcIdlParser
 @inherits RazorEngine.Templating.TemplateBase<CsCodeGenerater>
 @{
-    FileIdlInfo idlInfo = ((CsCodeGenerater)this.Model).CodeGenParameter.FileIdlInfo;
-    GenType genType = ((CsCodeGenerater)this.Model).CodeGenParameter.GenType;
-    //bool IsEnableMataDataEncode= ((CsCodeGenerater)this.Model).CodeGenParameter.IsEnableMataDataEncode;
+    FileIdlInfo idlInfo = ((CsCodeGenerater)this.Model).CSharpCodeGenParameter.FileIdlInfo;
+    GenType genType = ((CsCodeGenerater)this.Model).CSharpCodeGenParameter.GenType;
+    //bool IsEnableMataDataEncode= ((CsCodeGenerater)this.Model).CSharpCodeGenParameter.IsEnableMataDataEncode;
 }
 <h1 using EmbedXrpc; />
 <h1 using System; />
