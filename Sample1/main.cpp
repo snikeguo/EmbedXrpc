@@ -39,7 +39,7 @@ void ClientThread()
 	{
 		a ++;
 		b ++;
-		auto sum=Client.Add(a, b,3, Bytes);
+		auto sum=Client.Add(a, b,0, NULL);
 		if (sum.State == ResponseState_Ok)
 		{
 			printf("%d+%d=%d,%s\n", a,b,sum.ReturnValue.Sum,sum.ReturnValue.data);
@@ -95,10 +95,10 @@ void ServerThread()
 void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 {
 	Response.ReturnValue.Sum = a + b;
-	Response.ReturnValue.dataLen = dataLen + 1;
-	Response.ReturnValue.data = (uint8_t *)Malloc(Response.ReturnValue.dataLen);
-	strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
-	printf("len:%d, content:%s\n", dataLen, data);
+	Response.ReturnValue.dataLen = 0;
+	Response.ReturnValue.data = NULL;
+	//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
+	printf("len:%d\n", dataLen);
 }
 void Inter_NoArgService::NoArg()
 {
