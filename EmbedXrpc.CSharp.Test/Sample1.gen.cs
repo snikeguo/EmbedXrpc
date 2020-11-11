@@ -115,7 +115,7 @@ namespace Sample1
         [ArrayLenFieldFlag(false)]
         public RequestResponseState State { get; set; }
     }
-    [ServiceInfo(Name = "Inter_Add")]
+    [ResponseServiceInfo(Name = "Inter_Add")]
     public partial class Inter_AddService : IService
     {
         public static readonly UInt16 Add_ServiceId = 17;
@@ -129,7 +129,7 @@ namespace Sample1
         }
         //public void Add(Int32 a,Int32 b); 
     }
-    [ServiceInfo(Name = "Inter_NoArg")]
+    [ResponseServiceInfo(Name = "Inter_NoArg")]
     public partial class Inter_NoArgService : IService
     {
         public static readonly UInt16 NoArg_ServiceId = 18;
@@ -143,7 +143,7 @@ namespace Sample1
         }
         //public void NoArg(); 
     }
-    [ServiceInfo(Name = "Inter_NoReturn")]
+    [ResponseServiceInfo(Name = "Inter_NoReturn")]
     public partial class Inter_NoReturnService : IService
     {
         public static readonly UInt16 NoReturn_ServiceId = 19;
@@ -155,11 +155,11 @@ namespace Sample1
         }
         //public void NoReturn(Int32 a); 
     }
-    [ServiceInfo(Name = "Inter_NoArgAndReturn")]
+    [ResponseServiceInfo(Name = "Inter_NoArgAndReturn")]
     public partial class Inter_NoArgAndReturnService : IService
     {
         public static readonly UInt16 NoArgAndReturn_ServiceId = 20;
-        public override UInt16 GetSid() { return NoArgAndReturn_ServiceId; }
+        public UInt16 GetSid() { return NoArgAndReturn_ServiceId; }
         public override void Invoke(SerializationManager recManager, SerializationManager sendManager)
         {
             Inter_NoArgAndReturn_Parameter request = recManager.Deserialize<Inter_NoArgAndReturn_Parameter>();
@@ -167,10 +167,10 @@ namespace Sample1
         }
         //public void NoArgAndReturn(); 
     }
-    [ResponseInfo(Name = "Inter_Add", ServiceId = 17)]
-    [ResponseInfo(Name = "Inter_NoArg", ServiceId = 18)]
-    [ResponseInfo(Name = "Inter_NoReturn", ServiceId = 19)]
-    [ResponseInfo(Name = "Inter_NoArgAndReturn", ServiceId = 20)]
+    [RequestServiceInfo(Name = "Inter_Add", ServiceId = 17)]
+    [RequestServiceInfo(Name = "Inter_NoArg", ServiceId = 18)]
+    [RequestServiceInfo(Name = "Inter_NoReturn", ServiceId = 19)]
+    [RequestServiceInfo(Name = "Inter_NoArgAndReturn", ServiceId = 20)]
     public class InterClientImpl
     {
         private EmbedXrpcObject Client = null;

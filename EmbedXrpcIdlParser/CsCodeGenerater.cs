@@ -68,7 +68,7 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine($"public partial class {del.MethodName}ClientImpl:IDelegate");
                 sw.WriteLine("{");//class begin
 
-                sw.WriteLine($"public static readonly UInt16 {del.MethodName}_ServiceId={del.ServiceId};");
+                sw.WriteLine($"public static readonly UInt16 {del.MethodName}_ServiceId={del.ServiceId};//0x{Convert.ToString(del.ServiceId, 16)}");
                 sw.WriteLine($"public override UInt16 GetSid(){{ return {del.MethodName}_ServiceId;}}");
                 sw.WriteLine("public override void Invoke(SerializationManager recManager)");
                 sw.WriteLine("{");//function begin
@@ -88,9 +88,8 @@ namespace EmbedXrpcIdlParser
                     }
                 }
                 sw.WriteLine($"{del.MethodName}({pars});//call function!");
-                sw.WriteLine($"//public void {del.MethodName}({externstr});");
-
                 sw.WriteLine("}");//function end
+                sw.WriteLine($"//public void {del.MethodName}({externstr});");
 
                 sw.WriteLine("}");//class end
             }
@@ -105,7 +104,7 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine("XrpcObject=xrpcObject;");
                 sw.WriteLine("}");//function end
 
-                sw.WriteLine($"public static readonly UInt16 {del.MethodName}_ServiceId={del.ServiceId};");
+                sw.WriteLine($"public static readonly UInt16 {del.MethodName}_ServiceId={del.ServiceId};//0x{Convert.ToString(del.ServiceId, 16)}");
                 var pars = string.Empty;
                 for (int pi = 0; pi < del.ParameterStructType.TargetFields.Count; pi++)
                 {
@@ -124,7 +123,7 @@ namespace EmbedXrpcIdlParser
                     var par = del.ParameterStructType.TargetFields[pi];
                     sw.WriteLine($"request.{par.FieldName} = {par.FieldName};");
                 }
-                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),Server.IsEnableMataDataEncode,new List<byte>());");
+                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());");
                 sw.WriteLine("sm.Serialize(request,0);");
                 sw.WriteLine("List<byte> sendBytes = new List<byte>();");
                 sw.WriteLine($"sendBytes.Add((byte)({del.MethodName}_ServiceId&0xff));");
@@ -145,10 +144,10 @@ namespace EmbedXrpcIdlParser
             GenerateStruct(sw, service.ReturnStructType);
             if (genType == GenType.Server || genType == GenType.All)
             {
-                sw.WriteLine($"[ServiceInfo(Name=\"{interfaceName}_{service.ServiceName}\")]");
+                sw.WriteLine($"[ResponseServiceInfo(Name=\"{interfaceName}_{service.ServiceName}\",ServiceId={service.ServiceId})]");
                 sw.WriteLine($"public partial class {interfaceName}_{service.ServiceName}Service:IService");
                 sw.WriteLine("{");//class begin
-                sw.WriteLine($"public static readonly UInt16 {service.ServiceName}_ServiceId={service.ServiceId};");
+                sw.WriteLine($"public static readonly UInt16 {service.ServiceName}_ServiceId={service.ServiceId};//0x{Convert.ToString(service.ServiceId, 16)}");
                 sw.WriteLine($"public override UInt16 GetSid(){{ return {service.ServiceName}_ServiceId;}}");
                 if (service.ReturnStructType.TargetFields.Count > 1)
                 {
@@ -181,8 +180,8 @@ namespace EmbedXrpcIdlParser
             }
             if (genType == GenType.Client || genType == GenType.All)
             {
-                sw.WriteLine($"[ResponseInfo(Name=\"{interfaceName}_{service.ServiceName}\",ServiceId={service.ServiceId})]");
-                sw.WriteLine($"public class {interfaceName}_{service.ServiceName}:IService");
+                sw.WriteLine($"[RequestServiceInfo(Name=\"{interfaceName}_{service.ServiceName}\",ServiceId={service.ServiceId})]");
+                sw.WriteLine($"public class {interfaceName}_{service.ServiceName}:IRequestService");
                 sw.WriteLine("{");//class begin
 
                 sw.WriteLine("private EmbedXrpcObject XrpcObject=null;");
@@ -191,7 +190,7 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine("XrpcObject=xrpcObject;");
                 sw.WriteLine("}");//function end
 
-                sw.WriteLine($"public static readonly UInt16 {service.ServiceName}_ServiceId={service.ServiceId};");
+                sw.WriteLine($"public static readonly UInt16 {service.ServiceName}_ServiceId={service.ServiceId};//0x{Convert.ToString(service.ServiceId, 16)}");
                 sw.WriteLine($"public override UInt16 GetSid(){{ return {service.ServiceName}_ServiceId;}}");
 
                 string pars = string.Empty;
@@ -207,7 +206,7 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine($"public {service.ReturnStructType.TypeName} {service.ServiceName}({pars})");
                 sw.WriteLine("{");//function begin
                 sw.WriteLine($"{service.ReturnStructType.TypeName} reqresp=new {service.ReturnStructType.TypeName}();");
-                sw.WriteLine("lock(Client.ObjectMutex) ");
+                sw.WriteLine("lock(XrpcObject.ObjectMutex) ");
                 sw.WriteLine("{");//lock begin
                 sw.WriteLine("XrpcObject.ResponseMessageQueueHandle.Reset();");
                 sw.WriteLine($"{service.ParameterStructType.TypeName} request =new {service.ParameterStructType.TypeName}();");
@@ -216,7 +215,7 @@ namespace EmbedXrpcIdlParser
                     var par = service.ParameterStructType.TargetFields[pi];
                     sw.WriteLine($"request.{par.FieldName}={par.FieldName};");   
                 }
-                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),Client.IsEnableMataDataEncode,new List<byte>());");
+                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());");
                 sw.WriteLine("sm.Serialize(request,0);");
                 sw.WriteLine("List<byte> sendBytes = new List<byte>();");
                 sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId&0xff));");
@@ -260,10 +259,11 @@ namespace EmbedXrpcIdlParser
                 csStreamWriter.WriteLine($"using {userNs};");
             }
             csStreamWriter.WriteLine($"// auto code gen ! DO NOT modify this file! create time {DateTime.Now.ToString("yyyy - MM - dd HH: mm:ss.fff")};");
-            csStreamWriter.WriteLine($"C# Code Generater Version:{Assembly.GetExecutingAssembly().GetName().Version.ToString()}");
+            csStreamWriter.WriteLine($"//C# Code Generater Version:{Assembly.GetExecutingAssembly().GetName().Version.ToString()}");
             csStreamWriter.WriteLine($"namespace {idlInfo.GenerationOption.CSharpNameSpace}");
             csStreamWriter.WriteLine("{");//namespace begin
-
+            csStreamWriter.WriteLine("using UInt8 = Byte;");
+            csStreamWriter.WriteLine("using Int8 = SByte;");
             foreach (var enu in idlInfo.TargetEnums)
             {
                 csStreamWriter.WriteLine($"public enum {enu.TypeName}:{NumberTypeOfEnumInCShapCodeCollection[enu.NumberType]}");

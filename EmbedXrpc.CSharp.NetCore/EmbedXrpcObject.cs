@@ -36,19 +36,15 @@ namespace EmbedXrpc
             List<RequestMessageMap> rMaps = new List<RequestMessageMap>();
             foreach (var type in types)
             {
-                var ResponseInfoAttrs = type.GetCustomAttributes<ResponseInfoAttribute>();
-                if (ResponseInfoAttrs != null)
+                var requestInfoAttr = type.GetCustomAttribute<RequestServiceInfoAttribute>();
+                if (requestInfoAttr != null)
                 {
-                    foreach (var resInfoAttr in ResponseInfoAttrs)
-                    {
-                        ResponseDelegateMessageMap map = new ResponseDelegateMessageMap();
-                        map.Name = resInfoAttr.Name;
-                        map.ReceiveType = ReceiveType.Response;
-                        map.Delegate = null;
-                        map.Sid = resInfoAttr.ServiceId;
-
-                        rdMaps.Add(map);
-                    }
+                    ResponseDelegateMessageMap map = new ResponseDelegateMessageMap();
+                    map.Name = requestInfoAttr.Name;
+                    map.ReceiveType = ReceiveType.Response;
+                    map.Delegate = null;
+                    map.Sid = requestInfoAttr.ServiceId;
+                    rdMaps.Add(map);
                 }
 
                 var DelAttr = type.GetCustomAttribute<DelegateInfoAttribute>();
@@ -63,11 +59,11 @@ namespace EmbedXrpc
                     rdMaps.Add(map);
                 }
 
-                var serviceInfoAttr = type.GetCustomAttribute<ServiceInfoAttribute>();
-                if (serviceInfoAttr != null)
+                var responseServiceInfoAttr = type.GetCustomAttribute<ResponseServiceInfoAttribute>();
+                if (responseServiceInfoAttr != null)
                 {
                     RequestMessageMap map = new RequestMessageMap();
-                    map.Name = serviceInfoAttr.Name;
+                    map.Name = responseServiceInfoAttr.Name;
                     map.Service = (IService)assembly.CreateInstance(type.FullName);
                     rMaps.Add(map);
                 }

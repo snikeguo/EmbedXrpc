@@ -31,10 +31,14 @@ namespace EmbedXrpc
         public static readonly UInt16 EmbedXrpcSuspendSid = 0x1;
     }
 
-    public abstract class IService
+    public interface IService
     {
-        public abstract UInt16 GetSid();
-        public abstract void Invoke(SerializationManager recManager, SerializationManager sendManager);
+        UInt16 GetSid();
+        void Invoke(SerializationManager recManager, SerializationManager sendManager);
+    }
+    public interface IRequestService
+    {
+        UInt16 GetSid();
     }
     public class RequestMessageMap
     {
@@ -66,20 +70,21 @@ namespace EmbedXrpc
     }
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    public sealed class ServiceInfoAttribute : Attribute
+    public sealed class ResponseServiceInfoAttribute : Attribute
     {
-        public ServiceInfoAttribute()
+        public ResponseServiceInfoAttribute()
         {
            
         }
         public string Name { get; set; }
+        public UInt16 ServiceId { get; set; }
     }
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    public sealed class ResponseInfoAttribute : Attribute
+    public sealed class RequestServiceInfoAttribute : Attribute
     {
        
-        public ResponseInfoAttribute()
+        public RequestServiceInfoAttribute()
         {
             
         }
