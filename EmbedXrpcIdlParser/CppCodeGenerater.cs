@@ -46,7 +46,8 @@ namespace EmbedXrpcIdlParser
         public CppCodeGenParameter codeGenParameter;
         public IEmbedXrpcSerializationGenerator embedXrpcSerializationGenerator;
         public void CodeGen(CppCodeGenParameter parameter)
-        {         
+        {
+            UTF8Encoding utf8ec = new UTF8Encoding(true);
             codeGenParameter = parameter;
             if(embedXrpcSerializationGenerator==null)
             {
@@ -63,7 +64,7 @@ namespace EmbedXrpcIdlParser
             Console.WriteLine($"cpp code gen:   {parameter.FileIdlInfo.FileName}");
             var outputattr = parameter.FileIdlInfo.GenerationOption;
 
-            var VersionHsw = new StreamWriter(parameter.OutPutPath + "EmbedXrpcVersion.h", false, Encoding.UTF8);
+            var VersionHsw = new StreamWriter(parameter.OutPutPath + "EmbedXrpcVersion.h", false, utf8ec);
             VersionHsw.WriteLine("#ifndef EmbedXrpcVersion_H");
             VersionHsw.WriteLine("#define EmbedXrpcVersion_H");
             string ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -72,7 +73,7 @@ namespace EmbedXrpcIdlParser
             VersionHsw.Flush();
             VersionHsw.Close();
 
-            CommonHsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".h", false, Encoding.UTF8);
+            CommonHsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".h", false, utf8ec);
             CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_H");
             CommonHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_H");
             //CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
@@ -94,7 +95,7 @@ namespace EmbedXrpcIdlParser
             CommonHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
 
-            CommonCsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".cpp", false, Encoding.UTF8);
+            CommonCsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".cpp", false, utf8ec);
             CommonCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
             CommonCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             CommonCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
@@ -104,14 +105,14 @@ namespace EmbedXrpcIdlParser
 
 
 
-            SerializeCsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, Encoding.UTF8);
+            SerializeCsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, utf8ec);
 
 
             SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
             SerializeCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             SerializeCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
-            SerializeHsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, Encoding.UTF8);
+            SerializeHsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, utf8ec);
             SerializeHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".","_")}_EmbedXrpcSerialization_H");
             SerializeHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_EmbedXrpcSerialization_H");
             SerializeHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
@@ -143,13 +144,13 @@ namespace EmbedXrpcIdlParser
                 if (Directory.Exists(parameter.OutPutPath + "Client") == false)
                     Directory.CreateDirectory(parameter.OutPutPath + "Client");
 
-                ClientHsw = new StreamWriter(parameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, Encoding.UTF8);
+                ClientHsw = new StreamWriter(parameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, utf8ec);
                 ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
                 ClientHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");                
                 ClientHsw.WriteLine("#include\"EmbedXrpcObject.h\"");
                 ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
-                ClientCsw = new StreamWriter(parameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.cpp", false, Encoding.UTF8);
+                ClientCsw = new StreamWriter(parameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.cpp", false, utf8ec);
                 ClientCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Client.h\"");
             }
 
@@ -159,13 +160,13 @@ namespace EmbedXrpcIdlParser
                 if (Directory.Exists(parameter.OutPutPath + "Server") == false)
                     Directory.CreateDirectory(parameter.OutPutPath + "Server");
 
-                ServerHsw = new StreamWriter(parameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.h", false, Encoding.UTF8);
+                ServerHsw = new StreamWriter(parameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.h", false, utf8ec);
                 ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
                 ServerHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
                 ServerHsw.WriteLine("#include\"EmbedXrpcObject.h\"");
                 ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
-                ServerCsw = new StreamWriter(parameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.cpp", false, Encoding.UTF8);
+                ServerCsw = new StreamWriter(parameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.cpp", false, utf8ec);
                 ServerCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Server.h\"");
             }
             
@@ -267,8 +268,8 @@ namespace EmbedXrpcIdlParser
             if (field.TargetType.TargetType ==  TargetType_t.TYPE_ARRAY)
             {
                 Array_TargetField array_TargetField = field as Array_TargetField;
-                cppType = array_TargetField.TargetType.TypeName.Replace("[", "");
-                cppType = cppType.Replace("]", "");
+                ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
+                cppType = attt.ElementType.TypeName;
                 if (array_TargetField.MaxCountAttribute.IsFixed == false)
                 {
                     cppType = cppType + "*";
@@ -376,7 +377,7 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} request;");
 
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
-                ClientCsw.WriteLine($"recManager.Deserialize(&{targetDelegate.ParameterStructType.TypeName}_Object_Type,&request);");
+                ClientCsw.WriteLine($"recManager.Deserialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
                 ClientCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
                 ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
                 ClientCsw.WriteLine("#else");
@@ -394,7 +395,7 @@ namespace EmbedXrpcIdlParser
                 }
                 ClientCsw.WriteLine(");");//生成调用目标函数。
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
-                ClientCsw.WriteLine($"SerializationManager::FreeData(&{targetDelegate.ParameterStructType.TypeName}_Object_Type,&request);");
+                ClientCsw.WriteLine($"SerializationManager::FreeData(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
 
                 ClientCsw.WriteLine("}");//函数生成完毕
 
@@ -476,7 +477,7 @@ namespace EmbedXrpcIdlParser
 
                 }
                 //ServerCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&sendData);");
-                ServerCsw.WriteLine($"sm.Serialize(&{targetDelegate.ParameterStructType.TypeName}_Object_Type,&sendData,0);");
+                ServerCsw.WriteLine($"sm.Serialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&sendData,0);");
 
                 ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
                 ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
@@ -644,7 +645,7 @@ namespace EmbedXrpcIdlParser
 
                     }
                     //ClientCsw.WriteLine($"{GeneratServiceName}_Request_Type.Serialize(sm,0,&sendData);");
-                    ClientCsw.WriteLine($"sm.Serialize(&{service.ParameterStructType.TypeName}_Object_Type,&sendData,0);");
+                    ClientCsw.WriteLine($"sm.Serialize(&{service.ParameterStructType.TypeName}_TypeInstance,&sendData,0);");
 
                     ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)({service.FullName}_ServiceId&0xff);");
                     ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)({service.FullName}_ServiceId>>8&0xff);");
@@ -657,7 +658,7 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine("else\n{\nreqresp.State=RequestState_Ok;\n}");
                     if (service.ReturnStructType.TargetFields.Count>1)
                     {
-                        ClientCsw.WriteLine($"waitstate=RpcObject->Wait({service.FullName}_ServiceId,&{service.ReturnStructType.TypeName}_Object_Type,&reqresp);");
+                        ClientCsw.WriteLine($"waitstate=RpcObject->Wait({service.FullName}_ServiceId,&{service.ReturnStructType.TypeName}_TypeInstance,&reqresp);");
                         ClientCsw.WriteLine("reqresp.State=waitstate;");
                     }
 
@@ -671,7 +672,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine($"void {targetInterface.Name}ClientImpl::Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response)");
                         ClientCsw.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
                         //ClientCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(response);");
-                        ClientCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_Object_Type,response);");
+                        ClientCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,response);");
                         ClientCsw.WriteLine("}\n}");
                     }
                     ClientCsw.WriteLine("\n"); //client interface end class
@@ -718,7 +719,7 @@ namespace EmbedXrpcIdlParser
                     ServerCsw.WriteLine("{");
                     ServerCsw.WriteLine($"static {service.ParameterStructType.TypeName} request;");
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Deserialize(recManager,&request);");
-                    ServerCsw.WriteLine($"recManager.Deserialize(&{service.ParameterStructType.TypeName}_Object_Type,&request);");
+                    ServerCsw.WriteLine($"recManager.Deserialize(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");
                     ServerCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
                     ServerCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
                     ServerCsw.WriteLine("#else");
@@ -739,13 +740,13 @@ namespace EmbedXrpcIdlParser
                     ServerCsw.WriteLine(");");//生成调用目标函数。
 
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Free(&request);");//free
-                    ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ParameterStructType.TypeName}_Object_Type,&request);");//free
+                    ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");//free
                     if (service.ReturnStructType.TargetFields.Count>1)
                     {
                         //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
-                        ServerCsw.WriteLine($"sendManager.Serialize(&{service.ReturnStructType.TypeName}_Object_Type,&Response,0);");//生成返回值序列化
+                        ServerCsw.WriteLine($"sendManager.Serialize(&{service.ReturnStructType.TypeName}_TypeInstance,&Response,0);");//生成返回值序列化
                         //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(&Response);");//生成返回值序列化
-                        ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_Object_Type,&Response);");//生成返回值序列化
+                        ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,&Response);");//生成返回值序列化
                     }
 
                     ServerCsw.WriteLine("}");//end function

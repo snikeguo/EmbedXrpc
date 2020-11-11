@@ -87,9 +87,9 @@ namespace EmbedXrpcIdlParser
         //public string TypeName { get; set; }
         public TargetType_t NumberType { get; set; }
 
-        public Dictionary<int, string> KeyValue { get; set; } = new Dictionary<int, string>();
+        public Dictionary< string, int> KeyValue { get; set; } = new Dictionary< string, int>();
 
-        public TargetType_t TargetType { get; set; }
+        public TargetType_t TargetType { get; set; } = TargetType_t.TYPE_ENUM;
 
         public string TypeName { get; set; }
 
@@ -587,7 +587,7 @@ namespace EmbedXrpcIdlParser
                         te.NumberType = ClrBaseValueTypeToTargetType_t(type.GetEnumUnderlyingType());
                         foreach (var vsv in vs)
                         {
-                            te.KeyValue.Add(Convert.ToInt32(vsv), type.GetEnumName(vsv));
+                            te.KeyValue.Add( type.GetEnumName(vsv), Convert.ToInt32(vsv));
                         }
                         fileIdlInfo.TargetEnums.Add(te);
                         //Console.WriteLine(te.ToString());

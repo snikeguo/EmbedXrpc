@@ -16,8 +16,8 @@ typedef bool Boolean;
 #include <stdlib.h>
 typedef uint8_t Boolean;
 #endif
-typedef  uint8_t Byte;
-typedef  int8_t SByte;
+typedef  uint8_t UInt8;
+typedef  int8_t Int8;
 typedef  uint16_t UInt16;
 typedef  int16_t Int16;
 typedef  uint32_t UInt32;

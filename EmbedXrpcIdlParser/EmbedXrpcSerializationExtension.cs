@@ -7,67 +7,6 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpcIdlParser
 { 
-    public class ArrayType
-    {
-        static List<string> GeneratedTypes = new List<string>();
-        public string TypeName { get; set; }
-        public string ArrayElementType { get; set; }
-        public string ArrayElementLen { get; set; }
-
-        public string ToCode()
-        {
-            //return $"const ArrayType {Name}_Type({ArrayElementType},{ArrayElementLen});\n";
-            if (GeneratedTypes.Contains($"{TypeName}_Array_Type") == true)
-            {
-                return string.Empty;
-            }
-            GeneratedTypes.Add($"{TypeName}_Array_Type");
-            return $"extern const ArrayType {TypeName}_Array_Type= \r\n" +  //修复C++中的const限定符导致的链接问题
-                $"{{\r\n" +
-                $"  {{ \r\n" +
-                $"    TYPE_ARRAY,\r\n" +
-                $"  }},\r\n" +
-                $"  (const IType *)(&{ArrayElementType}),\r\n" +
-                $"  {ArrayElementLen},\r\n" +
-                $"}};\r\n";
-
-        }
-        public string ToExtern()
-        {
-            return $"extern const ArrayType {TypeName}_Array_Type;\r\n";//多extern几次没关系,不管他
-        }
-    }
-
-    public class ObjectType
-    {
-        static List<string> GeneratedTypes = new List<string>();
-        public string TypeName { get; set; }
-        public string FieldCount { get; set; }
-        public string FieldDesc { get; set; }
-
-        public string ToCode()
-        {
-            if (GeneratedTypes.Contains($"{TypeName}_Object_Type") == true)
-            {
-                return string.Empty;
-            }
-            GeneratedTypes.Add($"{TypeName}_Object_Type");
-            //return $"const ObjectType {Name}({FieldCount},{FieldDesc});\n";
-            return $"extern const ObjectType {TypeName}_Object_Type=\r\n" +
-                $"{{    \r\n" +
-                $"  {{\r\n" +
-                $"    TYPE_OBJECT,\r\n" +
-                $"  }},\r\n" +
-                $"  {FieldCount},\r\n" +
-                $"  {FieldDesc},\r\n" +
-                $"}};\r\n";
-        }
-        public string ToExtern()
-        {
-            return $"extern const ObjectType {TypeName}_Object_Type;\n";
-        }
-    }
-    
     public interface IEmbedXrpcSerializationGenerator
     {
         void EmitStruct(ObjectType_TargetType targetStruct, StreamWriter cfilewriter, StreamWriter hfilewriter);
@@ -292,11 +231,12 @@ namespace EmbedXrpcIdlParser
         {
             if (GeneratedTypes.Contains(at_ot) == true)
                 return;
-            if(at_ot.TargetType== TargetType_t.TYPE_ARRAY)
+            GeneratedTypes.Add(at_ot);
+            if (at_ot.TargetType== TargetType_t.TYPE_ARRAY)
             {
                 ArrayType_TargetType attt = at_ot as ArrayType_TargetType;
                 ITargetType elementType = attt.ElementType;
-                var code =  $"extern const ArrayType {attt.TypeName}_Array_TypeInstance= \r\n" +  //修复C++中的const限定符导致的链接问题
+                var code =  $"extern const ArrayType {elementType.TypeName}_Array_TypeInstance= \r\n" +  //修复C++中的const限定符导致的链接问题
                             $"{{\r\n" +
                             $"  {{ \r\n" +
                             $"    TYPE_ARRAY,\r\n" +
@@ -304,7 +244,7 @@ namespace EmbedXrpcIdlParser
                             $"  (const IType *)(&{elementType.TypeName}_TypeInstance),\r\n" +
                             $"  sizeof({elementType.TypeName}),\r\n" +
                             $"}};\r\n";
-                var Extern= $"extern const ArrayType {attt.TypeName}_Array_TypeInstance;\r\n";//多extern几次没关系,不管他
+                var Extern= $"extern const ArrayType {elementType.TypeName}_Array_TypeInstance;\r\n";//多extern几次没关系,不管他
                 cfilestringBuilder.Append(code);
                 hfilestringBuilder.Append(Extern);
             }
@@ -318,11 +258,11 @@ namespace EmbedXrpcIdlParser
                 }
                 if (FieldsDesc.Count > 0)
                 {
-                    cfilestringBuilder.Append(EmitIFieldsArray($"{ottt.TypeName}_Type_Desc", FieldsDesc));
-                    hfilestringBuilder.Append($"extern const IField* {ottt.TypeName}_Type_Desc [{FieldsDesc.Count}];\n");
+                    cfilestringBuilder.Append(EmitIFieldsArray($"{ottt.TypeName}_Type_Field_Desc", FieldsDesc));
+                    hfilestringBuilder.Append($"extern const IField* {ottt.TypeName}_Type_Field_Desc [{FieldsDesc.Count}];\n");
                 }
-                string FieldCount = FieldsDesc.Count == 0 ? "0" : $"sizeof({ottt.TypeName}_Type_Desc)/sizeof(IField*)";
-                string FieldDesc= FieldsDesc.Count == 0 ? "nullptr" : $"{ottt.TypeName}_Type_Desc";
+                string FieldCount = FieldsDesc.Count == 0 ? "0" : $"sizeof({ottt.TypeName}_Type_Field_Desc)/sizeof(IField*)";
+                string FieldDesc= FieldsDesc.Count == 0 ? "nullptr" : $"{ottt.TypeName}_Type_Field_Desc";
                 var code=   $"extern const ObjectType {ottt.TypeName}_TypeInstance=\r\n" +
                             $"{{    \r\n" +
                             $"  {{\r\n" +
@@ -331,7 +271,7 @@ namespace EmbedXrpcIdlParser
                             $"  {FieldCount},\r\n" +
                             $"  {FieldDesc},\r\n" +
                             $"}};\r\n";
-                var Extern= $"extern const ObjectType {ottt.TypeName}_Type;\n";
+                var Extern= $"extern const ObjectType {ottt.TypeName}_TypeInstance;\n";
                 cfilestringBuilder.Append(code);
                 hfilestringBuilder.Append(Extern);
 
@@ -389,10 +329,11 @@ namespace EmbedXrpcIdlParser
 
                     Array_TargetField array_TargetField = field as Array_TargetField;
                     ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
-                    
+                    EmitArrayTypeAndObjectType(attt as ITargetType, cfilestringBuilder, hfilestringBuilder);
+
                     var arrayLenFieldDesc = array_TargetField.ArrayLenField == null ? "nullptr" : $"(const IField*)&{objectType_TargetType.TypeName}_Field_{array_TargetField.ArrayLenField.FieldName}";
                     //return $"const ArrayField {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{arrayLenFieldDesc});\n";
-                    string code = $"extern const ArrayType {attt.TypeName}_Array_TypeInstance;\r\n";
+                    string code = $"extern const ArrayType {attt.ElementType.TypeName}_Array_TypeInstance;\r\n";
                     code += $"extern const ArrayField {objectType_TargetType.TypeName}_Field_{array_TargetField.FieldName}=\r\n" +
                         $"{{ \r\n" +
                         $"  {{\r\n" +
@@ -401,14 +342,14 @@ namespace EmbedXrpcIdlParser
                         $"  \"{objectType_TargetType.TypeName}.{array_TargetField.FieldName}\",\r\n" +
                         $"  offsetof({objectType_TargetType.TypeName},{array_TargetField.FieldName}),\r\n" +
                         $"  {arrayLenFieldDesc},\r\n" +
-                        $"  &{attt.TypeName}_Array_TypeInstance,\r\n" +
+                        $"  &{attt.ElementType.TypeName}_Array_TypeInstance,\r\n" +
                         $"  {array_TargetField.MaxCountAttribute.IsFixed.ToString().ToLower()},\r\n" +
                         $"  {array_TargetField.FieldNumberAttr.Number},\r\n" +
                         $"}};\r\n";
                     cfilestringBuilder.Append(code);
                     var Extern = $"extern const ArrayField {objectType_TargetType.TypeName}_Field_{array_TargetField.FieldName};\n";
                     hfilestringBuilder.Append(Extern);
-                    EmitArrayTypeAndObjectType(attt as ITargetType,cfilestringBuilder,hfilestringBuilder);
+                    
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_OBJECT)
                 {
@@ -430,23 +371,9 @@ namespace EmbedXrpcIdlParser
                     hfilestringBuilder.Append(Extern);
                 }
             }
-            //if (FieldsDesc.Count > 0)
-            //{
-            //    cfilestringBuilder.Append(EmbedXrpcSerializationHelper.EmitIFieldsArray($"{targetStruct.TypeName}_Type_Desc", FieldsDesc));
-            //    hfilestringBuilder.Append($"extern const IField* {targetStruct.TypeName}_Type_Desc [{FieldsDesc.Count}];\n");
-            //}
             EmitArrayTypeAndObjectType(objectType_TargetType, cfilestringBuilder, hfilestringBuilder);
             cfilewriter.WriteLine(cfilestringBuilder.ToString());
             hfilewriter.WriteLine(hfilestringBuilder.ToString());
         }
     }
-    public class EmbedXrpcSerializationHelper
-    {
-       
-
-
-
-
-    }
-
 }

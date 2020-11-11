@@ -9,7 +9,12 @@ struct Student
     [FieldNumber(2)]
     int b;
 }
-
+[FileName("sample1.cs")]
+enum Sex: ulong
+{
+    Man=2,
+    WoMan=9,
+}
 [FileName("sample1.cs")]
 struct DateTime_t
 {
@@ -25,8 +30,13 @@ struct DateTime_t
     int Min;
     [FieldNumber(6)]
     int Sec;
+
+    [FieldNumber(8)]
+    Sex Sex;
+
     [FieldNumber(7)]
     Student David;
+    
 }
 [FileName("sample1.cs")]
 delegate void DateTimeChange(DateTime_t[] now);

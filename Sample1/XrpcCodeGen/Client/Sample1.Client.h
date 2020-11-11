@@ -15,7 +15,7 @@ public:
 EmbedXrpcObject *RpcObject=nullptr;
 InterClientImpl(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 {}
-Inter_Add_Return& Add(Int32 a,Int32 b,Int32 dataLen,Byte* data);
+Inter_Add_Return& Add(Int32 a,Int32 b,Int32 dataLen,UInt8* data);
 void Free_Add(Inter_Add_Return *response);
 
 Inter_NoArg_Return& NoArg();

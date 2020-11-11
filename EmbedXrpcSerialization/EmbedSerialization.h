@@ -101,7 +101,7 @@ struct prefix##Field	\
 	const uint32_t FieldNumber;\
 	const bool ArrayLenFieldFlag;\
 };\
-extern const BaseValueType prefix##TypeInstance;
+extern const BaseValueType prefix##_TypeInstance;
 ExternBaseValueStruct(UInt8);
 ExternBaseValueStruct(Int8);
 ExternBaseValueStruct(UInt16);

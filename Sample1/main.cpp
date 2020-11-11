@@ -32,7 +32,7 @@ void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server¹ã²¥ºó£¬
 InterClientImpl Client(&ClientRpc);
 void ClientThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	int a=1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
 	while (true)
@@ -72,7 +72,7 @@ EmbedXrpcObject ServerRpc(ServerSend,
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	while (true)
 	{		
 		DateTime_t t;
@@ -84,14 +84,15 @@ void ServerThread()
 		t.Month = localti->tm_mon;
 		t.Sec = localti->tm_sec;
 		t.Year = localti->tm_year+1900;
+		t.Sex = t.Sec % 2 == 0 ? Sex::Man : Sex::WoMan;
 		t.David.a = 1;
 		t.David.b = 3;
 		DateTimeChanger.Invoke(&t);
-		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 }
 
-void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, Byte* data)
+void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 {
 	Response.ReturnValue.Sum = a + b;
 	Response.ReturnValue.dataLen = dataLen + 1;

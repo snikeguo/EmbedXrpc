@@ -78,7 +78,7 @@ const IType* ArrayField_GetTypeInstance(const IField* const a)
 		.DataWidth=dataWidth}
 #endif
 #define DefineBaseValueStructInstance(prefix,type,dataWidth) \
-		 const BaseValueType prefix##TypeInstance = { \
+		 const BaseValueType prefix##_TypeInstance = { \
 		{type},\
 		dataWidth}
 
@@ -134,16 +134,16 @@ DefineBaseValueStructInstance(Double, TYPE_DOUBLE, 8);
 
 const static BaseValueType* const BaseValueTypeInstances[] =
 {
-	&UInt8TypeInstance,
-	&Int8TypeInstance,
-	&UInt16TypeInstance,
-	&Int16TypeInstance,
-	&UInt32TypeInstance,
-	&Int32TypeInstance,
-	&UInt64TypeInstance,
-	&Int64TypeInstance,
-	&FloatTypeInstance,
-	&DoubleTypeInstance,
+	&UInt8_TypeInstance,
+	&Int8_TypeInstance,
+	&UInt16_TypeInstance,
+	&Int16_TypeInstance,
+	&UInt32_TypeInstance,
+	&Int32_TypeInstance,
+	&UInt64_TypeInstance,
+	&Int64_TypeInstance,
+	&Float_TypeInstance,
+	&Double_TypeInstance,
 };
 
 
