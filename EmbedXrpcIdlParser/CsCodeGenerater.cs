@@ -22,13 +22,7 @@ namespace EmbedXrpcIdlParser
                 .Build();
             var result = engine.CompileRenderStringAsync("templateKey", File.ReadAllText("CSharpTemplate.cshtml"), this).Result;
 #endif
-            foreach (var str in codeGenParameter.FileIdlInfo.TargetStructs)
-            {
-                if(str.BitsAttribute!=null)
-                {
-                    throw new Exception("生成C#代码不支持位域! 位域功能仅C++支持!");
-                }
-            }
+            
             var config = new TemplateServiceConfiguration();
             config.EncodedStringFactory = new RawStringFactory(); // Raw string encoding.
             var service = RazorEngineService.Create(config);

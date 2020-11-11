@@ -38,24 +38,6 @@ namespace EmbedXrpcIdlParser
         UInt64,
         Int64,
     }
-    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-    public sealed class BitsAttribute : Attribute
-    {
-        public BitsType BitsType { get; set; }
-        public BitsAttribute(BitsType ut)
-        {
-            BitsType = ut;
-        }
-    }
-    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
-    public sealed class BitsFieldLengthAttribute : Attribute
-    {
-        public int Length { get; set; }
-        public BitsFieldLengthAttribute(int len)
-        {
-            Length = len;
-        }
-    }
     public interface IOptionProcess
     {
         GenerationOption Process();

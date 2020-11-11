@@ -6,38 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace EmbedXrpcIdlParser
-{
-    public class BaseValueField
-    {
-        public string Type { get; set; }
-
-        public string Prefix { get; set; } = "Field";
-        public string Name { get; set; }
-        public string StructName { get; set; }
-        public UInt32 FieldNumber { get; set; }
-
-        public bool IsArrayLenField { get; set; }
-
-        public string ToCode()
-        {
-            //return $"const {EmbedXrpcSerializationHelper.TypeReplaceDic[Type]}Field {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",offsetof({StructName},{Name}),{IsArrayLenField.ToString().ToLower()});\n";
-            return $"extern const {EmbedXrpcSerializationHelper.TypeReplaceDic[Type]}Field {StructName}_{Prefix}_{Name}=\r\n" +
-                $"{{ \r\n" +
-                $"  {{ \r\n" +
-                $"    TYPE_{EmbedXrpcSerializationHelper.TypeReplaceDic[Type].ToString().ToUpper()},\r\n" +
-                $"  }},\r\n" +
-                $"  \"{StructName}.{Name}\" ,\r\n" +
-                $"  offsetof({StructName},{Name}) ,\r\n" +
-                $"  &{EmbedXrpcSerializationHelper.TypeReplaceDic[Type]}TypeInstance,  \r\n" +
-                $"  {FieldNumber},\r\n" +
-                $"  {IsArrayLenField.ToString().ToLower()},\r\n" +
-                $"}};\r\n";
-        }
-        public string ToExtern()
-        {
-            return $"extern const {EmbedXrpcSerializationHelper.TypeReplaceDic[Type]}Field {StructName}_{Prefix}_{Name};\n";
-        }
-    }
+{ 
     public class ArrayType
     {
         static List<string> GeneratedTypes = new List<string>();
@@ -68,38 +37,7 @@ namespace EmbedXrpcIdlParser
             return $"extern const ArrayType {TypeName}_Array_Type;\r\n";//多extern几次没关系,不管他
         }
     }
-    public class ArrayField : ArrayType
-    {
-        public string FieldName { get; set; }
-        public bool IsFixed { get; set; }
-        public string Prefix { get; set; } = "Field";
-        public string StructName { get; set; }
-        public TargetField LenField { get; set; }
-        public UInt32 FieldNumber { get; set; }
-        public new string ToCode()
-        {
-            var arrayLenFieldDesc = LenField == null ? "nullptr" : $"(const IField*)&{StructName}_{Prefix}_{LenField.Name}";
-            //return $"const ArrayField {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{arrayLenFieldDesc});\n";
-            string s = $"extern const ArrayType {TypeName}_Array_Type;\r\n";
-            s += $"extern const ArrayField {StructName}_{Prefix}_{FieldName}=\r\n" +
-                $"{{ \r\n" +
-                $"  {{\r\n" +
-                $"    TYPE_ARRAY,\r\n" +
-                $"  }},\r\n" +
-                $"  \"{StructName}.{FieldName}\",\r\n" +
-                $"  offsetof({StructName},{FieldName}),\r\n" +
-                $"  {arrayLenFieldDesc},\r\n" +
-                $"  &{TypeName}_Array_Type,\r\n" +
-                $"  {IsFixed.ToString().ToLower()},\r\n" +
-                $"  {FieldNumber},\r\n" +
-                $"}};\r\n";
-            return s;
-        }
-        public new string ToExtern()
-        {
-            return $"extern const ArrayField {StructName}_{Prefix}_{FieldName};\n";
-        }
-    }
+
     public class ObjectType
     {
         static List<string> GeneratedTypes = new List<string>();
@@ -129,39 +67,15 @@ namespace EmbedXrpcIdlParser
             return $"extern const ObjectType {TypeName}_Object_Type;\n";
         }
     }
-    public class ObjectField : ObjectType
-    {
-        public string FieldName { get; set; }
-        public string Prefix { get; set; } = "Field";
-        public string StructName { get; set; }
-        public UInt32 FieldNumber { get; set; }
-        public new string ToCode()
-        {
-            string s = $"extern const ObjectType {TypeName}_Object_Type;\r\n";
-            s += $"extern const ObjectField {StructName}_{Prefix}_{FieldName}=\r\n" +
-                $"{{ \r\n" +
-                $"  {{\r\n" +
-                $"    TYPE_OBJECT,\r\n" +
-                $"  }},\r\n" +
-                $"  \"{StructName}.{FieldName}\",\r\n" +
-                $"  offsetof({StructName},{FieldName}),\r\n" +
-                $"  &{TypeName}_Object_Type,\r\n" +
-                $"  {FieldNumber},\r\n" +
-                $"}};\r\n";
-            return s;
-        }
-        public new string ToExtern()
-        {
-            return $"extern const ObjectField {StructName}_{Prefix}_{FieldName};\n";
-        }
-    }
+    
     public interface IEmbedXrpcSerializationGenerator
     {
-        void EmitStruct(TargetStruct targetStruct, StreamWriter cfilewriter, StreamWriter hfilewriter);
+        void EmitStruct(ObjectType_TargetType targetStruct, StreamWriter cfilewriter, StreamWriter hfilewriter);
     }
-    public class EmbedXrpcNoRuntimeSerializer:IEmbedXrpcSerializationGenerator
+#if false
+    public class EmbedXrpcNoRuntimeSerializer : IEmbedXrpcSerializationGenerator
     {
-        public void EmitStruct(TargetStruct targetStruct, StreamWriter cfilewriter, StreamWriter hfilewriter)
+        public void EmitStruct(ObjectType_TargetType targetStruct, StreamWriter cfilewriter, StreamWriter hfilewriter)
         {
             StringBuilder CfilestringBuilder = new StringBuilder();
             StringBuilder HfilestringBuilder = new StringBuilder();
@@ -358,120 +272,11 @@ namespace EmbedXrpcIdlParser
             hfilewriter.WriteLine(HfilestringBuilder.ToString());
         }
     }
-    public class EmbedXrpcNeedRuntimeSerializer:IEmbedXrpcSerializationGenerator
+#endif
+    public class EmbedXrpcNeedRuntimeSerializer : IEmbedXrpcSerializationGenerator
     {
-        public void EmitStruct(TargetStruct targetStruct, StreamWriter cfilewriter, StreamWriter hfilewriter)
-        {
-            StringBuilder cfilestringBuilder = new StringBuilder();
-            StringBuilder hfilestringBuilder = new StringBuilder();
-            List<string> FieldsDesc = new List<string>();
-            foreach (var field in targetStruct.TargetFields)
-            {
-                FieldsDesc.Add($"{targetStruct.Name}_Field_{field.Name}");
-                if (field.IsArray == false)
-                {
-                    if (EmbedXrpcSerializationHelper.TypeReplaceDic.ContainsKey(field.BitsType == BitsType.NoBits ? field.SourceCodeType : field.BitsType.ToString()) == true)
-                    {
-                        BaseValueField baseValueField = new BaseValueField();
-                        baseValueField.Type = field.BitsType == BitsType.NoBits ? field.SourceCodeType : field.BitsType.ToString();//field.IdlType;
-                        baseValueField.StructName = targetStruct.Name;
-                        baseValueField.Name = $"{field.Name}";
-                        baseValueField.FieldNumber = field.FieldNumberAttr.Number;
-                        baseValueField.IsArrayLenField = field.IsArrayLenField;
-                        cfilestringBuilder.Append(baseValueField.ToCode());
-                        hfilestringBuilder.Append(baseValueField.ToExtern());
-                    }
-                    else
-                    {
-                        if (field.Enum == null)
-                        {
-                            ObjectField objectField = new ObjectField();
-                            objectField.TypeName = $"{field.SourceCodeType}";
-                            objectField.FieldName = $"{field.Name}";
-                            objectField.StructName = targetStruct.Name;
-                            objectField.FieldCount = $"sizeof({field.SourceCodeType}_Object_Type_Desc)/sizeof(IField*)";
-                            objectField.FieldDesc = $"{field.SourceCodeType}_Object_Type_Desc";
-                            objectField.FieldNumber = field.FieldNumberAttr.Number;
-                            cfilestringBuilder.Append(((ObjectType)objectField).ToCode());
-                            cfilestringBuilder.Append(objectField.ToCode());
-                            hfilestringBuilder.Append(objectField.ToExtern());
-                        }
-                        else
-                        {
-                            BaseValueField baseValueField = new BaseValueField();
-                            baseValueField.Type = field.Enum.SourceCodeType;
-                            baseValueField.Name = $"{field.Name}";
-                            baseValueField.StructName = targetStruct.Name;
-                            baseValueField.FieldNumber = field.FieldNumberAttr.Number;
-                            baseValueField.IsArrayLenField = field.IsArrayLenField;
-                            cfilestringBuilder.Append(baseValueField.ToCode());
-                            hfilestringBuilder.Append(baseValueField.ToExtern());
-                        }
-                    }
-                }
-                else
-                {
-                    string x = EmbedXrpcSerializationHelper.TypeReplaceDic.ContainsKey(field.SourceCodeElementType) == false ?
-                        field.SourceCodeElementType + "_Object_Type" : EmbedXrpcSerializationHelper.TypeReplaceDic[field.SourceCodeElementType] + "TypeInstance";
-                    //没有找到基本数据类型,说明对象元素是Object类型
-                    var arrayLenField = IdlInfo.GetArrayLenField(targetStruct.TargetFields, field);
-
-
-                    ArrayField arrayField = new ArrayField();
-                    arrayField.TypeName = $"{field.SourceCodeElementType}";
-                    arrayField.FieldName = $"{field.Name}";
-                    arrayField.StructName = targetStruct.Name;
-                    arrayField.IsFixed = field.MaxCountAttribute.IsFixed;
-                    arrayField.LenField = arrayLenField;
-                    arrayField.ArrayElementType = x;
-                    arrayField.ArrayElementLen = $"sizeof({field.SourceCodeElementType})";
-                    arrayField.FieldNumber = field.FieldNumberAttr.Number;
-                    cfilestringBuilder.Append(((ArrayType)arrayField).ToCode());
-                    cfilestringBuilder.Append(arrayField.ToCode());
-                    hfilestringBuilder.Append(arrayField.ToExtern());
-
-                }
-            }
-            if (FieldsDesc.Count > 0)
-            {
-                cfilestringBuilder.Append(EmbedXrpcSerializationHelper.EmitIFieldsArray($"{targetStruct.Name}_Object_Type_Desc", FieldsDesc));
-                hfilestringBuilder.Append($"extern const IField* {targetStruct.Name}_Object_Type_Desc [{FieldsDesc.Count}];\n");
-            }
-
-
-            ObjectType objectType = new ObjectType();
-            objectType.TypeName = $"{targetStruct.Name}";
-            objectType.FieldCount = FieldsDesc.Count == 0 ? "0" : $"sizeof({targetStruct.Name}_Object_Type_Desc)/sizeof(IField*)";
-            objectType.FieldDesc = FieldsDesc.Count == 0 ? "nullptr" : $"{targetStruct.Name}_Object_Type_Desc";
-
-            cfilestringBuilder.Append(objectType.ToCode());
-            hfilestringBuilder.Append(objectType.ToExtern());
-
-            cfilewriter.WriteLine(cfilestringBuilder.ToString());
-            hfilewriter.WriteLine(hfilestringBuilder.ToString());
-        }
-    }
-    public class EmbedXrpcSerializationHelper
-    {
-        internal static Dictionary<string, string> TypeReplaceDic = new Dictionary<string, string>();
-        static EmbedXrpcSerializationHelper()
-        {
-            TypeReplaceDic.Add("bool", "UInt8");
-            TypeReplaceDic.Add("Boolean", "UInt8");
-            TypeReplaceDic.Add("byte", "UInt8");
-            TypeReplaceDic.Add("Byte", "UInt8");
-            TypeReplaceDic.Add("sbyte", "Int8");
-            TypeReplaceDic.Add("SByte", "Int8");
-            TypeReplaceDic.Add("UInt16", "UInt16");
-            TypeReplaceDic.Add("Int16", "Int16");
-            TypeReplaceDic.Add("UInt32", "UInt32");
-            TypeReplaceDic.Add("Int32", "Int32");
-            TypeReplaceDic.Add("UInt64", "UInt64");
-            TypeReplaceDic.Add("Int64", "Int64");
-            TypeReplaceDic.Add("float", "Float");
-            TypeReplaceDic.Add("double", "Double");
-        }
-        public static StringBuilder EmitIFieldsArray(string name, IList<string> FieldDesc)
+        static List<ITargetType> GeneratedTypes = new List<ITargetType>();
+        private StringBuilder EmitIFieldsArray(string name, IList<string> FieldDesc)
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.Append($"const IField*  {name} []=\n");
@@ -483,8 +288,164 @@ namespace EmbedXrpcIdlParser
             stringBuilder.Append("};\n");
             return stringBuilder;
         }
+        private void EmitArrayTypeAndObjectType(ITargetType at_ot, StringBuilder cfilestringBuilder, StringBuilder hfilestringBuilder)
+        {
+            if (GeneratedTypes.Contains(at_ot) == true)
+                return;
+            if(at_ot.TargetType== TargetType_t.TYPE_ARRAY)
+            {
+                ArrayType_TargetType attt = at_ot as ArrayType_TargetType;
+                ITargetType elementType = attt.ElementType;
+                var code =  $"extern const ArrayType {attt.TypeName}_Array_TypeInstance= \r\n" +  //修复C++中的const限定符导致的链接问题
+                            $"{{\r\n" +
+                            $"  {{ \r\n" +
+                            $"    TYPE_ARRAY,\r\n" +
+                            $"  }},\r\n" +
+                            $"  (const IType *)(&{elementType.TypeName}_TypeInstance),\r\n" +
+                            $"  sizeof({elementType.TypeName}),\r\n" +
+                            $"}};\r\n";
+                var Extern= $"extern const ArrayType {attt.TypeName}_Array_TypeInstance;\r\n";//多extern几次没关系,不管他
+                cfilestringBuilder.Append(code);
+                hfilestringBuilder.Append(Extern);
+            }
+            else if(at_ot.TargetType== TargetType_t.TYPE_OBJECT)
+            {
+                ObjectType_TargetType ottt = at_ot as ObjectType_TargetType;
+                List<string> FieldsDesc = new List<string>();
+                foreach (var field in ottt.TargetFields)
+                {
+                    FieldsDesc.Add($"{ottt.TypeName}_Field_{field.FieldName}");
+                }
+                if (FieldsDesc.Count > 0)
+                {
+                    cfilestringBuilder.Append(EmitIFieldsArray($"{ottt.TypeName}_Type_Desc", FieldsDesc));
+                    hfilestringBuilder.Append($"extern const IField* {ottt.TypeName}_Type_Desc [{FieldsDesc.Count}];\n");
+                }
+                string FieldCount = FieldsDesc.Count == 0 ? "0" : $"sizeof({ottt.TypeName}_Type_Desc)/sizeof(IField*)";
+                string FieldDesc= FieldsDesc.Count == 0 ? "nullptr" : $"{ottt.TypeName}_Type_Desc";
+                var code=   $"extern const ObjectType {ottt.TypeName}_TypeInstance=\r\n" +
+                            $"{{    \r\n" +
+                            $"  {{\r\n" +
+                            $"    TYPE_OBJECT,\r\n" +
+                            $"  }},\r\n" +
+                            $"  {FieldCount},\r\n" +
+                            $"  {FieldDesc},\r\n" +
+                            $"}};\r\n";
+                var Extern= $"extern const ObjectType {ottt.TypeName}_Type;\n";
+                cfilestringBuilder.Append(code);
+                hfilestringBuilder.Append(Extern);
+
+            }
+        }
+        public void EmitStruct(ObjectType_TargetType objectType_TargetType, StreamWriter cfilewriter, StreamWriter hfilewriter)
+        {
+            StringBuilder cfilestringBuilder = new StringBuilder();
+            StringBuilder hfilestringBuilder = new StringBuilder();
+            //List<string> FieldsDesc = new List<string>();
+            foreach (var field in objectType_TargetType.TargetFields)
+            {
+                //FieldsDesc.Add($"{targetStruct.TypeName}_Field_{field.FieldName}");
+                if (field.TargetType.TargetType < TargetType_t.TYPE_ENUM) //(EmbedXrpcSerializationHelper.TypeReplaceDic.ContainsKey(field.BitsType == BitsType.NoBits ? field.SourceCodeType : field.BitsType.ToString()) == true)
+                {
+                    Base_TargetField base_TargetField = field as Base_TargetField;
+                    var code = $"extern const {BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}Field {objectType_TargetType.TypeName}_Field_{base_TargetField.FieldName}=\r\n" +
+                                $"{{ \r\n" +
+                                $"  {{ \r\n" +
+                                $"    TYPE_{BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType].ToString().ToUpper()},\r\n" +
+                                $"  }},\r\n" +
+                                $"  \"{objectType_TargetType.TypeName}.{base_TargetField.FieldName}\" ,\r\n" +
+                                $"  offsetof({objectType_TargetType.TypeName},{base_TargetField.FieldName}) ,\r\n" +
+                                $"  &{BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}_TypeInstance,  \r\n" +
+                                $"  {base_TargetField.FieldNumberAttr.Number},\r\n" +
+                                $"  {base_TargetField.IsArrayLenField.ToString().ToLower()},\r\n" +
+                                $"}};\r\n";
+
+                    cfilestringBuilder.Append(code);
+                    var Extern = $"extern const {BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}Field {objectType_TargetType.TypeName}_Field_{base_TargetField.FieldName};\n";
+                    hfilestringBuilder.Append(Extern);
+                }
+                else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
+                {
+                    Enum_TargetField enum_TargetField = field as Enum_TargetField;
+                    EnumType_TargetType ettt = enum_TargetField.TargetType as EnumType_TargetType;
+                    var code = $"extern const {BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}Field {objectType_TargetType.TypeName}_Field_{enum_TargetField.FieldName}=\r\n" +
+                               $"{{ \r\n" +
+                               $"  {{ \r\n" +
+                               $"    TYPE_{BaseType_TargetType.TypeReplaceDic[ettt.NumberType].ToString().ToUpper()},\r\n" +
+                               $"  }},\r\n" +
+                               $"  \"{objectType_TargetType.TypeName}.{enum_TargetField.FieldName}\" ,\r\n" +
+                               $"  offsetof({objectType_TargetType.TypeName},{enum_TargetField.FieldName}) ,\r\n" +
+                               $"  &{BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}_TypeInstance,  \r\n" +
+                               $"  {enum_TargetField.FieldNumberAttr.Number},\r\n" +
+                               $"  {enum_TargetField.IsArrayLenField.ToString().ToLower()},\r\n" +
+                               $"}};\r\n";
+
+                    cfilestringBuilder.Append(code);
+                    var Extern = $"extern const {BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}Field {objectType_TargetType.TypeName}_Field_{enum_TargetField.FieldName};\n";
+                    hfilestringBuilder.Append(Extern);
+                }
+                else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
+                {
+
+                    Array_TargetField array_TargetField = field as Array_TargetField;
+                    ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
+                    
+                    var arrayLenFieldDesc = array_TargetField.ArrayLenField == null ? "nullptr" : $"(const IField*)&{objectType_TargetType.TypeName}_Field_{array_TargetField.ArrayLenField.FieldName}";
+                    //return $"const ArrayField {StructName}_{Prefix}_{Name}({FieldNumber},\"{StructName}.{Name}\",{IsFixed.ToString().ToLower()},&{ArrayElementType},{ArrayElementLen},offsetof({StructName},{Name}),{arrayLenFieldDesc});\n";
+                    string code = $"extern const ArrayType {attt.TypeName}_Array_TypeInstance;\r\n";
+                    code += $"extern const ArrayField {objectType_TargetType.TypeName}_Field_{array_TargetField.FieldName}=\r\n" +
+                        $"{{ \r\n" +
+                        $"  {{\r\n" +
+                        $"    TYPE_ARRAY,\r\n" +
+                        $"  }},\r\n" +
+                        $"  \"{objectType_TargetType.TypeName}.{array_TargetField.FieldName}\",\r\n" +
+                        $"  offsetof({objectType_TargetType.TypeName},{array_TargetField.FieldName}),\r\n" +
+                        $"  {arrayLenFieldDesc},\r\n" +
+                        $"  &{attt.TypeName}_Array_TypeInstance,\r\n" +
+                        $"  {array_TargetField.MaxCountAttribute.IsFixed.ToString().ToLower()},\r\n" +
+                        $"  {array_TargetField.FieldNumberAttr.Number},\r\n" +
+                        $"}};\r\n";
+                    cfilestringBuilder.Append(code);
+                    var Extern = $"extern const ArrayField {objectType_TargetType.TypeName}_Field_{array_TargetField.FieldName};\n";
+                    hfilestringBuilder.Append(Extern);
+                    EmitArrayTypeAndObjectType(attt as ITargetType,cfilestringBuilder,hfilestringBuilder);
+                }
+                else if (field.TargetType.TargetType == TargetType_t.TYPE_OBJECT)
+                {
+                    Object_TargetField object_TargetField = field as Object_TargetField;
+                    ObjectType_TargetType ottt = object_TargetField.TargetType as ObjectType_TargetType;
+                    string code = $"extern const ObjectType {ottt.TypeName}_TypeInstance;\r\n";
+                    code += $"extern const ObjectField {objectType_TargetType.TypeName}_Field_{object_TargetField.FieldName}=\r\n" +
+                        $"{{ \r\n" +
+                        $"  {{\r\n" +
+                        $"    TYPE_OBJECT,\r\n" +
+                        $"  }},\r\n" +
+                        $"  \"{objectType_TargetType.TypeName}.{object_TargetField.FieldName}\",\r\n" +
+                        $"  offsetof({objectType_TargetType.TypeName},{object_TargetField.FieldName}),\r\n" +
+                        $"  &{ottt.TypeName}_TypeInstance,\r\n" +
+                        $"  {object_TargetField.FieldNumberAttr.Number},\r\n" +
+                        $"}};\r\n";
+                    cfilestringBuilder.Append(code);
+                    var Extern= $"extern const ObjectField {objectType_TargetType.TypeName}_Field_{object_TargetField.FieldName};\n";
+                    hfilestringBuilder.Append(Extern);
+                }
+            }
+            //if (FieldsDesc.Count > 0)
+            //{
+            //    cfilestringBuilder.Append(EmbedXrpcSerializationHelper.EmitIFieldsArray($"{targetStruct.TypeName}_Type_Desc", FieldsDesc));
+            //    hfilestringBuilder.Append($"extern const IField* {targetStruct.TypeName}_Type_Desc [{FieldsDesc.Count}];\n");
+            //}
+            EmitArrayTypeAndObjectType(objectType_TargetType, cfilestringBuilder, hfilestringBuilder);
+            cfilewriter.WriteLine(cfilestringBuilder.ToString());
+            hfilewriter.WriteLine(hfilestringBuilder.ToString());
+        }
+    }
+    public class EmbedXrpcSerializationHelper
+    {
        
-       
+
+
+
 
     }
 

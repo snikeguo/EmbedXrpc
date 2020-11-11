@@ -54,26 +54,45 @@ namespace EmbedXrpcIdlParser
     public interface ITargetType
     {
         TargetType_t TargetType { get;  }
+        string TypeName { get; set; }
     }
     public class BaseType_TargetType:ITargetType
     {
         public TargetType_t TargetType { get; private set; }
+        public string TypeName { get; set; }
+
+        public static Dictionary<TargetType_t, string> TypeReplaceDic = new Dictionary<TargetType_t, string>();
         public BaseType_TargetType(TargetType_t tt)
         {
             TargetType = tt;
+            TypeName = TypeReplaceDic[tt];
+
+        }
+        static BaseType_TargetType()
+        {
+            TypeReplaceDic.Add(TargetType_t.TYPE_UINT8, "UInt8");
+            TypeReplaceDic.Add(TargetType_t.TYPE_INT8, "Int8");
+            TypeReplaceDic.Add(TargetType_t.TYPE_UINT16, "UInt16");
+            TypeReplaceDic.Add(TargetType_t.TYPE_INT16, "Int16");
+            TypeReplaceDic.Add(TargetType_t.TYPE_UINT32, "UInt32");
+            TypeReplaceDic.Add(TargetType_t.TYPE_INT32, "Int32");
+            TypeReplaceDic.Add(TargetType_t.TYPE_UINT64, "UInt64");
+            TypeReplaceDic.Add(TargetType_t.TYPE_INT64, "Int64");
+            TypeReplaceDic.Add(TargetType_t.TYPE_FLOAT, "Float");
+            TypeReplaceDic.Add(TargetType_t.TYPE_DOUBLE, "Double");
         }
     }
-    public class EnumType_TargetType: BaseType_TargetType
+    public class EnumType_TargetType: ITargetType
     {
-        public string TypeName { get; set; }
+        //public string TypeName { get; set; }
         public TargetType_t NumberType { get; set; }
 
         public Dictionary<int, string> KeyValue { get; set; } = new Dictionary<int, string>();
 
-        public EnumType_TargetType() :base(TargetType_t.TYPE_ENUM)
-        {
+        public TargetType_t TargetType { get; set; }
 
-        }
+        public string TypeName { get; set; }
+
     }
     public class ArrayType_TargetType:ITargetType
     {
@@ -87,6 +106,19 @@ namespace EmbedXrpcIdlParser
         public TargetType_t TargetType { get;private set; } = TargetType_t.TYPE_OBJECT;
         public string TypeName { get; set; }
         public List<ITargetField> TargetFields { get; set; } = new List<ITargetField>();
+        public Base_TargetField GetArrayLenField(Array_TargetField arrayField)
+        {
+            foreach (var f in TargetFields)
+            {
+                if (f.FieldName == arrayField.MaxCountAttribute.LenFieldName)
+                {
+                    var v= f as Base_TargetField;
+                    v.IsArrayLenField = true;//更新字段Base_TargetField的IsArrayLenField标志量
+                    return v;
+                }
+            }
+            return null;
+        }
     }
 
     public interface ITargetField
@@ -103,6 +135,8 @@ namespace EmbedXrpcIdlParser
         public string FieldName { get; set; }
 
         public FieldNumberAttribute FieldNumberAttr { get; set; }
+
+        public bool IsArrayLenField { get; set; } = false;//是否是数组长度字段
         
     }
     public class Enum_TargetField: Base_TargetField
@@ -118,6 +152,8 @@ namespace EmbedXrpcIdlParser
         public string FieldName { get; set; }
 
         public MaxCountAttribute MaxCountAttribute { get; set; }
+
+        public Base_TargetField ArrayLenField { get; set; }
     }
     public class Object_TargetField : ITargetField
     {
@@ -132,12 +168,12 @@ namespace EmbedXrpcIdlParser
     public class TargetService
     {
         //public TargetField ReturnValue { get; set; }
-        public Object_TargetField ReturnStruct { get; set; } = new Object_TargetField();
+        public ObjectType_TargetType ReturnStructType { get; set; } = new ObjectType_TargetType();
         public string ServiceName { get; set; }
 
         public string FullName { get; set; }
         //public List<TargetField> TargetFields { get; set; } = new List<TargetField>();//参数
-        public Object_TargetField ParameterStruct { get; set; } = new Object_TargetField();
+        public ObjectType_TargetType ParameterStructType { get; set; } = new ObjectType_TargetType();
         public int ServiceId { get; internal set; }
 
     }
@@ -165,7 +201,7 @@ namespace EmbedXrpcIdlParser
         public int ServiceId { get; internal set; }
         public string MethodName { get; set; }
         //public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
-        public Object_TargetField ParameterStruct { get; set; } = new Object_TargetField();
+        public ObjectType_TargetType ParameterStructType { get; set; } = new ObjectType_TargetType();
         
     }
     /// <summary>
@@ -217,21 +253,13 @@ namespace EmbedXrpcIdlParser
         }
     }
     public class IdlInfo
-    {
-        
-        public static ITargetField GetArrayLenField(IList<ITargetField> fields, Array_TargetField arrayField)
-        {
-            foreach (var f in fields)
-            {
-                if(f.FieldName== arrayField.MaxCountAttribute.LenFieldName)
-                {
-                    return f;
-                }
-            }
-            return null;
-        }
+    {          
         private TargetType_t ClrBaseValueTypeToTargetType_t(Type t)
         {
+            if (t == typeof(bool))
+            {
+                return TargetType_t.TYPE_UINT8;
+            }
             if (t == typeof(byte))
             {
                 return TargetType_t.TYPE_UINT8;                
@@ -276,7 +304,10 @@ namespace EmbedXrpcIdlParser
         private  bool IsNumberType(Type t)
         {
             bool r = false;
-            ///tt = TargetType_t.TYPE_OBJECT;//随便初始化
+            if(t==typeof(bool))
+            {
+                return true;
+            }
             if (t==typeof(byte))
             {
                 
@@ -335,7 +366,6 @@ namespace EmbedXrpcIdlParser
             ObjectType_TargetType targetStruct = new ObjectType_TargetType();
             targetStruct.TypeName = object_type.Name;
             var fields = object_type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            var BitsAttribute = object_type.GetCustomAttribute<BitsAttribute>();
             foreach (var field in fields)
             {
                 var FieldNumberAttr = field.GetCustomAttribute<FieldNumberAttribute>();
@@ -390,6 +420,7 @@ namespace EmbedXrpcIdlParser
                     arrayField.FieldName = field.Name;
                     var arratt = field.GetCustomAttribute<MaxCountAttribute>();
                     arrayField.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true, MaxCount = 1, LenFieldName = "" } : arratt;
+                    arrayField.ArrayLenField = targetStruct.GetArrayLenField(arrayField);
                     targetStruct.TargetFields.Add(arrayField);
                 }
                 else if (!field.FieldType.IsPrimitive && !field.FieldType.IsEnum && field.FieldType.IsValueType)//struct
@@ -466,6 +497,7 @@ namespace EmbedXrpcIdlParser
                     arrayField.FieldName = parameter.Name;
                     var arratt = parameter.GetCustomAttribute<MaxCountAttribute>();
                     arrayField.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true, MaxCount = 1, LenFieldName = "" } : arratt;
+                    arrayField.ArrayLenField = targetStruct.GetArrayLenField(arrayField);
                     targetStruct.TargetFields.Add(arrayField);
                 }
                 else if (!parameter.ParameterType.IsPrimitive && !parameter.ParameterType.IsEnum && parameter.ParameterType.IsValueType)//struct
@@ -592,7 +624,7 @@ namespace EmbedXrpcIdlParser
                         ettt.NumberType = TargetType_t.TYPE_UINT8;
                         //ettt.KeyValue这里在runtime中定义,不需要加
                         RequestResponseStatefield.TargetType = ettt;
-                        RequestResponseStatefield.FieldName = "RequestResponseState";
+                        RequestResponseStatefield.FieldName = "State";
                         RequestResponseStatefield.FieldNumberAttr = new FieldNumberAttribute(1);//state 的Field Number为1
                         returnStructType.TargetFields.Add(RequestResponseStatefield);
 
@@ -622,6 +654,7 @@ namespace EmbedXrpcIdlParser
                             else if(rt_ottt!=null)
                             {
                                 Object_TargetField objectFiled = new Object_TargetField();
+                                objectFiled.TargetType = rt_ottt;
                                 objectFiled.FieldName = "ReturnValue";
                                 objectFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
                                 returnStructType.TargetFields.Add(objectFiled);
@@ -633,6 +666,8 @@ namespace EmbedXrpcIdlParser
                         ParameterStructType.TypeName = type.Name + "_" + targetService.ServiceName + "_Parameter";
                         var pars = mt.GetParameters();
                         ParameterTypeParse(pars, ParameterStructType, fileIdlInfo);
+                        targetService.ReturnStructType = returnStructType;
+                        targetService.ParameterStructType = ParameterStructType;
                         targetInterface.Services.Add(targetService);
                     }
                     //Console.WriteLine(targetInterface.ToString());
@@ -666,7 +701,7 @@ namespace EmbedXrpcIdlParser
 
                     var pars = invokemi.GetParameters();
                     ParameterTypeParse(pars, ParameterStructType, fileIdlInfo);
-
+                    targetDelegate.ParameterStructType = ParameterStructType;
                     fileIdlInfo.TargetDelegates.Add(targetDelegate);
                     //Console.WriteLine(targetDelegate.ToString());
                 }

@@ -199,6 +199,14 @@ const ArrayType DateTime_t_Array_Type=
   (const IType *)(&DateTime_t_Object_Type),
   sizeof(DateTime_t),
 };
+const ArrayType DateTime_t_Array_Type =
+{
+  {
+    TYPE_ARRAY,
+  },
+  (const IType*)(&DateTime_t_Type),
+  sizeof(DateTime_t),
+};
 const ArrayField DateTimeChange_Parameter_Field_now=
 { 
   {
