@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using RazorEngine;
-using RazorEngine.Templating; // For extension methods.
+
 using System.IO;
-using RazorEngine.Configuration;
-using RazorEngine.Text;
+
 using System.Reflection;
 
 namespace EmbedXrpcIdlParser
