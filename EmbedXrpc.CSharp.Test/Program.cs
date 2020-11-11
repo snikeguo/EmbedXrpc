@@ -23,10 +23,9 @@ namespace Sample1
     }
     public partial class Inter_AddService : IService
     {
-        public void Add(int a, int b)
-        {
-            Response.ReturnValue = a + b;
-            
+        public void Add(Int32 a, Int32 b, Int32 dataLen, Byte[] data)
+        { 
+        
         }
     }
     public partial class Inter_NoArgService : IService
@@ -64,10 +63,10 @@ namespace EmbedXrpc
             server.Start();
             Task.Run(() =>
             {
-                InterClientImpl inter = new InterClientImpl(client);
+                Inter_Add inter_Add = new Inter_Add(client);
                 while (true)
                 {
-                    var reAdd = inter.Add(1,2);
+                    var reAdd = inter_Add.Invoke(1,2,0,null);
                     Debug.Assert(reAdd.State == RequestResponseState.ResponseState_Ok);
                     Console.WriteLine($"{1}+{2}={reAdd.ReturnValue}");
                     /*var reNoArg = inter.NoArg();

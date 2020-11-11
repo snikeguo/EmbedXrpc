@@ -21,10 +21,10 @@ namespace EmbedXrpc
         Response=0x2,
         Delegate=0x3,
     };
-    public abstract class IDelegate
+    public interface IDelegate
     {
-        public abstract UInt16 GetSid();
-        public abstract void Invoke(SerializationManager recManager);
+        UInt16 GetSid();
+        void Invoke(SerializationManager recManager);
     }
     public static class EmbedXrpcCommon
     {
