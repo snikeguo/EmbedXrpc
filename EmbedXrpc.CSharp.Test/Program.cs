@@ -24,8 +24,9 @@ namespace Sample1
     public partial class Inter_AddService : IService
     {
         public void Add(Int32 a, Int32 b, Int32 dataLen, Byte[] data)
-        { 
-        
+        {
+            Response.ReturnValue.Sum = a + b;
+            Response.ReturnValue.dataLen = 0;
         }
     }
     public partial class Inter_NoArgService : IService
@@ -66,9 +67,10 @@ namespace EmbedXrpc
                 Inter_Add inter_Add = new Inter_Add(client);
                 while (true)
                 {
+                    Thread.Sleep(-1);
                     var reAdd = inter_Add.Invoke(1,2,0,null);
                     Debug.Assert(reAdd.State == RequestResponseState.ResponseState_Ok);
-                    Console.WriteLine($"{1}+{2}={reAdd.ReturnValue}");
+                    Console.WriteLine($"{1}+{2}={reAdd.ReturnValue.Sum}");
                     /*var reNoArg = inter.NoArg();
                     if (reNoArg.State == RequestResponseState.RequestState_Failed)
                     {
@@ -84,7 +86,7 @@ namespace EmbedXrpc
                     {
                         throw new Exception("send failed!");
                     }*/
-                    Thread.Sleep(10);
+                    
                 }
             });
 
@@ -93,7 +95,7 @@ namespace EmbedXrpc
                 DateTimeChangeDelegate broadcastDataTimeDelegate = new DateTimeChangeDelegate(server);
                 while (true)
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(100);
                     broadcastDataTimeDelegate.Invoke(new DateTime_t[1] {
                     new DateTime_t()
                     {
@@ -102,7 +104,8 @@ namespace EmbedXrpc
                         Day = DateTime.Now.Day,
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
-                        Sec = DateTime.Now.Second
+                        Sec = DateTime.Now.Second,
+                        David=null,
                     }});
                     
                 }

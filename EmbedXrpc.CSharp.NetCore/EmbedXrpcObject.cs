@@ -211,7 +211,7 @@ namespace EmbedXrpc
         private void DelegateServiceThread()
         {
             EmbeXrpcRawData recData;
-            try
+            //try
             {
                 while (true)
                 {
@@ -230,16 +230,16 @@ namespace EmbedXrpc
                     }
                 }
             }
-            catch (Exception e)
+            //catch (Exception e)
             {
-                Console.WriteLine($"{e.Message}");
+            //    Console.WriteLine($"{e.Message}");
             }
         }
         private void RequestServiceThread()
         {
             EmbeXrpcRawData recData;
             UInt32 i = 0;
-            try
+            //try
             {
                 while (true)
                 {
@@ -277,9 +277,9 @@ namespace EmbedXrpc
                     }
                 }
             }
-            catch (Exception e)
+            //catch (Exception e)
             {
-                Console.WriteLine($"{e.Message}");
+            //    Console.WriteLine($"{e.Message}");
             }
         }
     }

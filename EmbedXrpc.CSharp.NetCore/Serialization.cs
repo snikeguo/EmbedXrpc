@@ -331,6 +331,7 @@ namespace EmbedXrpc
             }
             if (vt == typeof(bool))
             {
+
                 mytype = Type_t.TYPE_UINT8;
                 return true;
             }
@@ -439,6 +440,8 @@ namespace EmbedXrpc
         }
         private static object[] ConvertArray(Array arr)
         {
+            if (arr == null)
+                return null;
             int lb = arr.GetLowerBound(0);
             var ret = new object[arr.GetUpperBound(0) - lb + 1];
             for (int ix = 0; ix < ret.Length; ++ix)
@@ -465,8 +468,9 @@ namespace EmbedXrpc
             var pros = st.GetProperties();
             foreach (var field in pros)
             {
-                object v = field.GetValue(s);
-                var vt = v.GetType();
+                object value = field.GetValue(s);
+                //var vt = v.GetType();
+                var vt = field.PropertyType;
                 FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
                 ArrayLenFieldFlagAttribute IsArrayLenFieldAttribute = field.GetCustomAttribute<ArrayLenFieldFlagAttribute>();
                 if (vt.IsArray == false)
@@ -476,17 +480,21 @@ namespace EmbedXrpc
                     if (isBaseValueTypeFlag == true && IsArrayLenFieldAttribute.Flag == false)
                     {
                         SerializeKey(fieldNumberAttribute.Number, lost_t);
-                        BaseValueSerialize(v);
+                        BaseValueSerialize(value);
                     }
                     else if(lost_t== Type_t.TYPE_OBJECT)
                     {
-                        Serialize(v, fieldNumberAttribute.Number);
+                        if (value == null)
+                        {
+                            value = Assembly.CreateInstance(field.PropertyType.FullName);
+                        }
+                        Serialize(value, fieldNumberAttribute.Number);
                     }
                 }
                 else
                 {
                     //object[] arrayValue = (object[])v;
-                    object[] arrayValue = ConvertArray(v as Array);
+                    object[] arrayValue = ConvertArray(value as Array);
                     ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
                     if (att == null)
                     {
@@ -502,9 +510,9 @@ namespace EmbedXrpc
                     }
                     SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
                     SerializeLen(len);
-                    var aet = (v as Array).GetType().GetElementType();
+                    var aet = field.PropertyType.GetElementType();
                     Type_t lost_t = Type_t.TYPE_OBJECT;
-                    if (IsBaseValueType(aet,ref lost_t)==true)
+                    if (IsBaseValueType(aet, ref lost_t) == true)
                     {
                         SerializeArrayElementFlag((byte)((byte)lost_t << 4 | 0x01));
                         for (Int64 i = 0; i < len; i++)
@@ -522,7 +530,8 @@ namespace EmbedXrpc
                             SerializeSubField(aev);
                         }
                     }
-                    
+
+
                 }
             }
             SerializeEndFlag();
@@ -533,8 +542,8 @@ namespace EmbedXrpc
             var pros = st.GetProperties();
             foreach (var field in pros)
             {
-                object v = field.GetValue(s);
-                var vt = v.GetType();
+                object value = field.GetValue(s);
+                var vt = field.PropertyType;
                 FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
                 if (vt.IsArray == false)
                 {
@@ -543,17 +552,21 @@ namespace EmbedXrpc
                     if (isBaseValueTypeFlag == true)
                     {
                         //SerializeKey(fieldNumberAttribute.Number, lost_t);
-                        BaseValueSerialize(v);
+                        BaseValueSerialize(value);
                     }
                     else if(lost_t== Type_t.TYPE_OBJECT)
                     {
-                        Serialize(v, fieldNumberAttribute.Number);
+                        if (value == null)
+                        {
+                            value = Assembly.CreateInstance(field.PropertyType.FullName);
+                        }
+                        Serialize(value, fieldNumberAttribute.Number);
                     }
                 }
                 else
                 {
                     //object[] arrayValue = (object[])v;
-                    object[] arrayValue = ConvertArray(v as Array);
+                    object[] arrayValue = ConvertArray(value as Array);
                     ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
                     if (att == null)
                     {
@@ -569,7 +582,7 @@ namespace EmbedXrpc
                     }
                     //SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
                     //SerializeLen(len);
-                    var aet = (v as Array).GetType().GetElementType();
+                    var aet = field.PropertyType.GetElementType();
                     Type_t lost_t = Type_t.TYPE_OBJECT;
                     if (IsBaseValueType(aet, ref lost_t) == true)
                     {
@@ -589,6 +602,7 @@ namespace EmbedXrpc
                             NoMataData_SerializeSubField(aev);
                         }
                     }
+
 
                 }
             }

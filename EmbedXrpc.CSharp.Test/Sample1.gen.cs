@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
-// auto code gen ! DO NOT modify this file! create time 2020 - 11 - 11 19: 31:42.877;
+// auto code gen ! DO NOT modify this file! create time 2020 - 11 - 11 20: 16:07.882;
 //C# Code Generater Version:1.7.3.0
 namespace Sample1
 {
