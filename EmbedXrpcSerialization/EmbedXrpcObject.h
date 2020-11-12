@@ -461,26 +461,26 @@ public:
 			//EmbedSerializationShowMessage("EmbedXrpcObject","Server ServiceThread Free 0x%x\n", (uint32_t)recData.Data);
 		}
 	}
-	RequestResponseState Wait(uint32_t sid, const ObjectType *type,void * response)
+	RequestResponseState Wait(uint32_t sid, ReceiveItemInfo *recData)
 	{
 		RequestResponseState ret= ResponseState_Ok;
-		ReceiveItemInfo recData;
+		//ReceiveItemInfo recData;
 		while (true)
 		{
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
-			if (ResponseBlockBufferProvider->Receive(&recData, TimeOut) == false)
+			if (ResponseBlockBufferProvider->Receive(recData, TimeOut) == false)
 #else
-			if (EmbedXrpc_ReceiveQueue(ResponseBlockQueue, &recData,sizeof(ReceiveItemInfo), TimeOut)!= QueueState_OK)
+			if (EmbedXrpc_ReceiveQueue(ResponseBlockQueue, recData,sizeof(ReceiveItemInfo), TimeOut)!= QueueState_OK)
 #endif
 			{
 				return ResponseState_Timeout;
 			}
-			if (recData.Sid == EmbedXrpcSuspendSid)
+			if (recData->Sid == EmbedXrpcSuspendSid)
 			{
 				EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcSuspendSid\n");
 				continue;
 			}
-			if (sid != recData.Sid)
+			if (sid != recData->Sid)
 			{
 				ret = ResponseState_SidError;
 			}
@@ -491,6 +491,7 @@ public:
 			}
 			break;
 		}
+#if 0
 		if (ret == ResponseState_Ok)
 		{
 			SerializationManager rsm;
@@ -513,6 +514,7 @@ public:
 #endif
 			
 		}
+#endif
 		return ret;
 	}
 	

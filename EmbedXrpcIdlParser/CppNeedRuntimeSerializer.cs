@@ -173,7 +173,17 @@ namespace EmbedXrpcIdlParser
 
         public void EmitSerializeMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
         {
-            writer.WriteLine($"#define {targetStruct.TypeName}_Serialize(sm,obj)    ");
+            writer.WriteLine($"#define {targetStruct.TypeName}_Serialize(sm,objptr)    sm.Serialize(&{targetStruct.TypeName}_TypeInstance,objptr,0)");
+        }
+
+        public void EmitDeserializeMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        {
+            writer.WriteLine($"#define {targetStruct.TypeName}_Deserialize(sm,objptr)    sm.Deserialize(&{targetStruct.TypeName}_TypeInstance,objptr)");
+        }
+
+        public void EmitFreeDataMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        {
+            writer.WriteLine($"#define {targetStruct.TypeName}_FreeData(objptr)    SerializationManager::FreeData(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
     }
 }

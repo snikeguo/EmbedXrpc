@@ -15,71 +15,178 @@
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
-extern const Int32Field Student_Field_a;
-extern const Int32Field Student_Field_b;
-extern const IField* Student_Type_Field_Desc [2];
-extern const ObjectType Student_TypeInstance;
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Student_Serialize(SerializationManager &sm,Student *obj);
 
-extern const Int32Field DateTime_t_Field_Year;
-extern const Int32Field DateTime_t_Field_Month;
-extern const Int32Field DateTime_t_Field_Day;
-extern const Int32Field DateTime_t_Field_Hour;
-extern const Int32Field DateTime_t_Field_Min;
-extern const Int32Field DateTime_t_Field_Sec;
-extern const UInt64Field DateTime_t_Field_Sex;
-extern const ObjectField DateTime_t_Field_David;
-extern const IField* DateTime_t_Type_Field_Desc [8];
-extern const ObjectType DateTime_t_TypeInstance;
+void Student_Deserialize(SerializationManager &sm,Student *obj);
 
-extern const Int32Field AddResult_Field_Sum;
-extern const Int32Field AddResult_Field_dataLen;
-extern const ArrayType UInt8_Array_TypeInstance;
-extern const ArrayField AddResult_Field_data;
-extern const IField* AddResult_Type_Field_Desc [3];
-extern const ObjectType AddResult_TypeInstance;
+void Student_FreeData(Student *obj);
 
-extern const ArrayType DateTime_t_Array_TypeInstance;
-extern const ArrayField DateTimeChange_Parameter_Field_now;
-extern const IField* DateTimeChange_Parameter_Type_Field_Desc [1];
-extern const ObjectType DateTimeChange_Parameter_TypeInstance;
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void DateTime_t_Serialize(SerializationManager &sm,DateTime_t *obj);
+
+void DateTime_t_Deserialize(SerializationManager &sm,DateTime_t *obj);
+
+void DateTime_t_FreeData(DateTime_t *obj);
+
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void AddResult_Serialize(SerializationManager &sm,AddResult *obj);
+
+void AddResult_Deserialize(SerializationManager &sm,AddResult *obj);
+
+void AddResult_FreeData(AddResult *obj);
+
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void DateTimeChange_Parameter_Serialize(SerializationManager &sm,DateTimeChange_Parameter *obj);
+
+void DateTimeChange_Parameter_Deserialize(SerializationManager &sm,DateTimeChange_Parameter *obj);
+
+void DateTimeChange_Parameter_FreeData(DateTimeChange_Parameter *obj);
 
 #define DateTimeChange_ServiceId 16   //0x10
-extern const Int32Field Inter_Add_Parameter_Field_a;
-extern const Int32Field Inter_Add_Parameter_Field_b;
-extern const Int32Field Inter_Add_Parameter_Field_dataLen;
-extern const ArrayField Inter_Add_Parameter_Field_data;
-extern const IField* Inter_Add_Parameter_Type_Field_Desc [4];
-extern const ObjectType Inter_Add_Parameter_TypeInstance;
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_Add_Parameter_Serialize(SerializationManager &sm,Inter_Add_Parameter *obj);
+
+void Inter_Add_Parameter_Deserialize(SerializationManager &sm,Inter_Add_Parameter *obj);
+
+void Inter_Add_Parameter_FreeData(Inter_Add_Parameter *obj);
 
 #define Inter_Add_ServiceId 17   //0x11
-extern const UInt8Field Inter_Add_Return_Field_State;
-extern const ObjectField Inter_Add_Return_Field_ReturnValue;
-extern const IField* Inter_Add_Return_Type_Field_Desc [2];
-extern const ObjectType Inter_Add_Return_TypeInstance;
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_Add_Return_Serialize(SerializationManager &sm,Inter_Add_Return *obj);
 
-extern const ObjectType Inter_NoArg_Parameter_TypeInstance;
+void Inter_Add_Return_Deserialize(SerializationManager &sm,Inter_Add_Return *obj);
+
+void Inter_Add_Return_FreeData(Inter_Add_Return *obj);
+
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_NoArg_Parameter_Serialize(SerializationManager &sm,Inter_NoArg_Parameter *obj);
+
+void Inter_NoArg_Parameter_Deserialize(SerializationManager &sm,Inter_NoArg_Parameter *obj);
+
+void Inter_NoArg_Parameter_FreeData(Inter_NoArg_Parameter *obj);
 
 #define Inter_NoArg_ServiceId 18   //0x12
-extern const UInt8Field Inter_NoArg_Return_Field_State;
-extern const UInt8Field Inter_NoArg_Return_Field_ReturnValue;
-extern const IField* Inter_NoArg_Return_Type_Field_Desc [2];
-extern const ObjectType Inter_NoArg_Return_TypeInstance;
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_NoArg_Return_Serialize(SerializationManager &sm,Inter_NoArg_Return *obj);
 
-extern const Int32Field Inter_NoReturn_Parameter_Field_a;
-extern const IField* Inter_NoReturn_Parameter_Type_Field_Desc [1];
-extern const ObjectType Inter_NoReturn_Parameter_TypeInstance;
+void Inter_NoArg_Return_Deserialize(SerializationManager &sm,Inter_NoArg_Return *obj);
+
+void Inter_NoArg_Return_FreeData(Inter_NoArg_Return *obj);
+
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_NoReturn_Parameter_Serialize(SerializationManager &sm,Inter_NoReturn_Parameter *obj);
+
+void Inter_NoReturn_Parameter_Deserialize(SerializationManager &sm,Inter_NoReturn_Parameter *obj);
+
+void Inter_NoReturn_Parameter_FreeData(Inter_NoReturn_Parameter *obj);
 
 #define Inter_NoReturn_ServiceId 19   //0x13
-extern const UInt8Field Inter_NoReturn_Return_Field_State;
-extern const IField* Inter_NoReturn_Return_Type_Field_Desc [1];
-extern const ObjectType Inter_NoReturn_Return_TypeInstance;
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_NoReturn_Return_Serialize(SerializationManager &sm,Inter_NoReturn_Return *obj);
 
-extern const ObjectType Inter_NoArgAndReturn_Parameter_TypeInstance;
+void Inter_NoReturn_Return_Deserialize(SerializationManager &sm,Inter_NoReturn_Return *obj);
+
+void Inter_NoReturn_Return_FreeData(Inter_NoReturn_Return *obj);
+
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_NoArgAndReturn_Parameter_Serialize(SerializationManager &sm,Inter_NoArgAndReturn_Parameter *obj);
+
+void Inter_NoArgAndReturn_Parameter_Deserialize(SerializationManager &sm,Inter_NoArgAndReturn_Parameter *obj);
+
+void Inter_NoArgAndReturn_Parameter_FreeData(Inter_NoArgAndReturn_Parameter *obj);
 
 #define Inter_NoArgAndReturn_ServiceId 20   //0x14
-extern const UInt8Field Inter_NoArgAndReturn_Return_Field_State;
-extern const IField* Inter_NoArgAndReturn_Return_Type_Field_Desc [1];
-extern const ObjectType Inter_NoArgAndReturn_Return_TypeInstance;
+#if EmbedXrpc_UseRingBufferWhenReceiving==1
+#error  Unsupported  RingBuffer Mode!
+#endif
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
+void Inter_NoArgAndReturn_Return_Serialize(SerializationManager &sm,Inter_NoArgAndReturn_Return *obj);
+
+void Inter_NoArgAndReturn_Return_Deserialize(SerializationManager &sm,Inter_NoArgAndReturn_Return *obj);
+
+void Inter_NoArgAndReturn_Return_FreeData(Inter_NoArgAndReturn_Return *obj);
 
 
 #endif

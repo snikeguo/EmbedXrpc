@@ -21,7 +21,7 @@ EmbedXrpcObject ClientRpc(ClientSend,
 	500,
 	rdCollection,
 	1,
-	true,
+	false,
 	nullptr);//client rpc 对象
 
 void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server广播后，client接受到的
@@ -32,7 +32,7 @@ void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server广播后，
 InterClientImpl Client(&ClientRpc);
 void ClientThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	int a=1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
 	while (true)
@@ -67,12 +67,12 @@ EmbedXrpcObject ServerRpc(ServerSend,
 	500,
 	rmCollection,
 	1,
-	true,
+	false,
 	nullptr);//server rpc 对象
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+	std::this_thread::sleep_for(std::chrono::milliseconds(0xfffffffff));
 	while (true)
 	{		
 		DateTime_t t;
@@ -88,7 +88,7 @@ void ServerThread()
 		t.David.a = 1;
 		t.David.b = 3;
 		DateTimeChanger.Invoke(&t);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(0xfffffffff));
 	}
 }
 

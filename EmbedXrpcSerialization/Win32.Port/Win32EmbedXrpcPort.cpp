@@ -144,13 +144,13 @@ uint32_t EmbedXrpc_QueueSpacesAvailable(EmbedXrpc_Queue_t queue)
 void* Malloc(uint32_t size)
 {
 	auto x=malloc(size);
-	printf("malloc ptr:0x%8x,size:%4d\n", x, size);
+	//printf("malloc ptr:0x%8x,size:%4d\n", x, size);
 	return x;
 }
 void Free(void* ptr)
 {
 	free(ptr);
-	printf("free ptr:0x%8x\n", ptr);
+	//printf("free ptr:0x%8x\n", ptr);
 }
 void Memcpy(void* d, const void* s, uint32_t size)
 {
