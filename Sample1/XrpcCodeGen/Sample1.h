@@ -25,6 +25,8 @@ Int32 Hour;   //FieldNumber:4
 Int32 Min;   //FieldNumber:5
 Int32 Sec;   //FieldNumber:6
 Sex Sex;   //FieldNumber:8
+UInt8 DateStringLen;   //FieldNumber:0
+UInt8* DateString;   //FieldNumber:0
 Student David;   //FieldNumber:7
 }DateTime_t;
 typedef struct _AddResult

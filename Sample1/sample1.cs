@@ -34,9 +34,15 @@ struct DateTime_t
     [FieldNumber(8)]
     Sex Sex;
 
+    byte DateStringLen;
+
+    [MaxCount(LenFieldName = "DateStringLen", IsFixed = false)]
+    byte[] DateString;
+
     [FieldNumber(7)]
     Student David;
-    
+
+
 }
 [FileName("sample1.cs")]
 delegate void DateTimeChange(DateTime_t[] now);

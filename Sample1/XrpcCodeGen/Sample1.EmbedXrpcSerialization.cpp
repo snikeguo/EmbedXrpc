@@ -3,297 +3,489 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
-void Student_Serialize(SerializationManager &sm,Student *obj)
+extern const Int32Field Student_Field_a=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "Student.a" ,
+  offsetof(Student,a) ,
+  &Int32_TypeInstance,  
+  1,
+  false,
+};
+extern const Int32Field Student_Field_b=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "Student.b" ,
+  offsetof(Student,b) ,
+  &Int32_TypeInstance,  
+  2,
+  false,
+};
+const IField*  Student_Type_Field_Desc []=
 {
-Memcpy(&sm.Buf[sm.Index],&obj->a,sizeof(obj->a));
-sm.Index+=sizeof(obj->a);
-Memcpy(&sm.Buf[sm.Index],&obj->b,sizeof(obj->b));
-sm.Index+=sizeof(obj->b);
-}
+  (const IField*)&Student_Field_a,
+  (const IField*)&Student_Field_b,
+};
+extern const ObjectType Student_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(Student_Type_Field_Desc)/sizeof(IField*),
+  Student_Type_Field_Desc,
+};
 
-void Student_Deserialize(SerializationManager &sm,Student *obj)
+extern const Int32Field DateTime_t_Field_Year=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "DateTime_t.Year" ,
+  offsetof(DateTime_t,Year) ,
+  &Int32_TypeInstance,  
+  10086,
+  false,
+};
+extern const Int32Field DateTime_t_Field_Month=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "DateTime_t.Month" ,
+  offsetof(DateTime_t,Month) ,
+  &Int32_TypeInstance,  
+  2,
+  false,
+};
+extern const Int32Field DateTime_t_Field_Day=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "DateTime_t.Day" ,
+  offsetof(DateTime_t,Day) ,
+  &Int32_TypeInstance,  
+  3,
+  false,
+};
+extern const Int32Field DateTime_t_Field_Hour=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "DateTime_t.Hour" ,
+  offsetof(DateTime_t,Hour) ,
+  &Int32_TypeInstance,  
+  4,
+  false,
+};
+extern const Int32Field DateTime_t_Field_Min=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "DateTime_t.Min" ,
+  offsetof(DateTime_t,Min) ,
+  &Int32_TypeInstance,  
+  5,
+  false,
+};
+extern const Int32Field DateTime_t_Field_Sec=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "DateTime_t.Sec" ,
+  offsetof(DateTime_t,Sec) ,
+  &Int32_TypeInstance,  
+  6,
+  false,
+};
+extern const UInt64Field DateTime_t_Field_Sex=
+{ 
+  { 
+    TYPE_UINT64,
+  },
+  "DateTime_t.Sex" ,
+  offsetof(DateTime_t,Sex) ,
+  &UInt64_TypeInstance,  
+  8,
+  false,
+};
+extern const UInt8Field DateTime_t_Field_DateStringLen=
+{ 
+  { 
+    TYPE_UINT8,
+  },
+  "DateTime_t.DateStringLen" ,
+  offsetof(DateTime_t,DateStringLen) ,
+  &UInt8_TypeInstance,  
+  0,
+  true,
+};
+extern const ArrayType UInt8_Array_TypeInstance= 
 {
-Memcpy(&obj->a,&sm.Buf[sm.Index],sizeof(obj->a));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->a)));
-sm.Index+=sizeof(obj->a);
-Memcpy(&obj->b,&sm.Buf[sm.Index],sizeof(obj->b));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->b)));
-sm.Index+=sizeof(obj->b);
-}
+  { 
+    TYPE_ARRAY,
+  },
+  (const IType *)(&UInt8_TypeInstance),
+  sizeof(UInt8),
+};
+extern const ArrayType UInt8_Array_TypeInstance;
+extern const ArrayField DateTime_t_Field_DateString=
+{ 
+  {
+    TYPE_ARRAY,
+  },
+  "DateTime_t.DateString",
+  offsetof(DateTime_t,DateString),
+  (const IField*)&DateTime_t_Field_DateStringLen,
+  &UInt8_Array_TypeInstance,
+  false,
+  0,
+};
+extern const ObjectType Student_TypeInstance;
+extern const ObjectField DateTime_t_Field_David=
+{ 
+  {
+    TYPE_OBJECT,
+  },
+  "DateTime_t.David",
+  offsetof(DateTime_t,David),
+  &Student_TypeInstance,
+  7,
+};
+const IField*  DateTime_t_Type_Field_Desc []=
+{
+  (const IField*)&DateTime_t_Field_Year,
+  (const IField*)&DateTime_t_Field_Month,
+  (const IField*)&DateTime_t_Field_Day,
+  (const IField*)&DateTime_t_Field_Hour,
+  (const IField*)&DateTime_t_Field_Min,
+  (const IField*)&DateTime_t_Field_Sec,
+  (const IField*)&DateTime_t_Field_Sex,
+  (const IField*)&DateTime_t_Field_DateStringLen,
+  (const IField*)&DateTime_t_Field_DateString,
+  (const IField*)&DateTime_t_Field_David,
+};
+extern const ObjectType DateTime_t_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(DateTime_t_Type_Field_Desc)/sizeof(IField*),
+  DateTime_t_Type_Field_Desc,
+};
 
-void Student_FreeData(Student *obj)
+extern const Int32Field AddResult_Field_Sum=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "AddResult.Sum" ,
+  offsetof(AddResult,Sum) ,
+  &Int32_TypeInstance,  
+  1,
+  false,
+};
+extern const Int32Field AddResult_Field_dataLen=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "AddResult.dataLen" ,
+  offsetof(AddResult,dataLen) ,
+  &Int32_TypeInstance,  
+  2,
+  true,
+};
+extern const ArrayType UInt8_Array_TypeInstance;
+extern const ArrayField AddResult_Field_data=
+{ 
+  {
+    TYPE_ARRAY,
+  },
+  "AddResult.data",
+  offsetof(AddResult,data),
+  (const IField*)&AddResult_Field_dataLen,
+  &UInt8_Array_TypeInstance,
+  false,
+  3,
+};
+const IField*  AddResult_Type_Field_Desc []=
 {
-}
+  (const IField*)&AddResult_Field_Sum,
+  (const IField*)&AddResult_Field_dataLen,
+  (const IField*)&AddResult_Field_data,
+};
+extern const ObjectType AddResult_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(AddResult_Type_Field_Desc)/sizeof(IField*),
+  AddResult_Type_Field_Desc,
+};
 
-void DateTime_t_Serialize(SerializationManager &sm,DateTime_t *obj)
+extern const ArrayType DateTime_t_Array_TypeInstance= 
 {
-Memcpy(&sm.Buf[sm.Index],&obj->Year,sizeof(obj->Year));
-sm.Index+=sizeof(obj->Year);
-Memcpy(&sm.Buf[sm.Index],&obj->Month,sizeof(obj->Month));
-sm.Index+=sizeof(obj->Month);
-Memcpy(&sm.Buf[sm.Index],&obj->Day,sizeof(obj->Day));
-sm.Index+=sizeof(obj->Day);
-Memcpy(&sm.Buf[sm.Index],&obj->Hour,sizeof(obj->Hour));
-sm.Index+=sizeof(obj->Hour);
-Memcpy(&sm.Buf[sm.Index],&obj->Min,sizeof(obj->Min));
-sm.Index+=sizeof(obj->Min);
-Memcpy(&sm.Buf[sm.Index],&obj->Sec,sizeof(obj->Sec));
-sm.Index+=sizeof(obj->Sec);
-Memcpy(&sm.Buf[sm.Index],&obj->Sex,sizeof(UInt64));
-sm.Index+=sizeof(UInt64);
-Student_Serialize(sm,&obj->David);
-}
+  { 
+    TYPE_ARRAY,
+  },
+  (const IType *)(&DateTime_t_TypeInstance),
+  sizeof(DateTime_t),
+};
+extern const ArrayType DateTime_t_Array_TypeInstance;
+extern const ArrayField DateTimeChange_Parameter_Field_now=
+{ 
+  {
+    TYPE_ARRAY,
+  },
+  "DateTimeChange_Parameter.now",
+  offsetof(DateTimeChange_Parameter,now),
+  nullptr,
+  &DateTime_t_Array_TypeInstance,
+  true,
+  1,
+};
+const IField*  DateTimeChange_Parameter_Type_Field_Desc []=
+{
+  (const IField*)&DateTimeChange_Parameter_Field_now,
+};
+extern const ObjectType DateTimeChange_Parameter_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(DateTimeChange_Parameter_Type_Field_Desc)/sizeof(IField*),
+  DateTimeChange_Parameter_Type_Field_Desc,
+};
 
-void DateTime_t_Deserialize(SerializationManager &sm,DateTime_t *obj)
+extern const Int32Field Inter_Add_Parameter_Field_a=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "Inter_Add_Parameter.a" ,
+  offsetof(Inter_Add_Parameter,a) ,
+  &Int32_TypeInstance,  
+  1,
+  false,
+};
+extern const Int32Field Inter_Add_Parameter_Field_b=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "Inter_Add_Parameter.b" ,
+  offsetof(Inter_Add_Parameter,b) ,
+  &Int32_TypeInstance,  
+  2,
+  false,
+};
+extern const Int32Field Inter_Add_Parameter_Field_dataLen=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "Inter_Add_Parameter.dataLen" ,
+  offsetof(Inter_Add_Parameter,dataLen) ,
+  &Int32_TypeInstance,  
+  3,
+  true,
+};
+extern const ArrayType UInt8_Array_TypeInstance;
+extern const ArrayField Inter_Add_Parameter_Field_data=
+{ 
+  {
+    TYPE_ARRAY,
+  },
+  "Inter_Add_Parameter.data",
+  offsetof(Inter_Add_Parameter,data),
+  (const IField*)&Inter_Add_Parameter_Field_dataLen,
+  &UInt8_Array_TypeInstance,
+  false,
+  4,
+};
+const IField*  Inter_Add_Parameter_Type_Field_Desc []=
 {
-Memcpy(&obj->Year,&sm.Buf[sm.Index],sizeof(obj->Year));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->Year)));
-sm.Index+=sizeof(obj->Year);
-Memcpy(&obj->Month,&sm.Buf[sm.Index],sizeof(obj->Month));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->Month)));
-sm.Index+=sizeof(obj->Month);
-Memcpy(&obj->Day,&sm.Buf[sm.Index],sizeof(obj->Day));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->Day)));
-sm.Index+=sizeof(obj->Day);
-Memcpy(&obj->Hour,&sm.Buf[sm.Index],sizeof(obj->Hour));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->Hour)));
-sm.Index+=sizeof(obj->Hour);
-Memcpy(&obj->Min,&sm.Buf[sm.Index],sizeof(obj->Min));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->Min)));
-sm.Index+=sizeof(obj->Min);
-Memcpy(&obj->Sec,&sm.Buf[sm.Index],sizeof(obj->Sec));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->Sec)));
-sm.Index+=sizeof(obj->Sec);
-Memcpy(&obj->Sex,&sm.Buf[sm.Index],sizeof(UInt64));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(UInt64)));
-sm.Index+=sizeof(UInt64);
-Student_Deserialize(sm,&obj->David);
-}
+  (const IField*)&Inter_Add_Parameter_Field_a,
+  (const IField*)&Inter_Add_Parameter_Field_b,
+  (const IField*)&Inter_Add_Parameter_Field_dataLen,
+  (const IField*)&Inter_Add_Parameter_Field_data,
+};
+extern const ObjectType Inter_Add_Parameter_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(Inter_Add_Parameter_Type_Field_Desc)/sizeof(IField*),
+  Inter_Add_Parameter_Type_Field_Desc,
+};
 
-void DateTime_t_FreeData(DateTime_t *obj)
+extern const UInt8Field Inter_Add_Return_Field_State=
+{ 
+  { 
+    TYPE_UINT8,
+  },
+  "Inter_Add_Return.State" ,
+  offsetof(Inter_Add_Return,State) ,
+  &UInt8_TypeInstance,  
+  1,
+  false,
+};
+extern const ObjectType AddResult_TypeInstance;
+extern const ObjectField Inter_Add_Return_Field_ReturnValue=
+{ 
+  {
+    TYPE_OBJECT,
+  },
+  "Inter_Add_Return.ReturnValue",
+  offsetof(Inter_Add_Return,ReturnValue),
+  &AddResult_TypeInstance,
+  2,
+};
+const IField*  Inter_Add_Return_Type_Field_Desc []=
 {
-Student_FreeData(&obj->David);
-}
+  (const IField*)&Inter_Add_Return_Field_State,
+  (const IField*)&Inter_Add_Return_Field_ReturnValue,
+};
+extern const ObjectType Inter_Add_Return_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(Inter_Add_Return_Type_Field_Desc)/sizeof(IField*),
+  Inter_Add_Return_Type_Field_Desc,
+};
 
-void AddResult_Serialize(SerializationManager &sm,AddResult *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->Sum,sizeof(obj->Sum));
-sm.Index+=sizeof(obj->Sum);
-Memcpy(&sm.Buf[sm.Index],&obj->dataLen,sizeof(obj->dataLen));
-sm.Index+=sizeof(obj->dataLen);
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->data[data_index],sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-}
-}
+extern const ObjectType Inter_NoArg_Parameter_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  0,
+  nullptr,
+};
 
-void AddResult_Deserialize(SerializationManager &sm,AddResult *obj)
+extern const UInt8Field Inter_NoArg_Return_Field_State=
+{ 
+  { 
+    TYPE_UINT8,
+  },
+  "Inter_NoArg_Return.State" ,
+  offsetof(Inter_NoArg_Return,State) ,
+  &UInt8_TypeInstance,  
+  1,
+  false,
+};
+extern const UInt8Field Inter_NoArg_Return_Field_ReturnValue=
+{ 
+  { 
+    TYPE_UINT8,
+  },
+  "Inter_NoArg_Return.ReturnValue" ,
+  offsetof(Inter_NoArg_Return,ReturnValue) ,
+  &UInt8_TypeInstance,  
+  2,
+  false,
+};
+const IField*  Inter_NoArg_Return_Type_Field_Desc []=
 {
-Memcpy(&obj->Sum,&sm.Buf[sm.Index],sizeof(obj->Sum));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->Sum)));
-sm.Index+=sizeof(obj->Sum);
-Memcpy(&obj->dataLen,&sm.Buf[sm.Index],sizeof(obj->dataLen));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->dataLen)));
-sm.Index+=sizeof(obj->dataLen);
-obj->data=(UInt8 *)Malloc(sizeof(UInt8)*obj->dataLen);
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-Memcpy(&obj->data[data_index],&sm.Buf[sm.Index],sizeof(UInt8));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(UInt8)));
-sm.Index+=sizeof(UInt8);
-}
-}
+  (const IField*)&Inter_NoArg_Return_Field_State,
+  (const IField*)&Inter_NoArg_Return_Field_ReturnValue,
+};
+extern const ObjectType Inter_NoArg_Return_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(Inter_NoArg_Return_Type_Field_Desc)/sizeof(IField*),
+  Inter_NoArg_Return_Type_Field_Desc,
+};
 
-void AddResult_FreeData(AddResult *obj)
+extern const Int32Field Inter_NoReturn_Parameter_Field_a=
+{ 
+  { 
+    TYPE_INT32,
+  },
+  "Inter_NoReturn_Parameter.a" ,
+  offsetof(Inter_NoReturn_Parameter,a) ,
+  &Int32_TypeInstance,  
+  1,
+  false,
+};
+const IField*  Inter_NoReturn_Parameter_Type_Field_Desc []=
 {
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-}
-Free(obj->data);
-}
+  (const IField*)&Inter_NoReturn_Parameter_Field_a,
+};
+extern const ObjectType Inter_NoReturn_Parameter_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(Inter_NoReturn_Parameter_Type_Field_Desc)/sizeof(IField*),
+  Inter_NoReturn_Parameter_Type_Field_Desc,
+};
 
-void DateTimeChange_Parameter_Serialize(SerializationManager &sm,DateTimeChange_Parameter *obj)
+extern const UInt8Field Inter_NoReturn_Return_Field_State=
+{ 
+  { 
+    TYPE_UINT8,
+  },
+  "Inter_NoReturn_Return.State" ,
+  offsetof(Inter_NoReturn_Return,State) ,
+  &UInt8_TypeInstance,  
+  1,
+  false,
+};
+const IField*  Inter_NoReturn_Return_Type_Field_Desc []=
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
-{
-DateTime_t_Serialize(sm,&obj->now[now_index]);
-}
-}
+  (const IField*)&Inter_NoReturn_Return_Field_State,
+};
+extern const ObjectType Inter_NoReturn_Return_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(Inter_NoReturn_Return_Type_Field_Desc)/sizeof(IField*),
+  Inter_NoReturn_Return_Type_Field_Desc,
+};
 
-void DateTimeChange_Parameter_Deserialize(SerializationManager &sm,DateTimeChange_Parameter *obj)
-{
-for(uint8_t now_index=0;now_index<1;now_index++)
-{
-DateTime_t_Deserialize(sm,&obj->now[now_index]);
-}
-}
+extern const ObjectType Inter_NoArgAndReturn_Parameter_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  0,
+  nullptr,
+};
 
-void DateTimeChange_Parameter_FreeData(DateTimeChange_Parameter *obj)
+extern const UInt8Field Inter_NoArgAndReturn_Return_Field_State=
+{ 
+  { 
+    TYPE_UINT8,
+  },
+  "Inter_NoArgAndReturn_Return.State" ,
+  offsetof(Inter_NoArgAndReturn_Return,State) ,
+  &UInt8_TypeInstance,  
+  1,
+  false,
+};
+const IField*  Inter_NoArgAndReturn_Return_Type_Field_Desc []=
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
-{
-DateTime_t_FreeData(&obj->now[now_index]);
-}
-}
-
-void Inter_Add_Parameter_Serialize(SerializationManager &sm,Inter_Add_Parameter *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->a,sizeof(obj->a));
-sm.Index+=sizeof(obj->a);
-Memcpy(&sm.Buf[sm.Index],&obj->b,sizeof(obj->b));
-sm.Index+=sizeof(obj->b);
-Memcpy(&sm.Buf[sm.Index],&obj->dataLen,sizeof(obj->dataLen));
-sm.Index+=sizeof(obj->dataLen);
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->data[data_index],sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-}
-}
-
-void Inter_Add_Parameter_Deserialize(SerializationManager &sm,Inter_Add_Parameter *obj)
-{
-Memcpy(&obj->a,&sm.Buf[sm.Index],sizeof(obj->a));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->a)));
-sm.Index+=sizeof(obj->a);
-Memcpy(&obj->b,&sm.Buf[sm.Index],sizeof(obj->b));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->b)));
-sm.Index+=sizeof(obj->b);
-Memcpy(&obj->dataLen,&sm.Buf[sm.Index],sizeof(obj->dataLen));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->dataLen)));
-sm.Index+=sizeof(obj->dataLen);
-obj->data=(UInt8 *)Malloc(sizeof(UInt8)*obj->dataLen);
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-Memcpy(&obj->data[data_index],&sm.Buf[sm.Index],sizeof(UInt8));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(UInt8)));
-sm.Index+=sizeof(UInt8);
-}
-}
-
-void Inter_Add_Parameter_FreeData(Inter_Add_Parameter *obj)
-{
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-}
-Free(obj->data);
-}
-
-void Inter_Add_Return_Serialize(SerializationManager &sm,Inter_Add_Return *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->State,sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-AddResult_Serialize(sm,&obj->ReturnValue);
-}
-
-void Inter_Add_Return_Deserialize(SerializationManager &sm,Inter_Add_Return *obj)
-{
-Memcpy(&obj->State,&sm.Buf[sm.Index],sizeof(UInt8));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(UInt8)));
-sm.Index+=sizeof(UInt8);
-AddResult_Deserialize(sm,&obj->ReturnValue);
-}
-
-void Inter_Add_Return_FreeData(Inter_Add_Return *obj)
-{
-AddResult_FreeData(&obj->ReturnValue);
-}
-
-void Inter_NoArg_Parameter_Serialize(SerializationManager &sm,Inter_NoArg_Parameter *obj)
-{
-}
-
-void Inter_NoArg_Parameter_Deserialize(SerializationManager &sm,Inter_NoArg_Parameter *obj)
-{
-}
-
-void Inter_NoArg_Parameter_FreeData(Inter_NoArg_Parameter *obj)
-{
-}
-
-void Inter_NoArg_Return_Serialize(SerializationManager &sm,Inter_NoArg_Return *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->State,sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-Memcpy(&sm.Buf[sm.Index],&obj->ReturnValue,sizeof(obj->ReturnValue));
-sm.Index+=sizeof(obj->ReturnValue);
-}
-
-void Inter_NoArg_Return_Deserialize(SerializationManager &sm,Inter_NoArg_Return *obj)
-{
-Memcpy(&obj->State,&sm.Buf[sm.Index],sizeof(UInt8));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(UInt8)));
-sm.Index+=sizeof(UInt8);
-Memcpy(&obj->ReturnValue,&sm.Buf[sm.Index],sizeof(obj->ReturnValue));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->ReturnValue)));
-sm.Index+=sizeof(obj->ReturnValue);
-}
-
-void Inter_NoArg_Return_FreeData(Inter_NoArg_Return *obj)
-{
-}
-
-void Inter_NoReturn_Parameter_Serialize(SerializationManager &sm,Inter_NoReturn_Parameter *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->a,sizeof(obj->a));
-sm.Index+=sizeof(obj->a);
-}
-
-void Inter_NoReturn_Parameter_Deserialize(SerializationManager &sm,Inter_NoReturn_Parameter *obj)
-{
-Memcpy(&obj->a,&sm.Buf[sm.Index],sizeof(obj->a));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->a)));
-sm.Index+=sizeof(obj->a);
-}
-
-void Inter_NoReturn_Parameter_FreeData(Inter_NoReturn_Parameter *obj)
-{
-}
-
-void Inter_NoReturn_Return_Serialize(SerializationManager &sm,Inter_NoReturn_Return *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->State,sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-}
-
-void Inter_NoReturn_Return_Deserialize(SerializationManager &sm,Inter_NoReturn_Return *obj)
-{
-Memcpy(&obj->State,&sm.Buf[sm.Index],sizeof(UInt8));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(UInt8)));
-sm.Index+=sizeof(UInt8);
-}
-
-void Inter_NoReturn_Return_FreeData(Inter_NoReturn_Return *obj)
-{
-}
-
-void Inter_NoArgAndReturn_Parameter_Serialize(SerializationManager &sm,Inter_NoArgAndReturn_Parameter *obj)
-{
-}
-
-void Inter_NoArgAndReturn_Parameter_Deserialize(SerializationManager &sm,Inter_NoArgAndReturn_Parameter *obj)
-{
-}
-
-void Inter_NoArgAndReturn_Parameter_FreeData(Inter_NoArgAndReturn_Parameter *obj)
-{
-}
-
-void Inter_NoArgAndReturn_Return_Serialize(SerializationManager &sm,Inter_NoArgAndReturn_Return *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->State,sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-}
-
-void Inter_NoArgAndReturn_Return_Deserialize(SerializationManager &sm,Inter_NoArgAndReturn_Return *obj)
-{
-Memcpy(&obj->State,&sm.Buf[sm.Index],sizeof(UInt8));
-SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(UInt8)));
-sm.Index+=sizeof(UInt8);
-}
-
-void Inter_NoArgAndReturn_Return_FreeData(Inter_NoArgAndReturn_Return *obj)
-{
-}
+  (const IField*)&Inter_NoArgAndReturn_Return_Field_State,
+};
+extern const ObjectType Inter_NoArgAndReturn_Return_TypeInstance=
+{    
+  {
+    TYPE_OBJECT,
+  },
+  sizeof(Inter_NoArgAndReturn_Return_Type_Field_Desc)/sizeof(IField*),
+  Inter_NoArgAndReturn_Return_Type_Field_Desc,
+};
 
