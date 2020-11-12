@@ -71,11 +71,13 @@
     <Compile Include="Commands.cs" />
     <Compile Include="CppCodeGenerater.cs" />
     <Compile Include="CsCodeGenerater.cs" />
-    <Compile Include="EmbedXrpcSerializationExtension.cs" />
+    <Compile Include="CppNoRuntimeSerializer.cs" />
+    <Compile Include="CppNeedRuntimeSerializer.cs" />
     <Compile Include="ICodeGenerater.cs" />
     <None Include="idltest1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Compile Include="ICppSerializable.cs" />
     <Compile Include="Program.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -83,9 +85,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="CSharpTemplate.cshtml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommandLineParser">

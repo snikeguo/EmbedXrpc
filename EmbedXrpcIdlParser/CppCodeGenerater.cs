@@ -44,7 +44,7 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine("#define {0}_ServiceId {1}   //0x{2:X}", defineName, ServiceId, ServiceId);
         }
         public CppCodeGenParameter codeGenParameter;
-        public IEmbedXrpcSerializationGenerator embedXrpcSerializationGenerator;
+        public ICppSerializable embedXrpcSerializationGenerator;
         public void CodeGen(CppCodeGenParameter parameter)
         {
             UTF8Encoding utf8ec = new UTF8Encoding(true);
@@ -53,12 +53,12 @@ namespace EmbedXrpcIdlParser
             {
                 if(parameter.IsRuntimeVersion==true)
                 {
-                    embedXrpcSerializationGenerator = new EmbedXrpcNeedRuntimeSerializer();
+                    embedXrpcSerializationGenerator = new CppNeedRuntimeSerializer();
                 }
                 else
                 {
-                    throw new NotImplementedException();
-                    //embedXrpcSerializationGenerator = new EmbedXrpcNoRuntimeSerializer();
+                    //throw new NotImplementedException();
+                    embedXrpcSerializationGenerator = new CppNoRuntimeSerializer();
                 }
             }
             Console.WriteLine($"cpp code gen:   {parameter.FileIdlInfo.FileName}");
