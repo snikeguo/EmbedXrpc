@@ -9,7 +9,7 @@ namespace EmbedXrpcIdlParser
 { 
     public class CppReflectionSerializer : ICppSerializable
     {
-        static List<ITargetType> GeneratedTypes = new List<ITargetType>();
+        static List<string> GeneratedArrayTypes = new List<string>();
         private StringBuilder EmitIFieldsArray(string name, IList<string> FieldDesc)
         {
             StringBuilder stringBuilder = new StringBuilder();
@@ -24,9 +24,9 @@ namespace EmbedXrpcIdlParser
         }
         private void EmitArrayTypeAndObjectType(ITargetType at_ot, StringBuilder cfilestringBuilder, StringBuilder hfilestringBuilder)
         {
-            if (GeneratedTypes.Contains(at_ot) == true)
+            if (GeneratedArrayTypes.Contains(at_ot.TypeName) == true)
                 return;
-            GeneratedTypes.Add(at_ot);
+            GeneratedArrayTypes.Add(at_ot.TypeName);
             if (at_ot.TargetType== TargetType_t.TYPE_ARRAY)
             {
                 ArrayType_TargetType attt = at_ot as ArrayType_TargetType;
