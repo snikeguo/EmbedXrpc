@@ -43,7 +43,7 @@ void ClientThread()
 		auto sum=Client.Add(a, b,0, NULL);
 		if (sum.State == ResponseState_Ok)
 		{
-			printf("%d+%d=%d,%s\n", a,b,sum.ReturnValue.Sum,sum.ReturnValue.data);
+			printf("%d+%d=%d\n", a,b,sum.ReturnValue.Sum);
 		}
 		Client.Free_Add(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));

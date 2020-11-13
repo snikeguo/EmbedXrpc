@@ -211,6 +211,15 @@ public:
 			return CalculateSum;
 		}
 	}
+
+	void AppendSumToCalculateSum(uint32_t sum)//只有ringbuffer mode 为0的情况下使用。
+	{
+		(void)sum;
+#if EmbedXrpc_UseRingBufferWhenReceiving==0
+		CalculateSum += sum;
+#endif
+	}
+
 #endif
 	bool IsEnableMataDataEncode = false;
 	void SerializeKey(uint32_t  FieldNumber, Type_t   Field);

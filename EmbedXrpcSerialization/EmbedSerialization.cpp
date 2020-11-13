@@ -547,7 +547,9 @@ bool SerializationManager::Pop(uint8_t* out_buf, uint32_t len)
 		{
 			Memcpy(out_buf, &Buf[Index], len);
 		}
-		CalculateSum += GetSum(&Buf[Index], len);
+#if EmbedXrpc_CheckSumValid==1
+		AppendSumToCalculateSum(GetSum(&Buf[Index], len));
+#endif
 		Index += len;
 	}
 	else
@@ -567,8 +569,10 @@ bool SerializationManager::Pop(uint8_t* out_buf, uint32_t len)
 void SerializationManager::Reset()
 {
 	Index = 0;
-	ReferenceSum = 0;
-	CalculateSum = 0;
+#if EmbedXrpc_CheckSumValid==1
+	SetReferenceSum(0);
+	SetCalculateSum(0);
+#endif
 	if (BlockBufferProvider != nullptr)
 	{
 		BlockBufferProvider->Reset();
@@ -618,7 +622,12 @@ void SerializationManager::RemoveKeyFromSerializationManager()
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->PopChars(nullptr, ind);
 	else
-		CalculateSum += GetSum(&Buf[Index], ind);
+	{
+		//CalculateSum += GetSum(&Buf[Index], ind);
+#if EmbedXrpc_CheckSumValid==1
+		AppendSumToCalculateSum(GetSum(&Buf[Index], ind));
+#endif
+	}
 	Index += ind;
 }
 uint8_t SerializationManager::GetArrayLenFromSerializationManager(uint32_t* arrayLen)
@@ -653,7 +662,12 @@ void SerializationManager::RemoveArrayLenFromSerializationManager()
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->PopChars(nullptr, ind);
 	else
-		CalculateSum += GetSum(&Buf[Index], ind);
+	{
+		//CalculateSum += GetSum(&Buf[Index], ind);
+#if EmbedXrpc_CheckSumValid==1
+		AppendSumToCalculateSum(GetSum(&Buf[Index], ind));
+#endif
+	}
 	Index += ind;
 }
 uint8_t SerializationManager::GetArrayElementFlag()
@@ -668,7 +682,12 @@ void SerializationManager::RemoveArrayElementFlagFromSerializationManager()
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->GetChar(nullptr);
 	else
-		CalculateSum += GetSum(&Buf[Index], 1);
+	{
+		//CalculateSum += GetSum(&Buf[Index], 1);
+#if EmbedXrpc_CheckSumValid==1
+		AppendSumToCalculateSum(GetSum(&Buf[Index], 1));
+#endif
+	}
 	Index++;
 }
 void SerializationManager::RemoveEndFlagFromSerializationManager()
@@ -676,7 +695,12 @@ void SerializationManager::RemoveEndFlagFromSerializationManager()
 	if (BlockBufferProvider != nullptr)
 		BlockBufferProvider->GetChar(nullptr);
 	else
-		CalculateSum += GetSum(&Buf[Index], 1);
+	{
+		//CalculateSum += GetSum(&Buf[Index], 1);
+#if EmbedXrpc_CheckSumValid==1
+		AppendSumToCalculateSum(GetSum(&Buf[Index], 1));
+#endif
+	}
 	Index++;
 }
 void SerializationManager::Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber)

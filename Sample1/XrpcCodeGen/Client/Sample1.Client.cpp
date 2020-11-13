@@ -55,13 +55,14 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 {
 #if  EmbedXrpc_UseRingBufferWhenReceiving==1
 sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;
-sm.SetCalculateSum(0);
-sm.SetReferenceSum(recData.CheckSum);
 #else
 sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;
 sm.Reset();
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
+#endif
+#if  EmbedXrpc_CheckSumValid==1
+sm.SetCalculateSum(0);
 sm.SetReferenceSum(recData.CheckSum);
 #endif
 Inter_Add_Return_Deserialize(sm,&reqresp);
@@ -133,13 +134,14 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 {
 #if  EmbedXrpc_UseRingBufferWhenReceiving==1
 sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;
-sm.SetCalculateSum(0);
-sm.SetReferenceSum(recData.CheckSum);
 #else
 sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;
 sm.Reset();
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
+#endif
+#if  EmbedXrpc_CheckSumValid==1
+sm.SetCalculateSum(0);
 sm.SetReferenceSum(recData.CheckSum);
 #endif
 Inter_NoArg_Return_Deserialize(sm,&reqresp);
