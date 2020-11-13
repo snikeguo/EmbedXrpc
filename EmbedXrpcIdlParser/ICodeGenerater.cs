@@ -2,6 +2,7 @@
 using CSScriptLibrary;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -217,7 +218,7 @@ namespace EmbedXrpcIdlParser
         public List<TargetDelegate> TargetDelegates { get; set; } = new List<TargetDelegate>();
  
         public GenerationOption GenerationOption = null;
-
+        public int ServiceId { get; set; }
         public EnumType_TargetType GetTargetEnum(string name)
         {
             foreach (var e in TargetEnums)
@@ -387,6 +388,21 @@ namespace EmbedXrpcIdlParser
                     Enum_TargetField enumField = new Enum_TargetField();
                     enumField.FieldName = field.Name;
                     enumField.FieldNumberAttr = FieldNumberAttr;
+                    //有可能还没有把该枚举类型添加到集合里,所以要添加一下
+                    if(fileIdlInfo.GetTargetEnum(field.FieldType.Name)==null)
+                    {
+                        Debug.Assert(false);
+                        var vs = field.FieldType.GetEnumValues();
+                        EnumType_TargetType te = new EnumType_TargetType();
+                        te.TypeName = field.FieldType.Name;//类型名称
+                        te.NumberType = ClrBaseValueTypeToTargetType_t(field.FieldType.GetEnumUnderlyingType());
+                        foreach (var vsv in vs)
+                        {
+                            te.KeyValue.Add(field.FieldType.GetEnumName(vsv), Convert.ToInt32(vsv));
+                        }
+                        fileIdlInfo.TargetEnums.Add(te);
+                    }
+                    //添加完毕
                     enumField.TargetType = fileIdlInfo.GetTargetEnum(field.FieldType.Name);
                     targetStruct.TargetFields.Add(enumField);
 
@@ -465,6 +481,21 @@ namespace EmbedXrpcIdlParser
                     Enum_TargetField enumField = new Enum_TargetField();
                     enumField.FieldName = parameter.Name;
                     enumField.FieldNumberAttr = FieldNumberAttr;
+                    //有可能还没有把该枚举类型添加到集合里,所以要添加一下
+                    if (fileIdlInfo.GetTargetEnum(parameter.ParameterType.Name) == null)
+                    {
+                        Debug.Assert(false);
+                        var vs = parameter.ParameterType.GetEnumValues();
+                        EnumType_TargetType te = new EnumType_TargetType();
+                        te.TypeName = parameter.ParameterType.Name;//类型名称
+                        te.NumberType = ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetEnumUnderlyingType());
+                        foreach (var vsv in vs)
+                        {
+                            te.KeyValue.Add(parameter.ParameterType.GetEnumName(vsv), Convert.ToInt32(vsv));
+                        }
+                        fileIdlInfo.TargetEnums.Add(te);
+                    }
+                    //添加完毕
                     enumField.TargetType = fileIdlInfo.GetTargetEnum(parameter.ParameterType.Name);
                     targetStruct.TargetFields.Add(enumField);
 
@@ -485,6 +516,7 @@ namespace EmbedXrpcIdlParser
                             ObjectType_TargetType ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.GetElementType().Name);
                             if (ottt == null)
                             {
+                                //元素的每个对象都是struct 所以要按照struct去parse
                                 StructTypeParse(parameter.ParameterType.GetElementType(), fileIdlInfo);//如果list中没有targetstruct 那就去parse
                             }
                             ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.GetElementType().Name);
@@ -521,6 +553,256 @@ namespace EmbedXrpcIdlParser
             }
             
         }
+
+        public void GetTargetEnum(string name,out EnumType_TargetType ettt,out FileIdlInfo fileIdlInfo)
+        {
+            ettt = null;
+            fileIdlInfo = null;
+            foreach (var pf in ParsedFiles)
+            {
+                var ettt_temp = pf.GetTargetEnum(name);
+                if (ettt_temp != null)
+                {
+                    ettt = ettt_temp;
+                    if (fileIdlInfo != null)
+                        fileIdlInfo = pf;
+                }
+            }
+            //throw new NotSupportedException();
+        }
+        public void GetTargetArray(string typeName,out ArrayType_TargetType attt,out FileIdlInfo fileIdlInfo)
+        {
+            attt = null;
+            fileIdlInfo = null;
+            foreach (var pf in ParsedFiles)
+            {
+                var attt_temp = pf.GetTargetArray(typeName);
+                if (attt_temp != null)
+                {
+                    attt = attt_temp;
+                    if (fileIdlInfo != null)
+                        fileIdlInfo = pf;
+                }
+            }
+            //throw new NotSupportedException();
+
+        }
+        public void GetTargetStruct(string typeName,out ObjectType_TargetType ottt,out FileIdlInfo fileIdlInfo)
+        {
+            ottt = null;
+            fileIdlInfo = null;
+            foreach (var pf in ParsedFiles)
+            {
+                var ottt_temp = pf.GetTargetStruct(typeName);
+                if (ottt_temp != null)
+                {
+                    ottt = ottt_temp;
+                    if (fileIdlInfo != null)
+                        fileIdlInfo = pf;
+                }
+            }
+            //throw new NotSupportedException();
+        }
+        public FileIdlInfo GetFileIdlInfo(string fileName)
+        {
+            foreach (var fil in ParsedFiles)
+            {
+                if(fil.FileName==fileName)
+                {
+                    return fil;
+                }
+            }
+            throw new NotSupportedException();
+        }
+        public void Parse2(string file)
+        {
+            CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
+            var eva = CSScript.Evaluator;
+            Assembly assembly = CSScript.Evaluator.CompileCode(File.ReadAllText(file));
+            var types = assembly.GetTypes();
+
+            //本次循环用来添加ParsedFiles集合以及获取每个FileIdlInfo的GenerationOption参数
+            foreach (var type in types)
+            {
+                var filenameattr = type.GetCustomAttribute<FileNameAttribute>();
+                if (filenameattr == null)
+                {
+                    throw new Exception($"{filenameattr} you must add FileNameAttribute into every struct!");
+                }
+                if (filenameattr.FileNameString != file)
+                {
+                    //Parse(filename.FileNameString);
+                    throw new Exception("you must add file name attribute!");
+                    //continue;
+                }
+                if (type.GetInterface("IOptionProcess") != null)
+                {
+                    var process = assembly.CreateInstance(type.FullName) as IOptionProcess;
+                    FileIdlInfo fileIdlInfo = null;
+                    foreach (var fii in ParsedFiles)
+                    {
+                        if(fii.FileName== filenameattr.FileNameString)
+                        {
+                            fileIdlInfo = fii;
+                        }
+                    }
+                    if(fileIdlInfo==null)
+                    {
+                        fileIdlInfo = new FileIdlInfo();
+                        ParsedFiles.Add(fileIdlInfo);
+                    }
+                    fileIdlInfo.GenerationOption = process.Process();
+                    fileIdlInfo.ServiceId = fileIdlInfo.GenerationOption.ServiceIdStartNumber;
+                    //fileIdlInfo.ServiceId = fileIdlInfo.GenerationOption.ServiceIdStartNumber;
+                }
+            }
+
+            foreach (var type in types)
+            {
+                var filename = type.GetCustomAttribute<FileNameAttribute>().FileNameString;
+                var fileIdlInfo = GetFileIdlInfo(filename);
+                if (type.IsValueType == true)
+                {
+                    if (type.IsEnum == true)
+                    {
+                        var vs = type.GetEnumValues();
+                        EnumType_TargetType te = new EnumType_TargetType();
+                        te.TypeName = type.Name;//类型名称
+                        te.NumberType = ClrBaseValueTypeToTargetType_t(type.GetEnumUnderlyingType());
+                        foreach (var vsv in vs)
+                        {
+                            te.KeyValue.Add(type.GetEnumName(vsv), Convert.ToInt32(vsv));
+                        }
+                        fileIdlInfo.TargetEnums.Add(te);
+                        //Console.WriteLine(te.ToString());
+                    }
+                    else
+                    {
+                        StructTypeParse(type, fileIdlInfo);
+                    }
+
+                }
+                else if (type.IsInterface == true)
+                {
+                    TargetInterface targetInterface = new TargetInterface();
+                    targetInterface.Name = type.Name;
+
+                    var services = type.GetMembers();
+                    foreach (var service in services)
+                    {
+                        TargetService targetService = new TargetService();
+                        var serviceIdAttr = service.GetCustomAttribute<ServiceIdAttribute>();
+                        targetService.ServiceId = serviceIdAttr == null ? fileIdlInfo.ServiceId : serviceIdAttr.ServiceId;
+                        fileIdlInfo.ServiceId++;
+                        var mt = (service as MethodInfo);
+                        Type rt = mt.ReturnType;
+                        targetService.ServiceName = mt.Name;
+                        targetService.FullName = type.Name + "_" + targetService.ServiceName;
+
+                        ObjectType_TargetType returnStructType = new ObjectType_TargetType();
+                        returnStructType.TypeName = type.Name + "_" + targetService.ServiceName + "_Return";
+
+                        Enum_TargetField RequestResponseStatefield = new Enum_TargetField();
+                        var ettt = new EnumType_TargetType();
+                        ettt.TypeName = "RequestResponseState";
+                        ettt.NumberType = TargetType_t.TYPE_UINT8;
+                        //ettt.KeyValue这里在runtime中定义,不需要加
+                        RequestResponseStatefield.TargetType = ettt;
+                        RequestResponseStatefield.FieldName = "State";
+                        RequestResponseStatefield.FieldNumberAttr = new FieldNumberAttribute(1);//state 的Field Number为1
+                        returnStructType.TargetFields.Add(RequestResponseStatefield);
+
+                        if (rt.Name != "Void")
+                        {
+                            //返回值有可能是枚举、基本数据、结构体
+                            //根据返回值判断
+                            //EnumType_TargetType rt_ettt = fileIdlInfo.GetTargetEnum(rt.Name);
+                            //ObjectType_TargetType rt_ottt = fileIdlInfo.GetTargetStruct(rt.Name);
+                            if (rt.IsEnum == true)
+                            {
+                                //说明返回值是枚举
+                                //new 一个enum 类型
+                                var vs = type.GetEnumValues();
+                                EnumType_TargetType te = new EnumType_TargetType();
+                                te.TypeName = type.Name;//类型名称
+                                te.NumberType = ClrBaseValueTypeToTargetType_t(type.GetEnumUnderlyingType());
+                                foreach (var vsv in vs)
+                                {
+                                    te.KeyValue.Add(type.GetEnumName(vsv), Convert.ToInt32(vsv));
+                                }
+                                
+
+                                Enum_TargetField retunValueFiled = new Enum_TargetField();
+                                retunValueFiled.TargetType = te;
+                                retunValueFiled.FieldName = "ReturnValue";
+                                retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
+                                returnStructType.TargetFields.Add(retunValueFiled);
+                            }
+                            else if (IsNumberType(rt) == true)
+                            {
+                                Base_TargetField retunValueFiled = new Base_TargetField();
+                                retunValueFiled.TargetType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(rt));
+                                retunValueFiled.FieldName = "ReturnValue";
+                                retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
+                                returnStructType.TargetFields.Add(retunValueFiled);
+                            }
+                            else//一定是struct 不可能是数组，因为不支持返回值是数组的。
+                            {
+                                Object_TargetField objectFiled = new Object_TargetField();
+                                objectFiled.TargetType = rt_ottt;
+                                objectFiled.FieldName = "ReturnValue";
+                                objectFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
+                                returnStructType.TargetFields.Add(objectFiled);
+                            }
+                            
+                        }
+
+                        //处理函数参数
+                        ObjectType_TargetType ParameterStructType = new ObjectType_TargetType();
+                        ParameterStructType.TypeName = type.Name + "_" + targetService.ServiceName + "_Parameter";
+                        var pars = mt.GetParameters();
+                        ParameterTypeParse(pars, ParameterStructType, fileIdlInfo);
+                        targetService.ReturnStructType = returnStructType;
+                        targetService.ParameterStructType = ParameterStructType;
+                        targetInterface.Services.Add(targetService);
+                    }
+                    //Console.WriteLine(targetInterface.ToString());
+                    fileIdlInfo.TargetInterfaces.Add(targetInterface);
+                }
+                else if (type.BaseType.Name == "MulticastDelegate")//如果这个类型是委托。
+                {
+                    var delms = type.GetMembers();
+                    MethodInfo invokemi = null;
+                    foreach (var delm in delms)
+                    {
+                        if (delm.Name == "Invoke")
+                        {
+                            invokemi = delm as MethodInfo;
+                            break;
+                        }
+                    }
+                    if (invokemi == null)
+                    {
+                        throw new NullReferenceException($"{type.Name}:invokemi is null");
+                    }
+                    var serviceIdAttr = type.GetCustomAttribute<ServiceIdAttribute>();
+                    TargetDelegate targetDelegate = new TargetDelegate();
+                    targetDelegate.ServiceId = serviceIdAttr == null ? ServiceId : serviceIdAttr.ServiceId;
+                    ServiceId++;
+                    targetDelegate.MethodName = type.Name;
+
+                    //处理函数参数
+                    ObjectType_TargetType ParameterStructType = new ObjectType_TargetType();
+                    ParameterStructType.TypeName = targetDelegate.MethodName + "_Parameter";
+
+                    var pars = invokemi.GetParameters();
+                    ParameterTypeParse(pars, ParameterStructType, fileIdlInfo);
+                    targetDelegate.ParameterStructType = ParameterStructType;
+                    fileIdlInfo.TargetDelegates.Add(targetDelegate);
+                    //Console.WriteLine(targetDelegate.ToString());
+                }
+            }
+        }
         public void Parse(string file)
         {
             FileIdlInfo fileIdlInfo = null;
@@ -550,8 +832,9 @@ namespace EmbedXrpcIdlParser
                 }
                 if (filename.FileNameString != file)
                 {
-                    Parse(filename.FileNameString);
-                    continue;
+                    //Parse(filename.FileNameString);
+                    throw new Exception("you must add file name attribute!");
+                    //continue;
                 }
                 if (type.GetInterface("IOptionProcess") != null)
                 {
