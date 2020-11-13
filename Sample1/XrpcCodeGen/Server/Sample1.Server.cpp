@@ -24,10 +24,8 @@ void Inter_AddService::Invoke(SerializationManager &recManager, SerializationMan
 {
 static Inter_Add_Parameter request;
 Inter_Add_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_UseRingBufferWhenReceiving==1 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());
-#elif EmbedXrpc_UseRingBufferWhenReceiving==0 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
+#if EmbedXrpc_CheckSumValid==1
+EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
 #endif
 Add(request.a,request.b,request.dataLen,request.data);
 Inter_Add_Parameter_FreeData(&request);
@@ -39,10 +37,8 @@ void Inter_NoArgService::Invoke(SerializationManager &recManager, SerializationM
 {
 static Inter_NoArg_Parameter request;
 Inter_NoArg_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_UseRingBufferWhenReceiving==1 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());
-#elif EmbedXrpc_UseRingBufferWhenReceiving==0 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
+#if EmbedXrpc_CheckSumValid==1
+EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
 #endif
 NoArg();
 Inter_NoArg_Parameter_FreeData(&request);
@@ -54,10 +50,8 @@ void Inter_NoReturnService::Invoke(SerializationManager &recManager, Serializati
 {
 static Inter_NoReturn_Parameter request;
 Inter_NoReturn_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_UseRingBufferWhenReceiving==1 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());
-#elif EmbedXrpc_UseRingBufferWhenReceiving==0 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
+#if EmbedXrpc_CheckSumValid==1
+EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
 #endif
 NoReturn(request.a);
 Inter_NoReturn_Parameter_FreeData(&request);
@@ -67,10 +61,8 @@ void Inter_NoArgAndReturnService::Invoke(SerializationManager &recManager, Seria
 {
 static Inter_NoArgAndReturn_Parameter request;
 Inter_NoArgAndReturn_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_UseRingBufferWhenReceiving==1 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());
-#elif EmbedXrpc_UseRingBufferWhenReceiving==0 && EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);
+#if EmbedXrpc_CheckSumValid==1
+EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
 #endif
 NoArgAndReturn();
 Inter_NoArgAndReturn_Parameter_FreeData(&request);

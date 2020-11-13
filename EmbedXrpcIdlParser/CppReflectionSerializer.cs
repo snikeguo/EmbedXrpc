@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpcIdlParser
 { 
-    public class CppNeedRuntimeSerializer : ICppSerializable
+    public class CppReflectionSerializer : ICppSerializable
     {
         static List<ITargetType> GeneratedTypes = new List<ITargetType>();
         private StringBuilder EmitIFieldsArray(string name, IList<string> FieldDesc)

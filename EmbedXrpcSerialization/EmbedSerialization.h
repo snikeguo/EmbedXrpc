@@ -166,8 +166,52 @@ public:
 	uint8_t* Buf = nullptr;
 	uint32_t BufferLen = 0;
 	BlockRingBufferProvider* BlockBufferProvider = nullptr;
-	uint32_t ReferenceSum = 0;
-	uint32_t CalculateSum = 0;
+#if EmbedXrpc_CheckSumValid==1
+	void SetReferenceSum(uint32_t sum)
+	{
+		if (BlockBufferProvider != nullptr)
+		{
+			BlockBufferProvider->SetReferenceSum(sum);
+		}
+		else
+		{
+			ReferenceSum = sum;
+		}
+	}
+	void SetCalculateSum(uint32_t sum)
+	{
+		if (BlockBufferProvider != nullptr)
+		{
+			BlockBufferProvider->SetCalculateSum(sum);
+		}
+		else
+		{
+			CalculateSum = sum;
+		}
+	}
+	uint32_t GetReferenceSum()
+	{
+		if (BlockBufferProvider != nullptr)
+		{
+			return BlockBufferProvider->GetReferenceSum();
+		}
+		else
+		{
+			return ReferenceSum;
+		}
+	}
+	uint32_t GetCalculateSum()
+	{
+		if (BlockBufferProvider != nullptr)
+		{
+			return BlockBufferProvider->GetCalculateSum();
+		}
+		else
+		{
+			return CalculateSum;
+		}
+	}
+#endif
 	bool IsEnableMataDataEncode = false;
 	void SerializeKey(uint32_t  FieldNumber, Type_t   Field);
 	void SerializeLen(uint32_t  Len);
@@ -193,6 +237,25 @@ private:
 	void NoMataData_SerializeSubField(const ObjectType* objectType, void* objectData);
 	bool DeserializeSubField(const ObjectType* objectType, void* objectPoint);
 	bool NoMataData_DeserializeSubField(const ObjectType* objectType, void* objectPoint);
+#if EmbedXrpc_CheckSumValid==1
+	uint32_t ReferenceSum = 0;
+	uint32_t CalculateSum = 0;
+#endif
 };
+#if EmbedXrpc_CheckSumValid==1
+#define SerializationManagerAppendDataSum(sm,sum)    sm.SetCalculateSum(sm.GetCalculateSum()+sum)
+#else
+#define SerializationManagerAppendDataSum(sm,sum)
+#endif
 
+inline void DeserializeField(uint8_t* field_ptr, SerializationManager& sm, uint16_t field_width)
+{
+#if EmbedXrpc_UseRingBufferWhenReceiving==1 
+	sm.BlockBufferProvider->PopChars(field_ptr, (uint16_t)field_width);
+#else 
+	Memcpy(field_ptr, &sm.Buf[sm.Index], field_width);
+	SerializationManagerAppendDataSum(sm, GetSum(&sm.Buf[sm.Index], field_width));
+	sm.Index += field_width;
+#endif 
+}
 #endif

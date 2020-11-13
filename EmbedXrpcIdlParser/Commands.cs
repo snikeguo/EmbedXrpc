@@ -33,13 +33,21 @@ namespace EmbedXrpcIdlParser
             FileInfo fi = new FileInfo(generater.InputFile);
             idlInfo.Parse(fi.Name);//这里不写generater.InputFile是因为 generater.InputFile有可能是这样的 .\\myidl.cs 而我们内部需要的是myidl.cs 所以在外面通过fileinfo做下处理
             GenType gt = EmbedXrpcIdlParser.GenType.All;
-            if(generater.GenType.ToLower()=="client")
+            if (generater.GenType.ToLower() == "client")
             {
                 gt = EmbedXrpcIdlParser.GenType.Client;
             }
-            else if(generater.GenType.ToLower()=="server")
+            else if (generater.GenType.ToLower() == "server")
             {
                 gt = EmbedXrpcIdlParser.GenType.Server;
+            }
+            else if (generater.GenType.ToLower() == "all")
+            {
+                gt = EmbedXrpcIdlParser.GenType.All;
+            }
+            else
+            {
+                throw new NotSupportedException("NotSupported the generater type! please use -g=client or -g=server or -g=all");
             }
             var end = generater.OutputPath[generater.OutputPath.Length - 1];
             if (end!='\\'&&end!='/')
@@ -51,7 +59,7 @@ namespace EmbedXrpcIdlParser
             {
                 Directory.CreateDirectory(generater.OutputPath);
             }
-            if(generater.GenLanguageType.ToLower()=="cpp-rt")
+            if(generater.GenLanguageType.ToLower()=="cpp-ref")
             {
                 CppCodeGenerater cpp = new CppCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
@@ -67,7 +75,7 @@ namespace EmbedXrpcIdlParser
                 }
                 
             }
-            else if (generater.GenLanguageType.ToLower() == "cpp")
+            else if (generater.GenLanguageType.ToLower() == "cpp-nano")
             {
                 CppCodeGenerater cpp = new CppCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
@@ -96,10 +104,12 @@ namespace EmbedXrpcIdlParser
                         //IsEnableMataDataEncode = generater.IsEnableMataDataEncode
                     };
                     cs.CodeGen(parameter);
-                }
-                
+                }   
             }
-
+            else
+            {
+                throw new NotSupportedException("NotSupported the language type!please use -l=cpp-ref or -l=cpp-nano or -l=cs");
+            }
             Console.WriteLine("complete!");
 
         }

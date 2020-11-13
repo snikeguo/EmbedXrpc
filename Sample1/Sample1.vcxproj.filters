@@ -77,9 +77,6 @@
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.Port.h">
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.h">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h">
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>

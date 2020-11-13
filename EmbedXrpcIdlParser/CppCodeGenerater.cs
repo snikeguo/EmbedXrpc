@@ -53,12 +53,12 @@ namespace EmbedXrpcIdlParser
             {
                 if(parameter.IsRuntimeVersion==true)
                 {
-                    embedXrpcSerializationGenerator = new CppNeedRuntimeSerializer();
+                    embedXrpcSerializationGenerator = new CppReflectionSerializer();
                 }
                 else
                 {
                     //throw new NotImplementedException();
-                    embedXrpcSerializationGenerator = new CppNoRuntimeSerializer();
+                    embedXrpcSerializationGenerator = new CppNanoSerializer();
                 }
             }
             Console.WriteLine($"cpp code gen:   {parameter.FileIdlInfo.FileName}");
@@ -388,10 +388,8 @@ namespace EmbedXrpcIdlParser
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
                 //ClientCsw.WriteLine($"recManager.Deserialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
                 ClientCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
-                ClientCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1 && EmbedXrpc_CheckSumValid==1");
-                ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
-                ClientCsw.WriteLine("#elif EmbedXrpc_UseRingBufferWhenReceiving==0 && EmbedXrpc_CheckSumValid==1");
-                ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);");
+                ClientCsw.WriteLine("#if EmbedXrpc_CheckSumValid==1");
+                ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());");
                 ClientCsw.WriteLine("#endif");
                 ClientCsw.Write($"{targetDelegate.MethodName}(");
                 for (int i = 0; i < targetDelegate.ParameterStructType.TargetFields.Count; i++)
@@ -678,18 +676,23 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine("{");
                         ClientCsw.WriteLine("#if  EmbedXrpc_UseRingBufferWhenReceiving==1");
                         ClientCsw.WriteLine("sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;");
-                        ClientCsw.WriteLine("sm.BlockBufferProvider->SetCalculateSum(0);");
-                        ClientCsw.WriteLine("sm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);");
                         ClientCsw.WriteLine("#else");
                         ClientCsw.WriteLine("sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;");
                         ClientCsw.WriteLine("sm.Reset();");
                         ClientCsw.WriteLine("sm.BufferLen = recData.DataLen;");
                         ClientCsw.WriteLine("sm.Buf = recData.Data;");
-                        ClientCsw.WriteLine("sm.ReferenceSum = recData.CheckSum;");
+                        ClientCsw.WriteLine("#endif");
+                        ClientCsw.WriteLine("#if  EmbedXrpc_CheckSumValid==1");
+                        ClientCsw.WriteLine("sm.SetCalculateSum(0);");
+                        ClientCsw.WriteLine("sm.SetReferenceSum(recData.CheckSum);");
                         ClientCsw.WriteLine("#endif");
                         ClientCsw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(sm,&reqresp);");
+                        ClientCsw.WriteLine("#if  EmbedXrpc_CheckSumValid==1");
+                        ClientCsw.WriteLine("EmbedSerializationAssert(sm.GetReferenceSum()==sm.GetCalculateSum());");
+                        ClientCsw.WriteLine("#endif");
                         ClientCsw.WriteLine("}");
 
+                        ClientCsw.WriteLine("#if  EmbedXrpc_UseRingBufferWhenReceiving==0");
                         ClientCsw.WriteLine("if(waitstate != RequestResponseState::ResponseState_Timeout)");
                         ClientCsw.WriteLine("{");
 
@@ -699,6 +702,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine("}");
 
                         ClientCsw.WriteLine("}");
+                        ClientCsw.WriteLine("#endif");
 
                         ClientCsw.WriteLine("reqresp.State=waitstate;");
                     }
@@ -763,10 +767,8 @@ namespace EmbedXrpcIdlParser
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Deserialize(recManager,&request);");
                     //ServerCsw.WriteLine($"recManager.Deserialize(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");
                     ServerCsw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
-                    ServerCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1 && EmbedXrpc_CheckSumValid==1");
-                    ServerCsw.WriteLine($"EmbedSerializationAssert(recManager.BlockBufferProvider->GetReferenceSum()==recManager.BlockBufferProvider->GetCalculateSum());");
-                    ServerCsw.WriteLine("#elif EmbedXrpc_UseRingBufferWhenReceiving==0 && EmbedXrpc_CheckSumValid==1");
-                    ServerCsw.WriteLine($"EmbedSerializationAssert(recManager.ReferenceSum==recManager.CalculateSum);");
+                    ServerCsw.WriteLine("#if EmbedXrpc_CheckSumValid==1");
+                    ServerCsw.WriteLine($"EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());");
                     ServerCsw.WriteLine("#endif");
                     //if (service.ReturnValue != null)
                     //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");

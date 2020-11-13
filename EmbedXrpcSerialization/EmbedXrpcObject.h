@@ -351,12 +351,12 @@ public:
 							rsm.BufferLen = recData.DataLen;
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 							rsm.BlockBufferProvider=obj->DelegateBlockBufferProvider;
-							rsm.BlockBufferProvider->SetCalculateSum(0);
-							rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
 #else
 							rsm.Buf = recData.Data;
-							rsm.CalculateSum = 0;
-							rsm.ReferenceSum = recData.CheckSum;
+#endif
+#if EmbedXrpc_CheckSumValid==1
+							rsm.SetCalculateSum(0);
+							rsm.SetReferenceSum(recData.CheckSum);
 #endif
 							MessageMaps[i].Delegate->Invoke(rsm);
 							isContain = true;
@@ -414,12 +414,12 @@ public:
 						rsm.BufferLen = recData.DataLen;
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 						rsm.BlockBufferProvider = obj->RequestBlockBufferProvider;
-						rsm.BlockBufferProvider->SetCalculateSum(0);
-						rsm.BlockBufferProvider->SetReferenceSum(recData.CheckSum);
 #else
 						rsm.Buf = recData.Data;
-						rsm.CalculateSum = 0;
-						rsm.ReferenceSum = recData.CheckSum;
+#endif
+#if EmbedXrpc_CheckSumValid==1
+						rsm.SetCalculateSum(0);
+						rsm.SetReferenceSum(recData.CheckSum);
 #endif
 						EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
 						sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;

@@ -35,7 +35,6 @@
     <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.Port.h" />
-    <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpc.Port.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcObject.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h" />

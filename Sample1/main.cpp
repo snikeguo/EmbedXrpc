@@ -46,7 +46,7 @@ void ClientThread()
 			printf("%d+%d=%d,%s\n", a,b,sum.ReturnValue.Sum,sum.ReturnValue.data);
 		}
 		Client.Free_Add(&sum);
-		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 }
 //--------------------------------------------------------------------
@@ -73,7 +73,7 @@ EmbedXrpcObject ServerRpc(ServerSend,
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;

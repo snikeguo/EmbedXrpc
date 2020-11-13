@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpcIdlParser
 {
-    public class CppNoRuntimeSerializer : ICppSerializable
+    public class CppNanoSerializer : ICppSerializable
     {
         public void EmitSerializeMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
         {
@@ -36,15 +36,13 @@ namespace EmbedXrpcIdlParser
 
             if(IsFirstRun==true)
             {
-                hfilewriter.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
-                hfilewriter.WriteLine("#error  Unsupported  RingBuffer Mode!");
-                hfilewriter.WriteLine("#endif");
+                
+                //cfilewriter.WriteLine("#if EmbedXrpc_CheckSumValid==1");
+                //cfilewriter.WriteLine("#define SerializationManagerAppendDataSum(sm,sum)    sm.SetCalculateSum(sm.GetCalculateSum()+sum)");
+                //cfilewriter.WriteLine("#else");
+                //cfilewriter.WriteLine("#define SerializationManagerAppendDataSum(sm,sum)");
+                //cfilewriter.WriteLine("#endif");
 
-                cfilewriter.WriteLine("#if EmbedXrpc_CheckSumValid==1");
-                cfilewriter.WriteLine("#define SerializationManagerAppendDataSum(sm,sum)    sm.CalculateSum+=sum");
-                cfilewriter.WriteLine("#else");
-                cfilewriter.WriteLine("#define SerializationManagerAppendDataSum(sm,sum)");
-                cfilewriter.WriteLine("#endif");
                 IsFirstRun = false;
             }
             
@@ -68,10 +66,7 @@ namespace EmbedXrpcIdlParser
                     SerializeCodeSb.AppendLine($"Memcpy(&sm.Buf[sm.Index],&obj->{field.FieldName},sizeof(obj->{field.FieldName}));");
                     SerializeCodeSb.AppendLine($"sm.Index+=sizeof(obj->{field.FieldName});\r\n");
 
-                    DeserializeCodeSb.AppendLine($"Memcpy(&obj->{field.FieldName},&sm.Buf[sm.Index],sizeof(obj->{field.FieldName}));");
-                    DeserializeCodeSb.AppendLine($"SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof(obj->{field.FieldName})));");
-                    DeserializeCodeSb.AppendLine($"sm.Index+=sizeof(obj->{field.FieldName});\r\n");
-                    
+                    DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof(obj->{field.FieldName}));");                    
 
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
@@ -80,9 +75,8 @@ namespace EmbedXrpcIdlParser
                     SerializeCodeSb.AppendLine($"Memcpy(&sm.Buf[sm.Index],&obj->{field.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
                     SerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
 
-                    DeserializeCodeSb.AppendLine($"Memcpy(&obj->{field.FieldName},&sm.Buf[sm.Index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
-                    DeserializeCodeSb.AppendLine($"SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]})));");
-                    DeserializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
+                    DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
+                    
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
@@ -119,9 +113,8 @@ namespace EmbedXrpcIdlParser
                         SerializeCodeSb.AppendLine($"Memcpy(&sm.Buf[sm.Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({attt.ElementType.TypeName}));");
                         SerializeCodeSb.AppendLine($"sm.Index+=sizeof({attt.ElementType.TypeName});\r\n");
 
-                        DeserializeCodeSb.AppendLine($"Memcpy(&obj->{field.FieldName}[{field.FieldName}_index],&sm.Buf[sm.Index],sizeof({attt.ElementType.TypeName}));");
-                        DeserializeCodeSb.AppendLine($"SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof({attt.ElementType.TypeName})));");
-                        DeserializeCodeSb.AppendLine($"sm.Index+=sizeof({attt.ElementType.TypeName});\r\n");
+                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({attt.ElementType.TypeName}));");
+
                     }
                     else if (attt.ElementType.TargetType == TargetType_t.TYPE_ENUM)
                     {
@@ -129,9 +122,7 @@ namespace EmbedXrpcIdlParser
                         SerializeCodeSb.AppendLine($"Memcpy(&sm.Buf[sm.Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
                         SerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
 
-                        DeserializeCodeSb.AppendLine($"Memcpy(&obj->{field.FieldName}[{field.FieldName}_index],&sm.Buf[sm.Index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
-                        DeserializeCodeSb.AppendLine($"SerializationManagerAppendDataSum(sm,GetSum(&sm.Buf[sm.Index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]})));");
-                        DeserializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
+                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
                     }
                     else
                     {
