@@ -118,5 +118,6 @@
     <None Include="sample1.cs">
       <Filter>otherfiles</Filter>
     </None>
+    <None Include="readme.md" />
   </ItemGroup>
 </Project>

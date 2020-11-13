@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="cmd.bat" />
+    <None Include="readme.md" />
     <None Include="sample1.cs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
