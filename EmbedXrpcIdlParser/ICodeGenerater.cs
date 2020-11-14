@@ -219,39 +219,6 @@ namespace EmbedXrpcIdlParser
  
         public GenerationOption GenerationOption = null;
         public int ServiceId { get; set; }
-        public EnumType_TargetType GetTargetEnum(string name)
-        {
-            foreach (var e in TargetEnums)
-            {
-                if (name == e.TypeName)
-                {
-                    return e;
-                }
-            }
-            return null;
-        }
-        public ArrayType_TargetType GetTargetArray(string typeName)
-        {
-            foreach (var e in TargetArrayTypes)
-            {
-                if (typeName == e.TypeName)
-                {
-                    return e;
-                }
-            }
-            return null;
-        }
-        public ObjectType_TargetType GetTargetStruct(string typeName)
-        {
-            foreach (var e in TargetStructs)
-            {
-                if (typeName == e.TypeName)
-                {
-                    return e;
-                }
-            }
-            return null;
-        }
     }
     public class IdlInfo
     {          
@@ -361,215 +328,7 @@ namespace EmbedXrpcIdlParser
             return false;
         }
         public List< FileIdlInfo> ParsedFiles { get; private set; } = new List< FileIdlInfo>();//已经被Parse过的file
-#if false
-        private void StructTypeParse(Type object_type, FileIdlInfo fileIdlInfo)
-        {
-            ObjectType_TargetType targetStruct = new ObjectType_TargetType();
-            targetStruct.TypeName = object_type.Name;
-            var fields = object_type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (var field in fields)
-            {
-                var FieldNumberAttr = field.GetCustomAttribute<FieldNumberAttribute>();
-                if (FieldNumberAttr == null)
-                {
-                    FieldNumberAttr = new FieldNumberAttribute(0);//如果没有fieldNumber说明用户并不打算使用TTLV编码
-                                                                  //throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");
-                }
-                if (IsNumberType(field.FieldType) == true)
-                {
-                    Base_TargetField targetfield = new Base_TargetField();
-                    targetfield.TargetType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(field.FieldType));
-                    targetfield.FieldName = field.Name;
-                    targetfield.FieldNumberAttr = FieldNumberAttr;
-                    targetStruct.TargetFields.Add(targetfield);
-                }
-                else if (IsEnumType(field.FieldType) == true)
-                {
-                    Enum_TargetField enumField = new Enum_TargetField();
-                    enumField.FieldName = field.Name;
-                    enumField.FieldNumberAttr = FieldNumberAttr;
-                    //有可能还没有把该枚举类型添加到集合里,所以要添加一下
-                    if(fileIdlInfo.GetTargetEnum(field.FieldType.Name)==null)
-                    {
-                        Debug.Assert(false);
-                        var vs = field.FieldType.GetEnumValues();
-                        EnumType_TargetType te = new EnumType_TargetType();
-                        te.TypeName = field.FieldType.Name;//类型名称
-                        te.NumberType = ClrBaseValueTypeToTargetType_t(field.FieldType.GetEnumUnderlyingType());
-                        foreach (var vsv in vs)
-                        {
-                            te.KeyValue.Add(field.FieldType.GetEnumName(vsv), Convert.ToInt32(vsv));
-                        }
-                        fileIdlInfo.TargetEnums.Add(te);
-                    }
-                    //添加完毕
-                    enumField.TargetType = fileIdlInfo.GetTargetEnum(field.FieldType.Name);
-                    targetStruct.TargetFields.Add(enumField);
 
-                }
-                else if (field.FieldType.IsArray == true)
-                {
-                    ArrayType_TargetType attt = fileIdlInfo.GetTargetArray(field.FieldType.Name);
-                    if (attt == null)
-                    {
-                        attt = new ArrayType_TargetType();
-                        attt.TypeName = field.FieldType.Name;
-                        if(IsNumberType(field.FieldType.GetElementType()) == true)
-                        {
-                            attt.ElementType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(field.FieldType.GetElementType()));
-                        }
-                        else
-                        {
-                            ObjectType_TargetType ottt = fileIdlInfo.GetTargetStruct(field.FieldType.GetElementType().Name);
-                            if (ottt == null)
-                            {
-                                StructTypeParse(field.FieldType.GetElementType(), fileIdlInfo);//如果list中没有targetstruct 那就去parse
-                            }
-                            ottt = fileIdlInfo.GetTargetStruct(field.FieldType.GetElementType().Name);
-                            attt.ElementType = ottt;
-                        }
-                        fileIdlInfo.TargetArrayTypes.Add(attt);
-                    }
-                    Array_TargetField arrayField = new Array_TargetField();
-                    arrayField.TargetType = attt;
-                    arrayField.FieldNumberAttr = FieldNumberAttr;
-                    arrayField.FieldName = field.Name;
-                    var arratt = field.GetCustomAttribute<MaxCountAttribute>();
-                    arrayField.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true, MaxCount = 1, LenFieldName = "" } : arratt;
-                    arrayField.ArrayLenField = targetStruct.GetArrayLenField(arrayField);
-                    targetStruct.TargetFields.Add(arrayField);
-                }
-                else if (!field.FieldType.IsPrimitive && !field.FieldType.IsEnum && field.FieldType.IsValueType)//struct
-                {
-                    ObjectType_TargetType ottt = fileIdlInfo.GetTargetStruct(field.FieldType.Name);
-                    if (ottt == null)
-                    {
-                        StructTypeParse(field.FieldType, fileIdlInfo);//如果list中没有targetstruct 那就去parse
-                    }
-                    ottt = fileIdlInfo.GetTargetStruct(field.FieldType.Name);
-                    Object_TargetField objectFiled = new Object_TargetField();
-                    objectFiled.TargetType = ottt;
-                    objectFiled.FieldName = field.Name;
-                    objectFiled.FieldNumberAttr = FieldNumberAttr;
-                    targetStruct.TargetFields.Add(objectFiled);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            fileIdlInfo.TargetStructs.Add(targetStruct);
-        }
-        private void ParameterTypeParse(ParameterInfo[]parameters,ObjectType_TargetType targetStruct, FileIdlInfo fileIdlInfo)
-        {
-            uint fieldNumber = 1;
-            foreach (var parameter in parameters)
-            {
-                var FieldNumberAttr = new FieldNumberAttribute(fieldNumber);//如果没有fieldNumber说明用户并不打算使用TTLV编码
-                                                                            //throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");
-                fieldNumber++;
-                if (IsNumberType(parameter.ParameterType) == true)
-                {
-                    Base_TargetField targetfield = new Base_TargetField();
-                    targetfield.TargetType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(parameter.ParameterType));
-                    targetfield.FieldName = parameter.Name;
-                    targetfield.FieldNumberAttr = FieldNumberAttr;
-                    targetStruct.TargetFields.Add(targetfield);
-                }
-                else if (IsEnumType(parameter.ParameterType) == true)
-                {
-                    Enum_TargetField enumField = new Enum_TargetField();
-                    enumField.FieldName = parameter.Name;
-                    enumField.FieldNumberAttr = FieldNumberAttr;
-                    //有可能还没有把该枚举类型添加到集合里,所以要添加一下
-                    if (fileIdlInfo.GetTargetEnum(parameter.ParameterType.Name) == null)
-                    {
-                        Debug.Assert(false);
-                        var vs = parameter.ParameterType.GetEnumValues();
-                        EnumType_TargetType te = new EnumType_TargetType();
-                        te.TypeName = parameter.ParameterType.Name;//类型名称
-                        te.NumberType = ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetEnumUnderlyingType());
-                        foreach (var vsv in vs)
-                        {
-                            te.KeyValue.Add(parameter.ParameterType.GetEnumName(vsv), Convert.ToInt32(vsv));
-                        }
-                        fileIdlInfo.TargetEnums.Add(te);
-                    }
-                    //添加完毕
-                    enumField.TargetType = fileIdlInfo.GetTargetEnum(parameter.ParameterType.Name);
-                    targetStruct.TargetFields.Add(enumField);
-
-                }
-                else if (parameter.ParameterType.IsArray == true)
-                {
-                    ArrayType_TargetType attt = fileIdlInfo.GetTargetArray(parameter.ParameterType.Name);
-                    if (attt == null)
-                    {
-                        attt = new ArrayType_TargetType();
-                        attt.TypeName = parameter.ParameterType.Name;
-                        if (IsNumberType(parameter.ParameterType.GetElementType()) == true)
-                        {
-                            attt.ElementType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetElementType()));
-                        }
-                        else
-                        {
-                            ObjectType_TargetType ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.GetElementType().Name);
-                            if (ottt == null)
-                            {
-                                //元素的每个对象都是struct 所以要按照struct去parse
-                                StructTypeParse(parameter.ParameterType.GetElementType(), fileIdlInfo);//如果list中没有targetstruct 那就去parse
-                            }
-                            ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.GetElementType().Name);
-                            attt.ElementType = ottt;
-                        }
-                    }
-                    Array_TargetField arrayField = new Array_TargetField();
-                    arrayField.TargetType = attt;
-                    arrayField.FieldNumberAttr = FieldNumberAttr;
-                    arrayField.FieldName = parameter.Name;
-                    var arratt = parameter.GetCustomAttribute<MaxCountAttribute>();
-                    arrayField.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true, MaxCount = 1, LenFieldName = "" } : arratt;
-                    arrayField.ArrayLenField = targetStruct.GetArrayLenField(arrayField);
-                    targetStruct.TargetFields.Add(arrayField);
-                }
-                else if (!parameter.ParameterType.IsPrimitive && !parameter.ParameterType.IsEnum && parameter.ParameterType.IsValueType)//struct
-                {
-                    ObjectType_TargetType ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.Name);
-                    if (ottt == null)
-                    {
-                        StructTypeParse(parameter.ParameterType, fileIdlInfo);//如果list中没有targetstruct 那就去parse
-                    }
-                    ottt = fileIdlInfo.GetTargetStruct(parameter.ParameterType.Name);
-                    Object_TargetField objectFiled = new Object_TargetField();
-                    objectFiled.TargetType = ottt;
-                    objectFiled.FieldName = parameter.Name;
-                    objectFiled.FieldNumberAttr = FieldNumberAttr;
-                    targetStruct.TargetFields.Add(objectFiled);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            
-        }
-#endif
-        public Dictionary<string,ITargetType> TargetArrayElementTypes = new Dictionary<string,ITargetType>();
-        public ITargetType GetTargetArrayElementType(string typeName)
-        {
-            if(TargetArrayElementTypes.ContainsKey(typeName)==true)
-            {
-                return TargetArrayElementTypes[typeName];
-            }
-            return null;
-        }
-        public void AddUsedArrayElementTypeToCollection(ITargetType tt)
-        {
-            if(TargetArrayElementTypes.ContainsKey(tt.TypeName)==false)
-            {
-                TargetArrayElementTypes.Add(tt.TypeName, tt);
-            }
-        }
         public FileIdlInfo GetFileIdlInfo(string fileName)
         {
             foreach (var fil in ParsedFiles)
@@ -581,7 +340,7 @@ namespace EmbedXrpcIdlParser
             }
             throw new NotSupportedException();
         }
-        private ObjectType_TargetType StructTypeParse2(Type object_type)
+        private ObjectType_TargetType StructTypeParse(Type object_type)
         {
             ObjectType_TargetType targetStruct = new ObjectType_TargetType();
             targetStruct.TypeName = object_type.Name;
@@ -632,9 +391,9 @@ namespace EmbedXrpcIdlParser
                     }
                     else
                     {
-                        attt.ElementType = StructTypeParse2(field.FieldType.GetElementType());//如果list中没有targetstruct 那就去parse
+                        attt.ElementType = StructTypeParse(field.FieldType.GetElementType());//如果list中没有targetstruct 那就去parse
                     }
-                    AddUsedArrayElementTypeToCollection(attt.ElementType);//添加到全局数组元素类型的集合中
+                    //AddUsedArrayElementTypeToCollection(attt.ElementType);//添加到全局数组元素类型的集合中
                     //new完毕
                     Array_TargetField arrayField = new Array_TargetField();
                     arrayField.TargetType = attt;
@@ -647,7 +406,7 @@ namespace EmbedXrpcIdlParser
                 }
                 else if (!field.FieldType.IsPrimitive && !field.FieldType.IsEnum && field.FieldType.IsValueType)//struct
                 {
-                    ObjectType_TargetType ottt = StructTypeParse2(field.FieldType);
+                    ObjectType_TargetType ottt = StructTypeParse(field.FieldType);
                     Object_TargetField objectFiled = new Object_TargetField();
                     objectFiled.TargetType = ottt;
                     objectFiled.FieldName = field.Name;
@@ -661,7 +420,7 @@ namespace EmbedXrpcIdlParser
             }
             return targetStruct;
         }
-        private void ParameterTypeParse2(ParameterInfo[] parameters, ObjectType_TargetType targetStruct)
+        private void ParameterTypeParse(ParameterInfo[] parameters, ObjectType_TargetType targetStruct)
         {
             uint fieldNumber = 1;
             foreach (var parameter in parameters)
@@ -707,9 +466,9 @@ namespace EmbedXrpcIdlParser
                     }
                     else
                     {
-                        attt.ElementType = StructTypeParse2(parameter.ParameterType.GetElementType());
+                        attt.ElementType = StructTypeParse(parameter.ParameterType.GetElementType());
                     }
-                    AddUsedArrayElementTypeToCollection(attt.ElementType);
+                    //AddUsedArrayElementTypeToCollection(attt.ElementType);
                     //new 完毕
                     Array_TargetField arrayField = new Array_TargetField();
                     arrayField.TargetType = attt;
@@ -723,7 +482,7 @@ namespace EmbedXrpcIdlParser
                 else if (!parameter.ParameterType.IsPrimitive && !parameter.ParameterType.IsEnum && parameter.ParameterType.IsValueType)//struct
                 {
                     Object_TargetField objectFiled = new Object_TargetField();
-                    objectFiled.TargetType = StructTypeParse2(parameter.ParameterType);
+                    objectFiled.TargetType = StructTypeParse(parameter.ParameterType);
                     objectFiled.FieldName = parameter.Name;
                     objectFiled.FieldNumberAttr = FieldNumberAttr;
                     targetStruct.TargetFields.Add(objectFiled);
@@ -734,7 +493,7 @@ namespace EmbedXrpcIdlParser
                 }
             }
         }
-        public void Parse2(string file)
+        public void Parse(string file)
         {
             CSScript.EvaluatorConfig.Engine = EvaluatorEngine.CodeDom;
             var eva = CSScript.Evaluator;
@@ -799,7 +558,7 @@ namespace EmbedXrpcIdlParser
                     }
                     else//struct
                     {
-                        fileIdlInfo.TargetStructs.Add(StructTypeParse2(type));
+                        fileIdlInfo.TargetStructs.Add(StructTypeParse(type));
                     }
 
                 }
@@ -868,7 +627,7 @@ namespace EmbedXrpcIdlParser
                             else//一定是struct 不可能是数组，因为不支持返回值是数组的。
                             {
                                 Object_TargetField objectFiled = new Object_TargetField();
-                                objectFiled.TargetType = StructTypeParse2(rt);
+                                objectFiled.TargetType = StructTypeParse(rt);
                                 objectFiled.FieldName = "ReturnValue";
                                 objectFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
                                 returnStructType.TargetFields.Add(objectFiled);
@@ -879,7 +638,7 @@ namespace EmbedXrpcIdlParser
                         ObjectType_TargetType ParameterStructType = new ObjectType_TargetType();
                         ParameterStructType.TypeName = type.Name + "_" + targetService.ServiceName + "_Parameter";
                         var pars = mt.GetParameters();
-                        ParameterTypeParse2(pars, ParameterStructType);
+                        ParameterTypeParse(pars, ParameterStructType);
                         targetService.ReturnStructType = returnStructType;
                         targetService.ParameterStructType = ParameterStructType;
                         targetInterface.Services.Add(targetService);
@@ -914,7 +673,7 @@ namespace EmbedXrpcIdlParser
                     ParameterStructType.TypeName = targetDelegate.MethodName + "_Parameter";
 
                     var pars = invokemi.GetParameters();
-                    ParameterTypeParse2(pars, ParameterStructType);
+                    ParameterTypeParse(pars, ParameterStructType);
                     targetDelegate.ParameterStructType = ParameterStructType;
                     fileIdlInfo.TargetDelegates.Add(targetDelegate);
                 }

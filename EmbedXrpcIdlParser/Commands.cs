@@ -31,7 +31,7 @@ namespace EmbedXrpcIdlParser
         {
             IdlInfo idlInfo = new IdlInfo();
             FileInfo fi = new FileInfo(generater.InputFile);
-            idlInfo.Parse2(fi.Name);//这里不写generater.InputFile是因为 generater.InputFile有可能是这样的 .\\myidl.cs 而我们内部需要的是myidl.cs 所以在外面通过fileinfo做下处理
+            idlInfo.Parse(fi.Name);//这里不写generater.InputFile是因为 generater.InputFile有可能是这样的 .\\myidl.cs 而我们内部需要的是myidl.cs 所以在外面通过fileinfo做下处理
             GenType gt = EmbedXrpcIdlParser.GenType.All;
             if (generater.GenType.ToLower() == "client")
             {
