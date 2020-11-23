@@ -47,7 +47,7 @@ namespace EmbedXrpcIdlParser
         public ICppSerializable embedXrpcSerializationGenerator;
         public void CodeGen(CppCodeGenParameter parameter)
         {
-            UTF8Encoding utf8ec = new UTF8Encoding(true);
+            UTF8Encoding utf8ec = new UTF8Encoding(false);
             codeGenParameter = parameter;
             if(embedXrpcSerializationGenerator==null)
             {
