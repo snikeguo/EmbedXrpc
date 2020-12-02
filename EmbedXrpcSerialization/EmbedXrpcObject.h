@@ -195,7 +195,7 @@ public:
 		if (allDataLen < 4)
 			return false;
 		bool FindFlag = false;
-		bool EmbedXrpc_SendQueueResult = false;
+		QueueState EmbedXrpc_SendQueueResult = QueueState_Full;
 
 		ReceiveItemInfo raw;
 		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
@@ -219,7 +219,11 @@ public:
 				if(EmbedXrpc_QueueSpacesAvailable(ResponseBlockQueue)>0)
 				{
 					EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
-				}				
+				}
+				else
+				{
+					EmbedXrpc_SendQueueResult = QueueState_Full;
+				}
 #endif
 				goto sqr;
 			}
@@ -254,7 +258,11 @@ public:
 									Memcpy(raw.Data, data, dataLen);
 								}
 								EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
-							}							
+							}
+							else
+							{
+								EmbedXrpc_SendQueueResult = QueueState_Full;
+							}
 #endif
 						}
 						else if (iter->ReceiveType == ReceiveType_Delegate)
@@ -274,7 +282,11 @@ public:
 									Memcpy(raw.Data, data, dataLen);
 								}
 								EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(DelegateBlockQueue, &raw, sizeof(ReceiveItemInfo));
-							}							
+							}
+							else
+							{
+								EmbedXrpc_SendQueueResult = QueueState_Full;
+							}
 #endif
 						}
 						goto sqr;
@@ -304,11 +316,15 @@ public:
 					Memcpy(raw.Data, data, dataLen);
 				}
 				EmbedXrpc_SendQueueResult = EmbedXrpc_SendQueue(RequestBlockQueue, &raw, sizeof(ReceiveItemInfo));
-			}			
+			}
+			else
+			{
+				EmbedXrpc_SendQueueResult = QueueState_Full;
+			}
 #endif
 		}
 		sqr:
-		return EmbedXrpc_SendQueueResult;
+		return EmbedXrpc_SendQueueResult== QueueState_OK?true:false;
 	}
 	static void SuspendTimerCallBack(void* arg)
 	{
