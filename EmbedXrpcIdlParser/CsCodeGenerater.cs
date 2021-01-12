@@ -246,8 +246,8 @@ namespace EmbedXrpcIdlParser
             FileIdlInfo idlInfo = CSharpCodeGenParameter.FileIdlInfo;
             GenType genType = CSharpCodeGenParameter.GenType;
 
-            UTF8Encoding utf8ec = new UTF8Encoding(true);
-            var csStreamWriter = new StreamWriter(CSharpCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".cs", false, utf8ec);
+            var encode = Encoding.UTF8;
+            var csStreamWriter = new StreamWriter(CSharpCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".cs", false, encode);
             csStreamWriter.WriteLine("using System;");
             csStreamWriter.WriteLine("using System.Reflection;");
             csStreamWriter.WriteLine("using System.Collections.Generic;");

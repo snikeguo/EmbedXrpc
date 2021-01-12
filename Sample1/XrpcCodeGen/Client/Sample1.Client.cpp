@@ -10,13 +10,21 @@ DateTimeChange(request.now);
 DateTimeChange_Parameter_FreeData(&request);
 }
 DateTimeChangeClientImpl DateTimeChangeClientImplInstance;
-Inter_Add_Return& InterClientImpl::Add(Int32 a,Int32 b,Int32 dataLen,UInt8* data)
+void TestDelegateClientImpl::Invoke(SerializationManager &recManager)
 {
-//write serialization code:Add(a,b,dataLen,data,)
-static Inter_Add_Parameter sendData;
+static TestDelegate_Parameter request;
+TestDelegate_Parameter_Deserialize(recManager,&request);
+#if EmbedXrpc_CheckSumValid==1
+EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
+#endif
+TestDelegate(request.now);
+TestDelegate_Parameter_FreeData(&request);
+}
+TestDelegateClientImpl TestDelegateClientImplInstance;
+Inter_Add_Return& InterClientImpl::Add()
+{//write serialization code:Add()
 SerializationManager sm;
 sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
-static Inter_Add_Return reqresp;
 auto result=false;
 auto waitstate=ResponseState_Timeout;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
@@ -28,11 +36,7 @@ EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
 sm.BufferLen = EmbedXrpc_SendBufferSize-4;
-sendData.a=a;
-sendData.b=b;
-sendData.dataLen=dataLen;
-sendData.data=data;
-Inter_Add_Parameter_Serialize(sm,&sendData);
+Inter_Add_Parameter_Serialize(sm,&Add_sendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_Add_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_Add_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
@@ -42,12 +46,12 @@ result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {
-reqresp.State=RequestState_Failed;
+Add_reqresp.State=RequestState_Failed;
 goto exi;
 }
 else
 {
-reqresp.State=RequestState_Ok;
+Add_reqresp.State=RequestState_Ok;
 }
 ReceiveItemInfo recData;
 waitstate=RpcObject->Wait(Inter_Add_ServiceId,&recData);
@@ -65,7 +69,7 @@ sm.Buf = recData.Data;
 sm.SetCalculateSum(0);
 sm.SetReferenceSum(recData.CheckSum);
 #endif
-Inter_Add_Return_Deserialize(sm,&reqresp);
+Inter_Add_Return_Deserialize(sm,&Add_reqresp);
 #if  EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(sm.GetReferenceSum()==sm.GetCalculateSum());
 #endif
@@ -79,10 +83,10 @@ Free(recData.Data);
 }
 }
 #endif
-reqresp.State=waitstate;
+Add_reqresp.State=waitstate;
 exi:
 EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
-return reqresp;
+return Add_reqresp;
 }
 void InterClientImpl::Free_Add(Inter_Add_Return *response)
 {
@@ -96,10 +100,8 @@ Inter_Add_Return_FreeData(response);
 Inter_NoArg_Return& InterClientImpl::NoArg()
 {
 //write serialization code:NoArg()
-static Inter_NoArg_Parameter sendData;
 SerializationManager sm;
 sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
-static Inter_NoArg_Return reqresp;
 auto result=false;
 auto waitstate=ResponseState_Timeout;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
@@ -111,7 +113,7 @@ EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
 sm.BufferLen = EmbedXrpc_SendBufferSize-4;
-Inter_NoArg_Parameter_Serialize(sm,&sendData);
+Inter_NoArg_Parameter_Serialize(sm,&NoArg_sendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_NoArg_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoArg_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
@@ -121,12 +123,12 @@ result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {
-reqresp.State=RequestState_Failed;
+NoArg_reqresp.State=RequestState_Failed;
 goto exi;
 }
 else
 {
-reqresp.State=RequestState_Ok;
+NoArg_reqresp.State=RequestState_Ok;
 }
 ReceiveItemInfo recData;
 waitstate=RpcObject->Wait(Inter_NoArg_ServiceId,&recData);
@@ -144,7 +146,7 @@ sm.Buf = recData.Data;
 sm.SetCalculateSum(0);
 sm.SetReferenceSum(recData.CheckSum);
 #endif
-Inter_NoArg_Return_Deserialize(sm,&reqresp);
+Inter_NoArg_Return_Deserialize(sm,&NoArg_reqresp);
 #if  EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(sm.GetReferenceSum()==sm.GetCalculateSum());
 #endif
@@ -158,10 +160,10 @@ Free(recData.Data);
 }
 }
 #endif
-reqresp.State=waitstate;
+NoArg_reqresp.State=waitstate;
 exi:
 EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
-return reqresp;
+return NoArg_reqresp;
 }
 void InterClientImpl::Free_NoArg(Inter_NoArg_Return *response)
 {
@@ -175,10 +177,8 @@ Inter_NoArg_Return_FreeData(response);
 Inter_NoReturn_Return& InterClientImpl::NoReturn(Int32 a)
 {
 //write serialization code:NoReturn(a,)
-static Inter_NoReturn_Parameter sendData;
 SerializationManager sm;
 sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
-static Inter_NoReturn_Return reqresp;
 auto result=false;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
@@ -189,8 +189,8 @@ EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
 sm.BufferLen = EmbedXrpc_SendBufferSize-4;
-sendData.a=a;
-Inter_NoReturn_Parameter_Serialize(sm,&sendData);
+NoReturn_sendData.a=a;
+Inter_NoReturn_Parameter_Serialize(sm,&NoReturn_sendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_NoReturn_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoReturn_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
@@ -200,26 +200,24 @@ result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {
-reqresp.State=RequestState_Failed;
+NoReturn_reqresp.State=RequestState_Failed;
 goto exi;
 }
 else
 {
-reqresp.State=RequestState_Ok;
+NoReturn_reqresp.State=RequestState_Ok;
 }
 exi:
 EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
-return reqresp;
+return NoReturn_reqresp;
 }
 
 
 Inter_NoArgAndReturn_Return& InterClientImpl::NoArgAndReturn()
 {
 //write serialization code:NoArgAndReturn()
-static Inter_NoArgAndReturn_Parameter sendData;
 SerializationManager sm;
 sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
-static Inter_NoArgAndReturn_Return reqresp;
 auto result=false;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
@@ -230,7 +228,7 @@ EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
 sm.BufferLen = EmbedXrpc_SendBufferSize-4;
-Inter_NoArgAndReturn_Parameter_Serialize(sm,&sendData);
+Inter_NoArgAndReturn_Parameter_Serialize(sm,&NoArgAndReturn_sendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_NoArgAndReturn_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoArgAndReturn_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
@@ -240,22 +238,23 @@ result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {
-reqresp.State=RequestState_Failed;
+NoArgAndReturn_reqresp.State=RequestState_Failed;
 goto exi;
 }
 else
 {
-reqresp.State=RequestState_Ok;
+NoArgAndReturn_reqresp.State=RequestState_Ok;
 }
 exi:
 EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
-return reqresp;
+return NoArgAndReturn_reqresp;
 }
 
 
 ResponseDelegateMessageMap Inter_ResponseDelegateMessages[]=
 {
 {"DateTimeChange",DateTimeChange_ServiceId,ReceiveType_Delegate,&DateTimeChangeClientImplInstance},
+{"TestDelegate",TestDelegate_ServiceId,ReceiveType_Delegate,&TestDelegateClientImplInstance},
 {"Inter_Add",Inter_Add_ServiceId,ReceiveType_Response,nullptr},
 {"Inter_NoArg",Inter_NoArg_ServiceId,ReceiveType_Response,nullptr},
 {"Inter_NoReturn",Inter_NoReturn_ServiceId,ReceiveType_Response,nullptr},

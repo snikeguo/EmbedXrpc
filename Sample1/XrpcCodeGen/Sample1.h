@@ -39,6 +39,10 @@ typedef struct _DateTimeChange_Parameter
 {
 DateTime_t now[1];   //FieldNumber:1
 }DateTimeChange_Parameter;
+typedef struct _TestDelegate_Parameter
+{
+DateTime_t now[1];   //FieldNumber:1
+}TestDelegate_Parameter;
 typedef struct _Inter_Add_Parameter
 {
 Int32 a;   //FieldNumber:1

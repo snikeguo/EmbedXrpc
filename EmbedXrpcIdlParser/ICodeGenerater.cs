@@ -177,6 +177,8 @@ namespace EmbedXrpcIdlParser
         public ObjectType_TargetType ParameterStructType { get; set; } = new ObjectType_TargetType();
         public int ServiceId { get; internal set; }
 
+        public ExternalParameterAttribute ExternalParameter { get; internal set;}
+
     }
     [Serializable]
     public class TargetInterface
@@ -203,7 +205,9 @@ namespace EmbedXrpcIdlParser
         public string MethodName { get; set; }
         //public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
         public ObjectType_TargetType ParameterStructType { get; set; } = new ObjectType_TargetType();
-        
+
+        public ExternalParameterAttribute ExternalParameter { get; internal set; }
+
     }
     /// <summary>
     /// 本文件中所有的资源
@@ -574,6 +578,8 @@ namespace EmbedXrpcIdlParser
                         var serviceIdAttr = service.GetCustomAttribute<ServiceIdAttribute>();
                         targetService.ServiceId = serviceIdAttr == null ? fileIdlInfo.ServiceId : serviceIdAttr.ServiceId;
                         fileIdlInfo.ServiceId++;
+                        var externalParameterAttribute = service.GetCustomAttribute<ExternalParameterAttribute>();
+                        targetService.ExternalParameter = externalParameterAttribute == null ? new ExternalParameterAttribute(false) : externalParameterAttribute;
                         var mt = (service as MethodInfo);
                         Type rt = mt.ReturnType;
                         targetService.ServiceName = mt.Name;
@@ -666,6 +672,8 @@ namespace EmbedXrpcIdlParser
                     TargetDelegate targetDelegate = new TargetDelegate();
                     targetDelegate.ServiceId = serviceIdAttr == null ?fileIdlInfo.ServiceId : serviceIdAttr.ServiceId;
                     fileIdlInfo.ServiceId++;
+                    var externalParameterAttribute = type.GetCustomAttribute<ExternalParameterAttribute>();
+                    targetDelegate.ExternalParameter = externalParameterAttribute == null ? new ExternalParameterAttribute(false) : externalParameterAttribute;
                     targetDelegate.MethodName = type.Name;
 
                     //处理函数参数

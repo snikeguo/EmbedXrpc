@@ -64,6 +64,15 @@ namespace EmbedXrpcIdlParser
         }
         public int ServiceId { get; set; }
     }
+    [AttributeUsage(AttributeTargets.Method|AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
+    public sealed class ExternalParameterAttribute : Attribute
+    {
+        public ExternalParameterAttribute(bool isExternal)
+        {
+            IsExternal = isExternal;
+        }
+        public bool IsExternal { get; set; }
+    }
     public class GenerationOption
     {
         /// <summary>

@@ -173,6 +173,39 @@ DateTime_t_FreeData(&obj->now[now_index]);
 }
 
 
+void TestDelegate_Parameter_Serialize(SerializationManager &sm,TestDelegate_Parameter *obj)
+{
+for(uint8_t now_index=0;now_index<1;now_index++)
+{
+DateTime_t_Serialize(sm,&obj->now[now_index]);
+
+}
+
+}
+
+
+void TestDelegate_Parameter_Deserialize(SerializationManager &sm,TestDelegate_Parameter *obj)
+{
+for(uint8_t now_index=0;now_index<1;now_index++)
+{
+DateTime_t_Deserialize(sm,&obj->now[now_index]);
+
+}
+
+}
+
+
+void TestDelegate_Parameter_FreeData(TestDelegate_Parameter *obj)
+{
+for(uint8_t now_index=0;now_index<1;now_index++)
+{
+DateTime_t_FreeData(&obj->now[now_index]);
+
+}
+
+}
+
+
 void Inter_Add_Parameter_Serialize(SerializationManager &sm,Inter_Add_Parameter *obj)
 {
 Memcpy(&sm.Buf[sm.Index],&obj->a,sizeof(obj->a));

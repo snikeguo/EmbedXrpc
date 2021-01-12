@@ -29,7 +29,11 @@ void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server广播后，
 	printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 	//printf("%s", now[0].DateString);
 }
-
+void TestDelegateClientImpl::TestDelegate(DateTime_t now[1])//server广播后，client接受到的
+{
+	printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
+	//printf("%s", now[0].DateString);
+}
 InterClientImpl Client(&ClientRpc);
 void ClientThread()
 {
@@ -40,7 +44,11 @@ void ClientThread()
 	{
 		a ++;
 		b ++;
-		auto sum=Client.Add(a, b,0, NULL);
+		Client.Add_sendData.a = a;
+		Client.Add_sendData.b = b;
+		Client.Add_sendData.dataLen = 4;
+		Client.Add_sendData.data = (UInt8 *)"123";
+		auto sum=Client.Add();
 		if (sum.State == ResponseState_Ok)
 		{
 			printf("%d+%d=%d\n", a,b,sum.ReturnValue.Sum);

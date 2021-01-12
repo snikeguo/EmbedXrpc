@@ -40,13 +40,20 @@ void DateTimeChange_Parameter_Deserialize(SerializationManager &sm,DateTimeChang
 void DateTimeChange_Parameter_FreeData(DateTimeChange_Parameter *obj);
 
 #define DateTimeChange_ServiceId 16   //0x10
+void TestDelegate_Parameter_Serialize(SerializationManager &sm,TestDelegate_Parameter *obj);
+
+void TestDelegate_Parameter_Deserialize(SerializationManager &sm,TestDelegate_Parameter *obj);
+
+void TestDelegate_Parameter_FreeData(TestDelegate_Parameter *obj);
+
+#define TestDelegate_ServiceId 17   //0x11
 void Inter_Add_Parameter_Serialize(SerializationManager &sm,Inter_Add_Parameter *obj);
 
 void Inter_Add_Parameter_Deserialize(SerializationManager &sm,Inter_Add_Parameter *obj);
 
 void Inter_Add_Parameter_FreeData(Inter_Add_Parameter *obj);
 
-#define Inter_Add_ServiceId 17   //0x11
+#define Inter_Add_ServiceId 18   //0x12
 void Inter_Add_Return_Serialize(SerializationManager &sm,Inter_Add_Return *obj);
 
 void Inter_Add_Return_Deserialize(SerializationManager &sm,Inter_Add_Return *obj);
@@ -59,7 +66,7 @@ void Inter_NoArg_Parameter_Deserialize(SerializationManager &sm,Inter_NoArg_Para
 
 void Inter_NoArg_Parameter_FreeData(Inter_NoArg_Parameter *obj);
 
-#define Inter_NoArg_ServiceId 18   //0x12
+#define Inter_NoArg_ServiceId 19   //0x13
 void Inter_NoArg_Return_Serialize(SerializationManager &sm,Inter_NoArg_Return *obj);
 
 void Inter_NoArg_Return_Deserialize(SerializationManager &sm,Inter_NoArg_Return *obj);
@@ -72,7 +79,7 @@ void Inter_NoReturn_Parameter_Deserialize(SerializationManager &sm,Inter_NoRetur
 
 void Inter_NoReturn_Parameter_FreeData(Inter_NoReturn_Parameter *obj);
 
-#define Inter_NoReturn_ServiceId 19   //0x13
+#define Inter_NoReturn_ServiceId 20   //0x14
 void Inter_NoReturn_Return_Serialize(SerializationManager &sm,Inter_NoReturn_Return *obj);
 
 void Inter_NoReturn_Return_Deserialize(SerializationManager &sm,Inter_NoReturn_Return *obj);
@@ -85,7 +92,7 @@ void Inter_NoArgAndReturn_Parameter_Deserialize(SerializationManager &sm,Inter_N
 
 void Inter_NoArgAndReturn_Parameter_FreeData(Inter_NoArgAndReturn_Parameter *obj);
 
-#define Inter_NoArgAndReturn_ServiceId 20   //0x14
+#define Inter_NoArgAndReturn_ServiceId 21   //0x15
 void Inter_NoArgAndReturn_Return_Serialize(SerializationManager &sm,Inter_NoArgAndReturn_Return *obj);
 
 void Inter_NoArgAndReturn_Return_Deserialize(SerializationManager &sm,Inter_NoArgAndReturn_Return *obj);
