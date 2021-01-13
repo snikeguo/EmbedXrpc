@@ -1,7 +1,6 @@
 ﻿#include"Sample1.Client.h"
 void DateTimeChangeClientImpl::Invoke(SerializationManager &recManager)
 {
-static DateTimeChange_Parameter request;
 DateTimeChange_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
@@ -12,7 +11,6 @@ DateTimeChange_Parameter_FreeData(&request);
 DateTimeChangeClientImpl DateTimeChangeClientImplInstance;
 void TestDelegateClientImpl::Invoke(SerializationManager &recManager)
 {
-static TestDelegate_Parameter request;
 TestDelegate_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());

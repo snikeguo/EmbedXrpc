@@ -379,11 +379,12 @@ namespace EmbedXrpcIdlParser
                 ClientHsw.WriteLine(");");
 
                 //code gen invoke
+                ClientHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName} request;");
                 ClientHsw.WriteLine("void Invoke(SerializationManager &recManager);");//声明
 
                 ClientCsw.WriteLine($"void {targetDelegate.MethodName}ClientImpl::Invoke(SerializationManager &recManager)");
                 ClientCsw.WriteLine("{");
-                ClientCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} request;");
+                //ClientCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} request;");
 
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
                 //ClientCsw.WriteLine($"recManager.Deserialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
@@ -787,10 +788,11 @@ namespace EmbedXrpcIdlParser
                     ServerHsw.WriteLine(");");
 
                     //code gen invoke
+                    ServerHsw.WriteLine($"{service.ParameterStructType.TypeName} request;");
                     ServerHsw.WriteLine("void Invoke(SerializationManager &recManager, SerializationManager& sendManager);");
                     ServerCsw.WriteLine($"void {service.FullName}Service::Invoke(SerializationManager &recManager, SerializationManager& sendManager)");
                     ServerCsw.WriteLine("{");
-                    ServerCsw.WriteLine($"static {service.ParameterStructType.TypeName} request;");
+                    //ServerCsw.WriteLine($"static {service.ParameterStructType.TypeName} request;");
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Deserialize(recManager,&request);");
                     //ServerCsw.WriteLine($"recManager.Deserialize(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");
                     ServerCsw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request);");

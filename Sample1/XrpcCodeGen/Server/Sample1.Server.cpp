@@ -39,7 +39,6 @@ EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
 void Inter_AddService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
-static Inter_Add_Parameter request;
 Inter_Add_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
@@ -52,7 +51,6 @@ Inter_Add_Return_FreeData(&Response);
 Inter_AddService Inter_AddServiceInstance;
 void Inter_NoArgService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
-static Inter_NoArg_Parameter request;
 Inter_NoArg_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
@@ -65,7 +63,6 @@ Inter_NoArg_Return_FreeData(&Response);
 Inter_NoArgService Inter_NoArgServiceInstance;
 void Inter_NoReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
-static Inter_NoReturn_Parameter request;
 Inter_NoReturn_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
@@ -76,7 +73,6 @@ Inter_NoReturn_Parameter_FreeData(&request);
 Inter_NoReturnService Inter_NoReturnServiceInstance;
 void Inter_NoArgAndReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
-static Inter_NoArgAndReturn_Parameter request;
 Inter_NoArgAndReturn_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());

@@ -40,7 +40,6 @@
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.h" />
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.h" />
     <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h" />
     <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h" />
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h" />

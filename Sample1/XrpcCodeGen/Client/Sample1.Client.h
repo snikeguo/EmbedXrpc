@@ -7,6 +7,7 @@ class DateTimeChangeClientImpl:public IDelegate
 public:
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
 void DateTimeChange(DateTime_t now[1]);
+DateTimeChange_Parameter request;
 void Invoke(SerializationManager &recManager);
 };
 class TestDelegateClientImpl:public IDelegate
@@ -14,6 +15,7 @@ class TestDelegateClientImpl:public IDelegate
 public:
 uint16_t GetSid(){return TestDelegate_ServiceId;}
 void TestDelegate(DateTime_t now[1]);
+TestDelegate_Parameter request;
 void Invoke(SerializationManager &recManager);
 };
 class InterClientImpl

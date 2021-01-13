@@ -92,9 +92,6 @@
     <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.h">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.h">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
-    </ClInclude>
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h">
       <Filter>CodeGen</Filter>
     </ClInclude>
