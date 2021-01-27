@@ -44,10 +44,10 @@ void ClientThread()
 	{
 		a ++;
 		b ++;
-		Client.Add_sendData.a = a;
-		Client.Add_sendData.b = b;
-		Client.Add_sendData.dataLen = 4;
-		Client.Add_sendData.data = (UInt8 *)"123";
+		Client.Add_SendData.a = a;
+		Client.Add_SendData.b = b;
+		Client.Add_SendData.dataLen = 4;
+		Client.Add_SendData.data = (UInt8 *)"123";
 		auto sum=Client.Add();
 		if (sum.State == ResponseState_Ok)
 		{
@@ -100,9 +100,14 @@ void ServerThread()
 		memset(t.DateString, 0x0, 128);
 		sprintf((char *)t.DateString, "%d-%d-%d %d:%d:%d!server\r\n", t.Year, t.Month, t.Day, t.Hour, t.Min, t.Sec);
 		t.DateStringLen = (UInt8)strlen((const char *)t.DateString)+1;
-		DateTimeChanger.Invoke(&t);
+		
 		t.David.a = 1;
 		t.David.b = 5;
+		t.David.AddressType = Student_u2_FieldNumber;
+		t.David.u2 = 0x66778899;
+		t.David.uend1 = 1;
+		t.David.uend2 = 2;
+		DateTimeChanger.Invoke(&t);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 }

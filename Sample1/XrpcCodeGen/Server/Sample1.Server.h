@@ -9,7 +9,7 @@ EmbedXrpcObject *RpcObject=nullptr;
 DateTimeChangeDelegate(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 {}
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
-DateTimeChange_Parameter sendData;
+DateTimeChange_Parameter SendData;
 void  Invoke(DateTime_t now[1]);
 };
 class TestDelegateDelegate
@@ -19,7 +19,7 @@ EmbedXrpcObject *RpcObject=nullptr;
 TestDelegateDelegate(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 {}
 uint16_t GetSid(){return TestDelegate_ServiceId;}
-TestDelegate_Parameter sendData;
+TestDelegate_Parameter SendData;
 void  Invoke();};
 class Inter_AddService:public IService
 {

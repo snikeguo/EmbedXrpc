@@ -23,7 +23,7 @@ namespace EmbedXrpcIdlParser
         //public string IType { get; set; }
 
     }
-    public class CppCodeGenerater 
+    public class EmbedXrpcCodeGenerater 
     {
 
         private static Dictionary<string, string> ReplaceDic = new Dictionary<string, string>();
@@ -53,7 +53,7 @@ namespace EmbedXrpcIdlParser
             {
                 if(parameter.IsRuntimeVersion==true)
                 {
-                    embedXrpcSerializationGenerator = new CppReflectionSerializer();
+                    //embedXrpcSerializationGenerator = new CppReflectionSerializer();
                 }
                 else
                 {
@@ -175,7 +175,7 @@ namespace EmbedXrpcIdlParser
             {
                 //EmitFbsEnum(em);
                 //fbsStreamWriter.WriteLine(em.ToFbs().ToString());
-                EmitEnum(em);
+                CppSerializableCommon.EmitEnum(em,CommonHsw);
             }
             foreach (var stru in parameter.FileIdlInfo.TargetStructs)
             {
@@ -186,7 +186,6 @@ namespace EmbedXrpcIdlParser
                     SerializeHsw);*/
                 EmitStruct(stru);
             }
-
             foreach (var del in parameter.FileIdlInfo.TargetDelegates)
             {
                 //fbsStreamWriter.WriteLine(del.ToFbs().ToString());
@@ -260,75 +259,20 @@ namespace EmbedXrpcIdlParser
         private StreamWriter ServerCsw;
         private StreamWriter SerializeCsw;
         private StreamWriter SerializeHsw;
-
-        public static string EmitField(ITargetField field)
-        {
-            string cppType = field.TargetType.TypeName;
-            string valueName = string.Empty;
-            if (field.TargetType.TargetType ==  TargetType_t.TYPE_ARRAY)
-            {
-                Array_TargetField array_TargetField = field as Array_TargetField;
-                ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
-                cppType = attt.ElementType.TypeName;
-                if (array_TargetField.MaxCountAttribute.IsFixed == false)
-                {
-                    cppType = cppType + "*";
-                    valueName = field.FieldName;
-                }
-                else
-                {
-                    valueName = $"{field.FieldName}[{array_TargetField.MaxCountAttribute.MaxCount}]";
-                }
-            }
-            else
-            {
-                valueName = field.FieldName;
-            }
-            return $"{cppType} {valueName}";
-        }
-
-        /*public static string GetSourceCodeTypeArrayElementType(TargetField field)
-        {
-            string cppType = field.SourceCodeType;
-
-            if (field.IsArray == true)
-            {
-                cppType = field.SourceCodeType.Replace("[", "");
-                cppType = cppType.Replace("]", "");
-            }
-            return cppType;
-        }*/
-
-        public void EmitEnum(EnumType_TargetType targetEnum)
-        {
-            CommonHsw.WriteLine("typedef enum _" + targetEnum.TypeName);
-            CommonHsw.WriteLine("{");
-            foreach (var ev in targetEnum.KeyValue)
-            {
-                CommonHsw.WriteLine(ev.Key + " = " + ev.Value.ToString() + ",");
-            }
-            CommonHsw.WriteLine("}" + targetEnum.TypeName + ";");
-        }
-        
-        public void EmitStruct(ObjectType_TargetType targetStruct)
+     
+        public void EmitStruct(StructType_TargetType structType)
         {
             /*
              CommonHsw用来定义具体的数据结构
             SerializeCsw、SerializeHsw用来定义序列化的操作、行为等
              */
-            CommonHsw.WriteLine("typedef struct _" + targetStruct.TypeName);
-            CommonHsw.WriteLine("{");
-            foreach (var field in targetStruct.TargetFields)
-            {
-                CommonHsw.WriteLine($"{EmitField(field)};   //FieldNumber:" + field.FieldNumberAttr.Number);
-            }
-            CommonHsw.WriteLine("}" + targetStruct.TypeName + ";");
-            embedXrpcSerializationGenerator.EmitStruct(targetStruct,
+            CppSerializableCommon.EmitStruct(structType, CommonHsw);
+            embedXrpcSerializationGenerator.EmitStruct(structType,
                     SerializeCsw,
                     SerializeHsw);
-            embedXrpcSerializationGenerator.EmitSerializeMacro(targetStruct, SerializeHsw);
-            embedXrpcSerializationGenerator.EmitDeserializeMacro(targetStruct, SerializeHsw);
-            embedXrpcSerializationGenerator.EmitFreeDataMacro(targetStruct, SerializeHsw);
+            embedXrpcSerializationGenerator.EmitSerializeMacro(structType, SerializeHsw);
+            embedXrpcSerializationGenerator.EmitDeserializeMacro(structType, SerializeHsw);
+            embedXrpcSerializationGenerator.EmitFreeDataMacro(structType, SerializeHsw);
         }
 
         public void EmitDelegate(TargetDelegate targetDelegate)
@@ -370,7 +314,7 @@ namespace EmbedXrpcIdlParser
                     string name = field.FieldName;
                     temp_fileds += name + ",";
 
-                    ClientHsw.Write($"{EmitField(field)}");
+                    ClientHsw.Write($"{CppSerializableCommon.EmitField(field)}");
                     if (i + 1 < targetDelegate.ParameterStructType.TargetFields.Count)
                     {
                         ClientHsw.Write(",");
@@ -433,8 +377,8 @@ namespace EmbedXrpcIdlParser
                         string name = field.FieldName;
                         temp_fileds += name + ",";
 
-                        ServerHsw.Write($"{EmitField(field)}");
-                        ServerCsw.Write($"{EmitField(field)}");
+                        ServerHsw.Write($"{CppSerializableCommon.EmitField(field)}");
+                        ServerCsw.Write($"{CppSerializableCommon.EmitField(field)}");
 
                         if (i + 1 < targetDelegate.ParameterStructType.TargetFields.Count)
                         {
@@ -591,8 +535,8 @@ namespace EmbedXrpcIdlParser
                             string name = field.FieldName;
                             temp_fileds += name + ",";
 
-                            ClientHsw.Write($"{EmitField(field)}");
-                            ClientCsw.Write($"{EmitField(field)}");
+                            ClientHsw.Write($"{CppSerializableCommon.EmitField(field)}");
+                            ClientCsw.Write($"{CppSerializableCommon.EmitField(field)}");
 
                             if (i + 1 < service.ParameterStructType.TargetFields.Count)
                             {
@@ -778,7 +722,7 @@ namespace EmbedXrpcIdlParser
                         string name = field.FieldName;
                         temp_fileds += name + ",";
 
-                        ServerHsw.Write($"{EmitField(field)}");
+                        ServerHsw.Write($"{CppSerializableCommon.EmitField(field)}");
 
                         if (i + 1 < service.ParameterStructType.TargetFields.Count)
                         {

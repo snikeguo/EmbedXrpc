@@ -8,12 +8,39 @@ struct Student
     int a;
     [FieldNumber(2)]
     int b;
+
+    [FieldNumber(3)]
+    [UnionTargetType]
+    int AddressType;
+
+    [FieldNumber(4)]
+    [UnionField]
+    byte u1;
+
+
+    [FieldNumber(5)]
+    [UnionField]
+    UInt64 u2;
+
+    [FieldNumber(6)]
+    [UnionField]
+    Sex u3;
+
+    [FieldNumber(7)]
+    [UnionField]
+    AddResult u4;
+
+
+    [FieldNumber(100)]
+    byte uend1;
+    [FieldNumber(101)]
+    byte uend2;
 }
 [FileName("sample1.cs")]
-enum Sex: byte
+enum Sex : ulong
 {
-    Man=2,
-    WoMan=9,
+    Man = 2,
+    WoMan = 9,
 }
 [FileName("sample1.cs")]
 struct DateTime_t
@@ -30,14 +57,20 @@ struct DateTime_t
     int Min;
     [FieldNumber(6)]
     int Sec;
-    [FieldNumber(7)]
-    Student David;
+
     [FieldNumber(8)]
     Sex Sex;
+
+    [FieldNumber(7)]
+    Student David;
+
 }
 [FileName("sample1.cs")]
 delegate void DateTimeChange(DateTime_t[] now);
 
+[FileName("sample1.cs")]
+[ExternalParameter(true)]
+delegate void TestDelegate(DateTime_t[] now);
 [FileName("sample1.cs")]
 struct AddResult
 {
@@ -53,6 +86,7 @@ struct AddResult
 [FileName("sample1.cs")]
 interface Inter
 {
+    [ExternalParameter(true)]
     AddResult Add(Int32 a, Int32 b, Int32 dataLen,
         [MaxCount(LenFieldName="dataLen",IsFixed=false)]
         byte[]data);

@@ -61,7 +61,7 @@ namespace EmbedXrpcIdlParser
             }
             if(generater.GenLanguageType.ToLower()=="cpp-ref")
             {
-                CppCodeGenerater cpp = new CppCodeGenerater();
+                EmbedXrpcCodeGenerater cpp = new EmbedXrpcCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
                     CppCodeGenParameter parameter = new CppCodeGenParameter()
@@ -77,7 +77,7 @@ namespace EmbedXrpcIdlParser
             }
             else if (generater.GenLanguageType.ToLower() == "cpp-nano")
             {
-                CppCodeGenerater cpp = new CppCodeGenerater();
+                EmbedXrpcCodeGenerater cpp = new EmbedXrpcCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
                     CppCodeGenParameter parameter = new CppCodeGenParameter()

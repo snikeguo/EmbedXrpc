@@ -21,6 +21,13 @@ namespace Sample1
             Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
         }
     }
+    public partial class TestDelegateClientImpl : IDelegate
+    {
+        public void TestDelegate(DateTime_t[] now)
+        {
+
+        }
+    }
     public partial class Inter_AddService : IService
     {
         public void Add(Int32 a, Int32 b, Int32 dataLen, Byte[] data)
@@ -58,9 +65,9 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new EmbedXrpcObject(1000, clientSend, Assembly.GetExecutingAssembly(),true);
+            client = new EmbedXrpcObject(1000, clientSend, Assembly.GetExecutingAssembly(),false);
             client.Start();
-            server = new EmbedXrpcObject(2000, serverSend, Assembly.GetExecutingAssembly(),true);
+            server = new EmbedXrpcObject(2000, serverSend, Assembly.GetExecutingAssembly(), false);
             server.Start();
             Task.Run(() =>
             {
@@ -105,8 +112,8 @@ namespace EmbedXrpc
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second,
-                        David=null,
-                    }});
+                        David={ AddressType=Student.u2_FieldNumber,u2=0x778899AA , uend1=1,uend2=0x88},
+                    }}); ;
                     
                 }
             });

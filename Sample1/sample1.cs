@@ -2,12 +2,52 @@
 using EmbedXrpcIdlParser;
 
 [FileName("sample1.cs")]
+struct AddResult
+{
+    [FieldNumber(1)]
+    int Sum;
+    [FieldNumber(2)]
+    Int32 dataLen;
+    [FieldNumber(3)]
+    [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
+    byte[] data;
+
+}
+
+[FileName("sample1.cs")]
 struct Student
 {
     [FieldNumber(1)]
     int a;
     [FieldNumber(2)]
     int b;
+
+    [FieldNumber(3)]
+    [UnionTargetType]
+    int AddressType;
+
+    [FieldNumber(4)]
+    [UnionField]
+    byte u1;
+
+
+    [FieldNumber(5)]
+    [UnionField]
+    UInt64 u2;
+
+    [FieldNumber(6)]
+    [UnionField]
+    Sex u3;
+
+    [FieldNumber(7)]
+    [UnionField]
+    AddResult u4;
+
+
+    [FieldNumber(100)]
+    byte uend1;
+    [FieldNumber(101)]
+    byte uend2;
 }
 [FileName("sample1.cs")]
 enum Sex: ulong
@@ -49,18 +89,6 @@ delegate void DateTimeChange(DateTime_t[] now);
 [FileName("sample1.cs")]
 [ExternalParameter(true)]
 delegate void TestDelegate(DateTime_t[] now);
-[FileName("sample1.cs")]
-struct AddResult
-{
-    [FieldNumber(1)]
-    int Sum;
-    [FieldNumber(2)]
-    Int32 dataLen;
-    [FieldNumber(3)]
-    [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
-    byte[] data;
-
-}
 [FileName("sample1.cs")]
 interface Inter
 {

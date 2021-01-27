@@ -26,8 +26,8 @@ namespace EmbedXrpc
         TYPE_DOUBLE,
 
         TYPE_ARRAY,   /*array*/
-        TYPE_OBJECT,  /*object*/
-
+        TYPE_STRUCT,  /*struct*/
+        TYPE_UNION,     /*union*/
 
     };
     public class SerializationManager
@@ -57,14 +57,14 @@ namespace EmbedXrpc
         }*/
         
         public bool IsEnableMataDataEncode { get; set; } = false;
-        void SerializeKey(UInt32 FieldNumber, Type_t Field)
+        void SerializeKey(Int32 FieldNumber, Type_t Field)
         {
             /*Buf[Index++] = FieldNumber;
             Buf[Index++] = Field;
             printf("SerializeKey FieldNumber:%d,Type:%s\n", FieldNumber, TypeString[Field]);*/
             //Console.WriteLine($"SerializeKey:{FieldNumber},{Field.ToString()}");
-            UInt32 shiftfn = 0;
-            UInt32 next_shiftfn = 0;
+            Int32 shiftfn = 0;
+            Int32 next_shiftfn = 0;
             if ((FieldNumber >> 3) != 0)
             {
                 var data= (byte)(0x80 | (FieldNumber << 4) | (byte)Field);
@@ -167,7 +167,7 @@ namespace EmbedXrpc
             byte used = 0;
             byte temp = 0;
             type = (Type_t)(Data[Index] & 0x0F);
-            if(type> Type_t.TYPE_OBJECT)
+            if(type> Type_t.TYPE_STRUCT)
             {
                 throw new InvalidDataException();
             }
@@ -196,7 +196,7 @@ namespace EmbedXrpc
         void RemoveKeyFromSerializationManager()
         {
             UInt32 fn=0;
-            Type_t t = Type_t.TYPE_OBJECT;
+            Type_t t = Type_t.TYPE_STRUCT;
             UInt32 ind = GetKeyFromSerializationManager(ref fn, ref t);
             Index += (int)ind;
         }
@@ -382,7 +382,7 @@ namespace EmbedXrpc
             }
             else if (vt.IsClass == true)
             {
-                mytype = Type_t.TYPE_OBJECT;
+                mytype = Type_t.TYPE_STRUCT;
                 return false;
             }
             else
@@ -450,11 +450,11 @@ namespace EmbedXrpc
             }
             return ret;
         }
-        public void Serialize(object s,UInt32 fieldNumber)
+        public void Serialize(object s,Int32 fieldNumber)
         {
             if (IsEnableMataDataEncode == true)
             {
-                SerializeKey(fieldNumber,Type_t.TYPE_OBJECT);
+                SerializeKey(fieldNumber,Type_t.TYPE_STRUCT);
                 SerializeSubField(s);
             }
             else
@@ -475,14 +475,14 @@ namespace EmbedXrpc
                 ArrayLenFieldFlagAttribute IsArrayLenFieldAttribute = field.GetCustomAttribute<ArrayLenFieldFlagAttribute>();
                 if (vt.IsArray == false)
                 {
-                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    Type_t lost_t = Type_t.TYPE_STRUCT;
                     bool isBaseValueTypeFlag = IsBaseValueType(vt, ref lost_t);
                     if (isBaseValueTypeFlag == true && IsArrayLenFieldAttribute.Flag == false)
                     {
                         SerializeKey(fieldNumberAttribute.Number, lost_t);
                         BaseValueSerialize(value);
                     }
-                    else if(lost_t== Type_t.TYPE_OBJECT)
+                    else if(lost_t== Type_t.TYPE_STRUCT)
                     {
                         if (value == null)
                         {
@@ -511,7 +511,7 @@ namespace EmbedXrpc
                     SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
                     SerializeLen(len);
                     var aet = field.PropertyType.GetElementType();
-                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    Type_t lost_t = Type_t.TYPE_STRUCT;
                     if (IsBaseValueType(aet, ref lost_t) == true)
                     {
                         SerializeArrayElementFlag((byte)((byte)lost_t << 4 | 0x01));
@@ -540,21 +540,34 @@ namespace EmbedXrpc
         {
             Type st = s.GetType();
             var pros = st.GetProperties();
-            foreach (var field in pros)
+            Int32 unionTargetTypeValue = -1;
+            PropertyInfo field = pros[0];
+            int index = 0;
+            for (; index < pros.Length; index++)
             {
+                field = pros[index];
                 object value = field.GetValue(s);
                 var vt = field.PropertyType;
                 FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
+                UnionTargetTypeAttribute unionTargetTypeAttribute = field.GetCustomAttribute<UnionTargetTypeAttribute>();
+                UnionFieldAttribute unionFieldAttribute = field.GetCustomAttribute<UnionFieldAttribute>();
+                if (unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number)
+                    continue;
                 if (vt.IsArray == false)
                 {
-                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    Type_t lost_t = Type_t.TYPE_STRUCT;
                     bool isBaseValueTypeFlag = IsBaseValueType(vt, ref lost_t);
                     if (isBaseValueTypeFlag == true)
                     {
                         //SerializeKey(fieldNumberAttribute.Number, lost_t);
                         BaseValueSerialize(value);
+                        
+                        if(unionTargetTypeAttribute!=null)
+                        {
+                            unionTargetTypeValue = (Int32)value;
+                        }
                     }
-                    else if(lost_t== Type_t.TYPE_OBJECT)
+                    else if(lost_t== Type_t.TYPE_STRUCT)
                     {
                         if (value == null)
                         {
@@ -583,7 +596,7 @@ namespace EmbedXrpc
                     //SerializeKey(fieldNumberAttribute.Number, Type_t.TYPE_ARRAY);
                     //SerializeLen(len);
                     var aet = field.PropertyType.GetElementType();
-                    Type_t lost_t = Type_t.TYPE_OBJECT;
+                    Type_t lost_t = Type_t.TYPE_STRUCT;
                     if (IsBaseValueType(aet, ref lost_t) == true)
                     {
                         //SerializeArrayElementFlag((byte)((byte)lost_t << 4 | 0x01));
@@ -651,7 +664,7 @@ namespace EmbedXrpc
                 Type_t tp = Type_t.TYPE_UINT8;
                 GetKeyFromSerializationManager(ref fn, ref tp);
                 RemoveKeyFromSerializationManager();
-                if (fn == 0 && tp ==  Type_t.TYPE_OBJECT)
+                if (fn == 0 && tp ==  Type_t.TYPE_STRUCT)
                 {
                     DeserializeSubField(st, s);//如果fieldNumber 为0 说明这是第一次进来,也就是最顶级的结构体，最顶级的结构体执行完毕后,就要退出
                 }
@@ -776,7 +789,7 @@ namespace EmbedXrpc
                         }
                     }
                 }
-                else if(tp== Type_t.TYPE_OBJECT)
+                else if(tp== Type_t.TYPE_STRUCT)
                 {
                     if (targetfieldinfos.Count > 0 && localstruct != null)
                     {
@@ -796,22 +809,38 @@ namespace EmbedXrpc
         public bool NoMataData_DeserializeSubField(Type st, object localstruct)
         {
             PropertyInfo[] pros = new PropertyInfo[0];
+            Int32 unionTargetTypeValue = -1;
+            
+            int index = 0;
             if (st != null)//st有可能是null 要给pros赋一个长度为0的数组
             {
                 pros = st.GetProperties();
             }
-            foreach (var fieldinfo in pros)
+            PropertyInfo fieldinfo = pros[0];
+            for (;index<pros.Length;index++)
             {
-                Type_t tp = Type_t.TYPE_OBJECT;
+                fieldinfo = pros[index];
+                FieldNumberAttribute fieldNumberAttribute = fieldinfo.GetCustomAttribute<FieldNumberAttribute>();
+                UnionFieldAttribute unionFieldAttribute= fieldinfo.GetCustomAttribute<UnionFieldAttribute>();
+                if (unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number)
+                {
+                    continue;
+                }
+                Type_t tp = Type_t.TYPE_STRUCT;
                 IsBaseValueType(fieldinfo.PropertyType, ref tp);
                 if(tp <= Type_t.TYPE_DOUBLE)
                 {
                     var fieldValue = BaseValueDeserialize(tp);
                     fieldinfo.SetValue(localstruct, fieldValue);
+                    UnionTargetTypeAttribute unionTargetTypeAttribute = fieldinfo.GetCustomAttribute<UnionTargetTypeAttribute>();
+                    if(unionTargetTypeAttribute!=null)
+                    {
+                        unionTargetTypeValue = (Int32)fieldValue;
+                    }
                 }
                 else if (tp == Type_t.TYPE_ARRAY)
                 {
-                    UInt32 arraylen = 0;
+                    UInt32 arraylen = 1;
                     Array arrayfield = null;
                     Type arrayElementTypeOfLocalType = null;
                     ArrayPropertyAttribute att = fieldinfo.GetCustomAttribute<ArrayPropertyAttribute>();
@@ -831,7 +860,7 @@ namespace EmbedXrpc
                     }
                     arrayElementTypeOfLocalType = fieldinfo.PropertyType.GetElementType();
                     arrayfield = Array.CreateInstance(arrayElementTypeOfLocalType, (int)arraylen);
-                    Type_t aet = Type_t.TYPE_OBJECT;
+                    Type_t aet = Type_t.TYPE_STRUCT;
                     bool isbaseValueTypeOfArrayElementType = IsBaseValueType(arrayElementTypeOfLocalType, ref aet);
                     if (isbaseValueTypeOfArrayElementType)//base value type
                     {
@@ -868,7 +897,7 @@ namespace EmbedXrpc
                         fieldinfo.SetValue(localstruct, arrayfield);
                     }
                 }
-                else if (tp == Type_t.TYPE_OBJECT)
+                else if (tp == Type_t.TYPE_STRUCT)
                 {
                     var sof = Assembly.CreateInstance(fieldinfo.PropertyType.FullName);
                     NoMataData_DeserializeSubField(fieldinfo.PropertyType, sof);
@@ -975,13 +1004,13 @@ namespace EmbedXrpc
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class FieldNumberAttribute : Attribute
     {
-        public FieldNumberAttribute(UInt32 number)
+        public FieldNumberAttribute(Int32 number)
         {
             Number = number;
         }
 
         // This is a named argument
-        public UInt32 Number { get; set; }
+        public Int32 Number { get; set; }
     }
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class ArrayLenFieldFlagAttribute : Attribute
@@ -993,5 +1022,17 @@ namespace EmbedXrpc
 
         // This is a named argument
         public bool Flag { get; set; }
+    }
+
+
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public class UnionTargetTypeAttribute : Attribute
+    {
+
+    }
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public class UnionFieldAttribute : Attribute
+    {
+
     }
 }

@@ -24,15 +24,25 @@ namespace EmbedXrpcIdlParser
             NumberTypeOfEnumInCShapCodeCollection.Add(TargetType_t.TYPE_UINT64, "ulong");
             NumberTypeOfEnumInCShapCodeCollection.Add(TargetType_t.TYPE_INT64, "long");
         }
-        private void GenerateStruct(StreamWriter sw, ObjectType_TargetType objectType_TargetType)
+        
+        private void GenerateStruct(StreamWriter sw, StructType_TargetType objectType_TargetType)
         {
             sw.WriteLine($"public class {objectType_TargetType.TypeName}");
             sw.WriteLine("{");//class begin
             foreach (var field in objectType_TargetType.TargetFields)
             {
+                sw.WriteLine($"public const int {field.FieldName}_FieldNumber={field.FieldNumberAttr.Number};");
                 if (field.TargetType.TargetType <= TargetType_t.TYPE_ENUM)
                 {
                     Base_TargetField base_TargetField = field as Base_TargetField;
+                    if(base_TargetField.IsUnionTargetTypeField==true)
+                    {
+                        sw.WriteLine($"[UnionTargetType]");
+                    }
+                    if(base_TargetField.UnionFieldAttr!=null)
+                    {
+                        sw.WriteLine($"[UnionField]");
+                    }
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
                     sw.WriteLine($"[ArrayLenFieldFlag( {base_TargetField.IsArrayLenField.ToString().ToString().ToLower()} ) ]");
                     sw.WriteLine($"public {field.TargetType.TypeName} {field.FieldName}{{get;set;}}");
@@ -40,6 +50,10 @@ namespace EmbedXrpcIdlParser
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
                     Array_TargetField array_TargetField = field as Array_TargetField;
+                    if (array_TargetField.UnionFieldAttr !=null)
+                    {
+                        sw.WriteLine($"[UnionField]");
+                    }
                     sw.WriteLine($"[ArrayProperty(LenFieldName = \"{array_TargetField.MaxCountAttribute.LenFieldName}\")]");
                     Base_TargetField arrayLenField = array_TargetField.ArrayLenField;
                     ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
@@ -47,12 +61,17 @@ namespace EmbedXrpcIdlParser
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
                     sw.WriteLine($"public {attt.ElementType.TypeName}[] {array_TargetField.FieldName}{{get;set;}}=new {attt.ElementType.TypeName}[{lenstring}];");
                 }
-                else if (field.TargetType.TargetType == TargetType_t.TYPE_OBJECT)
+                else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
                 {
-                    Object_TargetField object_TargetField = field as Object_TargetField;
+                    Struct_TargetField object_TargetField = field as Struct_TargetField;
+                    if (object_TargetField.UnionFieldAttr != null)
+                    {
+                        sw.WriteLine($"[UnionField]");
+                    }
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
                     sw.WriteLine($"public {field.TargetType.TypeName} {field.FieldName}{{get;set;}}=new {field.TargetType.TypeName}();");
                 }
+                sw.WriteLine("\r\n");
             }
             sw.WriteLine("}");//class end
 
@@ -277,7 +296,6 @@ namespace EmbedXrpcIdlParser
             {
                 GenerateStruct(csStreamWriter, stru);
             }
-
             foreach (var del in idlInfo.TargetDelegates)
             {
                 GenerateDelegate(csStreamWriter, del, genType);

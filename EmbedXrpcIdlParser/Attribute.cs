@@ -4,18 +4,7 @@ using System.Text;
 
 namespace EmbedXrpcIdlParser
 {
-#if false
-    [AttributeUsage(AttributeTargets.Field|AttributeTargets.Parameter, Inherited = false, AllowMultiple = true)]
-    public sealed class FieldIndexAttribute : Attribute
-    {
-        public FieldIndexAttribute(int index)
-        {
-            Index = index;
-        }
-        // This is a named argument
-        public int Index { get; set; }
-    }
-#endif   
+ 
     [AttributeUsage(AttributeTargets.Field|AttributeTargets.ReturnValue | AttributeTargets.Parameter, Inherited = false, AllowMultiple = true)]
     [Serializable]
     public sealed class MaxCountAttribute : Attribute
@@ -117,18 +106,30 @@ namespace EmbedXrpcIdlParser
         TYPE_DOUBLE,
 
         TYPE_ARRAY,   /*array*/
-        TYPE_OBJECT,  /*object*/
+        TYPE_STRUCT,  /*object*/
+        TYPE_UNION,
     };
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    public class UnionTargetTypeAttribute : Attribute
+    {
+
+    }
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    public class UnionFieldAttribute : Attribute
+    {
+
+    }
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
     public sealed class FieldNumberAttribute : Attribute
     { 
-        public FieldNumberAttribute(UInt32 number)
+        public FieldNumberAttribute(Int32 number)
         {
             Number = number;
         }
 
         // This is a named argument
-        public UInt32 Number { get; set; }
+        public Int32 Number { get; set; }
     }
 
 

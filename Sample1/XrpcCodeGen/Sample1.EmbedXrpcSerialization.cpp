@@ -3,6 +3,48 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
+void AddResult_Serialize(SerializationManager &sm,AddResult *obj)
+{
+Memcpy(&sm.Buf[sm.Index],&obj->Sum,sizeof(obj->Sum));
+sm.Index+=sizeof(obj->Sum);
+
+Memcpy(&sm.Buf[sm.Index],&obj->dataLen,sizeof(obj->dataLen));
+sm.Index+=sizeof(obj->dataLen);
+
+for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
+{
+Memcpy(&sm.Buf[sm.Index],&obj->data[data_index],sizeof(UInt8));
+sm.Index+=sizeof(UInt8);
+
+}
+
+}
+
+
+void AddResult_Deserialize(SerializationManager &sm,AddResult *obj)
+{
+DeserializeField((uint8_t *)&obj->Sum,sm,sizeof(obj->Sum));
+DeserializeField((uint8_t *)&obj->dataLen,sm,sizeof(obj->dataLen));
+obj->data=(UInt8 *)Malloc(sizeof(UInt8)*obj->dataLen);
+for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
+{
+DeserializeField((uint8_t *)&obj->data[data_index],sm,sizeof(UInt8));
+}
+
+}
+
+
+void AddResult_FreeData(AddResult *obj)
+{
+for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
+{
+}
+
+Free(obj->data);
+
+}
+
+
 void Student_Serialize(SerializationManager &sm,Student *obj)
 {
 Memcpy(&sm.Buf[sm.Index],&obj->a,sizeof(obj->a));
@@ -11,6 +53,38 @@ sm.Index+=sizeof(obj->a);
 Memcpy(&sm.Buf[sm.Index],&obj->b,sizeof(obj->b));
 sm.Index+=sizeof(obj->b);
 
+Memcpy(&sm.Buf[sm.Index],&obj->AddressType,sizeof(obj->AddressType));
+sm.Index+=sizeof(obj->AddressType);
+
+ if(obj->AddressType==Student_u1_FieldNumber)
+{
+Memcpy(&sm.Buf[sm.Index],&obj->u1,sizeof(obj->u1));
+sm.Index+=sizeof(obj->u1);
+
+}
+else if(obj->AddressType==Student_u2_FieldNumber)
+{
+Memcpy(&sm.Buf[sm.Index],&obj->u2,sizeof(obj->u2));
+sm.Index+=sizeof(obj->u2);
+
+}
+else if(obj->AddressType==Student_u3_FieldNumber)
+{
+Memcpy(&sm.Buf[sm.Index],&obj->u3,sizeof(UInt64));
+sm.Index+=sizeof(UInt64);
+
+}
+else if(obj->AddressType==Student_u4_FieldNumber)
+{
+AddResult_Serialize(sm,&obj->u4);
+
+}
+Memcpy(&sm.Buf[sm.Index],&obj->uend1,sizeof(obj->uend1));
+sm.Index+=sizeof(obj->uend1);
+
+Memcpy(&sm.Buf[sm.Index],&obj->uend2,sizeof(obj->uend2));
+sm.Index+=sizeof(obj->uend2);
+
 }
 
 
@@ -18,11 +92,45 @@ void Student_Deserialize(SerializationManager &sm,Student *obj)
 {
 DeserializeField((uint8_t *)&obj->a,sm,sizeof(obj->a));
 DeserializeField((uint8_t *)&obj->b,sm,sizeof(obj->b));
+DeserializeField((uint8_t *)&obj->AddressType,sm,sizeof(obj->AddressType));
+ if(obj->AddressType==Student_u1_FieldNumber)
+{
+DeserializeField((uint8_t *)&obj->u1,sm,sizeof(obj->u1));
+}
+else if(obj->AddressType==Student_u2_FieldNumber)
+{
+DeserializeField((uint8_t *)&obj->u2,sm,sizeof(obj->u2));
+}
+else if(obj->AddressType==Student_u3_FieldNumber)
+{
+DeserializeField((uint8_t *)&obj->u3,sm,sizeof(UInt64));
+}
+else if(obj->AddressType==Student_u4_FieldNumber)
+{
+AddResult_Deserialize(sm,&obj->u4);
+
+}
+DeserializeField((uint8_t *)&obj->uend1,sm,sizeof(obj->uend1));
+DeserializeField((uint8_t *)&obj->uend2,sm,sizeof(obj->uend2));
 }
 
 
 void Student_FreeData(Student *obj)
 {
+ if(obj->AddressType==Student_u1_FieldNumber)
+{
+}
+else if(obj->AddressType==Student_u2_FieldNumber)
+{
+}
+else if(obj->AddressType==Student_u3_FieldNumber)
+{
+}
+else if(obj->AddressType==Student_u4_FieldNumber)
+{
+AddResult_FreeData(&obj->u4);
+
+}
 }
 
 
@@ -94,48 +202,6 @@ for(UInt8 DateString_index=0;DateString_index<obj->DateStringLen;DateString_inde
 Free(obj->DateString);
 
 Student_FreeData(&obj->David);
-
-}
-
-
-void AddResult_Serialize(SerializationManager &sm,AddResult *obj)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->Sum,sizeof(obj->Sum));
-sm.Index+=sizeof(obj->Sum);
-
-Memcpy(&sm.Buf[sm.Index],&obj->dataLen,sizeof(obj->dataLen));
-sm.Index+=sizeof(obj->dataLen);
-
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->data[data_index],sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-
-}
-
-}
-
-
-void AddResult_Deserialize(SerializationManager &sm,AddResult *obj)
-{
-DeserializeField((uint8_t *)&obj->Sum,sm,sizeof(obj->Sum));
-DeserializeField((uint8_t *)&obj->dataLen,sm,sizeof(obj->dataLen));
-obj->data=(UInt8 *)Malloc(sizeof(UInt8)*obj->dataLen);
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-DeserializeField((uint8_t *)&obj->data[data_index],sm,sizeof(UInt8));
-}
-
-}
-
-
-void AddResult_FreeData(AddResult *obj)
-{
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-}
-
-Free(obj->data);
 
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,9 +44,9 @@ namespace EmbedXrpcIdlParser
                 cfilestringBuilder.Append(code);
                 hfilestringBuilder.Append(Extern);
             }
-            else if(at_ot.TargetType== TargetType_t.TYPE_OBJECT)
+            else if(at_ot.TargetType== TargetType_t.TYPE_STRUCT)
             {
-                ObjectType_TargetType ottt = at_ot as ObjectType_TargetType;
+                StructType_TargetType ottt = at_ot as StructType_TargetType;
                 List<string> FieldsDesc = new List<string>();
                 foreach (var field in ottt.TargetFields)
                 {
@@ -72,7 +73,7 @@ namespace EmbedXrpcIdlParser
 
             }
         }
-        public void EmitStruct(ObjectType_TargetType objectType_TargetType, StreamWriter cfilewriter, StreamWriter hfilewriter)
+        public void EmitStruct(StructType_TargetType objectType_TargetType, StreamWriter cfilewriter, StreamWriter hfilewriter)
         {
             StringBuilder cfilestringBuilder = new StringBuilder();
             StringBuilder hfilestringBuilder = new StringBuilder();
@@ -146,10 +147,10 @@ namespace EmbedXrpcIdlParser
                     hfilestringBuilder.Append(Extern);
                     
                 }
-                else if (field.TargetType.TargetType == TargetType_t.TYPE_OBJECT)
+                else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
                 {
-                    Object_TargetField object_TargetField = field as Object_TargetField;
-                    ObjectType_TargetType ottt = object_TargetField.TargetType as ObjectType_TargetType;
+                    Struct_TargetField object_TargetField = field as Struct_TargetField;
+                    StructType_TargetType ottt = object_TargetField.TargetType as StructType_TargetType;
                     string code = $"extern const ObjectType {ottt.TypeName}_TypeInstance;\r\n";
                     code += $"extern const ObjectField {objectType_TargetType.TypeName}_Field_{object_TargetField.FieldName}=\r\n" +
                         $"{{ \r\n" +
@@ -171,19 +172,20 @@ namespace EmbedXrpcIdlParser
             hfilewriter.WriteLine(hfilestringBuilder.ToString());
         }
 
-        public void EmitSerializeMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        public void EmitSerializeMacro(StructType_TargetType targetStruct, StreamWriter writer)
         {
             writer.WriteLine($"#define {targetStruct.TypeName}_Serialize(sm,objptr)    sm.Serialize(&{targetStruct.TypeName}_TypeInstance,objptr,0)");
         }
 
-        public void EmitDeserializeMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        public void EmitDeserializeMacro(StructType_TargetType targetStruct, StreamWriter writer)
         {
             writer.WriteLine($"#define {targetStruct.TypeName}_Deserialize(sm,objptr)    sm.Deserialize(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
 
-        public void EmitFreeDataMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        public void EmitFreeDataMacro(StructType_TargetType targetStruct, StreamWriter writer)
         {
             writer.WriteLine($"#define {targetStruct.TypeName}_FreeData(objptr)    SerializationManager::FreeData(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
     }
 }
+#endif

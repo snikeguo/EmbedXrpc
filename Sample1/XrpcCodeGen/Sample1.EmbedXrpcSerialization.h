@@ -15,6 +15,12 @@
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
+void AddResult_Serialize(SerializationManager &sm,AddResult *obj);
+
+void AddResult_Deserialize(SerializationManager &sm,AddResult *obj);
+
+void AddResult_FreeData(AddResult *obj);
+
 void Student_Serialize(SerializationManager &sm,Student *obj);
 
 void Student_Deserialize(SerializationManager &sm,Student *obj);
@@ -26,12 +32,6 @@ void DateTime_t_Serialize(SerializationManager &sm,DateTime_t *obj);
 void DateTime_t_Deserialize(SerializationManager &sm,DateTime_t *obj);
 
 void DateTime_t_FreeData(DateTime_t *obj);
-
-void AddResult_Serialize(SerializationManager &sm,AddResult *obj);
-
-void AddResult_Deserialize(SerializationManager &sm,AddResult *obj);
-
-void AddResult_FreeData(AddResult *obj);
 
 void DateTimeChange_Parameter_Serialize(SerializationManager &sm,DateTimeChange_Parameter *obj);
 

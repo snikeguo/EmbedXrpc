@@ -24,19 +24,19 @@ public:
 EmbedXrpcObject *RpcObject=nullptr;
 InterClientImpl(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 {}
-Inter_Add_Parameter Add_sendData;
+Inter_Add_Parameter Add_SendData;
 Inter_Add_Return Add_reqresp;
 Inter_Add_Return& Add();void Free_Add(Inter_Add_Return *response);
 
-Inter_NoArg_Parameter NoArg_sendData;
+Inter_NoArg_Parameter NoArg_SendData;
 Inter_NoArg_Return NoArg_reqresp;
 Inter_NoArg_Return& NoArg();
 void Free_NoArg(Inter_NoArg_Return *response);
 
-Inter_NoReturn_Parameter NoReturn_sendData;
+Inter_NoReturn_Parameter NoReturn_SendData;
 Inter_NoReturn_Return NoReturn_reqresp;
 Inter_NoReturn_Return& NoReturn(Int32 a);
-Inter_NoArgAndReturn_Parameter NoArgAndReturn_sendData;
+Inter_NoArgAndReturn_Parameter NoArgAndReturn_SendData;
 Inter_NoArgAndReturn_Return NoArgAndReturn_reqresp;
 Inter_NoArgAndReturn_Return& NoArgAndReturn();
 };

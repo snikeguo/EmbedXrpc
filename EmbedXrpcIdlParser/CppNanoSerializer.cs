@@ -9,22 +9,21 @@ namespace EmbedXrpcIdlParser
 {
     public class CppNanoSerializer : ICppSerializable
     {
-        public void EmitSerializeMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        public void EmitSerializeMacro(StructType_TargetType targetStructUnion, StreamWriter writer)
         {
             //writer.WriteLine($"#define {targetStruct.TypeName}_Serialize(sm,objptr)    sm.Serialize(&{targetStruct.TypeName}_TypeInstance,objptr,0)");
         }
 
-        public void EmitDeserializeMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        public void EmitDeserializeMacro(StructType_TargetType targetStructUnion, StreamWriter writer)
         {
             //writer.WriteLine($"#define {targetStruct.TypeName}_Deserialize(sm,objptr)    sm.Deserialize(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
 
-        public void EmitFreeDataMacro(ObjectType_TargetType targetStruct, StreamWriter writer)
+        public void EmitFreeDataMacro(StructType_TargetType targetStructUnion, StreamWriter writer)
         {
             //writer.WriteLine($"#define {targetStruct.TypeName}_FreeData(objptr)    SerializationManager::FreeData(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
-        private bool IsFirstRun = true;
-        public void EmitStruct(ObjectType_TargetType targetStruct, StreamWriter cfilewriter, StreamWriter hfilewriter)
+        public void EmitStruct(StructType_TargetType targetStructUnion, StreamWriter cfilewriter, StreamWriter hfilewriter)
         {
             StringBuilder SerializeCodeSb = new StringBuilder();
             StringBuilder DeserializeCodeSb = new StringBuilder();
@@ -34,39 +33,46 @@ namespace EmbedXrpcIdlParser
             StringBuilder DeserializeExternSb = new StringBuilder();
             StringBuilder FreeExternSb = new StringBuilder();
 
-            if(IsFirstRun==true)
-            {
-                
-                //cfilewriter.WriteLine("#if EmbedXrpc_CheckSumValid==1");
-                //cfilewriter.WriteLine("#define SerializationManagerAppendDataSum(sm,sum)    sm.SetCalculateSum(sm.GetCalculateSum()+sum)");
-                //cfilewriter.WriteLine("#else");
-                //cfilewriter.WriteLine("#define SerializationManagerAppendDataSum(sm,sum)");
-                //cfilewriter.WriteLine("#endif");
 
-                IsFirstRun = false;
-            }
-            
-
-            SerializeExternSb.AppendLine($"void {targetStruct.TypeName}_Serialize(SerializationManager &sm,{targetStruct.TypeName} *obj);");
-            SerializeCodeSb.AppendLine($"void {targetStruct.TypeName}_Serialize(SerializationManager &sm,{targetStruct.TypeName} *obj)");
+            SerializeExternSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager &sm,{targetStructUnion.TypeName} *obj);");
+            SerializeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager &sm,{targetStructUnion.TypeName} *obj)");
             SerializeCodeSb.AppendLine("{");
 
-            DeserializeExternSb.AppendLine($"void {targetStruct.TypeName}_Deserialize(SerializationManager &sm,{targetStruct.TypeName} *obj);");
-            DeserializeCodeSb.AppendLine($"void {targetStruct.TypeName}_Deserialize(SerializationManager &sm,{targetStruct.TypeName} *obj)");
+            DeserializeExternSb.AppendLine($"void {targetStructUnion.TypeName}_Deserialize(SerializationManager &sm,{targetStructUnion.TypeName} *obj);");
+            DeserializeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_Deserialize(SerializationManager &sm,{targetStructUnion.TypeName} *obj)");
             DeserializeCodeSb.AppendLine("{");
 
-            FreeExternSb.AppendLine($"void {targetStruct.TypeName}_FreeData({targetStruct.TypeName} *obj);");
-            FreeCodeSb.AppendLine($"void {targetStruct.TypeName}_FreeData({targetStruct.TypeName} *obj)");
+            FreeExternSb.AppendLine($"void {targetStructUnion.TypeName}_FreeData({targetStructUnion.TypeName} *obj);");
+            FreeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_FreeData({targetStructUnion.TypeName} *obj)");
             FreeCodeSb.AppendLine("{");
-            foreach (var field in targetStruct.TargetFields)
+
+            List<ITargetField> TargetFields= targetStructUnion.TargetFields;
+            ITargetField field = null;
+
+            bool unionIfFirstFlag = true;
+            for (int i=0;i<TargetFields.Count;i++)
             {
+                field = TargetFields[i];
+                if (field.UnionFieldAttr != null)
+                {
+                    string elsestring = (unionIfFirstFlag == true ? "" : "else");
+                    SerializeCodeSb.AppendLine($"{elsestring} if(obj->{targetStructUnion.UnionTargetTypeField.FieldName}=={targetStructUnion.TypeName}_{field.FieldName}_FieldNumber)");
+                    SerializeCodeSb.AppendLine("{");
+
+                    DeserializeCodeSb.AppendLine($"{elsestring} if(obj->{targetStructUnion.UnionTargetTypeField.FieldName}=={targetStructUnion.TypeName}_{field.FieldName}_FieldNumber)");
+                    DeserializeCodeSb.AppendLine("{");
+
+                    FreeCodeSb.AppendLine($"{elsestring} if(obj->{targetStructUnion.UnionTargetTypeField.FieldName}=={targetStructUnion.TypeName}_{field.FieldName}_FieldNumber)");
+                    FreeCodeSb.AppendLine("{");
+                    unionIfFirstFlag = false;
+                }
                 //FieldsDesc.Add($"{targetStruct.Name}_Field_{field.Name}");
                 if (field.TargetType.TargetType < TargetType_t.TYPE_ENUM)
                 {
                     SerializeCodeSb.AppendLine($"Memcpy(&sm.Buf[sm.Index],&obj->{field.FieldName},sizeof(obj->{field.FieldName}));");
                     SerializeCodeSb.AppendLine($"sm.Index+=sizeof(obj->{field.FieldName});\r\n");
 
-                    DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof(obj->{field.FieldName}));");                    
+                    DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof(obj->{field.FieldName}));");
 
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
@@ -76,7 +82,7 @@ namespace EmbedXrpcIdlParser
                     SerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
 
                     DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
-                    
+
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
@@ -141,13 +147,20 @@ namespace EmbedXrpcIdlParser
                         FreeCodeSb.AppendLine($"Free(obj->{field.FieldName});\r\n");
                     }
                 }
-                else if (field.TargetType.TargetType == TargetType_t.TYPE_OBJECT)
+                else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
                 {
                     SerializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Serialize(sm,&obj->{field.FieldName});\r\n");
                     DeserializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Deserialize(sm,&obj->{field.FieldName});\r\n");
                     FreeCodeSb.AppendLine($"{field.TargetType.TypeName}_FreeData(&obj->{field.FieldName});\r\n");
                 }
+                if (field.UnionFieldAttr != null)
+                {
+                    SerializeCodeSb.AppendLine("}");
+                    DeserializeCodeSb.AppendLine("}");
+                    FreeCodeSb.AppendLine("}");
+                }
             }
+            
             SerializeCodeSb.AppendLine("}\r\n");
             DeserializeCodeSb.AppendLine("}\r\n");
             FreeCodeSb.AppendLine("}\r\n");
