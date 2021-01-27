@@ -61,6 +61,7 @@ namespace EmbedXrpcIdlParser
             }
             if(generater.GenLanguageType.ToLower()=="cpp-ref")
             {
+                throw new NotSupportedException("Not support cpp-ref!");
                 EmbedXrpcCodeGenerater cpp = new EmbedXrpcCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {

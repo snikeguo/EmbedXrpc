@@ -46,7 +46,7 @@ struct Student
 
     [FieldNumber(100)]
     byte uend1;
-    [FieldNumber(101)]
+    //[FieldNumber(101)]
     byte uend2;
 }
 [FileName("sample1.cs")]

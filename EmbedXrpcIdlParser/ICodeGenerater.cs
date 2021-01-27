@@ -385,6 +385,7 @@ namespace EmbedXrpcIdlParser
             targetStructType.TypeName = object_type.Name;
             var fields = object_type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
             //var unionatt = object_type.GetCustomAttribute<UnionAttribute>();
+            List<int> FieldNumbers = new List<int>();
             int fieldNumber = 1;
             foreach (var field in fields)
             {
@@ -393,9 +394,14 @@ namespace EmbedXrpcIdlParser
                 if (FieldNumberAttr == null)
                 {
                     FieldNumberAttr = new FieldNumberAttribute(fieldNumber);//如果没有fieldNumber说明用户并不打算使用TTLV编码
-                                                                            //throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");
-                    fieldNumber++;
+                    //throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");     
                 }
+                while (FieldNumbers.Contains(FieldNumberAttr.Number))
+                {
+                    fieldNumber++;
+                    FieldNumberAttr.Number = fieldNumber;
+                }
+                FieldNumbers.Add(FieldNumberAttr.Number);
                 if (IsNumberType(field.FieldType) == true)
                 {
                     Base_TargetField targetfield = new Base_TargetField();
