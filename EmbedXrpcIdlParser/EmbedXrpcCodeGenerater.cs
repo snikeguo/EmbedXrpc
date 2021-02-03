@@ -45,26 +45,18 @@ namespace EmbedXrpcIdlParser
         }
         public CppCodeGenParameter codeGenParameter;
         public ICppSerializable embedXrpcSerializationGenerator;
-        public void CodeGen(CppCodeGenParameter parameter)
+        public void CodeGen(CppCodeGenParameter cppCodeGenParameter)
         {
             var encode = Encoding.UTF8;
-            codeGenParameter = parameter;
+            codeGenParameter = cppCodeGenParameter;
             if(embedXrpcSerializationGenerator==null)
             {
-                if(parameter.IsRuntimeVersion==true)
-                {
-                    //embedXrpcSerializationGenerator = new CppReflectionSerializer();
-                }
-                else
-                {
-                    //throw new NotImplementedException();
-                    embedXrpcSerializationGenerator = new CppNanoSerializer();
-                }
+                embedXrpcSerializationGenerator = new CppNanoSerializer();
             }
-            Console.WriteLine($"cpp code gen:   {parameter.FileIdlInfo.FileName}");
-            var outputattr = parameter.FileIdlInfo.GenerationOption;
+            Console.WriteLine($"cpp code gen:   {cppCodeGenParameter.FileIdlInfo.FileName}");
+            var outputattr = cppCodeGenParameter.FileIdlInfo.GenerationOption;
 
-            var VersionHsw = new StreamWriter(parameter.OutPutPath + "EmbedXrpcVersion.h", false, encode);
+            var VersionHsw = new StreamWriter(cppCodeGenParameter.OutPutPath + "EmbedXrpcVersion.h", false, encode);
             VersionHsw.WriteLine("#ifndef EmbedXrpcVersion_H");
             VersionHsw.WriteLine("#define EmbedXrpcVersion_H");
             string ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -73,12 +65,12 @@ namespace EmbedXrpcIdlParser
             VersionHsw.Flush();
             VersionHsw.Close();
 
-            CommonHsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".h", false, encode);
+            CommonHsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".h", false, encode);
             CommonHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_H");
             CommonHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_H");
             //CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
             CommonHsw.WriteLine("#include\"EmbedSerialization.h\"");
-            if(parameter.FileIdlInfo.TargetDelegates.Count>0|| parameter.FileIdlInfo.TargetInterfaces.Count>0)
+            if(cppCodeGenParameter.FileIdlInfo.TargetDelegates.Count>0|| cppCodeGenParameter.FileIdlInfo.TargetInterfaces.Count>0)
                 CommonHsw.WriteLine("#include\"EmbedXrpcCommon.h\"");
 
             foreach (var userInc in outputattr.UserIncludes)
@@ -95,7 +87,7 @@ namespace EmbedXrpcIdlParser
             CommonHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
 
-            CommonCsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".cpp", false, encode);
+            CommonCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".cpp", false, encode);
             CommonCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
             CommonCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             CommonCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
@@ -105,14 +97,14 @@ namespace EmbedXrpcIdlParser
 
 
 
-            SerializeCsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, encode);
+            SerializeCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, encode);
 
 
             SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
             SerializeCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             SerializeCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
-            SerializeHsw = new StreamWriter(parameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, encode);
+            SerializeHsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, encode);
             SerializeHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".","_")}_EmbedXrpcSerialization_H");
             SerializeHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_EmbedXrpcSerialization_H");
             SerializeHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
@@ -139,60 +131,60 @@ namespace EmbedXrpcIdlParser
 
             
 
-            if(parameter.GenType== GenType.Client|| parameter.GenType == GenType.All)
+            if(cppCodeGenParameter.GenType== GenType.Client|| cppCodeGenParameter.GenType == GenType.All)
             {
-                if (Directory.Exists(parameter.OutPutPath + "Client") == false)
-                    Directory.CreateDirectory(parameter.OutPutPath + "Client");
+                if (Directory.Exists(cppCodeGenParameter.OutPutPath + "Client") == false)
+                    Directory.CreateDirectory(cppCodeGenParameter.OutPutPath + "Client");
 
-                ClientHsw = new StreamWriter(parameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, encode);
+                ClientHsw = new StreamWriter(cppCodeGenParameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.h", false, encode);
                 ClientHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");
                 ClientHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Client_H");                
                 ClientHsw.WriteLine("#include\"EmbedXrpcObject.h\"");
                 ClientHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
-                ClientCsw = new StreamWriter(parameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.cpp", false, encode);
+                ClientCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + "Client/" + outputattr.OutPutFileName + ".Client.cpp", false, encode);
                 ClientCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Client.h\"");
             }
 
 
-            if (parameter.GenType == GenType.Server || parameter.GenType == GenType.All)
+            if (cppCodeGenParameter.GenType == GenType.Server || cppCodeGenParameter.GenType == GenType.All)
             {
-                if (Directory.Exists(parameter.OutPutPath + "Server") == false)
-                    Directory.CreateDirectory(parameter.OutPutPath + "Server");
+                if (Directory.Exists(cppCodeGenParameter.OutPutPath + "Server") == false)
+                    Directory.CreateDirectory(cppCodeGenParameter.OutPutPath + "Server");
 
-                ServerHsw = new StreamWriter(parameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.h", false, encode);
+                ServerHsw = new StreamWriter(cppCodeGenParameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.h", false, encode);
                 ServerHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
                 ServerHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_Server_H");
                 ServerHsw.WriteLine("#include\"EmbedXrpcObject.h\"");
                 ServerHsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
 
-                ServerCsw = new StreamWriter(parameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.cpp", false, encode);
+                ServerCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.cpp", false, encode);
                 ServerCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Server.h\"");
             }
             
 
-            foreach (var em in parameter.FileIdlInfo.TargetEnums)
+            foreach (var em in cppCodeGenParameter.FileIdlInfo.TargetEnums)
             {
                 //EmitFbsEnum(em);
                 //fbsStreamWriter.WriteLine(em.ToFbs().ToString());
                 CppSerializableCommon.EmitEnum(em,CommonHsw);
             }
-            foreach (var stru in parameter.FileIdlInfo.TargetStructs)
+            foreach (var stru in cppCodeGenParameter.FileIdlInfo.TargetStructs)
             {
                 //EmitFbsTable(stru);
                 //fbsStreamWriter.WriteLine(stru.ToFbs().ToString());
                 /*embedXrpcSerializationGenerator.EmitStruct(stru,
                     SerializeCsw, 
                     SerializeHsw);*/
-                EmitStruct(stru);
+                EmitStruct(stru, cppCodeGenParameter);
             }
-            foreach (var del in parameter.FileIdlInfo.TargetDelegates)
+            foreach (var del in cppCodeGenParameter.FileIdlInfo.TargetDelegates)
             {
                 //fbsStreamWriter.WriteLine(del.ToFbs().ToString());
                 /*TargetStruct targetStruct = new TargetStruct();
                 targetStruct.Name = del.MethodName+"Struct";
                 targetStruct.TargetFields = del.TargetFields;*/
-                EmitStruct(del.ParameterStructType);
+                EmitStruct(del.ParameterStructType, cppCodeGenParameter);
                 EmitDelegate(del);
                 /*embedXrpcSerializationGenerator.EmitStruct(del.ParameterStructType,
                     SerializeCsw,
@@ -202,10 +194,10 @@ namespace EmbedXrpcIdlParser
 
             }
 
-            foreach (var ifs in parameter.FileIdlInfo.TargetInterfaces)
+            foreach (var ifs in cppCodeGenParameter.FileIdlInfo.TargetInterfaces)
             {
                 //fbsStreamWriter.WriteLine(ifs.ToFbs().ToString());
-                EmitClientInterface(ifs);
+                EmitClientInterface(ifs,cppCodeGenParameter);
                 
             }
 
@@ -230,7 +222,7 @@ namespace EmbedXrpcIdlParser
 
             SerializeHsw.Flush();
             SerializeHsw.Close();
-            if (parameter.GenType == GenType.Client || parameter.GenType == GenType.All)
+            if (cppCodeGenParameter.GenType == GenType.Client || cppCodeGenParameter.GenType == GenType.All)
             {
                 ClientHsw.WriteLine("\n#endif");
                 ClientHsw.Flush();
@@ -240,7 +232,7 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.Close();
             }
 
-            if (parameter.GenType == GenType.Server || parameter.GenType == GenType.All)
+            if (cppCodeGenParameter.GenType == GenType.Server || cppCodeGenParameter.GenType == GenType.All)
             {
                 ServerHsw.WriteLine("\n#endif");
                 ServerHsw.Flush();
@@ -260,7 +252,7 @@ namespace EmbedXrpcIdlParser
         private StreamWriter SerializeCsw;
         private StreamWriter SerializeHsw;
      
-        public void EmitStruct(StructType_TargetType structType)
+        public void EmitStruct(StructType_TargetType structType, CppCodeGenParameter cppCodeGenParameter)
         {
             /*
              CommonHsw用来定义具体的数据结构
@@ -269,7 +261,8 @@ namespace EmbedXrpcIdlParser
             CppSerializableCommon.EmitStruct(structType, CommonHsw);
             embedXrpcSerializationGenerator.EmitStruct(structType,
                     SerializeCsw,
-                    SerializeHsw);
+                    SerializeHsw,
+                    cppCodeGenParameter.IsEncodeTlv);
             embedXrpcSerializationGenerator.EmitSerializeMacro(structType, SerializeHsw);
             embedXrpcSerializationGenerator.EmitDeserializeMacro(structType, SerializeHsw);
             embedXrpcSerializationGenerator.EmitFreeDataMacro(structType, SerializeHsw);
@@ -463,7 +456,7 @@ namespace EmbedXrpcIdlParser
 
                 
         }
-        public void EmitClientInterface(TargetInterface targetInterface)
+        public void EmitClientInterface(TargetInterface targetInterface, CppCodeGenParameter cppCodeGenParameter)
         {
             foreach (var service in targetInterface.Services)
             {
@@ -474,7 +467,7 @@ namespace EmbedXrpcIdlParser
                 /*embedXrpcSerializationGenerator.EmitStruct(service.ParameterStructType,
                     SerializeCsw,
                     SerializeHsw);*/
-                EmitStruct(service.ParameterStructType);
+                EmitStruct(service.ParameterStructType, cppCodeGenParameter);
                 AddMessageMap(service.FullName, ReceiveType_t.ReceiveType_Request);
                 EmitServiceIdCode(SerializeHsw, service.FullName, service.ServiceId);//生成 ServiceID 宏定义
 
@@ -505,7 +498,7 @@ namespace EmbedXrpcIdlParser
                     SerializeCsw,
                     SerializeHsw);*/
 
-                EmitStruct(service.ReturnStructType);
+                EmitStruct(service.ReturnStructType,cppCodeGenParameter);
 
                 AddMessageMap(service.FullName, ReceiveType_t.ReceiveType_Response);
                 //EmitServiceIdCode(SerializeHsw, targetStructResponse.Name, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);//生成 ServiceID 宏定义

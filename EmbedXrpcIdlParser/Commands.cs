@@ -27,6 +27,9 @@ namespace EmbedXrpcIdlParser
         [Option('o', "OutputPath", HelpText = "Output Path")]
         public string OutputPath { get; set; }
 
+        [Option('e', "Encode TTLV", HelpText = "Encode TTLV")]
+        public bool IsEncodeTlv { get; set; }
+
         public static void Parsed(CommandGenerater generater)
         {
             IdlInfo idlInfo = new IdlInfo();
@@ -70,7 +73,7 @@ namespace EmbedXrpcIdlParser
                         FileIdlInfo = idlInfo.ParsedFiles[i],
                         GenType = gt,
                         OutPutPath = generater.OutputPath,
-                        IsRuntimeVersion=true,
+                        IsEncodeTlv=true,
                     };
                     cpp.CodeGen(parameter);
                 }
@@ -86,7 +89,7 @@ namespace EmbedXrpcIdlParser
                         FileIdlInfo = idlInfo.ParsedFiles[i],
                         GenType = gt,
                         OutPutPath = generater.OutputPath,
-                        IsRuntimeVersion = false,
+                        IsEncodeTlv = false,
                     };
                     cpp.CodeGen(parameter);
                 }

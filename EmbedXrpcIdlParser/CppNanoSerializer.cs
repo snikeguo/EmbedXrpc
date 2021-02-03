@@ -23,7 +23,7 @@ namespace EmbedXrpcIdlParser
         {
             //writer.WriteLine($"#define {targetStruct.TypeName}_FreeData(objptr)    SerializationManager::FreeData(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
-        public void EmitStruct(StructType_TargetType targetStructUnion, StreamWriter cfilewriter, StreamWriter hfilewriter)
+        public void EmitStruct(StructType_TargetType targetStructUnion, StreamWriter cfilewriter, StreamWriter hfilewriter, bool isEncodeTlv)
         {
             StringBuilder SerializeCodeSb = new StringBuilder();
             StringBuilder DeserializeCodeSb = new StringBuilder();

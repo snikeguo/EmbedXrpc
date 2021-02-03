@@ -799,7 +799,7 @@ namespace EmbedXrpcIdlParser
         public GenType GenType { get; set; }
         public string OutPutPath { get; set; }
 
-        public bool IsRuntimeVersion { get; set; }
+        public bool IsEncodeTlv { get; set; }
 
     }
 
