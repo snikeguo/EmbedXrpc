@@ -23,6 +23,23 @@ namespace EmbedXrpcIdlParser
         {
             //writer.WriteLine($"#define {targetStruct.TypeName}_FreeData(objptr)    SerializationManager::FreeData(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
+        private static Dictionary<TargetType_t, string> TargetTypeString = new Dictionary<TargetType_t, string>();
+        static CppNanoSerializer()
+        {
+            TargetTypeString.Add(TargetType_t.TYPE_UINT8, "TYPE_UINT8");
+            TargetTypeString.Add(TargetType_t.TYPE_INT8, "TYPE_INT8");
+            TargetTypeString.Add(TargetType_t.TYPE_UINT16, "TYPE_UINT16");
+            TargetTypeString.Add(TargetType_t.TYPE_INT16, "TYPE_INT16");
+            TargetTypeString.Add(TargetType_t.TYPE_UINT32, "TYPE_UINT32");
+            TargetTypeString.Add(TargetType_t.TYPE_INT32, "TYPE_INT32");
+            TargetTypeString.Add(TargetType_t.TYPE_UINT64, "TYPE_UINT64");
+            TargetTypeString.Add(TargetType_t.TYPE_INT64, "TYPE_INT64");
+            TargetTypeString.Add(TargetType_t.TYPE_FLOAT, "TYPE_FLOAT");
+            TargetTypeString.Add(TargetType_t.TYPE_DOUBLE, "TYPE_DOUBLE");
+            TargetTypeString.Add(TargetType_t.TYPE_ARRAY, "TYPE_ARRAY");
+            TargetTypeString.Add(TargetType_t.TYPE_STRUCT, "TYPE_OBJECT");
+        }
+
         public void EmitStruct(StructType_TargetType targetStructUnion, StreamWriter cfilewriter, StreamWriter hfilewriter, bool isEncodeTlv)
         {
             StringBuilder SerializeCodeSb = new StringBuilder();
@@ -50,6 +67,10 @@ namespace EmbedXrpcIdlParser
             ITargetField field = null;
 
             bool unionIfFirstFlag = true;
+            /*if (isEncodeTlv == true)
+            {
+                SerializeCodeSb.AppendLine($"SerializeKey(0,{TargetTypeString[(int)field.TargetType.TargetType]});");
+            }*/
             for (int i=0;i<TargetFields.Count;i++)
             {
                 field = TargetFields[i];
@@ -69,6 +90,10 @@ namespace EmbedXrpcIdlParser
                 //FieldsDesc.Add($"{targetStruct.Name}_Field_{field.Name}");
                 if (field.TargetType.TargetType < TargetType_t.TYPE_ENUM)
                 {
+                    if (isEncodeTlv == true)
+                    {
+                        SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
+                    }
                     SerializeCodeSb.AppendLine($"Memcpy(&sm.Buf[sm.Index],&obj->{field.FieldName},sizeof(obj->{field.FieldName}));");
                     SerializeCodeSb.AppendLine($"sm.Index+=sizeof(obj->{field.FieldName});\r\n");
 
@@ -78,6 +103,10 @@ namespace EmbedXrpcIdlParser
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
                 {
                     EnumType_TargetType ettt = field.TargetType as EnumType_TargetType;
+                    if (isEncodeTlv == true)
+                    {
+                        SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[ettt.NumberType]});");
+                    }
                     SerializeCodeSb.AppendLine($"Memcpy(&sm.Buf[sm.Index],&obj->{field.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
                     SerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
 
@@ -86,6 +115,10 @@ namespace EmbedXrpcIdlParser
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
+                    if (isEncodeTlv == true)
+                    {
+                        SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
+                    }
                     Array_TargetField array_TargetField = field as Array_TargetField;
                     var arrayLenField = array_TargetField.ArrayLenField;
                     ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
@@ -101,6 +134,21 @@ namespace EmbedXrpcIdlParser
                         lenstring = "1";
                         len_type_string = "uint8_t";
                     }
+                    if(isEncodeTlv==true)
+                    {
+                        //todo 添加SerializeLen函数
+                        //函数原型void SerializeLen(SerializationManager &sm,UInt32 Len);
+                        SerializeCodeSb.AppendLine($"SerializeLen(sm,{lenstring});");
+                        if (attt.ElementType.TargetType < TargetType_t.TYPE_ENUM)
+                        {
+                            SerializeCodeSb.AppendLine($"SerializeArrayElementFlag(sm,{TargetTypeString[attt.ElementType.TargetType]}<<4|0x01);");
+                        }
+                        else
+                        {
+                            SerializeCodeSb.AppendLine($"SerializeArrayElementFlag(sm,{TargetTypeString[attt.ElementType.TargetType]}<<4|0x02);");
+                        }
+                    }
+                    
                     SerializeCodeSb.AppendLine($"for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
                     SerializeCodeSb.AppendLine("{");//for begin
 
@@ -149,6 +197,10 @@ namespace EmbedXrpcIdlParser
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
                 {
+                    if (isEncodeTlv == true)
+                    {
+                        SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
+                    }
                     SerializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Serialize(sm,&obj->{field.FieldName});\r\n");
                     DeserializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Deserialize(sm,&obj->{field.FieldName});\r\n");
                     FreeCodeSb.AppendLine($"{field.TargetType.TypeName}_FreeData(&obj->{field.FieldName});\r\n");

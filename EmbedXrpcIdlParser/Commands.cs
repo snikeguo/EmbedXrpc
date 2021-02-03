@@ -73,7 +73,7 @@ namespace EmbedXrpcIdlParser
                         FileIdlInfo = idlInfo.ParsedFiles[i],
                         GenType = gt,
                         OutPutPath = generater.OutputPath,
-                        IsEncodeTlv=true,
+                        IsEncodeTlv= generater.IsEncodeTlv,
                     };
                     cpp.CodeGen(parameter);
                 }
@@ -89,7 +89,7 @@ namespace EmbedXrpcIdlParser
                         FileIdlInfo = idlInfo.ParsedFiles[i],
                         GenType = gt,
                         OutPutPath = generater.OutputPath,
-                        IsEncodeTlv = false,
+                        IsEncodeTlv = generater.IsEncodeTlv,
                     };
                     cpp.CodeGen(parameter);
                 }
