@@ -88,7 +88,11 @@ namespace EmbedXrpcIdlParser
                 CommonHsw.WriteLine($"{EmitField(field)};   //FieldNumber:{field.FieldNumberAttr.Number}    {UnionTargetTypeString}");
                 FieldNumberSb.Append($"#define {structType.TypeName}_{field.FieldName}_FieldNumber  {field.FieldNumberAttr.Number}\r\n");
             }
-
+            if (isWriteUnion == true && IsUnionComplete == false)
+            {
+                CommonHsw.WriteLine("};//union end");
+                IsUnionComplete = true;
+            }
             CommonHsw.WriteLine("}" + structType.TypeName + ";");
             FieldNumberSb.Append("\r\n");
             CommonHsw.WriteLine(FieldNumberSb.ToString());
