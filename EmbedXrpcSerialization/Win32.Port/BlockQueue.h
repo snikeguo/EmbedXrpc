@@ -17,6 +17,8 @@ public:
 	void Send(T& msg);
 	QueueStatus Receive(T& msg, unsigned long timeOut);
 	void Reset();
+	int Size();
+	QueueStatus Peek(unsigned long timeOut);
 private:
 	//QWaitCondition		  waitCondition;
 	Semaphore			semaphore;
@@ -42,6 +44,7 @@ QueueStatus BlockingQueue<T>::Receive(T& msg, unsigned long timeOut)
 	{
 		
 		//waitCondition.wait(&mutex, timeOut);
+		//assert(queue.size() > 0);
 		if (queue.size() > 0)
 		{
 			s = QueueStatus::Ok;
@@ -57,6 +60,10 @@ QueueStatus BlockingQueue<T>::Receive(T& msg, unsigned long timeOut)
 		}
 		
 	}
+	else
+	{
+		s = QueueStatus::Empty;
+	}
 	mutex.unlock();
 	return s;
 }
@@ -68,7 +75,39 @@ void BlockingQueue<T>::Reset()
 	while (semaphore.wait(0) == true);
 	mutex.unlock();
 }
+template<class T>
+int BlockingQueue<T>::Size()
+{
+	return semaphore.Count();
+}
+template<class T>
+QueueStatus BlockingQueue<T>::Peek(unsigned long timeOut)
+{
+	QueueStatus s = QueueStatus::Empty;
+	bool r = semaphore.peek(timeOut);
 
+	mutex.lock();
+	if (r == true)
+	{
+
+		//waitCondition.wait(&mutex, timeOut);
+		if (queue.size() > 0)
+		{
+			s = QueueStatus::Ok;
+		}
+		else
+		{
+			s = QueueStatus::Empty;
+		}
+
+	}
+	else
+	{
+		s = QueueStatus::Empty;
+	}
+	mutex.unlock();
+	return s;
+}
 class NoGenericBlockingQueue
 {
 public:
@@ -111,6 +150,14 @@ public:
 				break;
 			}
 		}
+	}
+	int Size()
+	{
+		return genericQueue.Size();
+	}
+	QueueStatus Peek(unsigned long timeOut)
+	{
+		return genericQueue.Peek(timeOut);
 	}
 private:
 	struct NoGenericStruct
