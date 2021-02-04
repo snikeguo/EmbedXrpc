@@ -220,7 +220,7 @@ public:
 
 		ReceiveItemInfo raw;
 		uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
-		uint16_t targettimeout = (uint16_t)(allData[2] | allData[3] << 8)&0x3FFF;
+		uint16_t targettimeout = (uint16_t)(allData[2] | ((allData[3] & 0x3f)<<8));
 		uint32_t dataLen = allDataLen - 4;
 		uint8_t* data = &allData[4];
 		ReceiveType_t rt = (ReceiveType_t)(allData[3] >> 6);

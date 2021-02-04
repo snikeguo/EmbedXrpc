@@ -29,7 +29,7 @@ typedef  double Double;
 
 
 
-#define FilterStringHeader	{"NONE"}
+#define FilterStringHeader	{"EmbedXrpcObject"}
 #define StringOutput(...)  vprintf(__VA_ARGS__)
 void* Malloc(uint32_t size);
 void Free(void* ptr);

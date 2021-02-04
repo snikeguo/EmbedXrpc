@@ -680,7 +680,7 @@ namespace EmbedXrpcIdlParser
                     {
                         ClientHsw.WriteLine($"void Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response);\n");
                         ClientCsw.WriteLine($"void {targetInterface.Name}ClientImpl::Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response)");
-                        ClientCsw.WriteLine("{\nif(response->State==ResponseState_Ok||response->State==ResponseState_SidError)\n{");
+                        ClientCsw.WriteLine("{\nif(response->State==ResponseState_Ok)\n{");
                         //ClientCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(response);");
                         //ClientCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,response);");
                         ClientCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(response);");

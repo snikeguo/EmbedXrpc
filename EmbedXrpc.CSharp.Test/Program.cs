@@ -34,6 +34,7 @@ namespace Sample1
         {
             Response.ReturnValue.Sum = a + b;
             Response.ReturnValue.dataLen = 0;
+            Thread.Sleep(5000);
         }
     }
     public partial class Inter_NoArgService : IService
@@ -65,7 +66,7 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new EmbedXrpcObject(1000, clientSend, Assembly.GetExecutingAssembly(),false);
+            client = new EmbedXrpcObject(100, clientSend, Assembly.GetExecutingAssembly(),false);
             client.Start();
             server = new EmbedXrpcObject(2000, serverSend, Assembly.GetExecutingAssembly(), false);
             server.Start();
@@ -74,7 +75,7 @@ namespace EmbedXrpc
                 Inter_Add inter_Add = new Inter_Add(client);
                 while (true)
                 {
-                    Thread.Sleep(-1);
+                    Thread.Sleep(1000);
                     var reAdd = inter_Add.Invoke(1,2,0,null);
                     Debug.Assert(reAdd.State == RequestResponseState.ResponseState_Ok);
                     Console.WriteLine($"{1}+{2}={reAdd.ReturnValue.Sum}");
@@ -102,7 +103,7 @@ namespace EmbedXrpc
                 DateTimeChangeDelegate broadcastDataTimeDelegate = new DateTimeChangeDelegate(server);
                 while (true)
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(-1);
                     broadcastDataTimeDelegate.Invoke(new DateTime_t[1] {
                     new DateTime_t()
                     {

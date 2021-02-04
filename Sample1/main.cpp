@@ -18,7 +18,7 @@ bool ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ×îÖÕÍ¨¹ıÕ
 ResponseDelegateMessageMapCollection rdCollection[1] = { {Inter_ResponseDelegateMessages_Count,Inter_ResponseDelegateMessages} };//client¿ÉÒÔ´¦ÀíµÄservice¼¯ºÏ
 
 EmbedXrpcObject ClientRpc(ClientSend,
-	500,
+	1000,
 	rdCollection,
 	1,
 	false,
@@ -81,7 +81,7 @@ EmbedXrpcObject ServerRpc(ServerSend,
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(-1));
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;
@@ -117,6 +117,8 @@ void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 	Response.ReturnValue.Sum = a + b;
 	Response.ReturnValue.dataLen = 0;
 	Response.ReturnValue.data = NULL;
+	printf("Ä£ÄâºÄÊ±²Ù×÷  ÑÓÊ±3Ãë\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 	//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 	//printf("len:%d\n", dataLen);
 }

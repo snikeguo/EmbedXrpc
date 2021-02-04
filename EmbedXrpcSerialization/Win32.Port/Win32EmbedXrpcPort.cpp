@@ -5,7 +5,7 @@
 
 #include "Semaphore.h"
 #include "BlockQueue.h"
-
+#include "windows.h"
 
 EmbedXrpc_Thread_t EmbedXrpc_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg)
 {
@@ -30,10 +30,57 @@ EmbedXrpc_Semaphore_t  EmbedXrpc_CreateSemaphore(const char* SemaphoreName)
 	Semaphore*sem = new Semaphore(std::string(SemaphoreName));
 	return sem;
 }
-
+class Win32Timer //¼òµ¥µÄtimer
+{
+public:
+	Win32Timer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
+	{
+		name = timerName;
+		this->timerout = timeout;
+		this->timercb = timercb;
+		this->arg = Arg;
+		timerThread = new std::thread(TimerThread, this);
+		timerThread->detach();
+	}
+	static void TimerThread(void* arg)
+	{
+		Win32Timer* This = static_cast<Win32Timer*> (arg);
+		while (true)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			if (This->RunFlag)
+			{
+				This->count += 10;
+				if (This->count >= This->timerout)
+				{
+					This->count = 0;
+					This->timercb(This->arg);
+				}
+			}
+		}
+	}
+	void Start()
+	{
+		RunFlag = true;
+		
+	}
+	void Stop()
+	{
+		RunFlag = false;
+		count = 0;
+	}
+	std::thread* timerThread;
+	bool RunFlag;
+	const char* name;
+	uint32_t count = 0;
+	uint32_t timerout;
+	void (*timercb)(void* arg);
+	void *arg;
+};
 EmbedXrpc_Timer_t EmbedXrpc_CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
 {
-	return nullptr;
+	Win32Timer* timer = new Win32Timer(timerName, timeout, timercb, Arg);
+	return timer;
 }
 void EmbedXrpc_DeleteThread(EmbedXrpc_Thread_t thread)
 {
@@ -60,7 +107,9 @@ void EmbedXrpc_DeleteSemaphore(EmbedXrpc_Semaphore_t sem)
 }
 void EmbedXrpc_DeleteTimer(EmbedXrpc_Timer_t timer) 
 {
-	
+	Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
+	win32timer->Stop();
+	delete win32timer;
 }
 void EmbedXrpc_ThreadStart(EmbedXrpc_Thread_t thread)
 {
@@ -69,15 +118,19 @@ void EmbedXrpc_ThreadStart(EmbedXrpc_Thread_t thread)
 }
 void  EmbedXrpc_TimerStart(EmbedXrpc_Timer_t timer, uint16_t interval)
 {
-		
+	Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
+	win32timer->timerout = interval;
+	win32timer->Start();
 }
 void EmbedXrpc_TimerReset(EmbedXrpc_Timer_t timer)
 {
-	
+	Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
+	win32timer->Stop();
 }
 void EmbedXrpc_TimerStop(EmbedXrpc_Timer_t timer)
 {
-
+	Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
+	win32timer->Stop();
 }
 
 bool EmbedXrpc_TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)

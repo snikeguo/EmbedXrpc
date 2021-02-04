@@ -88,7 +88,7 @@ return Add_reqresp;
 }
 void InterClientImpl::Free_Add(Inter_Add_Return *response)
 {
-if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
+if(response->State==ResponseState_Ok)
 {
 Inter_Add_Return_FreeData(response);
 }
@@ -165,7 +165,7 @@ return NoArg_reqresp;
 }
 void InterClientImpl::Free_NoArg(Inter_NoArg_Return *response)
 {
-if(response->State==ResponseState_Ok||response->State==ResponseState_SidError)
+if(response->State==ResponseState_Ok)
 {
 Inter_NoArg_Return_FreeData(response);
 }

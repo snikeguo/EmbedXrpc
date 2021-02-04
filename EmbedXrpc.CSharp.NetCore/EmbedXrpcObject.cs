@@ -86,15 +86,13 @@ namespace EmbedXrpc
         private void SuspendTimerCallback(object s)
         {
             EmbedXrpcObject server = s as EmbedXrpcObject;
-            lock (ObjectMutex)
-            {
-                byte[] sendBytes = new byte[4];
-                sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 0 & 0xff);
-                sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 8 & 0xff);
-                sendBytes[2] = (byte)(server.TimeOut >> 0 & 0xff);
-                sendBytes[3] = (byte)(server.TimeOut >> 8 & 0xff);
-                //Send(sendBytes.Length, 0, sendBytes);
-            }
+            byte[] sendBytes = new byte[4];
+            sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 0 & 0xff);
+            sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 8 & 0xff);
+            sendBytes[2] = (byte)(server.TimeOut >> 0 & 0xff);
+            sendBytes[3] = (byte)((server.TimeOut >> 8 & 0xff) & (0x3F));
+            sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
+            Send(sendBytes.Length, 0, sendBytes);
         }
 
         
@@ -122,7 +120,7 @@ namespace EmbedXrpc
                 }
                 if(recData.Sid== EmbedXrpcCommon.EmbedXrpcSuspendSid)
                 {
-                    Console.WriteLine("sid== EmbedXrpcCommon.EmbedXrpcSuspendSid{0}",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+                    Console.WriteLine("{0}:sid== EmbedXrpcCommon.EmbedXrpcSuspendSid. this.timeout is:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),TimeOut);
                     continue;
                 }
                 if (sid != recData.Sid)
@@ -146,7 +144,7 @@ namespace EmbedXrpc
                 goto sqs;
             }
             UInt16 serviceId = (UInt16)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8);
-            UInt16 targettimeout = (UInt16)((alldata[2 + offset] << 0 | alldata[3 + offset] << 8)&0x3FF);
+            UInt16 targettimeout = (UInt16)((alldata[2 + offset] << 0) | ((alldata[3 + offset])&0x3F)<<8);
             UInt32 dataLen = validdataLen - 4;
             EmbeXrpcRawData raw = new EmbeXrpcRawData();
             ReceiveType rt = (ReceiveType)(alldata[3 + offset] >> 6);
@@ -259,7 +257,7 @@ namespace EmbedXrpc
                             RequestMessageMaps[i].Service.Invoke(rsm, sendsm);
                             SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-                            lock (ObjectMutex)
+                            //lock (ObjectMutex)
                             {
                                 if (sendsm.Index > 0)//
                                 {
