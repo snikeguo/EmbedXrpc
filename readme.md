@@ -64,7 +64,7 @@ public:
 
 **3.服务端(单片机)这边,你需要编写代码：**
 ```
-EmbedXrpcServerObject ServerRpcObject(.....);//参数我这里省略了
+EmbedXrpcObject ServerRpcObject(.....);//参数我这里省略了
 
 void Inter_GetValueService::GetValue()
 {
@@ -77,7 +77,7 @@ void Inter_GetValueService::GetValue()
 **4.客户端(电脑)这边,你需要编写代码：**
 
 ```
-EmbedXrpcClientObject ClientRpcObject(....Args...);//参数我这里省略了
+EmbedXrpcObject ClientRpcObject(....Args...);//参数我这里省略了
 InterClientImpl Client(&ClientRpcObject);
 auto val=Client.GetValue();//这个函数将会把数据发送到服务器(比如单片机)上
 if(val.State==ResponseState_Ok)
