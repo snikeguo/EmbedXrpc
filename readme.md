@@ -1,4 +1,5 @@
 # EmbedXrpc 用户手册
+### [EmbedXrpc发行版下载](https://gitee.com/snikeguo/EmbedXrpc/releases/)
 # QQ群134161401
 #### 这个东西类似于Google的GRPC,但是应用场景是单片机。RPC远程调用极大的方便了开发，使得不必关注于协议解析，数据的序列化和反序列化等繁琐的工作。可是目前还没有在单片机上实现好用的RPC框架，于是我就谋生了做这个RPC框架的想法，所用的技术是：C#做 IDL语言+csscript+自己实现序列化和反序列化+代码生成 QQ群134161401
 #### 应用场景：单片机近距离Client/Server交互场景（USB、串口、CAN（如J1939 、ISO15765协议等），）只要是流协议都支持
@@ -6,8 +7,6 @@
 ## 详情请看WIKI
 ![](简单示意图.jpg)
 ![](网图1.jpg)
-### [EmbedXrpc发行版下载](https://gitee.com/snikeguo/EmbedXrpc/releases/)
-
 #### 一个简单的例子(教程请看WIKI)
 1.编写idl文件：demo.cs
 ```
