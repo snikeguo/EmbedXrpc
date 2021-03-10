@@ -342,7 +342,7 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.WriteLine(");");//生成调用目标函数。
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
                 //ClientCsw.WriteLine($"SerializationManager::FreeData(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
-                ClientCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_FreeData(&request);");
+                ClientCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_FreeData(&request);");//free掉request
 
                 ClientCsw.WriteLine("}");//函数生成完毕
 
@@ -760,7 +760,7 @@ namespace EmbedXrpcIdlParser
                         ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_Serialize(sendManager,&Response);");
                         //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(&Response);");//生成返回值序列化
                         //ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,&Response);");//生成返回值序列化
-                        ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(&Response);");//生成返回值序列化
+                        ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(&Response);");//生成返回值的free
                     }
 
                     ServerCsw.WriteLine("}");//end function
