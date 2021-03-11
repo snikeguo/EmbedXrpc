@@ -63,10 +63,10 @@ public:
 		ResponseDescribe* responses,
 		uint32_t responsesCount,
 
-		DelegateDescribe* delegates,//´úÀíµÄservices
+		DelegateDescribe* delegates,//ä»£ç†çš„services
 		uint32_t delegatesCount,
 
-		RequestDescribe* requests,//server ÇëÇóµÄservices
+		RequestDescribe* requests,//server è¯·æ±‚çš„services
 		uint32_t requestsCount,//server
 
 		bool isEnableMataDataEncode,
@@ -93,7 +93,7 @@ public:
 	{
 
 	}
-	//client½Úµã¹¹Ôìº¯Êý
+	//clientèŠ‚ç‚¹æž„é€ å‡½æ•°
 	EmbedXrpcObject(SendPack_t send,
 		uint32_t timeOut,
 
@@ -122,11 +122,11 @@ public:
 	{
 
 	}
-	//server½ÚµãµÄ¹¹Ôìº¯Êý
+	//serverèŠ‚ç‚¹çš„æž„é€ å‡½æ•°
 	EmbedXrpcObject(SendPack_t send,
 		uint32_t timeOut,
 
-		RequestDescribe* requests,//server ÇëÇóµÄservices
+		RequestDescribe* requests,//server è¯·æ±‚çš„services
 		uint32_t requestsCount,//server
 
 		bool isEnableMataDataEncode,
@@ -250,7 +250,7 @@ public:
 		if (rt == ReceiveType_Response)
 		{
 			//EmbedSerializationShowMessage("EmbedXrpcObject","Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
-			if (serviceId == EmbedXrpcSuspendSid)//¹ÒÆðµÄSIDÒªÌØÊâ´¦Àí
+			if (serviceId == EmbedXrpcSuspendSid)//æŒ‚èµ·çš„SIDè¦ç‰¹æ®Šå¤„ç†
 			{
 				raw.Sid = serviceId;
 				raw.DataLen = dataLen;
@@ -360,7 +360,7 @@ public:
 	static void SuspendTimerCallBack(void* arg)
 	{
 		EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
-		//obj->EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//²»ÐèÒª¼ÓËø ÕâÀï²»Ê¹ÓÃobj->bufferÈ«¾Öbuffer
+		//obj->EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//ä¸éœ€è¦åŠ é” è¿™é‡Œä¸ä½¿ç”¨obj->bufferå…¨å±€buffer
 		uint8_t sb[4];
 		sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 		sb[1] = (uint8_t)(EmbedXrpcSuspendSid >> 8 & 0xff);
@@ -375,7 +375,7 @@ public:
 	{
 		EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
 		ReceiveItemInfo recData;
-		uint32_t i = 0;
+		//uint32_t i = 0;
 		bool isContain = false;
 		for (;;)
 		{
@@ -388,7 +388,7 @@ public:
 				isContain = false;
 				for (uint32_t collectionIndex = 0; collectionIndex < obj->DelegatesCount; collectionIndex++)
 				{
-					auto iter = &obj->Delegates[i];
+					auto iter = &obj->Delegates[collectionIndex];
 					if (iter->Delegate->GetSid() == recData.Sid)
 					{
 						SerializationManager rsm;
@@ -434,7 +434,7 @@ public:
 	{
 		EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
 		ReceiveItemInfo recData;
-		uint32_t i = 0;
+		//uint32_t i = 0;
 		bool isContain = false;
 		for (;;)
 		{
@@ -447,7 +447,7 @@ public:
 				isContain = false;
 				for (uint32_t collectionIndex = 0; collectionIndex < obj->RequestsCount; collectionIndex++)
 				{
-					auto iter = &obj->Requests[i];
+					auto iter = &obj->Requests[collectionIndex];
 					if (iter->Service->GetSid() == recData.Sid)
 					{
 
@@ -465,7 +465,7 @@ public:
 						rsm.SetCalculateSum(0);
 						rsm.SetReferenceSum(recData.CheckSum);
 #endif
-						EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//ÓÉÓÚÊ¹ÓÃobj->BufferÕâ¸öÈ«¾Ö±äÁ¿£¬ËùÒÔÌí¼ÓËø
+						EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//ç”±äºŽä½¿ç”¨obj->Bufferè¿™ä¸ªå…¨å±€å˜é‡ï¼Œæ‰€ä»¥æ·»åŠ é”
 						sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 						sendsm.Reset();
 						sendsm.Buf = &obj->DataLinkLayoutBuffer[4];
