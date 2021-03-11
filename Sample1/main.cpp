@@ -7,20 +7,34 @@ extern EmbedXrpcObject ServerRpc;
 
 //-------------------------------------------------------------------------
 //client 
-uint8_t ClientSendBuffer[2048];//·¢ËÍbuffer
-uint8_t ClientResponseBuffer[2048];//Client½ÓÊÕµ½Server·¢ËÍµÄResponse»Ø¸´ºó£¬Òª°ÑÊı¾İ·Åµ½Õâ¸öÀïÃæ£¬Èç¹ûÄãµÄĞ­ÒéÃ»ÓĞ»Ø¸´£¬Õâ¸ö¿ÉÒÔÎªnull
-uint8_t ClientDelegateBuffer[2048];//Client½ÓÊÕµ½Server·¢ËÍµÄDelegate¹ã²¥ºó£¬Òª°ÑÊı¾İ·Åµ½Õâ¸öÀïÃæ£¬Èç¹ûÄãµÄĞ­ÒéÃ»ÓĞ¹ã²¥£¬Õâ¸ö¿ÉÒÔÎªnull
 bool ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ×îÖÕÍ¨¹ıÕâ¸öº¯Êı·¢ËÍ³öÈ¥
 {
 	assert(ServerRpc.ReceivedMessage(dataLen, data)==true);
 	return true;
 }
-ResponseDelegateMessageMapCollection rdCollection[1] = { {Inter_ResponseDelegateMessages_Count,Inter_ResponseDelegateMessages} };//client¿ÉÒÔ´¦ÀíµÄservice¼¯ºÏ
+DateTimeChangeClientImpl DateTimeChange;
+TestDelegateClientImpl Test;
+
+DelegateDescribe AllDelegates[2] =
+{
+	{"DateTimeChange"  ,&DateTimeChange},
+	{"TestDelegate"  ,&Test},
+};//client¿ÉÒÔ´¦ÀíµÄDelegate¼¯ºÏ
+
+ResponseDescribe Responses[4] =
+{
+	{"Inter_Add"   ,     Inter_Add_ServiceId},
+	{"Inter_NoArg"     ,   Inter_NoArg_ServiceId},
+	{"Inter_NoReturn"   ,     Inter_NoReturn_ServiceId},
+	{"Inter_NoArgAndReturn"    ,    Inter_NoArgAndReturn_ServiceId},
+};
 
 EmbedXrpcObject ClientRpc(ClientSend,
 	1000,
-	rdCollection,
-	1,
+	Responses,
+	4,
+	AllDelegates,
+	2,
 	false,
 	nullptr);//client rpc ¶ÔÏó
 
@@ -59,8 +73,6 @@ void ClientThread()
 }
 //--------------------------------------------------------------------
 //server
-uint8_t ServerSendBuffer[2048];//·¢ËÍbuffer
-uint8_t ServerRequestBuffer[14];//server½ÓÊÕµ½client·¢ËÍµÄRequestÊı¾İÁ÷ºó£¬Òª°ÑÊı¾İÁÙÊ±´æµ½Õâ¸öÊı×éÀï
 bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ×îÖÕÍ¨¹ıÕâ¸öº¯Êı·¢ËÍ³öÈ¥£¬Èç¹ûÄãµÄĞ­ÒéÃ»ÓĞclientµÄrequestÇëÇó£¬Õâ¸ö¿ÉÒÔÎªnull
 {
 	/*for (size_t i = 4; i < dataLen; i++)
@@ -71,11 +83,21 @@ bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client ×îÖÕÍ¨¹ıÕ
 	ClientRpc.ReceivedMessage(dataLen, data);
 	return true;
 }
-RequestMessageMapCollection rmCollection[1] = { {Inter_RequestMessages_Count,Inter_RequestMessages} };
+Inter_AddService Inter_AddService_Instance;
+Inter_NoArgService Inter_NoArgService_Instance;
+Inter_NoReturnService Inter_NoReturnService_Instance;
+Inter_NoArgAndReturnService Inter_NoArgAndReturnService_Instance;
+RequestDescribe Requests[] =
+{
+	{"Inter_Add",					&Inter_AddService_Instance},
+	{"Inter_NoArg",					&Inter_NoArgService_Instance},
+	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
+	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
+};
 EmbedXrpcObject ServerRpc(ServerSend,
 	500,
-	rmCollection,
-	1,
+	Requests,
+	4,
 	false,
 	nullptr);//server rpc ¶ÔÏó
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
@@ -117,14 +139,23 @@ void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 	Response.ReturnValue.Sum = a + b;
 	Response.ReturnValue.dataLen = 0;
 	Response.ReturnValue.data = NULL;
-	printf("Ä£ÄâºÄÊ±²Ù×÷  ÑÓÊ±3Ãë\n");
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	//printf("Ä£ÄâºÄÊ±²Ù×÷  ÑÓÊ±3Ãë\n");
+	//std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 	//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 	//printf("len:%d\n", dataLen);
 }
+void Inter_AddService::Response_Serialized_After()
+{
+	Inter_Add_Return_FreeData(&Response); 
+}
+
 void Inter_NoArgService::NoArg()
 {
 	Response.ReturnValue = true;
+}
+void Inter_NoArgService::Response_Serialized_After()
+{
+	Inter_NoArg_Return_FreeData(&Response); 
 }
 void Inter_NoReturnService::NoReturn(int a)
 {

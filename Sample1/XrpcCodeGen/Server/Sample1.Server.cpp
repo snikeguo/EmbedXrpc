@@ -46,9 +46,8 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 Add(request.a,request.b,request.dataLen,request.data);
 Inter_Add_Parameter_FreeData(&request);
 Inter_Add_Return_Serialize(sendManager,&Response);
-Inter_Add_Return_FreeData(&Response);
+Response_Serialized_After();
 }
-Inter_AddService Inter_AddServiceInstance;
 void Inter_NoArgService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoArg_Parameter_Deserialize(recManager,&request);
@@ -58,9 +57,8 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 NoArg();
 Inter_NoArg_Parameter_FreeData(&request);
 Inter_NoArg_Return_Serialize(sendManager,&Response);
-Inter_NoArg_Return_FreeData(&Response);
+Response_Serialized_After();
 }
-Inter_NoArgService Inter_NoArgServiceInstance;
 void Inter_NoReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoReturn_Parameter_Deserialize(recManager,&request);
@@ -70,7 +68,6 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 NoReturn(request.a);
 Inter_NoReturn_Parameter_FreeData(&request);
 }
-Inter_NoReturnService Inter_NoReturnServiceInstance;
 void Inter_NoArgAndReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoArgAndReturn_Parameter_Deserialize(recManager,&request);
@@ -80,11 +77,3 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 NoArgAndReturn();
 Inter_NoArgAndReturn_Parameter_FreeData(&request);
 }
-Inter_NoArgAndReturnService Inter_NoArgAndReturnServiceInstance;
-RequestMessageMap Inter_RequestMessages[]=
-{
-{"Inter_Add",&Inter_AddServiceInstance},
-{"Inter_NoArg",&Inter_NoArgServiceInstance},
-{"Inter_NoReturn",&Inter_NoReturnServiceInstance},
-{"Inter_NoArgAndReturn",&Inter_NoArgAndReturnServiceInstance},
-};

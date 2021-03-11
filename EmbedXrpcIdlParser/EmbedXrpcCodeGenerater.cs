@@ -347,7 +347,7 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.WriteLine("}");//函数生成完毕
 
                 ClientHsw.WriteLine("};");//end class
-                ClientCsw.WriteLine($"{targetDelegate.MethodName}ClientImpl {targetDelegate.MethodName}ClientImplInstance;");//创建一个委托实例
+                //ClientCsw.WriteLine($"{targetDelegate.MethodName}ClientImpl {targetDelegate.MethodName}ClientImplc");//创建一个委托实例
             }
             if (codeGenParameter.GenType == GenType.Server || codeGenParameter.GenType == GenType.All)
             {
@@ -704,11 +704,14 @@ namespace EmbedXrpcIdlParser
 
                     //string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response& ";
                     if (service.ReturnStructType.TargetFields.Count>1)
+                    {
                         ServerHsw.WriteLine($"{service.ReturnStructType.TypeName} Response;");
-                    ServerHsw.WriteLine("//if you free Response,then:");
-                    //{service.ReturnStructType.TypeName}_FreeData(&Response);
-                    ServerHsw.WriteLine($"//void {service.FullName}Service::Response_Serialized_After() {{{service.ReturnStructType.TypeName}_FreeData(&Response);}}");
-                    ServerHsw.WriteLine($"void Response_Serialized_After();");
+                        ServerHsw.WriteLine("//if you free Response,then:");
+                        //{service.ReturnStructType.TypeName}_FreeData(&Response);
+                        ServerHsw.WriteLine($"//void Response_Serialized_After() {{{service.ReturnStructType.TypeName}_FreeData(&Response);}}");
+                        ServerHsw.WriteLine($"void Response_Serialized_After();");
+                    }
+ 
                     string returnType = "void";
                     ServerHsw.Write($"{returnType} {service.ServiceName}(");
 
@@ -766,7 +769,7 @@ namespace EmbedXrpcIdlParser
                         //ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,&Response);");//生成返回值序列化
                         
                         //ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 让用户去 free,所以注释了这条语句
-                        ServerCsw.WriteLine($"Response_Serialize_After();");//2021.3.10 用户malloc的空间 让用户去 free,所以有了这条语句
+                        ServerCsw.WriteLine($"Response_Serialized_After();");//2021.3.10 用户malloc的空间 让用户去 free,所以有了这条语句
                     }
 
                     ServerCsw.WriteLine("}");//end function
@@ -774,57 +777,59 @@ namespace EmbedXrpcIdlParser
 
                     ServerHsw.WriteLine("};");//end class
 
-                    ServerCsw.WriteLine($"{service.FullName}Service {service.FullName}ServiceInstance;");//创建一个service实例
+                    //ServerCsw.WriteLine($"{service.FullName}Service {service.FullName}ServiceInstance;");//创建一个service实例
                 }
 
             }
             if (codeGenParameter.GenType == GenType.Server || codeGenParameter.GenType == GenType.All)
             {
                 //生成request Service 数组
-                ServerCsw.WriteLine($"RequestMessageMap {targetInterface.Name}_RequestMessages[]=");
-                int RequestMessagesCount = 0;
-                ServerCsw.WriteLine("{");
+                ServerHsw.WriteLine($"/*\r\nThe Requests Of {targetInterface.Name}:");
+                int RequestsCount = 0;
+                ServerHsw.WriteLine("name                   type\r\n");
                 foreach (var message in messageMaps)
                 {
                     if (message.ReceiveType == ReceiveType_t.ReceiveType_Request)
                     {
-                        RequestMessagesCount++;
-                        ServerCsw.Write("{");
-                        ServerCsw.Write("\"{0}\",&{1}ServiceInstance", message.Name, message.Name);
-                        ServerCsw.WriteLine("},");
+                        RequestsCount++;
+                        ServerHsw.WriteLine("\"{0:-64}\",           {1:-64}Service", message.Name, message.Name);
                     }
 
                 }
-                ServerCsw.WriteLine("};");
-                ServerHsw.WriteLine($"#define {targetInterface.Name}_RequestMessages_Count  {RequestMessagesCount}");
-                ServerHsw.WriteLine($"extern RequestMessageMap {targetInterface.Name}_RequestMessages[{targetInterface.Name}_RequestMessages_Count];");
+                ServerHsw.WriteLine($"\r\nRequestsCount: {RequestsCount}");
+                ServerHsw.WriteLine("*/");
             }
             if (codeGenParameter.GenType == GenType.Client || codeGenParameter.GenType == GenType.All)
             {
                 //生成Response\Delegate service 数组
-                ClientCsw.WriteLine($"ResponseDelegateMessageMap {targetInterface.Name}_ResponseDelegateMessages[]=");
-                int ResponseDelegateMessagesCount = 0;
-                ClientCsw.WriteLine("{");
+                ClientHsw.WriteLine($"/*\r\nThe Delegates Of {targetInterface.Name}:");
+                int DelegatesCount = 0;
+                int ResponsesCount = 0;
+                ClientHsw.WriteLine("name                   type\r\n");
                 foreach (var message in messageMaps)
                 {
                     if (message.ReceiveType == ReceiveType_t.ReceiveType_Delegate)
                     {
-                        ResponseDelegateMessagesCount++;
-                        ClientCsw.Write("{");
-                        ClientCsw.Write("\"{0}\",{1},{2},&{3}ClientImplInstance", message.Name, message.ServiceId, "ReceiveType_Delegate", message.Name);
-                        ClientCsw.WriteLine("},");
-                    }
-                    else if (message.ReceiveType == ReceiveType_t.ReceiveType_Response)
-                    {
-                        ResponseDelegateMessagesCount++;
-                        ClientCsw.Write("{");
-                        ClientCsw.Write("\"{0}\",{1},{2},nullptr", message.Name, message.ServiceId, "ReceiveType_Response");
-                        ClientCsw.WriteLine("},");
+                        DelegatesCount++;
+                        ClientHsw.WriteLine("\"{0:-64}\"        {1:-64}ClientImpl,", message.Name,message.Name);
                     }
                 }
-                ClientCsw.WriteLine("};");
-                ClientHsw.WriteLine($"#define {targetInterface.Name}_ResponseDelegateMessages_Count {ResponseDelegateMessagesCount}");
-                ClientHsw.WriteLine($"extern ResponseDelegateMessageMap {targetInterface.Name}_ResponseDelegateMessages[{targetInterface.Name}_ResponseDelegateMessages_Count];");
+                ClientHsw.WriteLine($"\r\nDelegatesCount:{DelegatesCount}\r\n\r\n\r\n");
+
+
+                ClientHsw.WriteLine($"The Responses Of {targetInterface.Name}:");
+                ClientHsw.WriteLine("name                   sid\r\n");
+                foreach (var message in messageMaps)
+                {
+                    if (message.ReceiveType == ReceiveType_t.ReceiveType_Response)
+                    {
+                        ResponsesCount++;
+                        ClientHsw.WriteLine("\"{0:-64}\"        {1:16}", message.Name, message.ServiceId);
+                    }
+                }
+                ClientHsw.WriteLine($"\r\nResponsesCount:{ResponsesCount}");
+
+                ClientHsw.WriteLine("*/");
             }
         }
 

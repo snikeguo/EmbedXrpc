@@ -40,7 +40,26 @@ Inter_NoArgAndReturn_Parameter NoArgAndReturn_SendData;
 Inter_NoArgAndReturn_Return NoArgAndReturn_reqresp;
 Inter_NoArgAndReturn_Return& NoArgAndReturn();
 };
-#define Inter_ResponseDelegateMessages_Count 6
-extern ResponseDelegateMessageMap Inter_ResponseDelegateMessages[Inter_ResponseDelegateMessages_Count];
+/*
+The Delegates Of Inter:
+name                   type
+
+"DateTimeChange"        DateTimeChangeClientImpl,
+"TestDelegate"        TestDelegateClientImpl,
+
+DelegatesCount:2
+
+
+
+The Responses Of Inter:
+name                   sid
+
+"Inter_Add"        Inter_Add_ServiceId
+"Inter_NoArg"        Inter_NoArg_ServiceId
+"Inter_NoReturn"        Inter_NoReturn_ServiceId
+"Inter_NoArgAndReturn"        Inter_NoArgAndReturn_ServiceId
+
+ResponsesCount:4
+*/
 
 #endif

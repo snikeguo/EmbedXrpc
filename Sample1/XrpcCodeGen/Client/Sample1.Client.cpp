@@ -8,7 +8,6 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 DateTimeChange(request.now);
 DateTimeChange_Parameter_FreeData(&request);
 }
-DateTimeChangeClientImpl DateTimeChangeClientImplInstance;
 void TestDelegateClientImpl::Invoke(SerializationManager &recManager)
 {
 TestDelegate_Parameter_Deserialize(recManager,&request);
@@ -18,7 +17,6 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 TestDelegate(request.now);
 TestDelegate_Parameter_FreeData(&request);
 }
-TestDelegateClientImpl TestDelegateClientImplInstance;
 Inter_Add_Return& InterClientImpl::Add()
 {//write serialization code:Add()
 SerializationManager sm;
@@ -249,12 +247,3 @@ return NoArgAndReturn_reqresp;
 }
 
 
-ResponseDelegateMessageMap Inter_ResponseDelegateMessages[]=
-{
-{"DateTimeChange",DateTimeChange_ServiceId,ReceiveType_Delegate,&DateTimeChangeClientImplInstance},
-{"TestDelegate",TestDelegate_ServiceId,ReceiveType_Delegate,&TestDelegateClientImplInstance},
-{"Inter_Add",Inter_Add_ServiceId,ReceiveType_Response,nullptr},
-{"Inter_NoArg",Inter_NoArg_ServiceId,ReceiveType_Response,nullptr},
-{"Inter_NoReturn",Inter_NoReturn_ServiceId,ReceiveType_Response,nullptr},
-{"Inter_NoArgAndReturn",Inter_NoArgAndReturn_ServiceId,ReceiveType_Response,nullptr},
-};
