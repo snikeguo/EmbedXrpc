@@ -40,17 +40,20 @@ namespace EmbedXrpc
     {
         UInt16 GetSid();
     }
-    public class RequestMessageMap
+    public class RequestDescribe
     {
         public string Name { get; set; }
         public IService Service { get; set; }
     }
-    public class ResponseDelegateMessageMap
+    public class DelegateDescribe
+    {
+        public string Name { get; set; }
+        public IDelegate Delegate { get; set; }
+    };
+    public class ResponseDescribe
     {
         public string Name { get; set; }
         public UInt16 Sid { get; set; }//有可能是Response/Delegate
-        public ReceiveType ReceiveType { get; set; }
-        public IDelegate Delegate { get; set; }
     };
     public delegate bool Send(int dataLen, int offset ,byte[] data);
     public struct EmbeXrpcRawData

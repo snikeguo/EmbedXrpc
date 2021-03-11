@@ -15,7 +15,9 @@ namespace EmbedXrpc
         public object ObjectMutex { get; private set; } = new object();
         public Win32Queue<EmbeXrpcRawData> DelegateMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>();
         public Win32Queue<EmbeXrpcRawData> ResponseMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>();
-        private ResponseDelegateMessageMap[] ResponseDelegateMessageMaps { get; set; }
+        private List<DelegateDescribe> Delegates { get; set; } = new List<DelegateDescribe>();
+        private List<ResponseDescribe> Responses { get; set; } = new List<ResponseDescribe>();
+        private List<RequestDescribe> Requests { get; set; } = new List<RequestDescribe>();
 
         public Send Send;
         private Assembly Assembly;
@@ -25,59 +27,51 @@ namespace EmbedXrpc
         private Thread RequestServiceThreadHandle;
         private Thread DelegateServiceThreadHandle;
         private Win32Queue<EmbeXrpcRawData> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData>();
-        private RequestMessageMap[] RequestMessageMaps;
+        
         public bool IsEnableMataDataEncode { get; set; }
         public EmbedXrpcObject(UInt32 timeout, Send send, Assembly assembly,bool isEnableMataDataEncode)
         {
             IsEnableMataDataEncode = isEnableMataDataEncode;
             var types = assembly.GetTypes();
             Assembly = assembly;
-            List<ResponseDelegateMessageMap> rdMaps = new List<ResponseDelegateMessageMap>();
-            List<RequestMessageMap> rMaps = new List<RequestMessageMap>();
             foreach (var type in types)
             {
                 var requestInfoAttr = type.GetCustomAttribute<RequestServiceInfoAttribute>();
                 if (requestInfoAttr != null)
                 {
-                    ResponseDelegateMessageMap map = new ResponseDelegateMessageMap();
-                    map.Name = requestInfoAttr.Name;
-                    map.ReceiveType = ReceiveType.Response;
-                    map.Delegate = null;
-                    map.Sid = requestInfoAttr.ServiceId;
-                    rdMaps.Add(map);
+                    ResponseDescribe response = new ResponseDescribe();
+                    response.Name = requestInfoAttr.Name;
+                    response.Sid = requestInfoAttr.ServiceId;
+                    Responses.Add(response);
                 }
 
                 var DelAttr = type.GetCustomAttribute<DelegateInfoAttribute>();
                 if(DelAttr!=null)
                 {
-                    ResponseDelegateMessageMap map = new ResponseDelegateMessageMap();
-                    map.Name = DelAttr.Name;
-                    map.ReceiveType = ReceiveType.Delegate;
+                    DelegateDescribe delegateDescribe = new DelegateDescribe();
+                    delegateDescribe.Name = DelAttr.Name;
                     var v = assembly.CreateInstance(type.FullName);
-                    map.Delegate = (IDelegate)assembly.CreateInstance(type.FullName);
-                    map.Sid = map.Delegate.GetSid();
-                    rdMaps.Add(map);
+                    delegateDescribe.Delegate = (IDelegate)assembly.CreateInstance(type.FullName);
+                    Delegates.Add(delegateDescribe);
                 }
 
                 var responseServiceInfoAttr = type.GetCustomAttribute<ResponseServiceInfoAttribute>();
                 if (responseServiceInfoAttr != null)
                 {
-                    RequestMessageMap map = new RequestMessageMap();
-                    map.Name = responseServiceInfoAttr.Name;
-                    map.Service = (IService)assembly.CreateInstance(type.FullName);
-                    rMaps.Add(map);
+                    RequestDescribe request = new RequestDescribe();
+                    request.Name = responseServiceInfoAttr.Name;
+                    request.Service = (IService)assembly.CreateInstance(type.FullName);
+                    Requests.Add(request);
                 }
             }
 
             TimeOut = timeout;
             Send = send;
 
-            ResponseDelegateMessageMaps = rdMaps.ToArray();
             DelegateServiceThreadHandle = new Thread(DelegateServiceThread);
             DelegateServiceThreadHandle.IsBackground = true;
 
 
-            RequestMessageMaps = rMaps.ToArray();
             RequestServiceThreadHandle = new Thread(RequestServiceThread);
             RequestServiceThreadHandle.IsBackground = true;
 
@@ -165,30 +159,29 @@ namespace EmbedXrpc
                     goto sqs;
                 }
 
-                for (int i = 0; i < ResponseDelegateMessageMaps.Length; i++)
+                raw.Sid = serviceId;
+                if (dataLen > 0)
                 {
-                    var iter = ResponseDelegateMessageMaps[i];
-                    if (iter.Sid == serviceId)
-                    {
-                        raw.Sid = serviceId;
-                        if (dataLen > 0)
-                        {
-                            raw.Data = new byte[dataLen];
-                            Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
-                        }
-                        raw.DataLen = dataLen;
-                        raw.TargetTimeOut = targettimeout;
-                        if (iter.ReceiveType == ReceiveType.Response)
-                        {
-                            queueStatus=ResponseMessageQueueHandle.Send(raw);
-                        }
-                        else if (iter.ReceiveType == ReceiveType.Delegate)
-                        {
-                            queueStatus=DelegateMessageQueueHandle.Send(raw);
-                        }
-                        goto sqs;
-                    }
+                    raw.Data = new byte[dataLen];
+                    Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
                 }
+                raw.DataLen = dataLen;
+                raw.TargetTimeOut = targettimeout;
+                queueStatus = ResponseMessageQueueHandle.Send(raw);
+                goto sqs;
+            }
+            else if (rt == ReceiveType.Delegate)
+            {
+                raw.Sid = serviceId;
+                if (dataLen > 0)
+                {
+                    raw.Data = new byte[dataLen];
+                    Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
+                }
+                raw.DataLen = dataLen;
+                raw.TargetTimeOut = targettimeout;
+                queueStatus = DelegateMessageQueueHandle.Send(raw);
+                goto sqs;
             }
             else if(rt == ReceiveType.Request)
             {
@@ -198,6 +191,10 @@ namespace EmbedXrpc
                 raw.DataLen = dataLen;
                 raw.TargetTimeOut = targettimeout;
                 queueStatus=RequestQueueHandle.Send(raw);
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
             sqs:
             if(queueStatus!= QueueStatus.OK)
@@ -217,13 +214,14 @@ namespace EmbedXrpc
                     {
                         continue;
                     }
-                    for (int i = 0; i < ResponseDelegateMessageMaps.Length; i++)
+                    for (int i = 0; i < Delegates.Count; i++)
                     {
-                        if ((ResponseDelegateMessageMaps[i].ReceiveType ==  ReceiveType.Delegate) && (ResponseDelegateMessageMaps[i].Delegate.GetSid() == recData.Sid))
+                        if (Delegates[i].Delegate.GetSid() == recData.Sid)
                         {
                             SerializationManager rsm = new SerializationManager(Assembly, IsEnableMataDataEncode, new List<byte>(recData.Data));
                             //Console.WriteLine($"get server timeout value{recData.TargetTimeOut}");
-                            ResponseDelegateMessageMaps[i].Delegate.Invoke(rsm);
+                            Delegates[i].Delegate.Invoke(rsm);
+                            break;
                         }
                     }
                 }
@@ -236,7 +234,6 @@ namespace EmbedXrpc
         private void RequestServiceThread()
         {
             EmbeXrpcRawData recData;
-            UInt32 i = 0;
             //try
             {
                 while (true)
@@ -245,16 +242,16 @@ namespace EmbedXrpc
                     {
                         continue;
                     }
-                    for (i = 0; i < RequestMessageMaps.Length; i++)
+                    for (int i = 0; i < Requests.Count; i++)
                     {
-                        if (RequestMessageMaps[i].Service.GetSid() == recData.Sid)
+                        if (Requests[i].Service.GetSid() == recData.Sid)
                         {
                             SerializationManager rsm = new SerializationManager(Assembly,IsEnableMataDataEncode, new List<byte>(recData.Data));
                             SerializationManager sendsm = new SerializationManager(Assembly,IsEnableMataDataEncode,new List<byte>());
 
                             //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
                             SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);
-                            RequestMessageMaps[i].Service.Invoke(rsm, sendsm);
+                            Requests[i].Service.Invoke(rsm, sendsm);
                             SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
                             //lock (ObjectMutex)
@@ -271,6 +268,7 @@ namespace EmbedXrpc
                                     Send(sendBytes.Length, 0, sendBytes);
                                 }
                             }
+                            break;
                         }
                     }
                 }
