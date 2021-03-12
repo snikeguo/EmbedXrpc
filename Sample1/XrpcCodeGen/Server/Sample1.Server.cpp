@@ -46,7 +46,7 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 Add(request.a,request.b,request.dataLen,request.data);
 Inter_Add_Parameter_FreeData(&request);
 Inter_Add_Return_Serialize(sendManager,&Response);
-Response_Serialized_After();
+if(IsFreeResponse==true) Inter_Add_Return_FreeData(&Response);
 }
 void Inter_NoArgService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {
@@ -57,7 +57,7 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 NoArg();
 Inter_NoArg_Parameter_FreeData(&request);
 Inter_NoArg_Return_Serialize(sendManager,&Response);
-Response_Serialized_After();
+if(IsFreeResponse==true) Inter_NoArg_Return_FreeData(&Response);
 }
 void Inter_NoReturnService::Invoke(SerializationManager &recManager, SerializationManager& sendManager)
 {

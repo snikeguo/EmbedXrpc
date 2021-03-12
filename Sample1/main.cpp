@@ -136,6 +136,7 @@ void ServerThread()
 
 void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 {
+	IsFreeResponse = false;
 	Response.ReturnValue.Sum = a + b;
 	Response.ReturnValue.dataLen = 0;
 	Response.ReturnValue.data = NULL;
@@ -144,19 +145,14 @@ void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 	//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 	//printf("len:%d\n", dataLen);
 }
-void Inter_AddService::Response_Serialized_After()
-{
-	Inter_Add_Return_FreeData(&Response); 
-}
+
 
 void Inter_NoArgService::NoArg()
 {
+	IsFreeResponse = true;
 	Response.ReturnValue = true;
 }
-void Inter_NoArgService::Response_Serialized_After()
-{
-	Inter_NoArg_Return_FreeData(&Response); 
-}
+
 void Inter_NoReturnService::NoReturn(int a)
 {
 
