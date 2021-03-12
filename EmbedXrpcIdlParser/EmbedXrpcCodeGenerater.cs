@@ -706,10 +706,6 @@ namespace EmbedXrpcIdlParser
                     if (service.ReturnStructType.TargetFields.Count>1)
                     {
                         ServerHsw.WriteLine($"{service.ReturnStructType.TypeName} Response;");
-                        ServerHsw.WriteLine("//if you free Response,then:");
-                        //{service.ReturnStructType.TypeName}_FreeData(&Response);
-                        ServerHsw.WriteLine($"//void Response_Serialized_After() {{{service.ReturnStructType.TypeName}_FreeData(&Response);}}");
-                        ServerHsw.WriteLine($"void Response_Serialized_After();");
                     }
  
                     string returnType = "void";
@@ -767,9 +763,9 @@ namespace EmbedXrpcIdlParser
                         ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_Serialize(sendManager,&Response);");
                         //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(&Response);");//生成返回值序列化
                         //ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,&Response);");//生成返回值序列化
-                        
+
                         //ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 让用户去 free,所以注释了这条语句
-                        ServerCsw.WriteLine($"Response_Serialized_After();");//2021.3.10 用户malloc的空间 让用户去 free,所以有了这条语句
+                        ServerCsw.WriteLine($"if(IsFreeResponse==true) {service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 可以选择free,有用户控制所以有了这条语句
                     }
 
                     ServerCsw.WriteLine("}");//end function
