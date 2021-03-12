@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifndef EmbedXrpcObject_H
 #define EmbedXrpcObject_H
 #include "EmbedXrpcCommon.h"
@@ -70,26 +70,27 @@ public:
 		uint32_t requestsCount,//server
 
 		bool isEnableMataDataEncode,
-		void* ud = nullptr) :Send(send),
+		void* ud = nullptr) :
 		TimeOut(timeOut),
-
-		Responses(responses),
-		ResponsesCount(responsesCount),
-
-		Delegates(delegates),
-		DelegatesCount(delegatesCount),
-
-		Requests(requests),
-		RequestsCount(requestsCount),
-
-		IsEnableMataDataEncode(isEnableMataDataEncode),
-		UserData(ud),
-		//last
-		DeInitFlag(false),
+		Send(send),
 		ObjectMutexHandle(nullptr),
 		DelegateServiceThreadHandle(nullptr),
+
+		DelegatesCount(delegatesCount),
+		Delegates(delegates),
+
+		ResponsesCount(responsesCount),
+		Responses(responses),
+
+		UserData(ud),
+		DeInitFlag(false),
+		IsEnableMataDataEncode(isEnableMataDataEncode),
+
 		ResponseServiceThreadHandle(nullptr),
-		SuspendTimer(nullptr)
+		SuspendTimer(nullptr),
+
+		RequestsCount(requestsCount),
+		Requests(requests)
 	{
 
 	}
@@ -388,6 +389,7 @@ public:
 				isContain = false;
 				for (uint32_t collectionIndex = 0; collectionIndex < obj->DelegatesCount; collectionIndex++)
 				{
+					isContain = true;
 					auto iter = &obj->Delegates[collectionIndex];
 					if (iter->Delegate->GetSid() == recData.Sid)
 					{
@@ -436,6 +438,7 @@ public:
 		ReceiveItemInfo recData;
 		//uint32_t i = 0;
 		bool isContain = false;
+		(void)isContain;//make compiler happy!
 		for (;;)
 		{
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
@@ -447,6 +450,7 @@ public:
 				isContain = false;
 				for (uint32_t collectionIndex = 0; collectionIndex < obj->RequestsCount; collectionIndex++)
 				{
+					isContain = true;
 					auto iter = &obj->Requests[collectionIndex];
 					if (iter->Service->GetSid() == recData.Sid)
 					{
