@@ -697,13 +697,13 @@ namespace EmbedXrpcIdlParser
                             {
                                 //说明返回值是枚举
                                 //new 一个enum 类型
-                                var vs = type.GetEnumValues();
+                                var vs = rt.GetEnumValues();
                                 EnumType_TargetType te = new EnumType_TargetType();
-                                te.TypeName = type.Name;//类型名称
-                                te.NumberType = ClrBaseValueTypeToTargetType_t(type.GetEnumUnderlyingType());
+                                te.TypeName = rt.Name;//类型名称
+                                te.NumberType = ClrBaseValueTypeToTargetType_t(rt.GetEnumUnderlyingType());
                                 foreach (var vsv in vs)
                                 {
-                                    te.KeyValue.Add(type.GetEnumName(vsv), Convert.ToInt32(vsv));
+                                    te.KeyValue.Add(rt.GetEnumName(vsv), Convert.ToInt32(vsv));
                                 }
                                 Enum_TargetField retunValueFiled = new Enum_TargetField();
                                 retunValueFiled.TargetType = te;
