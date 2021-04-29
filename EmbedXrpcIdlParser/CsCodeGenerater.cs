@@ -140,7 +140,7 @@ namespace EmbedXrpcIdlParser
                     var par = del.ParameterStructType.TargetFields[pi];
                     sw.WriteLine($"request.{par.FieldName} = {par.FieldName};");
                 }
-                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());");
+                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());");
                 sw.WriteLine("sm.Serialize(request,0);");
                 sw.WriteLine("List<byte> sendBytes = new List<byte>();");
                 sw.WriteLine($"sendBytes.Add((byte)({del.MethodName}_ServiceId&0xff));");
@@ -232,7 +232,7 @@ namespace EmbedXrpcIdlParser
                     var par = service.ParameterStructType.TargetFields[pi];
                     sw.WriteLine($"request.{par.FieldName}={par.FieldName};");   
                 }
-                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());");
+                sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());");
                 sw.WriteLine("sm.Serialize(request,0);");
                 sw.WriteLine("List<byte> sendBytes = new List<byte>();");
                 sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId&0xff));");

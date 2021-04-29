@@ -2,8 +2,8 @@
 using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
-// auto code gen ! DO NOT modify this file! create time 2021 - 03 - 11 15: 17:41.341;
-//C# Code Generater Version:1.9.0.0
+// auto code gen ! DO NOT modify this file! create time 2021 - 04 - 29 10: 46:45.964;
+//C# Code Generater Version:1.9.3.0
 namespace Sample1
 {
 using UInt8 = Byte;
@@ -178,7 +178,7 @@ public void Invoke(DateTime_t[] now)
 {
 DateTimeChange_Parameter request =new DateTimeChange_Parameter();
 request.now = now;
-SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());
+SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());
 sm.Serialize(request,0);
 List<byte> sendBytes = new List<byte>();
 sendBytes.Add((byte)(DateTimeChange_ServiceId&0xff));
@@ -222,7 +222,7 @@ public void Invoke(DateTime_t[] now)
 {
 TestDelegate_Parameter request =new TestDelegate_Parameter();
 request.now = now;
-SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());
+SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());
 sm.Serialize(request,0);
 List<byte> sendBytes = new List<byte>();
 sendBytes.Add((byte)(TestDelegate_ServiceId&0xff));
@@ -309,7 +309,7 @@ request.a=a;
 request.b=b;
 request.dataLen=dataLen;
 request.data=data;
-SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());
+SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());
 sm.Serialize(request,0);
 List<byte> sendBytes = new List<byte>();
 sendBytes.Add((byte)(Add_ServiceId&0xff));
@@ -385,7 +385,7 @@ lock(XrpcObject.ObjectMutex)
 {
 XrpcObject.ResponseMessageQueueHandle.Reset();
 Inter_NoArg_Parameter request =new Inter_NoArg_Parameter();
-SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());
+SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());
 sm.Serialize(request,0);
 List<byte> sendBytes = new List<byte>();
 sendBytes.Add((byte)(NoArg_ServiceId&0xff));
@@ -460,7 +460,7 @@ lock(XrpcObject.ObjectMutex)
 XrpcObject.ResponseMessageQueueHandle.Reset();
 Inter_NoReturn_Parameter request =new Inter_NoReturn_Parameter();
 request.a=a;
-SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());
+SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());
 sm.Serialize(request,0);
 List<byte> sendBytes = new List<byte>();
 sendBytes.Add((byte)(NoReturn_ServiceId&0xff));
@@ -523,7 +523,7 @@ lock(XrpcObject.ObjectMutex)
 {
 XrpcObject.ResponseMessageQueueHandle.Reset();
 Inter_NoArgAndReturn_Parameter request =new Inter_NoArgAndReturn_Parameter();
-SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.IsEnableMataDataEncode,new List<byte>());
+SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());
 sm.Serialize(request,0);
 List<byte> sendBytes = new List<byte>();
 sendBytes.Add((byte)(NoArgAndReturn_ServiceId&0xff));

@@ -28,10 +28,10 @@ namespace EmbedXrpc
         private Thread DelegateServiceThreadHandle;
         private Win32Queue<EmbeXrpcRawData> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData>();
         
-        public bool IsEnableMataDataEncode { get; set; }
-        public EmbedXrpcObject(UInt32 timeout, Send send, Assembly assembly,bool isEnableMataDataEncode)
+        //public bool IsEnableMataDataEncode { get; set; }
+        public EmbedXrpcObject(UInt32 timeout, Send send, Assembly assembly)
         {
-            IsEnableMataDataEncode = isEnableMataDataEncode;
+            //IsEnableMataDataEncode = isEnableMataDataEncode;
             var types = assembly.GetTypes();
             Assembly = assembly;
             foreach (var type in types)
@@ -125,7 +125,7 @@ namespace EmbedXrpc
             }
             if(ret == RequestResponseState.ResponseState_Ok)
             {
-                SerializationManager sm = new SerializationManager(Assembly, IsEnableMataDataEncode, new List<byte>(recData.Data));
+                SerializationManager sm = new SerializationManager(Assembly, new List<byte>(recData.Data));
                 response = (T)sm.Deserialize(res_t);
             }
             return ret;
@@ -218,7 +218,7 @@ namespace EmbedXrpc
                     {
                         if (Delegates[i].Delegate.GetSid() == recData.Sid)
                         {
-                            SerializationManager rsm = new SerializationManager(Assembly, IsEnableMataDataEncode, new List<byte>(recData.Data));
+                            SerializationManager rsm = new SerializationManager(Assembly,  new List<byte>(recData.Data));
                             //Console.WriteLine($"get server timeout value{recData.TargetTimeOut}");
                             Delegates[i].Delegate.Invoke(rsm);
                             break;
@@ -246,8 +246,8 @@ namespace EmbedXrpc
                     {
                         if (Requests[i].Service.GetSid() == recData.Sid)
                         {
-                            SerializationManager rsm = new SerializationManager(Assembly,IsEnableMataDataEncode, new List<byte>(recData.Data));
-                            SerializationManager sendsm = new SerializationManager(Assembly,IsEnableMataDataEncode,new List<byte>());
+                            SerializationManager rsm = new SerializationManager(Assembly, new List<byte>(recData.Data));
+                            SerializationManager sendsm = new SerializationManager(Assembly,new List<byte>());
 
                             //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
                             SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);

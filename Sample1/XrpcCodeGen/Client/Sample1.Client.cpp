@@ -20,7 +20,6 @@ TestDelegate_Parameter_FreeData(&request);
 Inter_Add_Return& InterClientImpl::Add()
 {//write serialization code:Add()
 SerializationManager sm;
-sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 auto result=false;
 auto waitstate=ResponseState_Timeout;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
@@ -56,7 +55,6 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 #if  EmbedXrpc_UseRingBufferWhenReceiving==1
 sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;
 #else
-sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;
 sm.Reset();
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
@@ -97,7 +95,6 @@ Inter_NoArg_Return& InterClientImpl::NoArg()
 {
 //write serialization code:NoArg()
 SerializationManager sm;
-sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 auto result=false;
 auto waitstate=ResponseState_Timeout;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
@@ -133,7 +130,6 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 #if  EmbedXrpc_UseRingBufferWhenReceiving==1
 sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;
 #else
-sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;
 sm.Reset();
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
@@ -174,7 +170,6 @@ Inter_NoReturn_Return& InterClientImpl::NoReturn(Int32 a)
 {
 //write serialization code:NoReturn(a,)
 SerializationManager sm;
-sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 auto result=false;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
@@ -213,7 +208,6 @@ Inter_NoArgAndReturn_Return& InterClientImpl::NoArgAndReturn()
 {
 //write serialization code:NoArgAndReturn()
 SerializationManager sm;
-sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 auto result=false;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1

@@ -5,7 +5,7 @@
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 #include "BlockBufferProvider.h"
 #endif
-
+#define EmbedXrpcObjectVersion	"1.9.4"
 class EmbedXrpcObject
 {
 public:
@@ -39,8 +39,9 @@ public:
 	void* UserData;
 
 	bool DeInitFlag;
-
-	bool IsEnableMataDataEncode;
+	bool DelegateServiceThreadExitState;
+	bool ResponseServiceThreadExitState;
+	//bool IsEnableMataDataEncode;
 
 	//server:
 	EmbedXrpc_Thread_t ResponseServiceThreadHandle;
@@ -69,7 +70,7 @@ public:
 		RequestDescribe* requests,//server 请求的services
 		uint32_t requestsCount,//server
 
-		bool isEnableMataDataEncode,
+		//bool isEnableMataDataEncode,
 		void* ud = nullptr) :
 		TimeOut(timeOut),
 		Send(send),
@@ -84,7 +85,7 @@ public:
 
 		UserData(ud),
 		DeInitFlag(false),
-		IsEnableMataDataEncode(isEnableMataDataEncode),
+		//IsEnableMataDataEncode(isEnableMataDataEncode),
 
 		ResponseServiceThreadHandle(nullptr),
 		SuspendTimer(nullptr),
@@ -104,7 +105,7 @@ public:
 		DelegateDescribe* delegates,
 		uint32_t delegatesCount,
 
-		bool isEnableMataDataEncode,
+		//bool isEnableMataDataEncode,
 		void* ud = nullptr) :EmbedXrpcObject(send,
 			timeOut,
 
@@ -117,7 +118,7 @@ public:
 			nullptr,
 			0,
 
-			isEnableMataDataEncode,
+			//isEnableMataDataEncode,
 			ud
 		)
 	{
@@ -130,7 +131,7 @@ public:
 		RequestDescribe* requests,//server 请求的services
 		uint32_t requestsCount,//server
 
-		bool isEnableMataDataEncode,
+		//bool isEnableMataDataEncode,
 		void* ud = nullptr) :EmbedXrpcObject(send,
 			timeOut,
 
@@ -143,7 +144,7 @@ public:
 			requests,
 			requestsCount,
 
-			isEnableMataDataEncode,
+			//isEnableMataDataEncode,
 			ud
 		)
 	{
@@ -152,6 +153,8 @@ public:
 
 	void Init()
 	{
+		DelegateServiceThreadExitState = false;
+		ResponseServiceThreadExitState = false;
 		DeInitFlag = false;
 
 		ObjectMutexHandle = EmbedXrpc_CreateMutex("ObjectMutex");
@@ -394,7 +397,7 @@ public:
 					if (iter->Delegate->GetSid() == recData.Sid)
 					{
 						SerializationManager rsm;
-						rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
+						//rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 						rsm.Reset();
 						rsm.BufferLen = recData.DataLen;
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
@@ -425,6 +428,7 @@ public:
 			}
 			if (obj->DeInitFlag == true)
 			{
+				obj->DelegateServiceThreadExitState = true;
 				return;
 			}
 		}
@@ -457,7 +461,7 @@ public:
 
 						SerializationManager rsm;
 						SerializationManager sendsm;
-						rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
+						//rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 						rsm.Reset();
 						rsm.BufferLen = recData.DataLen;
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
@@ -470,7 +474,7 @@ public:
 						rsm.SetReferenceSum(recData.CheckSum);
 #endif
 						EmbedXrpc_TakeMutex(obj->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);//由于使用obj->Buffer这个全局变量，所以添加锁
-						sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
+						//sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 						sendsm.Reset();
 						sendsm.Buf = &obj->DataLinkLayoutBuffer[4];
 						sendsm.BufferLen = EmbedXrpc_SendBufferSize - 4;
@@ -509,6 +513,7 @@ public:
 
 			if (obj->DeInitFlag == true)
 			{
+				obj->ResponseServiceThreadExitState = true;
 				return;
 			}
 		}

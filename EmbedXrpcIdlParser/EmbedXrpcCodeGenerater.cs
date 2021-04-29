@@ -392,7 +392,7 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
                 //ServerCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} SendData;");
                 ServerCsw.WriteLine($"SerializationManager sm;");
-                ServerCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
+                //ServerCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
                 ServerCsw.WriteLine("EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
                 ServerCsw.WriteLine("sm.Reset();\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
@@ -550,7 +550,7 @@ namespace EmbedXrpcIdlParser
 
                     //ClientCsw.WriteLine($"static {service.ParameterStructType.TypeName} SendData;");
                     ClientCsw.WriteLine($"SerializationManager sm;");
-                    ClientCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
+                    //ClientCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
                     //ClientCsw.WriteLine($"static {service.ReturnStructType.TypeName} reqresp;");
                     ClientCsw.WriteLine($"auto result=false;");
 
@@ -642,7 +642,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine("#if  EmbedXrpc_UseRingBufferWhenReceiving==1");
                         ClientCsw.WriteLine("sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;");
                         ClientCsw.WriteLine("#else");
-                        ClientCsw.WriteLine("sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;");
+                        //ClientCsw.WriteLine("sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;");
                         ClientCsw.WriteLine("sm.Reset();");
                         ClientCsw.WriteLine("sm.BufferLen = recData.DataLen;");
                         ClientCsw.WriteLine("sm.Buf = recData.Data;");

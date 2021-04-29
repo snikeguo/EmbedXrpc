@@ -56,7 +56,7 @@ namespace EmbedXrpc
             data.Add(d);
         }*/
         
-        public bool IsEnableMataDataEncode { get; set; } = false;
+        //public bool IsEnableMataDataEncode { get; set; } = false;
         void SerializeKey(Int32 FieldNumber, Type_t Field)
         {
             /*Buf[Index++] = FieldNumber;
@@ -239,10 +239,10 @@ namespace EmbedXrpc
             Index++;
         }
         private Assembly Assembly;
-        public SerializationManager(Assembly assembly,bool isEnableMataDataEncode,List<byte> data)
+        public SerializationManager(Assembly assembly,List<byte> data)
         {
             Assembly = assembly;
-            IsEnableMataDataEncode = isEnableMataDataEncode;
+            //IsEnableMataDataEncode = isEnableMataDataEncode;
             Data = data;
             Index = 0;
         }
@@ -452,7 +452,7 @@ namespace EmbedXrpc
         }
         public void Serialize(object s,Int32 fieldNumber)
         {
-            if (IsEnableMataDataEncode == true)
+            if (false)//(IsEnableMataDataEncode == true)
             {
                 SerializeKey(fieldNumber,Type_t.TYPE_STRUCT);
                 SerializeSubField(s);
@@ -658,7 +658,7 @@ namespace EmbedXrpc
         public object Deserialize(Type st)
         {
             var s = Assembly.CreateInstance(st.FullName);
-            if (IsEnableMataDataEncode == true)
+            if (false)//(IsEnableMataDataEncode == true)
             {
                 UInt32 fn = 0;//Pop一次KEY 因为打包的时候是按照field打包的，所以这里要把KEY 要POP出来一次
                 Type_t tp = Type_t.TYPE_UINT8;

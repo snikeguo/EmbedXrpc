@@ -66,9 +66,9 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
-            client = new EmbedXrpcObject(100, clientSend, Assembly.GetExecutingAssembly(),false);
+            client = new EmbedXrpcObject(100, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
-            server = new EmbedXrpcObject(2000, serverSend, Assembly.GetExecutingAssembly(), false);
+            server = new EmbedXrpcObject(2000, serverSend, Assembly.GetExecutingAssembly());
             server.Start();
             Task.Run(() =>
             {

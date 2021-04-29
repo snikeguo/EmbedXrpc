@@ -221,7 +221,7 @@ public:
 	}
 
 #endif
-	bool IsEnableMataDataEncode = false;
+	//bool IsEnableMataDataEncode = false;
 	void SerializeKey(uint32_t  FieldNumber, Type_t   Field);
 	void SerializeLen(uint32_t  Len);
 	void SerializeEndFlag();

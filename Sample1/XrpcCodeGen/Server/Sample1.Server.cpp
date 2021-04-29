@@ -3,7 +3,6 @@ void  DateTimeChangeDelegate::Invoke(DateTime_t now[1])
 {
 //write serialization code:DateTimeChange(now,)
 SerializationManager sm;
-sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -22,7 +21,6 @@ EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 void  TestDelegateDelegate::Invoke()
 {//write serialization code:TestDelegate(now,)
 SerializationManager sm;
-sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;
 EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
 sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];

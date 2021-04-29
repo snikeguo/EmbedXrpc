@@ -705,7 +705,7 @@ void SerializationManager::RemoveEndFlagFromSerializationManager()
 }
 void SerializationManager::Serialize(const ObjectType* objectType, void* objectData, uint32_t fieldNumber)
 {
-	if (IsEnableMataDataEncode == true)
+	if (false)//(IsEnableMataDataEncode == true)
 	{
 		SerializeKey(fieldNumber, TYPE_OBJECT);
 		SerializeSubField(objectType, objectData);
@@ -870,7 +870,7 @@ void SerializationManager::NoMataData_SerializeSubField(const ObjectType* object
 }
 bool SerializationManager::Deserialize(const ObjectType* objectType, void* objectPoint, uint32_t fieldNumber)
 {
-	if (IsEnableMataDataEncode == true)
+	if (false)//(IsEnableMataDataEncode == true)
 	{
 		uint32_t fn = 0;//Pop一次KEY 因为打包的时候是按照field打包的，所以这里要把KEY 要POP出来一次
 		Type_t tp = TYPE_UINT8;
