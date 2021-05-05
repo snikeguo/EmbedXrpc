@@ -38,9 +38,9 @@ public:
 
 	void* UserData;
 
-	bool DeInitFlag;
-	bool DelegateServiceThreadExitState;
-	bool ResponseServiceThreadExitState;
+	volatile bool DeInitFlag;
+	volatile bool DelegateServiceThreadExitState;
+	volatile bool ResponseServiceThreadExitState;
 	//bool IsEnableMataDataEncode;
 
 	//server:
