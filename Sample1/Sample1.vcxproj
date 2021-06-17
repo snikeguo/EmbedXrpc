@@ -23,7 +23,6 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="XrpcCodeGen\Client\Sample1.Client.cpp" />
@@ -39,7 +38,6 @@
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcObject.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.h" />
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.h" />
     <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h" />
     <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h" />
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h" />

@@ -42,9 +42,6 @@
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.cpp">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
-    </ClCompile>
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.cpp">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
@@ -87,9 +84,6 @@
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.h">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\Semaphore.h">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h">

@@ -11,7 +11,9 @@ typedef void* EmbedXrpc_Timer_t;
 #define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
 //common
-#define EmbedXrpc_SendBufferSize			128//发送Buffer大小
+#define EmbedXrpc_SendBufferSize			1024//发送Buffer大小
+#define EmbedXrpc_CheckSumValid				1
+#define EmbedXrpc_IsSendToQueue				1
 
 //client部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
 #define EmbedXrpc_DelegateBlockQueue_MaxItemNumber	0

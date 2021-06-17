@@ -45,9 +45,6 @@
     <ClInclude Include="EmbedXrpcObject.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Win32.Port\Semaphore.h">
-      <Filter>WIN32.Port</Filter>
-    </ClInclude>
     <ClInclude Include="Win32.Port\EmbedSerialization.Port.h">
       <Filter>WIN32.Port</Filter>
     </ClInclude>
@@ -94,9 +91,6 @@
     </ClCompile>
     <ClCompile Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.cpp">
       <Filter>FreeRTOS.Port</Filter>
-    </ClCompile>
-    <ClCompile Include="Win32.Port\Semaphore.cpp">
-      <Filter>WIN32.Port</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

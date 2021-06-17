@@ -3,10 +3,9 @@
 #include <thread>
 #include <mutex>
 
-#include "Semaphore.h"
 #include "BlockQueue.h"
 #include "windows.h"
-
+using Semaphore = BlockingQueue<int>;
 EmbedXrpc_Thread_t EmbedXrpc_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg)
 {
 	std::thread * ServiceThread = new std::thread(Thread, Arg);
@@ -27,7 +26,7 @@ EmbedXrpc_Queue_t EmbedXrpc_CreateQueue(const char* queueName, uint32_t queueIte
 }
 EmbedXrpc_Semaphore_t  EmbedXrpc_CreateSemaphore(const char* SemaphoreName)
 {
-	Semaphore*sem = new Semaphore(std::string(SemaphoreName));
+	Semaphore*sem = new Semaphore();
 	return sem;
 }
 class Win32Timer //¼òµ¥µÄtimer
@@ -57,7 +56,12 @@ public:
 					This->timercb(This->arg);
 				}
 			}
+			if (This->ExitFlag == true)
+			{
+				break;
+			}
 		}
+		This->ExitedFlag = true;
 	}
 	void Start()
 	{
@@ -69,8 +73,15 @@ public:
 		RunFlag = false;
 		count = 0;
 	}
+	~Win32Timer()
+	{
+		ExitFlag = true;
+		while (ExitedFlag ==false);
+	}
 	std::thread* timerThread;
-	bool RunFlag;
+	volatile bool RunFlag;
+	volatile bool ExitFlag=false;
+	volatile bool ExitedFlag=false;
 	const char* name;
 	uint32_t count = 0;
 	uint32_t timerout;
@@ -102,7 +113,7 @@ void EmbedXrpc_DeleteQueue(EmbedXrpc_Queue_t queue)
 void EmbedXrpc_DeleteSemaphore(EmbedXrpc_Semaphore_t sem)
 {
 	Semaphore* qtsem = static_cast<Semaphore*>(sem);
-	while (qtsem->wait()== true);
+	qtsem->Reset();
 	delete sem;
 }
 void EmbedXrpc_DeleteTimer(EmbedXrpc_Timer_t timer) 
@@ -136,7 +147,8 @@ void EmbedXrpc_TimerStop(EmbedXrpc_Timer_t timer)
 bool EmbedXrpc_TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
 {
 	Semaphore* qtsem = static_cast<Semaphore*>(sem);
-	auto r= qtsem->wait(timeout);
+	int recItem = 0;
+	auto r= qtsem->Receive(recItem,timeout);
 	//assert(r == true);
 	return r;
 
@@ -144,12 +156,13 @@ bool EmbedXrpc_TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
 void EmbedXrpc_ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
 {
 	Semaphore* qtsem = static_cast<Semaphore*>(sem);
-	qtsem->release();
+	int recItem = 0;
+	qtsem->Send(recItem);
 }
 void EmbedXrpc_ResetSemaphore(EmbedXrpc_Semaphore_t sem)
 {
 	Semaphore* qtsem = static_cast<Semaphore*>(sem);
-	while (qtsem->wait() == true);
+	qtsem->Reset();
 }
 
 bool EmbedXrpc_TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout)

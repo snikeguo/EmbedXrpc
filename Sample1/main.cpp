@@ -53,7 +53,8 @@ void ClientThread()
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	int a=1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
-	while (true)
+	int testcount = 5;
+	while (testcount-- > 0)
 	{
 		a ++;
 		b ++;
@@ -69,6 +70,8 @@ void ClientThread()
 		Client.Free_Add(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));//等待RPC调用全部完毕
+	ClientRpc.DeInit();
 }
 //--------------------------------------------------------------------
 //server
@@ -105,7 +108,8 @@ void ServerThread()
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;
-	while (true)
+	int testcount = 5;
+	while (testcount-->0)
 	{		
 		
 		auto ti = (time(nullptr));
@@ -130,6 +134,8 @@ void ServerThread()
 		DateTimeChanger.Invoke(&t);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));//等待RPC调用全部完毕
+	ServerRpc.DeInit();
 }
 
 void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
