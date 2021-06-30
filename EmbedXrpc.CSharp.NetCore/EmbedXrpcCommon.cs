@@ -21,47 +21,51 @@ namespace EmbedXrpc
         Response=0x2,
         Delegate=0x3,
     };
-    public interface IDelegate
+    public interface IDelegate<DTL> where DTL : struct
     {
         UInt16 GetSid();
-        void Invoke(SerializationManager recManager);
+        void Invoke(DTL userDataOfTransportLayer, SerializationManager recManager);
     }
     public static class EmbedXrpcCommon
     {
         public static readonly UInt16 EmbedXrpcSuspendSid = 0x1;
     }
 
-    public interface IService
+    public interface IService<DTL> where DTL : struct
     {
         UInt16 GetSid();
-        void Invoke(SerializationManager recManager, SerializationManager sendManager);
+        void Invoke(DTL request_UserDataOfTransportLayer,
+         ref DTL response_UserDataOfTransportLayer,
+         EmbedXrpcObject<DTL> rpcObject,
+         UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager);
     }
-    public interface IRequestService
+    public interface IRequestService<DTL> where DTL : struct
     {
         UInt16 GetSid();
     }
-    public class RequestDescribe
+    public class RequestDescribe<DTL> where DTL : struct
     {
         public string Name { get; set; }
-        public IService Service { get; set; }
+        public IService<DTL> Service { get; set; }
     }
-    public class DelegateDescribe
+    public class DelegateDescribe<DTL> where DTL : struct
     {
         public string Name { get; set; }
-        public IDelegate Delegate { get; set; }
+        public IDelegate<DTL> Delegate { get; set; }
     };
     public class ResponseDescribe
     {
         public string Name { get; set; }
         public UInt16 Sid { get; set; }//有可能是Response/Delegate
     };
-    public delegate bool Send(int dataLen, int offset ,byte[] data);
-    public struct EmbeXrpcRawData
+    public delegate bool Send<DTL>(DTL userDataOfTransportLayer,  int dataLen, int offset ,byte[] data);
+    public struct EmbeXrpcRawData<DTL> where DTL : struct
     {
         public UInt16 Sid { get; set; }
         public UInt16 TargetTimeOut { get; set; }
         public byte[] Data { get; set; }
         public UInt32 DataLen { get; set; }
+        public DTL UserDataOfTransportLayer { get; set; }
     }
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public sealed class DelegateInfoAttribute : Attribute

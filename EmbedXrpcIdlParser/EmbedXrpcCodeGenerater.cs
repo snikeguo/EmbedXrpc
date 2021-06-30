@@ -298,7 +298,8 @@ namespace EmbedXrpcIdlParser
                 ClientHsw.WriteLine("{\npublic:");
                 ClientHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
 
-                ClientHsw.Write($"void {targetDelegate.MethodName}(");
+                var dh = targetDelegate.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                ClientHsw.Write($"void {targetDelegate.MethodName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
 
                 
                 for (int i = 0; i < targetDelegate.ParameterStructType.TargetFields.Count; i++)
@@ -317,9 +318,9 @@ namespace EmbedXrpcIdlParser
 
                 //code gen invoke
                 ClientHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName} request;");
-                ClientHsw.WriteLine("void Invoke(SerializationManager &recManager);");//声明
+                ClientHsw.WriteLine("void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager);");//声明
 
-                ClientCsw.WriteLine($"void {targetDelegate.MethodName}ClientImpl::Invoke(SerializationManager &recManager)");
+                ClientCsw.WriteLine($"void {targetDelegate.MethodName}ClientImpl::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager)");
                 ClientCsw.WriteLine("{");
                 //ClientCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} request;");
 
@@ -329,7 +330,8 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.WriteLine("#if EmbedXrpc_CheckSumValid==1");
                 ClientCsw.WriteLine($"EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());");
                 ClientCsw.WriteLine("#endif");
-                ClientCsw.Write($"{targetDelegate.MethodName}(");
+                dh = targetDelegate.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                ClientCsw.Write($"{targetDelegate.MethodName}(userDataOfTransportLayer{dh}");
                 for (int i = 0; i < targetDelegate.ParameterStructType.TargetFields.Count; i++)
                 {
                     var par = targetDelegate.ParameterStructType.TargetFields[i];
@@ -361,8 +363,9 @@ namespace EmbedXrpcIdlParser
                 ServerHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName} SendData;");
                 if (targetDelegate.ExternalParameter.IsExternal==false)
                 {
-                    ServerHsw.Write($"void  Invoke(");
-                    ServerCsw.Write($"void  {targetDelegate.MethodName }Delegate::Invoke(");
+                    var dh = targetDelegate.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                    ServerHsw.Write($"void  Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
+                    ServerCsw.Write($"void  {targetDelegate.MethodName }Delegate::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
                     temp_fileds = string.Empty;
                     for (int i = 0; i < targetDelegate.ParameterStructType.TargetFields.Count; i++)
                     {
@@ -384,8 +387,8 @@ namespace EmbedXrpcIdlParser
                 }
                 else
                 {
-                    ServerHsw.Write($"void  Invoke();");
-                    ServerCsw.Write($"void  {targetDelegate.MethodName }Delegate::Invoke()\n{{");
+                    ServerHsw.Write($"void  Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer);");
+                    ServerCsw.Write($"void  {targetDelegate.MethodName }Delegate::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer)\n{{");
                 }
 
                 //函数实现
@@ -445,7 +448,7 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
                 ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
                 ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);");
-                ServerCsw.WriteLine($"RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
+                ServerCsw.WriteLine($"RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
                 ServerCsw.WriteLine("sm.Reset();");
                 ServerCsw.WriteLine("EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);");
                 ServerCsw.WriteLine("}");//function end
@@ -519,8 +522,9 @@ namespace EmbedXrpcIdlParser
                     //string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
                     if (service.ExternalParameter.IsExternal ==false)
                     {
-                        ClientHsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(");
-                        ClientCsw.Write($"{service.ReturnStructType.TypeName}& {targetInterface.Name}ClientImpl::{service.ServiceName}(");
+                        var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                        ClientHsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
+                        ClientCsw.Write($"{service.ReturnStructType.TypeName}& {targetInterface.Name}ClientImpl::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
                         temp_fileds = string.Empty;
                         for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
                         {
@@ -542,8 +546,8 @@ namespace EmbedXrpcIdlParser
                     }
                     else
                     {
-                        ClientHsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}();");
-                        ClientCsw.Write($"{service.ReturnStructType.TypeName}& {targetInterface.Name}ClientImpl::{service.ServiceName}()\n{{");
+                        ClientHsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer);");
+                        ClientCsw.Write($"{service.ReturnStructType.TypeName}& {targetInterface.Name}ClientImpl::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer)\n{{");
                     }
 
                     ClientCsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
@@ -628,7 +632,7 @@ namespace EmbedXrpcIdlParser
                     ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
                     ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
                     ClientCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);");
-                    ClientCsw.WriteLine($"result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
+                    ClientCsw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
                     ClientCsw.WriteLine("sm.Reset();");
                     ClientCsw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\ngoto exi;\n}}");
                     ClientCsw.WriteLine($"else\n{{\n{service.ServiceName}_reqresp.State=RequestState_Ok;\n}}");
@@ -709,7 +713,8 @@ namespace EmbedXrpcIdlParser
                     }
  
                     string returnType = "void";
-                    ServerHsw.Write($"{returnType} {service.ServiceName}(");
+                    var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                    ServerHsw.Write($"{returnType} {service.ServiceName}(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut{dh}");
 
                     var temp_fileds = string.Empty;
                     for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
@@ -729,8 +734,8 @@ namespace EmbedXrpcIdlParser
 
                     //code gen invoke
                     ServerHsw.WriteLine($"{service.ParameterStructType.TypeName} request;");
-                    ServerHsw.WriteLine("void Invoke(SerializationManager &recManager, SerializationManager& sendManager);");
-                    ServerCsw.WriteLine($"void {service.FullName}Service::Invoke(SerializationManager &recManager, SerializationManager& sendManager)");
+                    ServerHsw.WriteLine("void Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager);");
+                    ServerCsw.WriteLine($"void {service.FullName}Service::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)");
                     ServerCsw.WriteLine("{");
                     //ServerCsw.WriteLine($"static {service.ParameterStructType.TypeName} request;");
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Deserialize(recManager,&request);");
@@ -741,7 +746,8 @@ namespace EmbedXrpcIdlParser
                     ServerCsw.WriteLine("#endif");
                     //if (service.ReturnValue != null)
                     //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");
-                    ServerCsw.Write($"{service.ServiceName}(");
+                    dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                    ServerCsw.Write($"{service.ServiceName}(request_UserDataOfTransportLayer,response_UserDataOfTransportLayer,rpcObject,targetTimeOut{dh}");
                     for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
                     {
                         var par = service.ParameterStructType.TargetFields[i];

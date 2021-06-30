@@ -1,23 +1,23 @@
 ﻿#include"Sample1.Client.h"
-void DateTimeChangeClientImpl::Invoke(SerializationManager &recManager)
+void DateTimeChangeClientImpl::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager)
 {
 DateTimeChange_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
 #endif
-DateTimeChange(request.now);
+DateTimeChange(userDataOfTransportLayer,request.now);
 DateTimeChange_Parameter_FreeData(&request);
 }
-void TestDelegateClientImpl::Invoke(SerializationManager &recManager)
+void TestDelegateClientImpl::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager)
 {
 TestDelegate_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSum());
 #endif
-TestDelegate(request.now);
+TestDelegate(userDataOfTransportLayer,request.now);
 TestDelegate_Parameter_FreeData(&request);
 }
-Inter_Add_Return& InterClientImpl::Add()
+Inter_Add_Return& InterClientImpl::Add(UserDataOfTransportLayer_t* userDataOfTransportLayer)
 {//write serialization code:Add()
 SerializationManager sm;
 auto result=false;
@@ -37,7 +37,7 @@ RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_Add_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {
@@ -91,7 +91,7 @@ Inter_Add_Return_FreeData(response);
 }
 
 
-Inter_NoArg_Return& InterClientImpl::NoArg()
+Inter_NoArg_Return& InterClientImpl::NoArg(UserDataOfTransportLayer_t* userDataOfTransportLayer)
 {
 //write serialization code:NoArg()
 SerializationManager sm;
@@ -112,7 +112,7 @@ RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoArg_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {
@@ -166,7 +166,7 @@ Inter_NoArg_Return_FreeData(response);
 }
 
 
-Inter_NoReturn_Return& InterClientImpl::NoReturn(Int32 a)
+Inter_NoReturn_Return& InterClientImpl::NoReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a)
 {
 //write serialization code:NoReturn(a,)
 SerializationManager sm;
@@ -187,7 +187,7 @@ RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoReturn_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {
@@ -204,7 +204,7 @@ return NoReturn_reqresp;
 }
 
 
-Inter_NoArgAndReturn_Return& InterClientImpl::NoArgAndReturn()
+Inter_NoArgAndReturn_Return& InterClientImpl::NoArgAndReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer)
 {
 //write serialization code:NoArgAndReturn()
 SerializationManager sm;
@@ -224,7 +224,7 @@ RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoArgAndReturn_ServiceId>>8&0
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
 sm.Reset();
 if(result==false)
 {

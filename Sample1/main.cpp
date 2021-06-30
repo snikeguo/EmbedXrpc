@@ -7,9 +7,9 @@ extern EmbedXrpcObject ServerRpc;
 
 //-------------------------------------------------------------------------
 //client 
-bool ClientSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
+bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(ServerRpc.ReceivedMessage(dataLen, data)==true);
+	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer)==true);
 	return true;
 }
 DateTimeChangeClientImpl DateTimeChange;
@@ -37,12 +37,12 @@ EmbedXrpcObject ClientRpc(ClientSend,
 	2,
 	nullptr);//client rpc 对象
 
-void DateTimeChangeClientImpl::DateTimeChange(DateTime_t now[1])//server广播后，client接受到的
+void DateTimeChangeClientImpl::DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
 {
 	printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 	//printf("%s", now[0].DateString);
 }
-void TestDelegateClientImpl::TestDelegate(DateTime_t now[1])//server广播后，client接受到的
+void TestDelegateClientImpl::TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
 {
 	printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 	//printf("%s", now[0].DateString);
@@ -54,6 +54,9 @@ void ClientThread()
 	int a=1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
 	int testcount = 5;
+	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
+	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
+	win32UserDataOfTransportLayerTest.Port = 6666;
 	while (testcount-- > 0)
 	{
 		a ++;
@@ -62,7 +65,7 @@ void ClientThread()
 		Client.Add_SendData.b = b;
 		Client.Add_SendData.dataLen = 4;
 		Client.Add_SendData.data = (UInt8 *)"123";
-		auto sum=Client.Add();
+		auto sum=Client.Add(&win32UserDataOfTransportLayerTest);
 		if (sum.State == ResponseState_Ok)
 		{
 			printf("%d+%d=%d\n", a,b,sum.ReturnValue.Sum);
@@ -70,19 +73,19 @@ void ClientThread()
 		Client.Free_Add(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));//等待RPC调用全部完毕
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
 	ClientRpc.DeInit();
 }
 //--------------------------------------------------------------------
 //server
-bool ServerSend(void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
+bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
 	/*for (size_t i = 4; i < dataLen; i++)
 	{
 		printf("ServerSend:0x%.2x\n", data[i]);
 
 	}*/
-	ClientRpc.ReceivedMessage(dataLen, data);
+	ClientRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer);
 	return true;
 }
 Inter_AddService Inter_AddService_Instance;
@@ -109,6 +112,9 @@ void ServerThread()
 	uint8_t data[128];
 	t.DateString = data;
 	int testcount = 5;
+	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
+	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "192.168.1.101");
+	win32UserDataOfTransportLayerTest.Port = 7777;
 	while (testcount-->0)
 	{		
 		
@@ -131,37 +137,54 @@ void ServerThread()
 		t.David.u2 = 0x66778899;
 		t.David.uend1 = 1;
 		t.David.uend2 = 2;
-		DateTimeChanger.Invoke(&t);
+		DateTimeChanger.Invoke(&win32UserDataOfTransportLayerTest,&t);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));//等待RPC调用全部完毕
+	std::this_thread::sleep_for(std::chrono::milliseconds(10000));//等待RPC调用全部完毕
 	ServerRpc.DeInit();
 }
 
-void Inter_AddService::Add(Int32 a, Int32 b, Int32 dataLen, UInt8* data)
+void Inter_AddService::Add(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
+	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
+	void* rpcObject,
+	uint16_t targetTimeOut,
+	Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 {
+	EmbedXrpcObject* RpcObj = (EmbedXrpcObject*)rpcObject;
+	RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
+	EmbedXrpc_TimerStart(RpcObj->SuspendTimer, targetTimeOut/2);
 	IsFreeResponse = false;
 	Response.ReturnValue.Sum = a + b;
 	Response.ReturnValue.dataLen = 0;
 	Response.ReturnValue.data = NULL;
-	//printf("模拟耗时操作  延时3秒\n");
-	//std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	printf("模拟耗时操作  延时2秒\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 	//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 	//printf("len:%d\n", dataLen);
 }
 
 
-void Inter_NoArgService::NoArg()
+void Inter_NoArgService::NoArg(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, 
+	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
+	void* rpcObject,
+	uint16_t targetTimeOut)
 {
 	IsFreeResponse = true;
 	Response.ReturnValue = true;
 }
 
-void Inter_NoReturnService::NoReturn(int a)
+void Inter_NoReturnService::NoReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
+	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
+	void* rpcObject,
+	uint16_t targetTimeOut,
+	int a)
 {
 
 }
-void Inter_NoArgAndReturnService::NoArgAndReturn()
+void Inter_NoArgAndReturnService::NoArgAndReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
+	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer, 
+	void* rpcObject,
+	uint16_t targetTimeOut)
 {
 
 }

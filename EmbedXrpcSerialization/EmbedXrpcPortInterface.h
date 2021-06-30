@@ -20,6 +20,7 @@ struct ReceiveItemInfo
 #if EmbedXrpc_UseRingBufferWhenReceiving==0
     uint8_t* Data;
 #endif
+    UserDataOfTransportLayer_t UserDataOfTransportLayer;
 };
 
 EmbedXrpc_Thread_t EmbedXrpc_CreateThread(const char* threadName, uint8_t priority, void (*Thread)(void*), void* Arg) ;

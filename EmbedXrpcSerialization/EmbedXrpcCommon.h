@@ -27,7 +27,8 @@
  public:
      void* UserData;
      virtual uint16_t GetSid() = 0;
-	 virtual void Invoke(SerializationManager& recManager) = 0;
+	 virtual void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,
+         SerializationManager& recManager) = 0;
  };
 
 
@@ -43,7 +44,13 @@
      */
      bool IsFreeResponse = true;
      virtual uint16_t GetSid() = 0;
-	 virtual void Invoke(SerializationManager& recManager, SerializationManager& sendManager) = 0;
+	 virtual void Invoke(
+         UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
+         UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
+         void* rpcObject,
+         uint16_t targetTimeOut,
+         SerializationManager& recManager, 
+         SerializationManager& sendManager) = 0;
  };
  struct RequestDescribe
  {
@@ -88,7 +95,7 @@
  {
 
  };
-typedef bool (*SendPack_t)(void *rpcObj,uint32_t dataLen, uint8_t* data);
+typedef bool (*SendPack_t)(UserDataOfTransportLayer_t* userDataOfTransportLayer, void *rpcObj,uint32_t dataLen, uint8_t* data);
 
 
 #endif

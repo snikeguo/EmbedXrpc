@@ -82,12 +82,12 @@ namespace EmbedXrpcIdlParser
             if (genType == GenType.Client || genType == GenType.All)
             {
                 sw.WriteLine($"[DelegateInfo(Name=\"{del.MethodName}\")]");
-                sw.WriteLine($"public partial class {del.MethodName}ClientImpl:IDelegate");
+                sw.WriteLine($"public partial class {del.MethodName}ClientImpl<DTL>:IDelegate<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
 
                 sw.WriteLine($"public static readonly UInt16 {del.MethodName}_ServiceId={del.ServiceId};//0x{Convert.ToString(del.ServiceId, 16)}");
                 sw.WriteLine($"public UInt16 GetSid(){{ return {del.MethodName}_ServiceId;}}");
-                sw.WriteLine("public void Invoke(SerializationManager recManager)");
+                sw.WriteLine("public void Invoke(DTL userDataOfTransportLayer,SerializationManager recManager)");
                 sw.WriteLine("{");//function begin
 
                 sw.WriteLine($"{del.ParameterStructType.TypeName} request = recManager.Deserialize <{del.ParameterStructType.TypeName}>();");
@@ -104,7 +104,8 @@ namespace EmbedXrpcIdlParser
                         externstr += ",";
                     }
                 }
-                sw.WriteLine($"{del.MethodName}({pars});//call function!");
+                var dh = pars == "" ? "" : ",";
+                sw.WriteLine($"{del.MethodName}(userDataOfTransportLayer{dh}{pars});//call function!");
                 sw.WriteLine("}");//function end
                 sw.WriteLine($"//public void {del.MethodName}({externstr});");
 
@@ -112,11 +113,11 @@ namespace EmbedXrpcIdlParser
             }
             if (genType == GenType.Server || genType == GenType.All)
             {
-                sw.WriteLine($"public class {del.MethodName}Delegate");
+                sw.WriteLine($"public class {del.MethodName}Delegate<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
 
-                sw.WriteLine("private EmbedXrpcObject XrpcObject; ");
-                sw.WriteLine($"public {del.MethodName}Delegate(EmbedXrpcObject xrpcObject)");
+                sw.WriteLine("private EmbedXrpcObject<DTL> XrpcObject; ");
+                sw.WriteLine($"public {del.MethodName}Delegate(EmbedXrpcObject<DTL> xrpcObject)");
                 sw.WriteLine("{");//function begin
                 sw.WriteLine("XrpcObject=xrpcObject;");
                 sw.WriteLine("}");//function end
@@ -132,7 +133,8 @@ namespace EmbedXrpcIdlParser
                         pars += ",";
                     }
                 }
-                sw.WriteLine($"public void Invoke({pars})");
+                var dh = pars == "" ? "" : ",";
+                sw.WriteLine($"public void Invoke(DTL userDataOfTransportLayer{dh}{pars})");
                 sw.WriteLine("{");//function begin
                 sw.WriteLine($"{del.ParameterStructType.TypeName} request =new {del.ParameterStructType.TypeName}();");
                 for (int pi = 0; pi < del.ParameterStructType.TargetFields.Count; pi++)
@@ -148,7 +150,7 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine($"sendBytes.Add((byte)(XrpcObject.TimeOut&0xff));");
                 sw.WriteLine($"sendBytes.Add((byte)(((XrpcObject.TimeOut>>8&0xff)&0x3F)|((byte)ReceiveType.Delegate)<<6));");
                 sw.WriteLine("sendBytes.AddRange(sm.Data);");
-                sw.WriteLine("XrpcObject.Send ( sendBytes.Count,0,sendBytes.ToArray() );");
+                sw.WriteLine("XrpcObject.Send (userDataOfTransportLayer, sendBytes.Count,0,sendBytes.ToArray() );");
 
                 sw.WriteLine("}");//function end
 
@@ -162,7 +164,7 @@ namespace EmbedXrpcIdlParser
             if (genType == GenType.Server || genType == GenType.All)
             {
                 sw.WriteLine($"[ResponseServiceInfo(Name=\"{interfaceName}_{service.ServiceName}\",ServiceId={service.ServiceId})]");
-                sw.WriteLine($"public partial class {interfaceName}_{service.ServiceName}Service:IService");
+                sw.WriteLine($"public partial class {interfaceName}_{service.ServiceName}Service<DTL>:IService<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
                 sw.WriteLine($"public static readonly UInt16 {service.ServiceName}_ServiceId={service.ServiceId};//0x{Convert.ToString(service.ServiceId, 16)}");
                 sw.WriteLine($"public UInt16 GetSid(){{ return {service.ServiceName}_ServiceId;}}");
@@ -170,7 +172,10 @@ namespace EmbedXrpcIdlParser
                 {
                     sw.WriteLine($"private {service.ReturnStructType.TypeName} Response = new {service.ReturnStructType.TypeName}();");
                 }
-                sw.WriteLine("public  void Invoke(SerializationManager recManager, SerializationManager sendManager)");
+                sw.WriteLine("public  void Invoke(DTL request_UserDataOfTransportLayer,"+
+         "ref DTL response_UserDataOfTransportLayer,"+
+         "EmbedXrpcObject < DTL > rpcObject,"+
+         "UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager)");
                 sw.WriteLine("{");//function begin
                 sw.WriteLine($"{service.ParameterStructType.TypeName} request = recManager.Deserialize < {service.ParameterStructType.TypeName}>();");
                 string pars = string.Empty;
@@ -186,23 +191,24 @@ namespace EmbedXrpcIdlParser
                         externstr += ",";
                     }
                 }
-                sw.WriteLine($"{service.ServiceName}({pars});");
+                var dh = pars == "" ? "" : ",";
+                sw.WriteLine($"{service.ServiceName}(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut{dh}{pars});");
                 if (service.ReturnStructType.TargetFields.Count > 1)
                 {
                     sw.WriteLine($"sendManager.Serialize(Response, 0);");
                 }
                 sw.WriteLine("}");//function end
-                sw.WriteLine($"//public void {service.ServiceName}({externstr});");
+                sw.WriteLine($"//public void {service.ServiceName}(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut{dh}{externstr});");
                 sw.WriteLine("}");//class end
             }
             if (genType == GenType.Client || genType == GenType.All)
             {
                 sw.WriteLine($"[RequestServiceInfo(Name=\"{interfaceName}_{service.ServiceName}\",ServiceId={service.ServiceId})]");
-                sw.WriteLine($"public class {interfaceName}_{service.ServiceName}:IRequestService");
+                sw.WriteLine($"public class {interfaceName}_{service.ServiceName}<DTL>:IRequestService<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
 
-                sw.WriteLine("private EmbedXrpcObject XrpcObject=null;");
-                sw.WriteLine($"public {interfaceName}_{service.ServiceName}(EmbedXrpcObject xrpcObject)");
+                sw.WriteLine("private EmbedXrpcObject<DTL> XrpcObject=null;");
+                sw.WriteLine($"public {interfaceName}_{service.ServiceName}(EmbedXrpcObject<DTL> xrpcObject)");
                 sw.WriteLine("{");//function begin
                 sw.WriteLine("XrpcObject=xrpcObject;");
                 sw.WriteLine("}");//function end
@@ -220,7 +226,8 @@ namespace EmbedXrpcIdlParser
                         pars += ",";
                     }
                 }
-                sw.WriteLine($"public {service.ReturnStructType.TypeName} Invoke({pars})");
+                var dh = pars == "" ? "" : ",";
+                sw.WriteLine($"public {service.ReturnStructType.TypeName} Invoke(DTL userDataOfTransportLayer{dh}{pars})");
                 sw.WriteLine("{");//function begin
                 sw.WriteLine($"{service.ReturnStructType.TypeName} reqresp=new {service.ReturnStructType.TypeName}();");
                 sw.WriteLine("lock(XrpcObject.ObjectMutex) ");
@@ -240,7 +247,7 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine($"sendBytes.Add((byte)(XrpcObject.TimeOut&0xff));");
                 sw.WriteLine($"sendBytes.Add((byte)(((XrpcObject.TimeOut>>8&0xff)&0x3F)|((byte)ReceiveType.Request)<<6));");
                 sw.WriteLine("sendBytes.AddRange(sm.Data);");
-                sw.WriteLine("if( XrpcObject.Send ( sendBytes.Count,0,sendBytes.ToArray() )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n"+
+                sw.WriteLine("if( XrpcObject.Send ( userDataOfTransportLayer,sendBytes.Count,0,sendBytes.ToArray() )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
                     "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");
                 if (service.ReturnStructType.TargetFields.Count > 1)
                 { 

@@ -5,7 +5,7 @@
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 #include "BlockBufferProvider.h"
 #endif
-#define EmbedXrpcObjectVersion	"1.9.5"
+#define EmbedXrpcObjectVersion	"1.9.6"
 class EmbedXrpcObject
 {
 public:
@@ -53,6 +53,7 @@ public:
 	EmbedXrpc_Queue_t	RequestBlockQueue;
 #endif
 	EmbedXrpc_Timer_t SuspendTimer;
+	UserDataOfTransportLayer_t UserDataOfTransportLayerOfSuspendTimerUsed;
 
 	uint32_t RequestsCount;
 	RequestDescribe* Requests;
@@ -239,7 +240,7 @@ public:
 				rsm.SetCalculateSum(0);
 				rsm.SetReferenceSum(recData.CheckSum);
 #endif
-				iter->Delegate->Invoke(rsm);
+				iter->Delegate->Invoke(&recData.UserDataOfTransportLayer,rsm);
 				isContain = true;
 				goto _break;
 			}
@@ -261,6 +262,7 @@ public:
 	{
 		bool isContain;
 		isContain = false;
+		UserDataOfTransportLayer_t response_UserDataOfTransportLayer;
 		for (uint32_t collectionIndex = 0; collectionIndex < obj->RequestsCount; collectionIndex++)
 		{
 			isContain = true;
@@ -288,9 +290,9 @@ public:
 				sendsm.Buf = &obj->DataLinkLayoutBuffer[4];
 				sendsm.BufferLen = EmbedXrpc_SendBufferSize - 4;
 
-				EmbedXrpc_TimerReset(obj->SuspendTimer);
-				EmbedXrpc_TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
-				iter->Service->Invoke(rsm, sendsm);
+				//EmbedXrpc_TimerReset(obj->SuspendTimer);
+				//EmbedXrpc_TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
+				iter->Service->Invoke(&recData.UserDataOfTransportLayer, &response_UserDataOfTransportLayer, obj, recData.TargetTimeout, rsm, sendsm);
 				EmbedXrpc_TimerStop(obj->SuspendTimer);
 
 				if (sendsm.Index > 0)//
@@ -300,7 +302,7 @@ public:
 					obj->DataLinkLayoutBuffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
 					obj->DataLinkLayoutBuffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
 					obj->DataLinkLayoutBuffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-					obj->Send(obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
+					obj->Send(&response_UserDataOfTransportLayer,obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
 				}
 				EmbedXrpc_ReleaseMutex(obj->ObjectMutexHandle);
 
@@ -321,7 +323,7 @@ public:
 	}
 
 #if EmbedXrpc_IsSendToQueue==1
-	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
+	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData,UserDataOfTransportLayer_t userDataOfTransportLayer)
 	{
 		if (allDataLen < 4)
 			return false;
@@ -333,6 +335,7 @@ public:
 		uint32_t dataLen = allDataLen - 4;
 		uint8_t* data = &allData[4];
 		ReceiveType_t rt = (ReceiveType_t)(allData[3] >> 6);
+		raw.UserDataOfTransportLayer = userDataOfTransportLayer;
 		if (rt == ReceiveType_Response)
 		{
 			//EmbedSerializationShowMessage("EmbedXrpcObject","Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
@@ -444,7 +447,7 @@ public:
 		return EmbedXrpc_SendQueueResult == QueueState_OK ? true : false;
 	}
 #else
-	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData)
+	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer)
 	{
 		if (allDataLen < 4)
 			return false;
@@ -456,6 +459,7 @@ public:
 		uint32_t dataLen = allDataLen - 4;
 		uint8_t* data = &allData[4];
 		ReceiveType_t rt = (ReceiveType_t)(allData[3] >> 6);
+		raw.UserDataOfTransportLayer = userDataOfTransportLayer;
 		if (rt == ReceiveType_Response)
 		{
 			//EmbedSerializationShowMessage("EmbedXrpcObject","Client ReceivedMessage  Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
@@ -550,7 +554,7 @@ public:
 		sb[2] = (uint8_t)(obj->TimeOut & 0xff);
 		sb[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
 		sb[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-		obj->Send(obj, 4, sb);
+		obj->Send(&obj->UserDataOfTransportLayerOfSuspendTimerUsed,obj, 4, sb);
 		//obj->EmbedXrpc_ReleaseMutex(obj->ObjectMutexHandle);
 	}
 	

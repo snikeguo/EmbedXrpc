@@ -7,6 +7,12 @@ typedef void* EmbedXrpc_Thread_t;
 typedef void* EmbedXrpc_Queue_t;
 typedef void* EmbedXrpc_Semaphore_t;
 typedef void* EmbedXrpc_Timer_t;
+struct Win32UserDataOfTransportLayerTest
+{
+	char IpAddress[16];
+	int Port;
+};
+typedef Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
 #define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
 //common
