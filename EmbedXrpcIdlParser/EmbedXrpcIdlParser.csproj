@@ -90,6 +90,11 @@
     <PackageReference Include="CommandLineParser">
       <Version>2.7.82</Version>
     </PackageReference>
+    <PackageReference Include="Costura.Fody">
+      <Version>5.3.0</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="CS-Script.lib">
       <Version>3.30.1.1-HotFix</Version>
     </PackageReference>

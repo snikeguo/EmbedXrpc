@@ -414,7 +414,7 @@ namespace EmbedXrpcIdlParser
                             {
                                 if (array_TargetField.MaxCountAttribute.IsFixed == true)
                                 {
-                                    ServerCsw.WriteLine($"for(auto index=0;index<{lenField.FieldName};index++)");
+                                    ServerCsw.WriteLine($"for({lenField.TargetType.TypeName} index=0;index<{lenField.FieldName};index++)");
                                     ServerCsw.WriteLine("{");
                                     ServerCsw.WriteLine($"  SendData.{field.FieldName}[index]={field.FieldName}[index];");
                                     ServerCsw.WriteLine("}");
@@ -597,7 +597,7 @@ namespace EmbedXrpcIdlParser
                                 {
                                     if (array_TargetField.MaxCountAttribute.IsFixed == true)
                                     {
-                                        ClientCsw.WriteLine($"for(auto index=0;index<{lenField.FieldName};index++)");
+                                        ClientCsw.WriteLine($"for({lenField.TargetType.TypeName} index=0;index<{lenField.FieldName};index++)");
                                         ClientCsw.WriteLine("{");
                                         ClientCsw.WriteLine($"  {service.ServiceName}_SendData.{field.FieldName}[index]={field.FieldName}[index];");
                                         ClientCsw.WriteLine("}");
