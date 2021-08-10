@@ -132,5 +132,22 @@ namespace EmbedXrpcIdlParser
         public Int32 Number { get; set; }
     }
 
+    [AttributeUsage(AttributeTargets.Delegate|AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+    public class MacroControlAttribute : Attribute
+    {
 
+        public MacroControlAttribute(string macroName):this(macroName, string.Empty)
+        {
+
+        }
+        public MacroControlAttribute(string macroName,string enableCondition)
+        {
+            MacroName = macroName;
+            EnableCondition = enableCondition;
+        }
+
+        public string MacroName { get; set; }
+        public string EnableCondition { get; set; }
+
+    }
 }

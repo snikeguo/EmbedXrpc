@@ -76,11 +76,34 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine("}");//class end
 
         }
+        private void MacroControlWriteBegin(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        {
+            if (MacroControlAttribute != null)
+            {
+                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
+                if (val != string.Empty)
+                    sw.WriteLine($"#if {MacroControlAttribute.MacroName}{val}");
+                else
+                    sw.WriteLine($"#ifdef {MacroControlAttribute.MacroName}");
+            }
+        }
+        private void MacroControlWriteEnd(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        {
+            if (MacroControlAttribute != null)
+            {
+                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
+                if (val != string.Empty)
+                    sw.WriteLine($"#endif // #if {MacroControlAttribute.MacroName}{val}");
+                else
+                    sw.WriteLine($"#endif // #ifdef {MacroControlAttribute.MacroName}");
+            }
+        }
         private void GenerateDelegate(StreamWriter sw, TargetDelegate del, GenType genType)
         {
             GenerateStruct(sw, del.ParameterStructType);
             if (genType == GenType.Client || genType == GenType.All)
             {
+                MacroControlWriteBegin(sw, del.MacroControlAttribute);
                 sw.WriteLine($"[DelegateInfo(Name=\"{del.MethodName}\")]");
                 sw.WriteLine($"public partial class {del.MethodName}ClientImpl<DTL>:IDelegate<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
@@ -110,9 +133,13 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine($"//public void {del.MethodName}({externstr});");
 
                 sw.WriteLine("}");//class end
+
+                MacroControlWriteEnd(sw, del.MacroControlAttribute);
             }
             if (genType == GenType.Server || genType == GenType.All)
             {
+                MacroControlWriteBegin(sw, del.MacroControlAttribute);
+
                 sw.WriteLine($"public class {del.MethodName}Delegate<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
 
@@ -155,7 +182,10 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine("}");//function end
 
                 sw.WriteLine("}");//class end
+
+                MacroControlWriteEnd(sw, del.MacroControlAttribute);
             }
+            sw.WriteLine(Environment.NewLine);
         }
         private void GenerateService(StreamWriter sw,string interfaceName, TargetService service, GenType genType)
         {
@@ -163,6 +193,7 @@ namespace EmbedXrpcIdlParser
             GenerateStruct(sw, service.ReturnStructType);
             if (genType == GenType.Server || genType == GenType.All)
             {
+                MacroControlWriteBegin(sw, service.MacroControlAttribute);
                 sw.WriteLine($"[ResponseServiceInfo(Name=\"{interfaceName}_{service.ServiceName}\",ServiceId={service.ServiceId})]");
                 sw.WriteLine($"public partial class {interfaceName}_{service.ServiceName}Service<DTL>:IService<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
@@ -200,9 +231,13 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine("}");//function end
                 sw.WriteLine($"//public void {service.ServiceName}(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut{dh}{externstr});");
                 sw.WriteLine("}");//class end
+
+                MacroControlWriteEnd(sw, service.MacroControlAttribute);
             }
             if (genType == GenType.Client || genType == GenType.All)
             {
+                MacroControlWriteBegin(sw, service.MacroControlAttribute);
+
                 sw.WriteLine($"[RequestServiceInfo(Name=\"{interfaceName}_{service.ServiceName}\",ServiceId={service.ServiceId})]");
                 sw.WriteLine($"public class {interfaceName}_{service.ServiceName}<DTL>:IRequestService<DTL> where DTL:struct");
                 sw.WriteLine("{");//class begin
@@ -263,7 +298,10 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine("}");//function end
 
                 sw.WriteLine("}");//class end
+
+                MacroControlWriteEnd(sw, service.MacroControlAttribute);
             }
+            sw.WriteLine(Environment.NewLine);
         }
         public void CodeGen(CSharpCodeGenParameter codeGenParameter)
         {

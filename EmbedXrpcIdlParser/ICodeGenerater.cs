@@ -212,6 +212,7 @@ namespace EmbedXrpcIdlParser
         public int ServiceId { get; internal set; }
 
         public ExternalParameterAttribute ExternalParameter { get; internal set;}
+        public MacroControlAttribute MacroControlAttribute { get; internal set; }
 
     }
     [Serializable]
@@ -241,6 +242,8 @@ namespace EmbedXrpcIdlParser
         public StructType_TargetType ParameterStructType { get; set; } = new StructType_TargetType();
 
         public ExternalParameterAttribute ExternalParameter { get; internal set; }
+
+        public MacroControlAttribute MacroControlAttribute { get; internal set; }
 
     }
     /// <summary>
@@ -669,6 +672,10 @@ namespace EmbedXrpcIdlParser
                         fileIdlInfo.ServiceId++;
                         var externalParameterAttribute = service.GetCustomAttribute<ExternalParameterAttribute>();
                         targetService.ExternalParameter = externalParameterAttribute == null ? new ExternalParameterAttribute(false) : externalParameterAttribute;
+
+                        var MacroControlAttribute = service.GetCustomAttribute<MacroControlAttribute>();
+                        targetService.MacroControlAttribute = MacroControlAttribute;
+
                         var mt = (service as MethodInfo);
                         Type rt = mt.ReturnType;
                         targetService.ServiceName = mt.Name;
@@ -765,6 +772,8 @@ namespace EmbedXrpcIdlParser
                     targetDelegate.ExternalParameter = externalParameterAttribute == null ? new ExternalParameterAttribute(false) : externalParameterAttribute;
                     targetDelegate.MethodName = type.Name;
 
+                    var MacroControlAttribute = type.GetCustomAttribute<MacroControlAttribute>();
+                    targetDelegate.MacroControlAttribute = MacroControlAttribute;
                     //处理函数参数
                     StructType_TargetType ParameterStructType = new StructType_TargetType();
                     ParameterStructType.TypeName = targetDelegate.MethodName + "_Parameter";

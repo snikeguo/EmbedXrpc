@@ -267,7 +267,28 @@ namespace EmbedXrpcIdlParser
             embedXrpcSerializationGenerator.EmitDeserializeMacro(structType, SerializeHsw);
             embedXrpcSerializationGenerator.EmitFreeDataMacro(structType, SerializeHsw);
         }
-
+        private void MacroControlWriteBegin(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        {
+            if (MacroControlAttribute != null)
+            {
+                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
+                if(val!= string.Empty)
+                    sw.WriteLine($"#if {MacroControlAttribute.MacroName}{val}");
+                else
+                    sw.WriteLine($"#ifdef {MacroControlAttribute.MacroName}");
+            }
+        }
+        private void MacroControlWriteEnd(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        {
+            if (MacroControlAttribute != null)
+            {
+                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
+                if (val != string.Empty)
+                    sw.WriteLine($"#endif // #if {MacroControlAttribute.MacroName}{val}");
+                else
+                    sw.WriteLine($"#endif // #ifdef {MacroControlAttribute.MacroName}");
+            }
+        }
         public void EmitDelegate(TargetDelegate targetDelegate)
         {
             /*
@@ -294,6 +315,7 @@ namespace EmbedXrpcIdlParser
             //生成客户端 delegate代码
             if (codeGenParameter.GenType == GenType.Client || codeGenParameter.GenType == GenType.All)
             {
+                MacroControlWriteBegin(ClientHsw, targetDelegate.MacroControlAttribute);
                 ClientHsw.WriteLine($"class {targetDelegate.MethodName}ClientImpl:public IDelegate");
                 ClientHsw.WriteLine("{\npublic:");
                 ClientHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
@@ -320,6 +342,7 @@ namespace EmbedXrpcIdlParser
                 ClientHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName} request;");
                 ClientHsw.WriteLine("void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager);");//声明
 
+                MacroControlWriteBegin(ClientCsw, targetDelegate.MacroControlAttribute);
                 ClientCsw.WriteLine($"void {targetDelegate.MethodName}ClientImpl::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager)");
                 ClientCsw.WriteLine("{");
                 //ClientCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} request;");
@@ -347,13 +370,21 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_FreeData(&request);");//free掉request
 
                 ClientCsw.WriteLine("}");//函数生成完毕
+                MacroControlWriteEnd(ClientCsw, targetDelegate.MacroControlAttribute);
 
                 ClientHsw.WriteLine("};");//end class
+
+                MacroControlWriteEnd(ClientHsw, targetDelegate.MacroControlAttribute);
+
+                ClientHsw.WriteLine(Environment.NewLine);
+                ClientCsw.WriteLine(Environment.NewLine);
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}ClientImpl {targetDelegate.MethodName}ClientImplc");//创建一个委托实例
             }
             if (codeGenParameter.GenType == GenType.Server || codeGenParameter.GenType == GenType.All)
             {
                 //生成服务端代码
+                MacroControlWriteBegin(ServerHsw, targetDelegate.MacroControlAttribute);
+                MacroControlWriteBegin(ServerCsw, targetDelegate.MacroControlAttribute);
                 ServerHsw.WriteLine("class " + targetDelegate.MethodName + "Delegate");
                 ServerHsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
                 ServerHsw.WriteLine(targetDelegate.MethodName + "Delegate" + "(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)");
@@ -452,9 +483,14 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine("sm.Reset();");
                 ServerCsw.WriteLine("EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);");
                 ServerCsw.WriteLine("}");//function end
-
+                MacroControlWriteEnd(ServerCsw, targetDelegate.MacroControlAttribute);
 
                 ServerHsw.WriteLine("};");//class end
+
+                MacroControlWriteEnd(ServerHsw, targetDelegate.MacroControlAttribute);
+
+                ServerHsw.WriteLine(Environment.NewLine);
+                ServerCsw.WriteLine(Environment.NewLine);
             }
 
                 
@@ -517,6 +553,8 @@ namespace EmbedXrpcIdlParser
                 string temp_fileds = string.Empty;
                 foreach (var service in targetInterface.Services)
                 {
+                    MacroControlWriteBegin(ClientHsw, service.MacroControlAttribute);
+                    MacroControlWriteBegin(ClientCsw, service.MacroControlAttribute);
                     ClientHsw.WriteLine($"{service.ParameterStructType.TypeName} {service.ServiceName}_SendData;");
                     ClientHsw.WriteLine($"{service.ReturnStructType.TypeName} {service.ServiceName}_reqresp;");
                     //string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
@@ -549,6 +587,8 @@ namespace EmbedXrpcIdlParser
                         ClientHsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer);");
                         ClientCsw.Write($"{service.ReturnStructType.TypeName}& {targetInterface.Name}ClientImpl::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer)\n{{");
                     }
+
+                    
 
                     ClientCsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
@@ -691,8 +731,14 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine("}\n}");
                     }
                     ClientCsw.WriteLine("\n"); //client interface end class
+
+                    MacroControlWriteEnd(ClientCsw, service.MacroControlAttribute);
+                    MacroControlWriteEnd(ClientHsw, service.MacroControlAttribute);
+
+                    ClientCsw.WriteLine(Environment.NewLine);
+                    ClientHsw.WriteLine(Environment.NewLine);
                 }
-                ClientHsw.WriteLine("};"); //client interface end class
+                ClientHsw.WriteLine("};\n"); //client interface end class
 
                 
             }
@@ -702,6 +748,8 @@ namespace EmbedXrpcIdlParser
                 //生成Server端代码
                 if (codeGenParameter.GenType == GenType.Server || codeGenParameter.GenType == GenType.All)
                 {
+                    MacroControlWriteBegin(ServerHsw, service.MacroControlAttribute);
+                    MacroControlWriteBegin(ServerCsw, service.MacroControlAttribute);
                     ServerHsw.WriteLine($"class {service.FullName}Service:public IService");
                     ServerHsw.WriteLine("{\npublic:");
                     ServerHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", service.FullName);
@@ -779,6 +827,11 @@ namespace EmbedXrpcIdlParser
 
                     ServerHsw.WriteLine("};");//end class
 
+                    MacroControlWriteEnd(ServerCsw, service.MacroControlAttribute);
+                    MacroControlWriteEnd(ServerHsw, service.MacroControlAttribute);
+
+                    ServerCsw.WriteLine(Environment.NewLine);
+                    ServerHsw.WriteLine(Environment.NewLine);
                     //ServerCsw.WriteLine($"{service.FullName}Service {service.FullName}ServiceInstance;");//创建一个service实例
                 }
 
@@ -799,7 +852,7 @@ namespace EmbedXrpcIdlParser
 
                 }
                 ServerHsw.WriteLine($"\r\nRequestsCount: {RequestsCount}");
-                ServerHsw.WriteLine("*/");
+                ServerHsw.WriteLine("*/\n");
             }
             if (codeGenParameter.GenType == GenType.Client || codeGenParameter.GenType == GenType.All)
             {
@@ -831,7 +884,7 @@ namespace EmbedXrpcIdlParser
                 }
                 ClientHsw.WriteLine($"\r\nResponsesCount:{ResponsesCount}");
 
-                ClientHsw.WriteLine("*/");
+                ClientHsw.WriteLine("*/\n");
             }
         }
 
