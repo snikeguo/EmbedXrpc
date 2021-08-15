@@ -221,6 +221,7 @@ public:
 	{
 		bool isContain;
 		isContain = false;
+		(void)isContain;
 		for (uint32_t collectionIndex = 0; collectionIndex < obj->DelegatesCount; collectionIndex++)
 		{
 			isContain = true;
@@ -262,6 +263,7 @@ public:
 	{
 		bool isContain;
 		isContain = false;
+		(void)isContain;
 		UserDataOfTransportLayer_t response_UserDataOfTransportLayer;
 		for (uint32_t collectionIndex = 0; collectionIndex < obj->RequestsCount; collectionIndex++)
 		{

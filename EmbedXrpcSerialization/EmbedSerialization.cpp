@@ -59,7 +59,7 @@ const uint32_t ArrayField_GetFieldNumber(const IField* const a)
 {
 	return ((ArrayField*)a)->FieldNumber;
 }
-//type²¿·Ö
+//typeéƒ¨åˆ†
 const char* ArrayField_GetTypeName(const IField* const a)
 {
 	return ArrayType_GetTypeName();
@@ -168,7 +168,7 @@ const uint32_t ObjectField_GetOffset(const IField* const  a)
 	return ((ObjectField*)a)->Offset;
 }
 
-//type²¿·Ö
+//typeéƒ¨åˆ†
 const char* ObjectField_GetTypeName(const IField* const a)
 {
 	return ObjectType_GetTypeName();
@@ -178,7 +178,7 @@ const IType* ObjectField_GetTypeInstance(const IField* const a)
 	return (IType*)((((ObjectField*)a)->TypeInstance));
 }
 
-//¿ªÊ¼Ìî³äº¯ÊıÊı×é
+//å¼€å§‹å¡«å……å‡½æ•°æ•°ç»„
 static const char* (* const GetTypeName_Functions[])() =
 {
 	UInt8Type_GetTypeName,
@@ -419,7 +419,7 @@ const IType* GetTypeInstance(const IField* const field)
 {
 	return GetTypeInstance_Functions[field->Type](field);
 }
-//µ½ÕâÀïº¯ÊıÊı×éÌî³äÍê±Ï
+//åˆ°è¿™é‡Œå‡½æ•°æ•°ç»„å¡«å……å®Œæ¯•
 
 uint32_t GetSum(uint8_t* d, uint32_t len)
 {
@@ -590,7 +590,7 @@ uint32_t SerializationManager::GetKeyFromSerializationManager(uint32_t* fn, Type
 		*type = (Type_t)(Elementvalue & 0x0F);
 		EmbedSerializationAssert(*type <= TYPE_OBJECT);
 	}
-	temp = (Elementvalue >> 4) & 0x07;//ÏÈ°Ñ×îµÍÈıÎ»±£´æÆğÀ´
+	temp = (Elementvalue >> 4) & 0x07;//å…ˆæŠŠæœ€ä½ä¸‰ä½ä¿å­˜èµ·æ¥
 	used++;
 	if ((Elementvalue & 0x80) != 0)
 	{
@@ -836,6 +836,7 @@ void SerializationManager::NoMataData_SerializeSubField(const ObjectType* object
 			//SerializeLen(len);
 
 			uint8_t baseValueTypeFlag = 0;
+			(void)baseValueTypeFlag;
 			if (GetType(arrayElementTypeInstance) <= TYPE_DOUBLE)
 			{
 				baseValueTypeFlag = (GetType(arrayElementTypeInstance) << 4) | 0x01;
@@ -872,7 +873,7 @@ bool SerializationManager::Deserialize(const ObjectType* objectType, void* objec
 {
 	if (false)//(IsEnableMataDataEncode == true)
 	{
-		uint32_t fn = 0;//PopÒ»´ÎKEY ÒòÎª´ò°üµÄÊ±ºòÊÇ°´ÕÕfield´ò°üµÄ£¬ËùÒÔÕâÀïÒª°ÑKEY ÒªPOP³öÀ´Ò»´Î
+		uint32_t fn = 0;//Popä¸€æ¬¡KEY å› ä¸ºæ‰“åŒ…çš„æ—¶å€™æ˜¯æŒ‰ç…§fieldæ‰“åŒ…çš„ï¼Œæ‰€ä»¥è¿™é‡Œè¦æŠŠKEY è¦POPå‡ºæ¥ä¸€æ¬¡
 		Type_t tp = TYPE_UINT8;
 		GetKeyFromSerializationManager(&fn, &tp);
 		RemoveKeyFromSerializationManager();
@@ -880,7 +881,7 @@ bool SerializationManager::Deserialize(const ObjectType* objectType, void* objec
 		EmbedSerializationAssert(fieldNumber == fn);
 		if (fn == 0 && tp == TYPE_OBJECT)
 		{
-			return DeserializeSubField(objectType, objectPoint);//Èç¹ûfieldNumber Îª0 ËµÃ÷ÕâÊÇµÚÒ»´Î½øÀ´,Ò²¾ÍÊÇ×î¶¥¼¶µÄ½á¹¹Ìå£¬×î¶¥¼¶µÄ½á¹¹ÌåÖ´ĞĞÍê±Ïºó,¾ÍÒªÍË³ö
+			return DeserializeSubField(objectType, objectPoint);//å¦‚æœfieldNumber ä¸º0 è¯´æ˜è¿™æ˜¯ç¬¬ä¸€æ¬¡è¿›æ¥,ä¹Ÿå°±æ˜¯æœ€é¡¶çº§çš„ç»“æ„ä½“ï¼Œæœ€é¡¶çº§çš„ç»“æ„ä½“æ‰§è¡Œå®Œæ¯•å,å°±è¦é€€å‡º
 		}
 	}
 	else
@@ -889,17 +890,17 @@ bool SerializationManager::Deserialize(const ObjectType* objectType, void* objec
 	}
 	return false;
 }
-bool SerializationManager::DeserializeSubField(const ObjectType* objectType, void* objectPoint)//µ÷ÓÃÕâ¸öº¯ÊıµÄÖ®Ç° ±ØĞë°Ñ½á¹¹ÌåµÄTagÈ¥µô
+bool SerializationManager::DeserializeSubField(const ObjectType* objectType, void* objectPoint)//è°ƒç”¨è¿™ä¸ªå‡½æ•°çš„ä¹‹å‰ å¿…é¡»æŠŠç»“æ„ä½“çš„Tagå»æ‰
 {
 	uint32_t fn = 0;
 	Type_t tp = TYPE_UINT8;
-	while (!IsEnd())//²¢Ã»ÓĞµ½½á¹¹Ìå¶¨½ç·ûÒÔ¼° Ã»ÓĞ±éÀúÍêÊı¾İÁ÷	&& Index < BufferLen
+	while (!IsEnd())//å¹¶æ²¡æœ‰åˆ°ç»“æ„ä½“å®šç•Œç¬¦ä»¥åŠ æ²¡æœ‰éå†å®Œæ•°æ®æµ	&& Index < BufferLen
 	{
 		GetKeyFromSerializationManager(&fn, &tp);
 		RemoveKeyFromSerializationManager();
 		if (tp <= TYPE_DOUBLE)
 		{
-			//const IType* typeInstance = BaseValueInfos[tp].TypeInstance;//»ñÈ¡µ½¶ÔÓ¦µÄTP
+			//const IType* typeInstance = BaseValueInfos[tp].TypeInstance;//è·å–åˆ°å¯¹åº”çš„TP
 			void* d = nullptr;
 			BaseValueType* bvt = nullptr;
 			if (objectType != nullptr)
@@ -953,7 +954,7 @@ bool SerializationManager::DeserializeSubField(const ObjectType* objectType, voi
 			if (arrayfield != nullptr)
 			{
 				arrayLenField = (IField*)GetArrayLenField(arrayfield);
-				if (arrayLenField != nullptr)//Èç¹ûlen×Ö¶Î²»Îªnull ¾Í°ÑlenÊı¾İ¸³¸ølen×Ö¶Î
+				if (arrayLenField != nullptr)//å¦‚æœlenå­—æ®µä¸ä¸ºnull å°±æŠŠlenæ•°æ®èµ‹ç»™lenå­—æ®µ
 				{
 					uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + GetOffset(arrayLenField));
 					Memcpy(arrayLenAddr, &arraylen, sizeOfArrayLenInStream);
@@ -994,7 +995,7 @@ bool SerializationManager::DeserializeSubField(const ObjectType* objectType, voi
 				}
 				for (uint64_t j = 0; j < arraylen; j++)
 				{
-					//ÕâÀïÃ»ÓĞ½á¹¹ÌåµÄtag ËùÒÔµ÷ÓÃµÄÊÇDeserializeSubField
+					//è¿™é‡Œæ²¡æœ‰ç»“æ„ä½“çš„tag æ‰€ä»¥è°ƒç”¨çš„æ˜¯DeserializeSubField
 					if (ptr != nullptr)
 					{
 						FuntionReturn(DeserializeSubField(ot, (uint8_t*)ptr + j * arrayType->LengthOfSingleElement));
@@ -1025,7 +1026,7 @@ bool SerializationManager::DeserializeSubField(const ObjectType* objectType, voi
 					}
 				}
 			}
-			FuntionReturn(DeserializeSubField(subObjectType, d));//ÒòÎª½á¹¹ÌåµÄTAGÒÑ¾­ÔÚwhileÑ­»·´¦È¥µôÁË¡£
+			FuntionReturn(DeserializeSubField(subObjectType, d));//å› ä¸ºç»“æ„ä½“çš„TAGå·²ç»åœ¨whileå¾ªç¯å¤„å»æ‰äº†ã€‚
 		}
 	}
 	RemoveEndFlagFromSerializationManager();
@@ -1057,7 +1058,7 @@ bool SerializationManager::NoMataData_DeserializeSubField(const ObjectType* obje
 			EmbedSerializationShowMessage("SerializationManager", "Deserialize:%s\n", GetName(objectType->SubFields[i]));
 
 			IField* arrayLenField = (IField*)GetArrayLenField(arrayfield);
-			if (arrayLenField != nullptr)//Èç¹ûlen×Ö¶Î²»Îªnull ¾Í°ÑlenÊı¾İ¸³¸ølen×Ö¶Î
+			if (arrayLenField != nullptr)//å¦‚æœlenå­—æ®µä¸ä¸ºnull å°±æŠŠlenæ•°æ®èµ‹ç»™lenå­—æ®µ
 			{
 				uint8_t* arrayLenAddr = ((uint8_t*)objectPoint + GetOffset(arrayLenField));
 				Memcpy(&arraylen, arrayLenAddr, BaseValueTypeInstances[GetType(GetTypeInstance(arrayLenField))]->DataWidth);
@@ -1094,7 +1095,7 @@ bool SerializationManager::NoMataData_DeserializeSubField(const ObjectType* obje
 				}
 				for (uint64_t j = 0; j < arraylen; j++)
 				{
-					//ÕâÀïÃ»ÓĞ½á¹¹ÌåµÄtag ËùÒÔµ÷ÓÃµÄÊÇDeserializeSubField
+					//è¿™é‡Œæ²¡æœ‰ç»“æ„ä½“çš„tag æ‰€ä»¥è°ƒç”¨çš„æ˜¯DeserializeSubField
 					if (ptr != nullptr)
 					{
 						FuntionReturn(NoMataData_DeserializeSubField(ot, (uint8_t*)ptr + j * arrayType->LengthOfSingleElement));
@@ -1141,7 +1142,7 @@ void SerializationManager::FreeData(const ObjectType* objectType, void* objectDa
 				const IType* elementTypeInstance = at->ElementTypeInstance;
 				EmbedSerializationAssert(GetType(elementTypeInstance) <= TYPE_DOUBLE || GetType(elementTypeInstance) == TYPE_OBJECT);
 
-				if (GetType(elementTypeInstance) == TYPE_OBJECT)//Èç¹ûÊı×éÔªËØÊÇ¶ÔÏó£¬¾ÍÏÈfreeÃ¿¸öÔªËØ£¬×îºóÊÍ·ÅÖ¸Õë
+				if (GetType(elementTypeInstance) == TYPE_OBJECT)//å¦‚æœæ•°ç»„å…ƒç´ æ˜¯å¯¹è±¡ï¼Œå°±å…ˆfreeæ¯ä¸ªå…ƒç´ ï¼Œæœ€åé‡Šæ”¾æŒ‡é’ˆ
 				{
 					for (uint64_t j = 0; j < len; j++)
 					{
@@ -1166,8 +1167,9 @@ void SerializationManager::FreeData(const ObjectType* objectType, void* objectDa
 static const char* FilterStrings[] = FilterStringHeader;
 void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...)
 {
+	(void)FilterStrings;
 	return;
-	va_list args;
+	/*va_list args;
 	va_start(args, fmt);
 	for (int i = 0; i < sizeof(FilterStrings) / sizeof(const char*); i++)
 	{
@@ -1177,4 +1179,5 @@ void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, .
 		}
 	}
 	va_end(args);
+	*/
 }

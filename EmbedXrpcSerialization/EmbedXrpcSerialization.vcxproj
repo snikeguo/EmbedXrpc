@@ -164,7 +164,6 @@
     <ClInclude Include="EmbedXrpcCommon.h" />
     <ClInclude Include="EmbedXrpcObject.h" />
     <ClInclude Include="EmbedSerialization.h" />
-    <ClInclude Include="EmbedXrpcServerObject.h" />
     <ClInclude Include="FreeRTOS.Port\EmbedSerialization.Port.h" />
     <ClInclude Include="FreeRTOS.Port\EmbedXrpc.Port.h" />
     <ClInclude Include="ringbuffer.h" />

@@ -12,6 +12,8 @@ uint16_t GetSid(){return DateTimeChange_ServiceId;}
 DateTimeChange_Parameter SendData;
 void  Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]);
 };
+
+
 class TestDelegateDelegate
 {
 public:
@@ -21,6 +23,8 @@ TestDelegateDelegate(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return TestDelegate_ServiceId;}
 TestDelegate_Parameter SendData;
 void  Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer);};
+
+
 class Inter_AddService:public IService
 {
 public:
@@ -30,6 +34,8 @@ void Add(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataO
 Inter_Add_Parameter request;
 void Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager);
 };
+
+
 class Inter_NoArgService:public IService
 {
 public:
@@ -39,6 +45,8 @@ void NoArg(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDat
 Inter_NoArg_Parameter request;
 void Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager);
 };
+
+
 class Inter_NoReturnService:public IService
 {
 public:
@@ -47,6 +55,8 @@ void NoReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, User
 Inter_NoReturn_Parameter request;
 void Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager);
 };
+
+
 class Inter_NoArgAndReturnService:public IService
 {
 public:
@@ -55,6 +65,8 @@ void NoArgAndReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer
 Inter_NoArgAndReturn_Parameter request;
 void Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager);
 };
+
+
 /*
 The Requests Of Inter:
 name                   type
@@ -66,5 +78,6 @@ name                   type
 
 RequestsCount: 4
 */
+
 
 #endif

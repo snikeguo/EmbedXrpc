@@ -10,6 +10,8 @@ void DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTim
 DateTimeChange_Parameter request;
 void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager);
 };
+
+
 class TestDelegateClientImpl:public IDelegate
 {
 public:
@@ -18,6 +20,8 @@ void TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_
 TestDelegate_Parameter request;
 void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager);
 };
+
+
 class InterClientImpl
 {
 public:
@@ -28,18 +32,27 @@ Inter_Add_Parameter Add_SendData;
 Inter_Add_Return Add_reqresp;
 Inter_Add_Return& Add(UserDataOfTransportLayer_t* userDataOfTransportLayer);void Free_Add(Inter_Add_Return *response);
 
+
+
 Inter_NoArg_Parameter NoArg_SendData;
 Inter_NoArg_Return NoArg_reqresp;
 Inter_NoArg_Return& NoArg(UserDataOfTransportLayer_t* userDataOfTransportLayer);
 void Free_NoArg(Inter_NoArg_Return *response);
 
+
+
 Inter_NoReturn_Parameter NoReturn_SendData;
 Inter_NoReturn_Return NoReturn_reqresp;
 Inter_NoReturn_Return& NoReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a);
+
+
 Inter_NoArgAndReturn_Parameter NoArgAndReturn_SendData;
 Inter_NoArgAndReturn_Return NoArgAndReturn_reqresp;
 Inter_NoArgAndReturn_Return& NoArgAndReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer);
+
+
 };
+
 /*
 The Delegates Of Inter:
 name                   type
@@ -61,5 +74,6 @@ name                   sid
 
 ResponsesCount:4
 */
+
 
 #endif

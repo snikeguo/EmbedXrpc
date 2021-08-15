@@ -69,7 +69,7 @@
   <ItemGroup>
     <Compile Include="Attribute.cs" />
     <Compile Include="Commands.cs" />
-    <Compile Include="EmbedXrpcCodeGenerater.cs" />
+    <Compile Include="CppCodeGenerater.cs" />
     <Compile Include="CsCodeGenerater.cs" />
     <Compile Include="CppNanoSerializer.cs" />
     <Compile Include="CppReflectionSerializer.cs" />

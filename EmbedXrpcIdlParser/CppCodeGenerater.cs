@@ -23,7 +23,7 @@ namespace EmbedXrpcIdlParser
         //public string IType { get; set; }
 
     }
-    public class EmbedXrpcCodeGenerater 
+    public class CppCodeGenerater 
     {
 
         private static Dictionary<string, string> ReplaceDic = new Dictionary<string, string>();

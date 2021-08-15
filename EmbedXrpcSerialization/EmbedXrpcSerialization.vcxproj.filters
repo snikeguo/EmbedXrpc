@@ -27,9 +27,6 @@
     <ClInclude Include="EmbedXrpcCommon.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="EmbedXrpcServerObject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="EmbedSerialization.h">
       <Filter>头文件</Filter>
     </ClInclude>

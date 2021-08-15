@@ -8,6 +8,8 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 DateTimeChange(userDataOfTransportLayer,request.now);
 DateTimeChange_Parameter_FreeData(&request);
 }
+
+
 void TestDelegateClientImpl::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager)
 {
 TestDelegate_Parameter_Deserialize(recManager,&request);
@@ -17,6 +19,8 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 TestDelegate(userDataOfTransportLayer,request.now);
 TestDelegate_Parameter_FreeData(&request);
 }
+
+
 Inter_Add_Return& InterClientImpl::Add(UserDataOfTransportLayer_t* userDataOfTransportLayer)
 {//write serialization code:Add()
 SerializationManager sm;
@@ -89,6 +93,8 @@ if(response->State==ResponseState_Ok)
 Inter_Add_Return_FreeData(response);
 }
 }
+
+
 
 
 Inter_NoArg_Return& InterClientImpl::NoArg(UserDataOfTransportLayer_t* userDataOfTransportLayer)
@@ -166,6 +172,8 @@ Inter_NoArg_Return_FreeData(response);
 }
 
 
+
+
 Inter_NoReturn_Return& InterClientImpl::NoReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a)
 {
 //write serialization code:NoReturn(a,)
@@ -204,6 +212,8 @@ return NoReturn_reqresp;
 }
 
 
+
+
 Inter_NoArgAndReturn_Return& InterClientImpl::NoArgAndReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer)
 {
 //write serialization code:NoArgAndReturn()
@@ -239,5 +249,7 @@ exi:
 EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return NoArgAndReturn_reqresp;
 }
+
+
 
 

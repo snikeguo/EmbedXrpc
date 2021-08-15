@@ -18,6 +18,8 @@ RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLin
 sm.Reset();
 EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
+
+
 void  TestDelegateDelegate::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer)
 {//write serialization code:TestDelegate(now,)
 SerializationManager sm;
@@ -35,6 +37,8 @@ RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLin
 sm.Reset();
 EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
+
+
 void Inter_AddService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_Add_Parameter_Deserialize(recManager,&request);
@@ -46,6 +50,8 @@ Inter_Add_Parameter_FreeData(&request);
 Inter_Add_Return_Serialize(sendManager,&Response);
 if(IsFreeResponse==true) Inter_Add_Return_FreeData(&Response);
 }
+
+
 void Inter_NoArgService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoArg_Parameter_Deserialize(recManager,&request);
@@ -57,6 +63,8 @@ Inter_NoArg_Parameter_FreeData(&request);
 Inter_NoArg_Return_Serialize(sendManager,&Response);
 if(IsFreeResponse==true) Inter_NoArg_Return_FreeData(&Response);
 }
+
+
 void Inter_NoReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoReturn_Parameter_Deserialize(recManager,&request);
@@ -66,6 +74,8 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 NoReturn(request_UserDataOfTransportLayer,response_UserDataOfTransportLayer,rpcObject,targetTimeOut,request.a);
 Inter_NoReturn_Parameter_FreeData(&request);
 }
+
+
 void Inter_NoArgAndReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoArgAndReturn_Parameter_Deserialize(recManager,&request);
@@ -75,3 +85,5 @@ EmbedSerializationAssert(recManager.GetReferenceSum()==recManager.GetCalculateSu
 NoArgAndReturn(request_UserDataOfTransportLayer,response_UserDataOfTransportLayer,rpcObject,targetTimeOut);
 Inter_NoArgAndReturn_Parameter_FreeData(&request);
 }
+
+
