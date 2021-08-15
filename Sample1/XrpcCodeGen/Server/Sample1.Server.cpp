@@ -39,7 +39,7 @@ EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
 
 
-void Inter_AddService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
+void Inter_AddService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_Add_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
@@ -52,7 +52,7 @@ if(IsFreeResponse==true) Inter_Add_Return_FreeData(&Response);
 }
 
 
-void Inter_NoArgService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
+void Inter_NoArgService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoArg_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
@@ -65,7 +65,7 @@ if(IsFreeResponse==true) Inter_NoArg_Return_FreeData(&Response);
 }
 
 
-void Inter_NoReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
+void Inter_NoReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoReturn_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
@@ -76,7 +76,7 @@ Inter_NoReturn_Parameter_FreeData(&request);
 }
 
 
-void Inter_NoArgAndReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,void* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
+void Inter_NoArgAndReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager &recManager, SerializationManager& sendManager)
 {
 Inter_NoArgAndReturn_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1

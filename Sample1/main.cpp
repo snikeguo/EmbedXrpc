@@ -7,7 +7,7 @@ extern EmbedXrpcObject ServerRpc;
 
 //-------------------------------------------------------------------------
 //client 
-bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
+bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,EmbedXrpcObject* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer)==true);
 	return true;
@@ -78,7 +78,7 @@ void ClientThread()
 }
 //--------------------------------------------------------------------
 //server
-bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, void* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
+bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
 	/*for (size_t i = 4; i < dataLen; i++)
 	{
@@ -146,7 +146,7 @@ void ServerThread()
 
 void Inter_AddService::Add(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
 	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
-	void* rpcObject,
+	EmbedXrpcObject* rpcObject,
 	uint16_t targetTimeOut,
 	Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 {
@@ -166,7 +166,7 @@ void Inter_AddService::Add(UserDataOfTransportLayer_t* request_UserDataOfTranspo
 
 void Inter_NoArgService::NoArg(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, 
 	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
-	void* rpcObject,
+	EmbedXrpcObject* rpcObject,
 	uint16_t targetTimeOut)
 {
 	IsFreeResponse = true;
@@ -175,7 +175,7 @@ void Inter_NoArgService::NoArg(UserDataOfTransportLayer_t* request_UserDataOfTra
 
 void Inter_NoReturnService::NoReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
 	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
-	void* rpcObject,
+	EmbedXrpcObject* rpcObject,
 	uint16_t targetTimeOut,
 	int a)
 {
@@ -183,7 +183,7 @@ void Inter_NoReturnService::NoReturn(UserDataOfTransportLayer_t* request_UserDat
 }
 void Inter_NoArgAndReturnService::NoArgAndReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
 	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer, 
-	void* rpcObject,
+	EmbedXrpcObject* rpcObject,
 	uint16_t targetTimeOut)
 {
 

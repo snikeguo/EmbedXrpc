@@ -6,7 +6,7 @@
 #include "EmbedSerialization.h"
 #define EmbedXrpcSuspendSid 0x01
 #define EmbedXrpcUnsupportedSid 0x2
-
+class EmbedXrpcObject;
  enum RequestResponseState
  {
      RequestState_Ok=1,
@@ -47,7 +47,7 @@
 	 virtual void Invoke(
          UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
          UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
-         void* rpcObject,
+         EmbedXrpcObject* rpcObject,
          uint16_t targetTimeOut,
          SerializationManager& recManager, 
          SerializationManager& sendManager) = 0;
@@ -95,7 +95,8 @@
  {
 
  };
-typedef bool (*SendPack_t)(UserDataOfTransportLayer_t* userDataOfTransportLayer, void *rpcObj,uint32_t dataLen, uint8_t* data);
+
+typedef bool (*SendPack_t)(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj,uint32_t dataLen, uint8_t* data);
 
 
 #endif
