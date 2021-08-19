@@ -253,7 +253,7 @@ public:
 			obj->DelegateBlockBufferProvider->PopChars(nullptr, recData.DataLen);
 		}
 #else
-		if (recData.DataLen > 0 && isFreeData == true)
+		if ((recData.DataLen > 0) && (isFreeData == true))
 			Free(recData.Data);
 #endif
 		//EmbedSerializationShowMessage("EmbedXrpcObject","Client ServiceThread Free 0x%x\n", (uint32_t)recData.Data);

@@ -71,7 +71,7 @@ void ClientThread()
 			printf("%d+%d=%d\n", a,b,sum.ReturnValue.Sum);
 		}
 		Client.Free_Add(&sum);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
 	ClientRpc.DeInit();
@@ -138,7 +138,7 @@ void ServerThread()
 		t.David.uend1 = 1;
 		t.David.uend2 = 2;
 		DateTimeChanger.Invoke(&win32UserDataOfTransportLayerTest,&t);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(10000));//等待RPC调用全部完毕
 	ServerRpc.DeInit();
