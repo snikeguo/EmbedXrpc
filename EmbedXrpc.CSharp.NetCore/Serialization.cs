@@ -33,10 +33,7 @@ namespace EmbedXrpc
     public class SerializationManager
     {
         private List<byte> data = new List<byte>();
-        public SerializationManager()
-        {
-
-        }
+        
         public List<byte> Data
         {
             get
@@ -621,34 +618,59 @@ namespace EmbedXrpc
             }
             //SerializeEndFlag();
         }
-        public object FromBytes(int len)
+        public object FromBytes(Type_t vt)
         {
-            if (len == 1)
+            if (vt ==  Type_t.TYPE_UINT8)
             {
-                var v = Data[Index];
+                byte v = Data[Index];
                 Index++;
                 return v;
             }
-            else if (len == 2)
+            if (vt == Type_t.TYPE_INT8)
             {
-                var v = Data[Index + 1] << 8 | Data[Index];
+                sbyte v = (sbyte)Data[Index];
+                Index++;
+                return v;
+            }
+            else if (vt == Type_t.TYPE_UINT16)
+            {
+                UInt16 v = (UInt16)(Data[Index + 1] << 8 | Data[Index]);
                 Index += 2;
                 return v;
             }
-            else if (len == 4)
+            else if (vt == Type_t.TYPE_INT16)
             {
-                var v = Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index];
+                Int16 v = (Int16)(Data[Index + 1] << 8 | Data[Index]);
+                Index += 2;
+                return v;
+            }
+            else if (vt == Type_t.TYPE_UINT32)
+            {
+                UInt32 v = (UInt32)(Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
                 Index += 4;
                 return v;
             }
-            else if (len == 8)
+            else if (vt == Type_t.TYPE_INT32)
             {
-                var v = Data[Index + 7] << 56 | Data[Index + 6] << 48 | Data[Index + 5] << 40 | Data[Index + 4] << 32
-                    | Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index];
+                Int32 v = (Int32)(Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
+                Index += 4;
+                return v;
+            }
+            else if (vt == Type_t.TYPE_UINT64)
+            {
+                UInt64 v = (UInt64)(Data[Index + 7] << 56 | Data[Index + 6] << 48 | Data[Index + 5] << 40 | Data[Index + 4] << 32
+                    | Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
                 Index += 8;
                 return v;
             }
-            throw new InvalidDataException($"len is {len},but len only support 1/2/4/8");
+            else if (vt == Type_t.TYPE_INT64)
+            {
+                Int64 v = (Int64)(Data[Index + 7] << 56 | Data[Index + 6] << 48 | Data[Index + 5] << 40 | Data[Index + 4] << 32
+                    | Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
+                Index += 8;
+                return v;
+            }
+            throw new InvalidDataException($"len is {vt},but len only support 1/2/4/8");
         }
 
         public T Deserialize<T>()
@@ -910,48 +932,48 @@ namespace EmbedXrpc
         {
             if (vt ==  Type_t.TYPE_UINT8)
             {
-                return Convert.ToByte(FromBytes( 1));
+                return Convert.ToByte(FromBytes(vt));
                 //field.SetValue(s, Convert.ToByte(FromBytes( 1)));
             }
             else if(vt == Type_t.TYPE_INT8)
             {
-                return Convert.ToSByte(FromBytes(1));
+                return Convert.ToSByte(FromBytes(vt));
             }
             else if (vt == Type_t.TYPE_UINT16)
             {
-                return Convert.ToUInt16(FromBytes( 2));
+                return Convert.ToUInt16(FromBytes(vt));
             }
             else if (vt == Type_t.TYPE_INT16)
             {
-                return Convert.ToInt16(FromBytes(2));
+                return Convert.ToInt16(FromBytes(vt));
             }
             else if (vt == Type_t.TYPE_UINT32)
             {
-                return Convert.ToUInt32(FromBytes( 4));
+                return Convert.ToUInt32(FromBytes(vt));
                 //field.SetValue(s, Convert.ToInt16(FromBytes( 2)));
             }
             else if (vt == Type_t.TYPE_INT32)
             {
-                return Convert.ToInt32(FromBytes(4));
+                return Convert.ToInt32(FromBytes(vt));
             }
             else if (vt == Type_t.TYPE_FLOAT)
             {
-                return Convert.ToDouble(FromBytes(4));
+                return Convert.ToDouble(FromBytes(vt));
                 //field.SetValue(s, Convert.ToInt16(FromBytes( 2)));
             }
             else if (vt == Type_t.TYPE_UINT64)
             {
-                return Convert.ToUInt64(FromBytes( 8));
+                return Convert.ToUInt64(FromBytes(vt));
                 //field.SetValue(s, Convert.ToUInt32(FromBytes( 4)));
             }
             else if (vt == Type_t.TYPE_INT64)
             {
-                return Convert.ToInt64(FromBytes(8));
+                return Convert.ToInt64(FromBytes(vt));
                 //field.SetValue(s, Convert.ToUInt32(FromBytes( 4)));
             }
             else if (vt == Type_t.TYPE_DOUBLE)
             {
-                return Convert.ToDouble(FromBytes(8));
+                return Convert.ToDouble(FromBytes(vt));
                 //field.SetValue(s, Convert.ToUInt32(FromBytes( 4)));
             }
             else
