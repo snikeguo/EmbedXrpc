@@ -155,6 +155,7 @@ namespace EmbedXrpcIdlParser
                     if (array_TargetField.MaxCountAttribute.IsFixed == false)
                     {
                         DeserializeCodeSb.AppendLine($"obj->{field.FieldName}=({attt.ElementType.TypeName} *)Malloc(sizeof({attt.ElementType.TypeName})*{lenstring});");
+                        DeserializeCodeSb.AppendLine($"Memset(obj->{field.FieldName},0,sizeof({attt.ElementType.TypeName})*{lenstring});");
                     }
 
                     DeserializeCodeSb.AppendLine($"for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
