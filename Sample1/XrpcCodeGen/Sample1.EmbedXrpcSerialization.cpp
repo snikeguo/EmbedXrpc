@@ -26,6 +26,7 @@ void AddResult_Deserialize(SerializationManager &sm,AddResult *obj)
 DeserializeField((uint8_t *)&obj->Sum,sm,sizeof(obj->Sum));
 DeserializeField((uint8_t *)&obj->dataLen,sm,sizeof(obj->dataLen));
 obj->data=(UInt8 *)Malloc(sizeof(UInt8)*obj->dataLen);
+Memset(obj->data,0,sizeof(UInt8)*obj->dataLen);
 for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
 {
 DeserializeField((uint8_t *)&obj->data[data_index],sm,sizeof(UInt8));
@@ -183,6 +184,7 @@ DeserializeField((uint8_t *)&obj->Sec,sm,sizeof(obj->Sec));
 DeserializeField((uint8_t *)&obj->Sex,sm,sizeof(UInt64));
 DeserializeField((uint8_t *)&obj->DateStringLen,sm,sizeof(obj->DateStringLen));
 obj->DateString=(UInt8 *)Malloc(sizeof(UInt8)*obj->DateStringLen);
+Memset(obj->DateString,0,sizeof(UInt8)*obj->DateStringLen);
 for(UInt8 DateString_index=0;DateString_index<obj->DateStringLen;DateString_index++)
 {
 DeserializeField((uint8_t *)&obj->DateString[DateString_index],sm,sizeof(UInt8));
@@ -299,6 +301,7 @@ DeserializeField((uint8_t *)&obj->a,sm,sizeof(obj->a));
 DeserializeField((uint8_t *)&obj->b,sm,sizeof(obj->b));
 DeserializeField((uint8_t *)&obj->dataLen,sm,sizeof(obj->dataLen));
 obj->data=(UInt8 *)Malloc(sizeof(UInt8)*obj->dataLen);
+Memset(obj->data,0,sizeof(UInt8)*obj->dataLen);
 for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
 {
 DeserializeField((uint8_t *)&obj->data[data_index],sm,sizeof(UInt8));

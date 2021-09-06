@@ -34,6 +34,7 @@ typedef  double Double;
 void* Malloc(uint32_t size);
 void Free(void* ptr);
 void Memcpy(void* d, const void* s, uint32_t size);
+void Memset(void* d, int v, uint32_t size);
 #define EmbedSerializationAssert assert
 
 

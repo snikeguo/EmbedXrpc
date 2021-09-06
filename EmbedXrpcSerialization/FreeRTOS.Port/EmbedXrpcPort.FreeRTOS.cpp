@@ -192,3 +192,7 @@ void Memcpy(void *d, const void *s, uint32_t size)
 {
 	memcpy(d, s, size);
 }
+void Memset(void* d, int v, uint32_t size)
+{
+	memset(d, v, size);
+}
