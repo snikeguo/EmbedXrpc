@@ -4,12 +4,14 @@ using EmbedXrpcIdlParser;
 [FileName("sample1.cs")]
 struct AddResult
 {
+    
     [FieldNumber(1)]
     int Sum;
     [FieldNumber(2)]
     Int32 dataLen;
     [FieldNumber(3)]
     [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
+    [NoSerialization]
     byte[] data;
 
 }

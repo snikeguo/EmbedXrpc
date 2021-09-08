@@ -146,7 +146,8 @@ namespace EmbedXrpcIdlParser
         ITargetType TargetType { get; set; }
         string FieldName { get; set; }
         FieldNumberAttribute FieldNumberAttr { get; set; }
-        UnionFieldAttribute UnionFieldAttr { get; set; } 
+        UnionFieldAttribute UnionFieldAttr { get; set; }
+        NoSerializationAttribute NoSerializationAttr { get; set; }
     }
 
     public class Base_TargetField : ITargetField
@@ -160,6 +161,7 @@ namespace EmbedXrpcIdlParser
         public bool IsArrayLenField { get; set; } = false;//是否是数组长度字段
         public bool IsUnionTargetTypeField { get; set; } = false;//是否是target type field类型。
         public UnionFieldAttribute UnionFieldAttr { get; set; }
+        public NoSerializationAttribute NoSerializationAttr { get; set; }
 
     }
     public class Enum_TargetField: Base_TargetField
@@ -178,6 +180,7 @@ namespace EmbedXrpcIdlParser
 
         public Base_TargetField ArrayLenField { get; set; }
         public UnionFieldAttribute UnionFieldAttr { get; set; }
+        public NoSerializationAttribute NoSerializationAttr { get; set; }
     }
     public class Struct_TargetField : ITargetField
     {
@@ -187,6 +190,7 @@ namespace EmbedXrpcIdlParser
 
         public FieldNumberAttribute FieldNumberAttr { get; set; }
         public UnionFieldAttribute UnionFieldAttr { get; set; }
+        public NoSerializationAttribute NoSerializationAttr { get; set; }
     }
     /*public class Union_TargetField:ITargetField
     {
@@ -418,6 +422,7 @@ namespace EmbedXrpcIdlParser
                     }
                     var unionTargetTypeAtt = field.GetCustomAttribute<UnionTargetTypeAttribute>();
                     targetfield.UnionFieldAttr= field.GetCustomAttribute<UnionFieldAttribute>();
+                    targetfield.NoSerializationAttr= field.GetCustomAttribute<NoSerializationAttribute>();
                     if (unionTargetTypeAtt != null)
                     {
                         targetfield.IsUnionTargetTypeField = true;
@@ -443,6 +448,7 @@ namespace EmbedXrpcIdlParser
                     //添加完毕
                     enumField.TargetType = te;
                     enumField.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
+                    enumField.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
                     needAddField = enumField;
                     //targetStruct.TargetFields.Add(enumField);
 
@@ -471,6 +477,7 @@ namespace EmbedXrpcIdlParser
                     arrayField.MaxCountAttribute = arratt == null ? new MaxCountAttribute() { IsFixed = true, MaxCount = 1, LenFieldName = "" } : arratt;
                     arrayField.ArrayLenField = targetStructType.GetArrayLenField(arrayField);
                     arrayField.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
+                    arrayField.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
                     needAddField = arrayField;
                     if(arrayField.UnionFieldAttr!=null)
                     {
@@ -486,6 +493,7 @@ namespace EmbedXrpcIdlParser
                     objectFiled.FieldName = field.Name;
                     objectFiled.FieldNumberAttr = FieldNumberAttr;
                     objectFiled.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
+                    objectFiled.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
                     needAddField = objectFiled;
                     //targetStruct.TargetFields.Add(objectFiled);
                 }

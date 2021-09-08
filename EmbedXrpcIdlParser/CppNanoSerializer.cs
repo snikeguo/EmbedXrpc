@@ -74,6 +74,13 @@ namespace EmbedXrpcIdlParser
             for (int i=0;i<TargetFields.Count;i++)
             {
                 field = TargetFields[i];
+                if (field.NoSerializationAttr != null)
+                {
+                    SerializeCodeSb.AppendLine($"//{field.FieldName} :NoSerialization");
+                    DeserializeCodeSb.AppendLine($"//{field.FieldName} :NoSerialization");
+                    FreeCodeSb.AppendLine($"//{field.FieldName} :NoSerialization ");
+                    continue;
+                }
                 if (field.UnionFieldAttr != null)
                 {
                     string elsestring = (unionIfFirstFlag == true ? "" : "else");

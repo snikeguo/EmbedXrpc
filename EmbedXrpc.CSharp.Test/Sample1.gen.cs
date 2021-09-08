@@ -2,8 +2,8 @@
 using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
-// auto code gen ! DO NOT modify this file! create time 2021 - 06 - 30 11: 44:31.683;
-//C# Code Generater Version:1.9.6.0
+// auto code gen ! DO NOT modify this file! create time 2021 - 09 - 08 09: 59:57.315;
+//C# Code Generater Version:1.9.11.0
 namespace Sample1
 {
     using UInt8 = Byte;
@@ -16,6 +16,7 @@ namespace Sample1
     public class Student
     {
         public const int a_FieldNumber = 1;
+        [NoSerialization]
         [FieldNumber(1)]
         [ArrayLenFieldFlag(false)]
         public Int32 a { get; set; }
@@ -189,6 +190,8 @@ namespace Sample1
             XrpcObject.Send(userDataOfTransportLayer, sendBytes.Count, 0, sendBytes.ToArray());
         }
     }
+
+
     public class TestDelegate_Parameter
     {
         public const int now_FieldNumber = 1;
@@ -233,6 +236,8 @@ namespace Sample1
             XrpcObject.Send(userDataOfTransportLayer, sendBytes.Count, 0, sendBytes.ToArray());
         }
     }
+
+
     public class Inter_Add_Parameter
     {
         public const int a_FieldNumber = 1;
@@ -336,6 +341,8 @@ namespace Sample1
             return reqresp;
         }
     }
+
+
     public class Inter_NoArg_Parameter
     {
     }
@@ -412,6 +419,8 @@ namespace Sample1
             return reqresp;
         }
     }
+
+
     public class Inter_NoReturn_Parameter
     {
         public const int a_FieldNumber = 1;
@@ -482,6 +491,8 @@ namespace Sample1
             return reqresp;
         }
     }
+
+
     public class Inter_NoArgAndReturn_Parameter
     {
     }
@@ -545,4 +556,6 @@ namespace Sample1
             return reqresp;
         }
     }
+
+
 }

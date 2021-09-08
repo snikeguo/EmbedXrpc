@@ -4,6 +4,7 @@ using EmbedXrpcIdlParser;
 [FileName("sample1.cs")]
 struct Student
 {
+    [NoSerialization]
     [FieldNumber(1)]
     int a;
     [FieldNumber(2)]

@@ -40,7 +40,9 @@ namespace EmbedXrpcIdlParser
             {
                 valueName = field.FieldName;
             }
-            return $"{cppType} {valueName}";
+            string returnvalue = $"{cppType} {valueName}";
+            
+            return returnvalue;
         }
 
         public static void EmitEnum(EnumType_TargetType targetEnum, StreamWriter CommonHsw)
@@ -85,7 +87,12 @@ namespace EmbedXrpcIdlParser
                 string UnionTargetTypeString = string.Empty;
                 if (baseValueField != null)
                     UnionTargetTypeString = baseValueField.IsUnionTargetTypeField == true ? "Union Target Type" : string.Empty;
-                CommonHsw.WriteLine($"{EmitField(field)};   //FieldNumber:{field.FieldNumberAttr.Number}    {UnionTargetTypeString}");
+                string NoSerializationString=string.Empty;
+                if (field.NoSerializationAttr != null)
+                {
+                    NoSerializationString= "NoSerialization";
+                }
+                CommonHsw.WriteLine($"{EmitField(field)};   //FieldNumber:{field.FieldNumberAttr.Number}    {UnionTargetTypeString} {NoSerializationString}");
                 FieldNumberSb.Append($"#define {structType.TypeName}_{field.FieldName}_FieldNumber  {field.FieldNumberAttr.Number}\r\n");
             }
             if (isWriteUnion == true && IsUnionComplete == false)

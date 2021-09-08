@@ -99,4 +99,5 @@ namespace EmbedXrpc
         public string Name { get; set; }
         public UInt16 ServiceId { get; set; }
     }
+    
 }

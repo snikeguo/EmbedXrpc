@@ -11,13 +11,7 @@ sm.Index+=sizeof(obj->Sum);
 Memcpy(&sm.Buf[sm.Index],&obj->dataLen,sizeof(obj->dataLen));
 sm.Index+=sizeof(obj->dataLen);
 
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-Memcpy(&sm.Buf[sm.Index],&obj->data[data_index],sizeof(UInt8));
-sm.Index+=sizeof(UInt8);
-
-}
-
+//data :NoSerialization
 }
 
 
@@ -25,24 +19,13 @@ void AddResult_Deserialize(SerializationManager &sm,AddResult *obj)
 {
 DeserializeField((uint8_t *)&obj->Sum,sm,sizeof(obj->Sum));
 DeserializeField((uint8_t *)&obj->dataLen,sm,sizeof(obj->dataLen));
-obj->data=(UInt8 *)Malloc(sizeof(UInt8)*obj->dataLen);
-Memset(obj->data,0,sizeof(UInt8)*obj->dataLen);
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-DeserializeField((uint8_t *)&obj->data[data_index],sm,sizeof(UInt8));
-}
-
+//data :NoSerialization
 }
 
 
 void AddResult_FreeData(AddResult *obj)
 {
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-}
-
-Free(obj->data);
-
+//data :NoSerialization 
 }
 
 

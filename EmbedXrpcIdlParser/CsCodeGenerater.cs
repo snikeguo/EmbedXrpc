@@ -32,6 +32,10 @@ namespace EmbedXrpcIdlParser
             foreach (var field in objectType_TargetType.TargetFields)
             {
                 sw.WriteLine($"public const int {field.FieldName}_FieldNumber={field.FieldNumberAttr.Number};");
+                if (field.NoSerializationAttr != null)
+                {
+                    sw.WriteLine($"[NoSerialization]");
+                }
                 if (field.TargetType.TargetType <= TargetType_t.TYPE_ENUM)
                 {
                     Base_TargetField base_TargetField = field as Base_TargetField;

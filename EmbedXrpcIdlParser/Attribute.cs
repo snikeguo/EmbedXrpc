@@ -150,4 +150,9 @@ namespace EmbedXrpcIdlParser
         public string EnableCondition { get; set; }
 
     }
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    public class NoSerializationAttribute : Attribute
+    {
+   
+    }
 }

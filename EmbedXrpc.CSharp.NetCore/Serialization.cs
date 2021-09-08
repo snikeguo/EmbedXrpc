@@ -470,6 +470,9 @@ namespace EmbedXrpc
                 var vt = field.PropertyType;
                 FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
                 ArrayLenFieldFlagAttribute IsArrayLenFieldAttribute = field.GetCustomAttribute<ArrayLenFieldFlagAttribute>();
+                NoSerializationAttribute noSerializationAttribute = field.GetCustomAttribute<NoSerializationAttribute>();
+                if ((noSerializationAttribute != null))
+                    continue;
                 if (vt.IsArray == false)
                 {
                     Type_t lost_t = Type_t.TYPE_STRUCT;
@@ -548,7 +551,8 @@ namespace EmbedXrpc
                 FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
                 UnionTargetTypeAttribute unionTargetTypeAttribute = field.GetCustomAttribute<UnionTargetTypeAttribute>();
                 UnionFieldAttribute unionFieldAttribute = field.GetCustomAttribute<UnionFieldAttribute>();
-                if (unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number)
+                NoSerializationAttribute noSerializationAttribute = field.GetCustomAttribute<NoSerializationAttribute>();
+                if ((unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number) ||(noSerializationAttribute!=null) )
                     continue;
                 if (vt.IsArray == false)
                 {
@@ -712,6 +716,9 @@ namespace EmbedXrpc
                 GetKeyFromSerializationManager(ref fn, ref tp);
                 RemoveKeyFromSerializationManager();
                 var targetfieldinfos = (from bs in pros where bs.GetCustomAttribute<FieldNumberAttribute>().Number == fn select bs).ToList();
+                NoSerializationAttribute noSerializationAttribute = targetfieldinfos[0].GetCustomAttribute<NoSerializationAttribute>();
+                if (noSerializationAttribute != null)
+                    continue;
                 if (tp <=  Type_t.TYPE_DOUBLE)
                 {
                     var fieldValue=BaseValueDeserialize(tp);
@@ -844,7 +851,8 @@ namespace EmbedXrpc
                 fieldinfo = pros[index];
                 FieldNumberAttribute fieldNumberAttribute = fieldinfo.GetCustomAttribute<FieldNumberAttribute>();
                 UnionFieldAttribute unionFieldAttribute= fieldinfo.GetCustomAttribute<UnionFieldAttribute>();
-                if (unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number)
+                NoSerializationAttribute noSerializationAttribute = fieldinfo.GetCustomAttribute<NoSerializationAttribute>();
+                if (unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number || (noSerializationAttribute != null))
                 {
                     continue;
                 }
@@ -1054,6 +1062,11 @@ namespace EmbedXrpc
     }
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public class UnionFieldAttribute : Attribute
+    {
+
+    }
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public class NoSerializationAttribute : Attribute
     {
 
     }
