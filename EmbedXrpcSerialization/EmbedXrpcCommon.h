@@ -28,7 +28,7 @@ class EmbedXrpcObject;
      void* UserData;
      virtual uint16_t GetSid() = 0;
 	 virtual void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,
-         SerializationManager& recManager) = 0;
+         SerializationManager* recManager) = 0;
  };
 
 
@@ -49,8 +49,8 @@ class EmbedXrpcObject;
          UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
          EmbedXrpcObject* rpcObject,
          uint16_t targetTimeOut,
-         SerializationManager& recManager, 
-         SerializationManager& sendManager) = 0;
+         SerializationManager* recManager, 
+         SerializationManager* sendManager) = 0;
  };
  struct RequestDescribe
  {
@@ -97,6 +97,5 @@ class EmbedXrpcObject;
  };
 
 typedef bool (*SendPack_t)(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj,uint32_t dataLen, uint8_t* data);
-
 
 #endif

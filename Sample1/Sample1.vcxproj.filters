@@ -33,12 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
@@ -60,7 +54,13 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.cpp">
+    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c">
+      <Filter>EmbedXrpcLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
   </ItemGroup>

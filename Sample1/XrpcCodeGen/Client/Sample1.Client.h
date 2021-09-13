@@ -8,7 +8,7 @@ public:
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
 void DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]);
 DateTimeChange_Parameter request;
-void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager);
+void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager);
 };
 
 
@@ -18,7 +18,7 @@ public:
 uint16_t GetSid(){return TestDelegate_ServiceId;}
 void TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]);
 TestDelegate_Parameter request;
-void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager &recManager);
+void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager);
 };
 
 

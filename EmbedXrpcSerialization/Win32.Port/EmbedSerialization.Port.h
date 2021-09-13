@@ -27,7 +27,24 @@ typedef  int64_t Int64;
 typedef  float Float;
 typedef  double Double;
 
+#ifndef Bool
+#define Bool uint8_t 
+#endif
 
+#ifndef True
+#define True 1
+#endif
+
+#ifndef False
+#define False 0
+#endif
+
+typedef void* EmbedXrpc_Semaphore_t;
+typedef void* EmbedXrpc_Mutex_t;
+typedef void* EmbedXrpc_Thread_t;
+typedef void* EmbedXrpc_Queue_t;
+typedef void* EmbedXrpc_Semaphore_t;
+typedef void* EmbedXrpc_Timer_t;
 
 #define FilterStringHeader	{"EmbedXrpcObject"}
 #define StringOutput(...)  vprintf(__VA_ARGS__)

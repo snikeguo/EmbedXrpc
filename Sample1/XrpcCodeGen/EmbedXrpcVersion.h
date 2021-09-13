@@ -1,4 +1,4 @@
 ﻿#ifndef EmbedXrpcVersion_H
 #define EmbedXrpcVersion_H
-#define EmbedXrpcVersion  "1.9.11.0"
+#define EmbedXrpcVersion  "2.0.0.0"
 #endif

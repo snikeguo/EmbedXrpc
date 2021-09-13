@@ -173,7 +173,7 @@ uint32_t EmbedXrpc_QueueSpacesAvailable(EmbedXrpc_Queue_t queue)
 	return uxQueueSpacesAvailable(q);
 }
 uint32_t MallocCount = 0;
-void *Malloc(uint32_t size)
+void * EmbedXrpc_Malloc(uint32_t size)
 {
 	auto x = pvPortMalloc(size);
 	//configASSERT(x != NULL);
@@ -182,17 +182,17 @@ void *Malloc(uint32_t size)
 	return x;
 }
 uint32_t FreeCount = 0;
-void Free(void *ptr)
+void EmbedXrpc_Free(void *ptr)
 {
 	FreeCount++;
 	EmbedSerializationShowMessage("EmbedXrpcPort", "Free %x\n", ptr);
 	vPortFree(ptr);
 }
-void Memcpy(void *d, const void *s, uint32_t size)
+void EmbedXrpc_Memcpy(void *d, const void *s, uint32_t size)
 {
 	memcpy(d, s, size);
 }
-void Memset(void* d, int v, uint32_t size)
+void EmbedXrpc_Memset(void* d, int v, uint32_t size)
 {
 	memset(d, v, size);
 }

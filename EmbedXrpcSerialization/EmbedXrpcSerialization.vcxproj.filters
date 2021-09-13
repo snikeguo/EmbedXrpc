@@ -68,10 +68,10 @@
     <ClCompile Include="test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="EmbedSerialization.cpp">
+    <ClCompile Include="EmbedSerialization.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BlockBufferProvider.cpp">
+    <ClCompile Include="BlockBufferProvider.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ringbuffer.c">

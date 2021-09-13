@@ -149,8 +149,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BlockBufferProvider.cpp" />
-    <ClCompile Include="EmbedSerialization.cpp" />
+    <ClCompile Include="BlockBufferProvider.c" />
+    <ClCompile Include="EmbedSerialization.c" />
     <ClCompile Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.cpp" />
     <ClCompile Include="ringbuffer.c" />
     <ClCompile Include="RT-Thread.Port\EmbedXrpcPort.Rtt.cpp" />
