@@ -2,7 +2,7 @@
 #define EmbedSerialization_Port_H
 
 #ifdef __cplusplus
-#include <cstdint>
+#include "stdint.h"
 #else
 #include "stdint.h"
 #endif
@@ -12,7 +12,9 @@
 #include "string.h"
 #include "stdio.h"
 typedef  uint8_t Byte;
+typedef  uint8_t UInt8;
 typedef  int8_t SByte;
+typedef  int8_t Int8;
 typedef  uint16_t UInt16;
 typedef  int16_t Int16;
 typedef  uint32_t UInt32;
@@ -26,10 +28,6 @@ typedef BaseType_t Boolean;
 #define FilterStringHeader	{"EmbedXrpcPort"}
 extern "C" void rt_kprintf(const char *fmt, ...);
 #define StringOutput(...)  vprintf(__VA_ARGS__)
-void* Malloc(uint32_t size);
-void Free(void* ptr);
-void Memcpy(void* d, const void* s, uint32_t size);
-void Memset(void* d, int v, uint32_t size);
 #define EmbedSerializationAssert configASSERT
 
 
