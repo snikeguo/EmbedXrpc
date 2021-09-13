@@ -68,13 +68,13 @@
     <ClCompile Include="test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="EmbedSerialization.c">
+    <ClCompile Include="EmbedSerialization.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BlockBufferProvider.c">
+    <ClCompile Include="BlockBufferProvider.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ringbuffer.c">
+    <ClCompile Include="ringbuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Win32.Port\BlockQueue.cpp">

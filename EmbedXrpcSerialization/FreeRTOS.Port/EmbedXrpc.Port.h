@@ -2,14 +2,9 @@
 #define EmbedXrpc_Port_H
 
 
-typedef void* EmbedXrpc_Semaphore_t;
-typedef void* EmbedXrpc_Mutex_t;
-typedef void* EmbedXrpc_Thread_t;
-typedef void* EmbedXrpc_Queue_t;
-typedef void* EmbedXrpc_Semaphore_t;
-typedef void* EmbedXrpc_Timer_t;
-#define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
+#define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
+typedef void * UserDataOfTransportLayer_t;
 //common
 #define EmbedXrpc_SendBufferSize			1024//∑¢ÀÕBuffer¥Û–°
 #define EmbedXrpc_CheckSumValid				1

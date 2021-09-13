@@ -54,13 +54,13 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c">
+    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c">
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c">
+    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.cpp">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,6 +5,9 @@
 #include "queue.h"
 #include "timers.h"
 #include "semphr.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 EmbedXrpc_Thread_t EmbedXrpc_CreateThread(const char *threadName, uint8_t priority, void (*Thread)(void *), void *Arg)
 {
 	TaskHandle_t ServiceThread = nullptr;
@@ -92,10 +95,10 @@ void EmbedXrpc_TimerStop(EmbedXrpc_Timer_t timer)
 	TimerHandle_t xtimer = (TimerHandle_t)timer;
 	xTimerStop(xtimer, 0);
 }
-bool EmbedXrpc_TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
+Bool EmbedXrpc_TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
 {
 	auto frsem = static_cast<QueueHandle_t>(sem);
-	return xSemaphoreTake(frsem, timeout) == pdTRUE ? true : false;
+	return xSemaphoreTake(frsem, timeout) == pdTRUE ? True : False;
 }
 void EmbedXrpc_ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
 {
@@ -105,32 +108,32 @@ void EmbedXrpc_ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
 void EmbedXrpc_ResetSemaphore(EmbedXrpc_Semaphore_t sem)
 {
 	auto frsem = static_cast<QueueHandle_t>(sem);
-	xQueueReset(frsem); //Çå¿Õ¶ÓÁÐ
+	xQueueReset(frsem); //ï¿½ï¿½Õ¶ï¿½ï¿½ï¿½
 }
-bool EmbedXrpc_TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout)
+Bool EmbedXrpc_TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout)
 {
 	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreTake(m, timeout);
 	if (r == pdTRUE)
 	{
-		return true;
+		return True;
 	}
 	else
 	{
-		return false;
+		return False;
 	}
 }
-bool EmbedXrpc_ReleaseMutex(EmbedXrpc_Mutex_t mutex)
+Bool EmbedXrpc_ReleaseMutex(EmbedXrpc_Mutex_t mutex)
 {
 	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreGive(m);
 	if (r == pdTRUE)
 	{
-		return true;
+		return True;
 	}
 	else
 	{
-		return false;
+		return False;
 	}
 }
 
@@ -196,3 +199,6 @@ void EmbedXrpc_Memset(void* d, int v, uint32_t size)
 {
 	memset(d, v, size);
 }
+#ifdef __cplusplus
+}
+#endif

@@ -149,10 +149,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BlockBufferProvider.c" />
-    <ClCompile Include="EmbedSerialization.c" />
+    <ClCompile Include="BlockBufferProvider.cpp" />
+    <ClCompile Include="EmbedSerialization.cpp" />
     <ClCompile Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.cpp" />
-    <ClCompile Include="ringbuffer.c" />
+    <ClCompile Include="ringbuffer.cpp" />
     <ClCompile Include="RT-Thread.Port\EmbedXrpcPort.Rtt.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Win32.Port\BlockQueue.cpp" />

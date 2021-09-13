@@ -25,6 +25,25 @@ typedef  float Float;
 typedef  double Double;
 typedef BaseType_t Boolean;
 
+#ifndef Bool
+#define Bool uint8_t
+#endif
+
+#ifndef True
+#define True 1
+#endif
+
+#ifndef False
+#define False 0
+#endif
+
+typedef void* EmbedXrpc_Semaphore_t;
+typedef void* EmbedXrpc_Mutex_t;
+typedef void* EmbedXrpc_Thread_t;
+typedef void* EmbedXrpc_Queue_t;
+typedef void* EmbedXrpc_Semaphore_t;
+typedef void* EmbedXrpc_Timer_t;
+
 #define FilterStringHeader	{"EmbedXrpcPort"}
 extern "C" void rt_kprintf(const char *fmt, ...);
 #define StringOutput(...)  vprintf(__VA_ARGS__)
