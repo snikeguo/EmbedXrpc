@@ -65,7 +65,7 @@ uint32_t SerializationManager_GetCalculateSum(SerializationManager* sm)
 	}
 }
 
-void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum)//åªæœ‰ringbuffer mode ä¸º0çš„æƒ…å†µä¸‹ä½¿ç”¨ã€‚
+void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum)//Ö»ÓĞringbuffer mode Îª0µÄÇé¿öÏÂÊ¹ÓÃ¡£
 {
 	(void)sum;
 #if EmbedXrpc_UseRingBufferWhenReceiving==0
