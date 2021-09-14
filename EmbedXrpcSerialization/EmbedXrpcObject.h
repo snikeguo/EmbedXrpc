@@ -180,13 +180,13 @@ public:
 #endif
 
 #if EmbedXrpc_DelegateBlockQueue_MaxItemNumber>0&&EmbedXrpc_IsSendToQueue==1 //client
-		DelegateServiceThreadHandle = El_CreateThread("DelegateServiceThread", Client_ThreadPriority, DelegateServiceThread, this);
+		DelegateServiceThreadHandle = El_CreateThread("DelegateServiceThread", Client_ThreadPriority, DelegateServiceThread, this,2048);
 		El_ThreadStart(DelegateServiceThreadHandle);
 #endif
 
 		//server
 #if EmbedXrpc_RequestBlockQueue_MaxItemNumber>0&&EmbedXrpc_IsSendToQueue==1
-		RequestProcessServiceThreadHandle = El_CreateThread("RequestProcessServiceThread", Server_ThreadPriority, RequestProcessServiceThread, this);
+		RequestProcessServiceThreadHandle = El_CreateThread("RequestProcessServiceThread", Server_ThreadPriority, RequestProcessServiceThread, this,2048);
 		El_ThreadStart(RequestProcessServiceThreadHandle);
 #endif
 		SuspendTimer = El_CreateTimer("SuspendTimer", El_WAIT_FOREVER, SuspendTimerCallBack, this);

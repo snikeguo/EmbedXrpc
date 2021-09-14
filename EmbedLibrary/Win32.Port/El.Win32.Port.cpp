@@ -9,7 +9,7 @@ using Semaphore = BlockingQueue<int>;
 extern "C"
 {
 
-	El_Thread_t El_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg)
+	El_Thread_t El_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg, uint16_t stack_size)
 	{
 		std::thread* ServiceThread = new std::thread(Thread, Arg);
 		return  ServiceThread;

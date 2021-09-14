@@ -36,24 +36,46 @@ extern "C" {
 #define False 0
 #endif
 #define El_WAIT_FOREVER	0xFFFFFFFF
+
+#define Windows 1
+#define FreeRtos	2
+#define SupportedOs	Windows
+
+#if SupportedOs==Windows
 	typedef void* El_Semaphore_t;
 	typedef void* El_Mutex_t;
 	typedef void* El_Thread_t;
 	typedef void* El_Queue_t;
 	typedef void* El_Semaphore_t;
 	typedef void* El_Timer_t;
+	#define El_Assert assert
+#define El_Debug	printf
+#define El_Sprintf     sprintf//不要使用sprintf
+#define El_Delay(x)    Sleep(x)
+#elif SupportedOs==FreeRtos
+	typedef SemaphoreHandle_t  Embeded_Mutex;
+	typedef TimerHandle_t Embeded_Timer;
+	typedef SemaphoreHandle_t  Embeded_Semaphore;
+	typedef TaskHandle_t Embeded_Thread;
+	typedef QueueHandle_t Embeded_Queue;
+#define El_Debug	
+#define El_Assert configASSERT
+#define El_Sprintf     rt_sprintf//不要使用sprintf
+#define El_Delay(x)    vTaskDelay(x)
+#endif
+#define El_Strncpy strncpy
+#define El_Strncmp    strncmp
+#define El_Strlen      strlen
 
-
+#define CallFunction(Function,...) do{if (Function != NULL){Function(__VA_ARGS__);}}while(0); //using C99 Mode.
 	void* El_Malloc(uint32_t size);
 	void El_Free(void* ptr);
 	void El_Memcpy(void* d, const void* s, uint32_t size);
 	void El_Memset(void* d, int v, uint32_t size);
 	
-	//WIN32 
-	#define El_Assert assert
-	//#define El_Assert configASSERT
+	
 
-	El_Thread_t El_CreateThread(const char* threadName, uint8_t priority, void (*Thread)(void*), void* Arg);
+	El_Thread_t El_CreateThread(const char* threadName, uint8_t priority, void (*Thread)(void*), void* Arg, uint16_t stack_size);
 	El_Mutex_t El_CreateSemaphore(const char* semaphoreName);
 	El_Mutex_t El_CreateMutex(const char* mutexName);
 	El_Queue_t El_CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen);

@@ -7,15 +7,15 @@ extern "C" {
 #endif
 	typedef void* UserDataOfTransportLayer_t;
 	//common
-#define EmbedXrpc_SendBufferSize			1024//·¢ËÍBuffer´óĞ¡
+#define EmbedXrpc_SendBufferSize			1024//å‘é€Bufferå¤§å°
 #define EmbedXrpc_CheckSumValid				1
 #define EmbedXrpc_IsSendToQueue				1
 
-//client²¿·Ö:RingBuffer Ä£Ê½ÏÂ and Dynamic Memory ÏÂ ¶¼ĞèÒªÅäÖÃµÄ
+//clientéƒ¨åˆ†:RingBuffer æ¨¡å¼ä¸‹ and Dynamic Memory ä¸‹ éƒ½éœ€è¦é…ç½®çš„
 #define EmbedXrpc_DelegateBlockQueue_MaxItemNumber	0
 #define EmbedXrpc_ResponseBlockQueue_MaxItemNumber	0
 
-//server²¿·Ö:RingBuffer Ä£Ê½ÏÂ and Dynamic Memory ÏÂ ¶¼ĞèÒªÅäÖÃµÄ
+//serveréƒ¨åˆ†:RingBuffer æ¨¡å¼ä¸‹ and Dynamic Memory ä¸‹ éƒ½éœ€è¦é…ç½®çš„
 #define EmbedXrpc_RequestBlockQueue_MaxItemNumber	100
 
 #define Server_ThreadPriority				0x2
@@ -26,11 +26,11 @@ extern "C" {
 
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 //client
-#define EmbedXrpc_DelegateRingBufferSize	1024//½ÓÊÕµ½Î¯ÍĞÊı¾İºóÒª°ÑÊı¾İ²åÈëµ½DelegateRingBuffer
-#define EmbedXrpc_ResponseRingBufferSize	1024//½ÓÊÕµ½»Ø¸´Êı¾İºóÒª°ÑÊı¾İ²åÈëµ½ResponseRingBuffer
+#define EmbedXrpc_DelegateRingBufferSize	1024//æ¥æ”¶åˆ°å§”æ‰˜æ•°æ®åè¦æŠŠæ•°æ®æ’å…¥åˆ°DelegateRingBuffer
+#define EmbedXrpc_ResponseRingBufferSize	1024//æ¥æ”¶åˆ°å›å¤æ•°æ®åè¦æŠŠæ•°æ®æ’å…¥åˆ°ResponseRingBuffer
 
 //server
-#define EmbedXrpc_RequestRingBufferSize		1024//½ÓÊÕµ½ÇëÇóÊı¾İºóÒª°ÑÊı¾İ²åÈëµ½RequestRingBuffer
+#define EmbedXrpc_RequestRingBufferSize		1024//æ¥æ”¶åˆ°è¯·æ±‚æ•°æ®åè¦æŠŠæ•°æ®æ’å…¥åˆ°RequestRingBuffer
 
 #endif
 

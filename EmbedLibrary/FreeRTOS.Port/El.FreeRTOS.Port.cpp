@@ -8,10 +8,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-El_Thread_t El_CreateThread(const char *threadName, uint8_t priority, void (*Thread)(void *), void *Arg)
+El_Thread_t El_CreateThread(const char *threadName, uint8_t priority, void (*Thread)(void *), void *Arg, uint16_t stack_size)
 {
 	TaskHandle_t ServiceThread = nullptr;
-	xTaskCreate(Thread, threadName, 512, Arg, priority, &ServiceThread);
+	xTaskCreate(Thread, threadName, stack_size, Arg, priority, &ServiceThread);
 	vTaskSuspend(ServiceThread);
 	return ServiceThread;
 }

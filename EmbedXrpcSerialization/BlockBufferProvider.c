@@ -90,7 +90,7 @@ Bool BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj,  ReceiveItemI
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
 		return False;
-	auto r = El_ReceiveQueue(obj->Queue, item, sizeof(ReceiveItemInfo), timeout) == QueueState_OK ? True : False;
+	Bool r = El_ReceiveQueue(obj->Queue, item, sizeof(ReceiveItemInfo), timeout) == QueueState_OK ? True : False;
 	return r;
 }
 uint32_t BlockRingBufferProvider_CalculateSum( uint8_t* d, uint16_t len)
