@@ -3,7 +3,7 @@ void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, u
 {
 	if (size == 0 || pool == NULL)
 		return;
-	EmbedXrpc_Memset(obj, 0, sizeof(BlockRingBufferProvider));
+	El_Memset(obj, 0, sizeof(BlockRingBufferProvider));
 	obj->CalculateSumValue = 0;
 	obj->ReferenceSumValue = 0;
 
@@ -11,16 +11,16 @@ void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, u
 	obj->Size = size;
 
 	rt_ringbuffer_init(&obj->RingBuffer, pool, size);
-	obj->Queue = EmbedXrpc_CreateQueue("ringbufqueue", sizeof(ReceiveItemInfo), queue_item_size);
-	obj->Mutex = EmbedXrpc_CreateMutex("ringbufmutex");
+	obj->Queue = El_CreateQueue("ringbufqueue", sizeof(ReceiveItemInfo), queue_item_size);
+	obj->Mutex = El_CreateMutex("ringbufmutex");
 }
 void BlockRingBufferProvider_DeInit(BlockRingBufferProvider* obj)
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
 		return;
 	rt_ringbuffer_reset(&obj->RingBuffer);
-	EmbedXrpc_DeleteMutex(obj->Mutex);
-	EmbedXrpc_DeleteQueue(obj->Queue);
+	El_DeleteMutex(obj->Mutex);
+	El_DeleteQueue(obj->Queue);
 }
 Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch)
 {
@@ -28,9 +28,9 @@ Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch)
 		return False;
 	uint8_t tch = 0;
 	uint32_t size = 0;
-	EmbedXrpc_TakeMutex(obj->Mutex, EmbedXrpc_WAIT_FOREVER);
+	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
 	size = rt_ringbuffer_getchar(&obj->RingBuffer, &tch);
-	EmbedXrpc_ReleaseMutex(obj->Mutex);
+	El_ReleaseMutex(obj->Mutex);
 	if (size == 0)
 	{
 		return False;
@@ -46,9 +46,9 @@ Bool BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj,  uint8_t* ch
 		return False;
 	uint8_t tch = 0;
 	uint32_t size = 0;
-	EmbedXrpc_TakeMutex(obj->Mutex, EmbedXrpc_WAIT_FOREVER);
+	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
 	size = rt_ringbuffer_viewchar(&obj->RingBuffer, &tch,offset);
-	EmbedXrpc_ReleaseMutex(obj->Mutex);
+	El_ReleaseMutex(obj->Mutex);
 	if (size == 0)
 	{
 		return False;
@@ -73,7 +73,7 @@ Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj,  uint8_t* ch
 		}
 	}*/
 	uint8_t tch=0;
-	EmbedXrpc_TakeMutex(obj->Mutex, EmbedXrpc_WAIT_FOREVER);
+	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
 	for (uint16_t i = 0; i < len; i++)
 	{
 		rt_ringbuffer_getchar(&obj->RingBuffer, &tch);
@@ -83,14 +83,14 @@ Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj,  uint8_t* ch
 			ch[i] = tch;
 		}
 	}
-	EmbedXrpc_ReleaseMutex(obj->Mutex);
+	El_ReleaseMutex(obj->Mutex);
 	return True;
 }
 Bool BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj,  ReceiveItemInfo* item, uint32_t timeout)
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
 		return False;
-	auto r = EmbedXrpc_ReceiveQueue(obj->Queue, item, sizeof(ReceiveItemInfo), timeout) == QueueState_OK ? True : False;
+	auto r = El_ReceiveQueue(obj->Queue, item, sizeof(ReceiveItemInfo), timeout) == QueueState_OK ? True : False;
 	return r;
 }
 uint32_t BlockRingBufferProvider_CalculateSum( uint8_t* d, uint16_t len)
@@ -112,8 +112,8 @@ Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo
 	//bool insert_flag = False;
 	Bool result = False;
 
-	EmbedXrpc_TakeMutex(obj->Mutex, EmbedXrpc_WAIT_FOREVER);
-	if (rt_ringbuffer_space_len(&obj->RingBuffer) >= bufLen && EmbedXrpc_QueueSpacesAvailable(obj->Queue)>0)
+	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
+	if (rt_ringbuffer_space_len(&obj->RingBuffer) >= bufLen && El_QueueSpacesAvailable(obj->Queue)>0)
 	{
 		//insert_flag = True;
 		putlen = rt_ringbuffer_put(&obj->RingBuffer, buf, bufLen);
@@ -124,7 +124,7 @@ Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo
 		}
 		//item->DataLen = bufLen;
 		//item->CheckSum = CalculateSum(buf, bufLen);
-		if (EmbedXrpc_SendQueue(obj->Queue, item, sizeof(ReceiveItemInfo)) == QueueState_OK)
+		if (El_SendQueue(obj->Queue, item, sizeof(ReceiveItemInfo)) == QueueState_OK)
 		{
 			result = True;
 			goto _unlock;
@@ -136,7 +136,7 @@ Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo
 		}
 	}
 _unlock:
-	EmbedXrpc_ReleaseMutex(obj->Mutex);
+	El_ReleaseMutex(obj->Mutex);
 	return result;
 }
 void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj)
@@ -144,5 +144,5 @@ void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj)
 	if (obj->Size == 0 || obj->Pool == NULL)
 		return ;
 	rt_ringbuffer_reset(&obj->RingBuffer);
-	EmbedXrpc_ResetQueue(obj->Queue);
+	El_ResetQueue(obj->Queue);
 }

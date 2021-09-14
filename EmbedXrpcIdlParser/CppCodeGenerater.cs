@@ -354,7 +354,7 @@ namespace EmbedXrpcIdlParser
                 //ClientCsw.WriteLine($"recManager.Deserialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
                 ClientCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
                 ClientCsw.WriteLine("#if EmbedXrpc_CheckSumValid==1");
-                ClientCsw.WriteLine($"EmbedSerializationAssert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
+                ClientCsw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
                 ClientCsw.WriteLine("#endif");
                 dh = targetDelegate.ParameterStructType.TargetFields.Count > 0 ? "," : "";
                 ClientCsw.Write($"{targetDelegate.MethodName}(userDataOfTransportLayer{dh}");
@@ -429,9 +429,9 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
                 //ServerCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} SendData;");
                 ServerCsw.WriteLine($"SerializationManager sm;");
-                ServerCsw.WriteLine("EmbedXrpc_Memset(&sm,0,sizeof(SerializationManager));");
+                ServerCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
                 //ServerCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
-                ServerCsw.WriteLine("EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
+                ServerCsw.WriteLine("El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);");
                 ServerCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
                         "sm.BufferLen = EmbedXrpc_SendBufferSize-4;");
@@ -485,7 +485,7 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine($"RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);");
                 ServerCsw.WriteLine($"RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);");
                 ServerCsw.WriteLine("SerializationManager_Reset(&sm);");
-                ServerCsw.WriteLine("EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);");
+                ServerCsw.WriteLine("El_ReleaseMutex(RpcObject->ObjectMutexHandle);");
                 ServerCsw.WriteLine("}");//function end
                 MacroControlWriteEnd(ServerCsw, targetDelegate.MacroControlAttribute);
 
@@ -598,7 +598,7 @@ namespace EmbedXrpcIdlParser
 
                     //ClientCsw.WriteLine($"static {service.ParameterStructType.TypeName} SendData;");
                     ClientCsw.WriteLine($"SerializationManager sm;");
-                    ClientCsw.WriteLine("EmbedXrpc_Memset(&sm,0,sizeof(SerializationManager));");
+                    ClientCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
                     //ClientCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
                     //ClientCsw.WriteLine($"static {service.ReturnStructType.TypeName} reqresp;");
                     ClientCsw.WriteLine($"auto result=false;");
@@ -607,13 +607,13 @@ namespace EmbedXrpcIdlParser
                     {
                         ClientCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
                     }
-                    ClientCsw.WriteLine("EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);");
+                    ClientCsw.WriteLine("El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);");
 
                     ClientCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
                     //ClientCsw.WriteLine("RpcObject->ResponseBlockBufferProvider->Reset();");
                     ClientCsw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);");
                     ClientCsw.WriteLine("#else");
-                    ClientCsw.WriteLine("EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);");
+                    ClientCsw.WriteLine("El_ResetQueue(RpcObject->ResponseBlockQueue);");
                     ClientCsw.WriteLine("#endif");
                     //ClientCsw.WriteLine("ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
@@ -703,7 +703,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine("#endif");
                         ClientCsw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp);");
                         ClientCsw.WriteLine("#if  EmbedXrpc_CheckSumValid==1");
-                        ClientCsw.WriteLine("EmbedSerializationAssert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
+                        ClientCsw.WriteLine("El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
                         ClientCsw.WriteLine("#endif");
                         ClientCsw.WriteLine("}");
 
@@ -713,7 +713,7 @@ namespace EmbedXrpcIdlParser
 
                         ClientCsw.WriteLine("if (recData.DataLen > 0)");
                         ClientCsw.WriteLine("{");
-                        ClientCsw.WriteLine("EmbedXrpc_Free(recData.Data);");
+                        ClientCsw.WriteLine("El_Free(recData.Data);");
                         ClientCsw.WriteLine("}");
 
                         ClientCsw.WriteLine("}");
@@ -722,7 +722,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");
                     }
 
-                    ClientCsw.WriteLine("exi:\nEmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);");
+                    ClientCsw.WriteLine("exi:El_ReleaseMutex(RpcObject->ObjectMutexHandle);");
                     ClientCsw.WriteLine($"return {service.ServiceName}_reqresp;");
                     ClientCsw.WriteLine("}");
 
@@ -796,7 +796,7 @@ namespace EmbedXrpcIdlParser
                     //ServerCsw.WriteLine($"recManager.Deserialize(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");
                     ServerCsw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
                     ServerCsw.WriteLine("#if EmbedXrpc_CheckSumValid==1");
-                    ServerCsw.WriteLine($"EmbedSerializationAssert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
+                    ServerCsw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
                     ServerCsw.WriteLine("#endif");
                     //if (service.ReturnValue != null)
                     //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");

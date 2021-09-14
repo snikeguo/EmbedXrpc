@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="RT-Thread.Port">
-      <UniqueIdentifier>{4bf34064-42b4-4a2b-81c0-27509d20458f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="WIN32.Port">
       <UniqueIdentifier>{6b9ce4e7-5552-4c3a-ac35-c0c06e13c36d}</UniqueIdentifier>
     </Filter>
@@ -36,20 +33,8 @@
     <ClInclude Include="ringbuffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Win32.Port\BlockQueue.h">
-      <Filter>WIN32.Port</Filter>
-    </ClInclude>
     <ClInclude Include="EmbedXrpcObject.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Win32.Port\EmbedSerialization.Port.h">
-      <Filter>WIN32.Port</Filter>
-    </ClInclude>
-    <ClInclude Include="RT-Thread.Port\EmbedSerialization.Port.h">
-      <Filter>RT-Thread.Port</Filter>
-    </ClInclude>
-    <ClInclude Include="FreeRTOS.Port\EmbedSerialization.Port.h">
-      <Filter>FreeRTOS.Port</Filter>
     </ClInclude>
     <ClInclude Include="EmbedXrpcPortInterface.h">
       <Filter>头文件</Filter>
@@ -57,37 +42,19 @@
     <ClInclude Include="FreeRTOS.Port\EmbedXrpc.Port.h">
       <Filter>FreeRTOS.Port</Filter>
     </ClInclude>
-    <ClInclude Include="RT-Thread.Port\EmbedXrpc.Port.h">
-      <Filter>RT-Thread.Port</Filter>
-    </ClInclude>
     <ClInclude Include="Win32.Port\EmbedXrpc.Port.h">
       <Filter>WIN32.Port</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test.cpp">
+    <ClCompile Include="EmbedSerialization.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="EmbedSerialization.cpp">
+    <ClCompile Include="BlockBufferProvider.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BlockBufferProvider.cpp">
+    <ClCompile Include="ringbuffer.c">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ringbuffer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Win32.Port\BlockQueue.cpp">
-      <Filter>WIN32.Port</Filter>
-    </ClCompile>
-    <ClCompile Include="Win32.Port\Win32EmbedXrpcPort.cpp">
-      <Filter>WIN32.Port</Filter>
-    </ClCompile>
-    <ClCompile Include="RT-Thread.Port\EmbedXrpcPort.Rtt.cpp">
-      <Filter>RT-Thread.Port</Filter>
-    </ClCompile>
-    <ClCompile Include="FreeRTOS.Port\EmbedXrpcPort.FreeRTOS.cpp">
-      <Filter>FreeRTOS.Port</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

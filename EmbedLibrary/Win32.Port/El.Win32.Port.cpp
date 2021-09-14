@@ -1,4 +1,4 @@
-#include  "../EmbedXrpcPortInterface.h"
+#include  "../EmbedLibrary.h"
 
 #include <thread>
 #include <mutex>
@@ -9,25 +9,25 @@ using Semaphore = BlockingQueue<int>;
 extern "C"
 {
 
-	EmbedXrpc_Thread_t EmbedXrpc_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg)
+	El_Thread_t El_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg)
 	{
 		std::thread* ServiceThread = new std::thread(Thread, Arg);
 		return  ServiceThread;
 	}
 
-	EmbedXrpc_Mutex_t EmbedXrpc_CreateMutex(const char* mutexName)
+	El_Mutex_t El_CreateMutex(const char* mutexName)
 	{
 		//QMutex* mutex = new QMutex();
 		std::timed_mutex* mutex = new std::timed_mutex();
 		return  mutex;
 	}
-	EmbedXrpc_Queue_t EmbedXrpc_CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen)
+	El_Queue_t El_CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen)
 	{
 		//这里创建队列，由于我只实现了C++泛型的队列，而底层RTOS一般要求提供的是queueItemSize，所以这里硬编码直接创建EmbeXrpcRawData;
 		NoGenericBlockingQueue* q = new NoGenericBlockingQueue(queueItemSize);
 		return q;
 	}
-	EmbedXrpc_Semaphore_t  EmbedXrpc_CreateSemaphore(const char* SemaphoreName)
+	El_Semaphore_t  El_CreateSemaphore(const char* SemaphoreName)
 	{
 		Semaphore* sem = new Semaphore();
 		return sem;
@@ -91,63 +91,63 @@ extern "C"
 		void (*timercb)(void* arg);
 		void* arg;
 	};
-	EmbedXrpc_Timer_t EmbedXrpc_CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
+	El_Timer_t El_CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
 	{
 		Win32Timer* timer = new Win32Timer(timerName, timeout, timercb, Arg);
 		return timer;
 	}
-	void EmbedXrpc_DeleteThread(EmbedXrpc_Thread_t thread)
+	void El_DeleteThread(El_Thread_t thread)
 	{
 		//auto qtThread = static_cast<QThread*>(thread);
 		auto qtThread = static_cast<std::thread*>(thread);
 		delete qtThread;
 	}
-	void EmbedXrpc_DeleteMutex(EmbedXrpc_Mutex_t mutex)
+	void El_DeleteMutex(El_Mutex_t mutex)
 	{
 		auto qtMutex = static_cast<std::mutex*>(mutex);
 		delete qtMutex;
 	}
-	void EmbedXrpc_DeleteQueue(EmbedXrpc_Queue_t queue)
+	void El_DeleteQueue(El_Queue_t queue)
 	{
 		auto qtQueue = static_cast<NoGenericBlockingQueue*>(queue);
 		qtQueue->Reset();
 		delete qtQueue;
 	}
-	void EmbedXrpc_DeleteSemaphore(EmbedXrpc_Semaphore_t sem)
+	void El_DeleteSemaphore(El_Semaphore_t sem)
 	{
 		Semaphore* qtsem = static_cast<Semaphore*>(sem);
 		qtsem->Reset();
 		delete sem;
 	}
-	void EmbedXrpc_DeleteTimer(EmbedXrpc_Timer_t timer)
+	void El_DeleteTimer(El_Timer_t timer)
 	{
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
 		delete win32timer;
 	}
-	void EmbedXrpc_ThreadStart(EmbedXrpc_Thread_t thread)
+	void El_ThreadStart(El_Thread_t thread)
 	{
 		std::thread* x = static_cast<std::thread*>(thread);
 		x->detach();
 	}
-	void  EmbedXrpc_TimerStart(EmbedXrpc_Timer_t timer, uint16_t interval)
+	void  El_TimerStart(El_Timer_t timer, uint16_t interval)
 	{
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->timerout = interval;
 		win32timer->Start();
 	}
-	void EmbedXrpc_TimerReset(EmbedXrpc_Timer_t timer)
+	void El_TimerReset(El_Timer_t timer)
 	{
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
 	}
-	void EmbedXrpc_TimerStop(EmbedXrpc_Timer_t timer)
+	void El_TimerStop(El_Timer_t timer)
 	{
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
 	}
 
-	Bool EmbedXrpc_TakeSemaphore(EmbedXrpc_Semaphore_t sem, uint32_t timeout)
+	Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout)
 	{
 		Semaphore* qtsem = static_cast<Semaphore*>(sem);
 		int recItem = 0;
@@ -156,32 +156,32 @@ extern "C"
 		return r;
 
 	}
-	void EmbedXrpc_ReleaseSemaphore(EmbedXrpc_Semaphore_t sem)
+	void El_ReleaseSemaphore(El_Semaphore_t sem)
 	{
 		Semaphore* qtsem = static_cast<Semaphore*>(sem);
 		int recItem = 0;
 		qtsem->Send(recItem);
 	}
-	void EmbedXrpc_ResetSemaphore(EmbedXrpc_Semaphore_t sem)
+	void El_ResetSemaphore(El_Semaphore_t sem)
 	{
 		Semaphore* qtsem = static_cast<Semaphore*>(sem);
 		qtsem->Reset();
 	}
 
-	Bool EmbedXrpc_TakeMutex(EmbedXrpc_Mutex_t mutex, uint32_t timeout)
+	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout)
 	{
 		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
 		std::chrono::milliseconds to(timeout);
 		return m->try_lock_for(to);
 	}
-	Bool EmbedXrpc_ReleaseMutex(EmbedXrpc_Mutex_t mutex)
+	Bool El_ReleaseMutex(El_Mutex_t mutex)
 	{
 		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
 		m->unlock();
 		return true;
 	}
 
-	QueueState EmbedXrpc_ReceiveQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout)
+	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout)
 	{
 		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
 		auto r = q->Receive(item, timeout);
@@ -195,37 +195,37 @@ extern "C"
 		}
 
 	}
-	QueueState EmbedXrpc_SendQueue(EmbedXrpc_Queue_t queue, void* item, uint32_t itemSize)
+	QueueState El_SendQueue(El_Queue_t queue, void* item, uint32_t itemSize)
 	{
 		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
 		q->Send(item);
 		return QueueState_OK;
 	}
-	void EmbedXrpc_ResetQueue(EmbedXrpc_Queue_t queue)
+	void El_ResetQueue(El_Queue_t queue)
 	{
 		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
 		q->Reset();
 	}
-	uint32_t EmbedXrpc_QueueSpacesAvailable(EmbedXrpc_Queue_t queue)
+	uint32_t El_QueueSpacesAvailable(El_Queue_t queue)
 	{
 		return -1;
 	}
-	void* EmbedXrpc_Malloc(uint32_t size)
+	void* El_Malloc(uint32_t size)
 	{
 		auto x = malloc(size);
 		printf("malloc ptr:0x%8x,size:%4d\n", x, size);
 		return x;
 	}
-	void EmbedXrpc_Free(void* ptr)
+	void El_Free(void* ptr)
 	{
 		free(ptr);
 		printf("free ptr:0x%8x\n", ptr);
 	}
-	void EmbedXrpc_Memcpy(void* d, const void* s, uint32_t size)
+	void El_Memcpy(void* d, const void* s, uint32_t size)
 	{
 		::memcpy(d, s, size);
 	}
-	void EmbedXrpc_Memset(void* d, int v, uint32_t size)
+	void El_Memset(void* d, int v, uint32_t size)
 	{
 		::memset(d, v, size);
 	}

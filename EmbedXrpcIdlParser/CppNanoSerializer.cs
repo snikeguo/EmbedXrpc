@@ -101,7 +101,7 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
                     //}
-                    SerializeCodeSb.AppendLine($"EmbedXrpc_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof(obj->{field.FieldName}));");
+                    SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof(obj->{field.FieldName}));");
                     SerializeCodeSb.AppendLine($"sm->Index+=sizeof(obj->{field.FieldName});\r\n");
 
                     DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof(obj->{field.FieldName}));");
@@ -114,7 +114,7 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[ettt.NumberType]});");
                     //}
-                    SerializeCodeSb.AppendLine($"EmbedXrpc_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
+                    SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
                     SerializeCodeSb.AppendLine($"sm->Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
 
                     DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
@@ -161,8 +161,8 @@ namespace EmbedXrpcIdlParser
 
                     if (array_TargetField.MaxCountAttribute.IsFixed == false)
                     {
-                        DeserializeCodeSb.AppendLine($"obj->{field.FieldName}=({attt.ElementType.TypeName} *)EmbedXrpc_Malloc(sizeof({attt.ElementType.TypeName})*{lenstring});");
-                        DeserializeCodeSb.AppendLine($"EmbedXrpc_Memset(obj->{field.FieldName},0,sizeof({attt.ElementType.TypeName})*{lenstring});");
+                        DeserializeCodeSb.AppendLine($"obj->{field.FieldName}=({attt.ElementType.TypeName} *)El_Malloc(sizeof({attt.ElementType.TypeName})*{lenstring});");
+                        DeserializeCodeSb.AppendLine($"El_Memset(obj->{field.FieldName},0,sizeof({attt.ElementType.TypeName})*{lenstring});");
                     }
 
                     DeserializeCodeSb.AppendLine($"for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
@@ -172,7 +172,7 @@ namespace EmbedXrpcIdlParser
                     FreeCodeSb.AppendLine("{");//for begin
                     if (attt.ElementType.TargetType < TargetType_t.TYPE_ENUM)
                     {
-                        SerializeCodeSb.AppendLine($"EmbedXrpc_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({attt.ElementType.TypeName}));");
+                        SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({attt.ElementType.TypeName}));");
                         SerializeCodeSb.AppendLine($"sm->Index+=sizeof({attt.ElementType.TypeName});\r\n");
 
                         DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({attt.ElementType.TypeName}));");
@@ -181,7 +181,7 @@ namespace EmbedXrpcIdlParser
                     else if (attt.ElementType.TargetType == TargetType_t.TYPE_ENUM)
                     {
                         var ettt = attt.ElementType as EnumType_TargetType;
-                        SerializeCodeSb.AppendLine($"EmbedXrpc_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
+                        SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
                         SerializeCodeSb.AppendLine($"sm->Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});\r\n");
 
                         DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
@@ -200,7 +200,7 @@ namespace EmbedXrpcIdlParser
                     FreeCodeSb.AppendLine("}\r\n");//for end
                     if (array_TargetField.MaxCountAttribute.IsFixed == false)
                     {
-                        FreeCodeSb.AppendLine($"EmbedXrpc_Free(obj->{field.FieldName});\r\n");
+                        FreeCodeSb.AppendLine($"El_Free(obj->{field.FieldName});\r\n");
                     }
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)

@@ -3,7 +3,7 @@
 
 
 
-#include "EmbedSerialization.Port.h"
+#include "EmbedLibrary.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,7 +74,7 @@ extern "C" {
 
     inline uint16_t rt_ringbuffer_get_size(struct rt_ringbuffer* rb)
     {
-        EmbedSerializationAssert(rb != NULL);
+        El_Assert(rb != NULL);
         return rb->buffer_size;
     }
 

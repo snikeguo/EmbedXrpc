@@ -7,15 +7,11 @@ extern "C" {
 #endif
     typedef struct  _BlockRingBufferProvider
     {
-        EmbedXrpc_Queue_t Queue;
+        El_Queue_t Queue;
         struct rt_ringbuffer RingBuffer;
-        EmbedXrpc_Mutex_t Mutex;
-
+        El_Mutex_t Mutex;
         uint8_t* Pool;
         int16_t Size;
-
-
-
         uint32_t CalculateSumValue;
         uint32_t ReferenceSumValue;
     }BlockRingBufferProvider;

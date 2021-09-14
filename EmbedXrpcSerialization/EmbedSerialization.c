@@ -79,16 +79,16 @@ void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t fie
 #if EmbedXrpc_UseRingBufferWhenReceiving==1 
 	BlockRingBufferProvider_PopChars(sm->BlockBufferProvider,field_ptr, (uint16_t)field_width);
 #else 
-	EmbedXrpc_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width);
+	El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width);
 	SerializationManagerAppendDataSum(sm, GetSum(&sm->Buf[sm->Index], field_width));
 	sm->Index += field_width;
 #endif 
 }
 
-static const char* FilterStrings[] = FilterStringHeader;
+//static const char* FilterStrings[] = FilterStringHeader;
 void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...)
 {
-	(void)FilterStrings;
+	(void)filter_string;
 	return;
 	/*va_list args;
 	va_start(args, fmt);

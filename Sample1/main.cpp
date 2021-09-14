@@ -152,7 +152,7 @@ void Inter_AddService::Add(UserDataOfTransportLayer_t* request_UserDataOfTranspo
 {
 	EmbedXrpcObject* RpcObj = (EmbedXrpcObject*)rpcObject;
 	RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
-	EmbedXrpc_TimerStart(RpcObj->SuspendTimer, targetTimeOut/2);
+	El_TimerStart(RpcObj->SuspendTimer, targetTimeOut/2);
 	IsFreeResponse = false;
 	Response.ReturnValue.Sum = a + b;
 	Response.ReturnValue.dataLen = 0;

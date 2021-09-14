@@ -2,10 +2,11 @@
 #define EmbedXrpc_Port_H
 
 
-
-#define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
-typedef void * UserDataOfTransportLayer_t;
-//common
+#ifdef __cplusplus
+extern "C" {
+#endif
+	typedef void* UserDataOfTransportLayer_t;
+	//common
 #define EmbedXrpc_SendBufferSize			1024//∑¢ÀÕBuffer¥Û–°
 #define EmbedXrpc_CheckSumValid				1
 #define EmbedXrpc_IsSendToQueue				1
@@ -34,6 +35,8 @@ typedef void * UserDataOfTransportLayer_t;
 #endif
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

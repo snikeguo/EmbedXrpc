@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.cpp" />
+    <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp" />
+    <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp" />
+    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c" />
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c" />
+    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="XrpcCodeGen\Client\Sample1.Client.cpp" />
     <ClCompile Include="XrpcCodeGen\Sample1.cpp" />
@@ -31,13 +31,12 @@
     <ClCompile Include="XrpcCodeGen\Server\Sample1.Server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h" />
-    <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.Port.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcObject.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h" />
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.h" />
     <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h" />
     <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h" />
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h" />
@@ -103,7 +102,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

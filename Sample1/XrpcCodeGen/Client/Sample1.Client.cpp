@@ -3,7 +3,7 @@ void DateTimeChangeClientImpl::Invoke(UserDataOfTransportLayer_t* userDataOfTran
 {
 DateTimeChange_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
+El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 #endif
 DateTimeChange(userDataOfTransportLayer,request.now);
 DateTimeChange_Parameter_FreeData(&request);
@@ -14,7 +14,7 @@ void TestDelegateClientImpl::Invoke(UserDataOfTransportLayer_t* userDataOfTransp
 {
 TestDelegate_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
+El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 #endif
 TestDelegate(userDataOfTransportLayer,request.now);
 TestDelegate_Parameter_FreeData(&request);
@@ -24,14 +24,14 @@ TestDelegate_Parameter_FreeData(&request);
 Inter_Add_Return& InterClientImpl::Add(UserDataOfTransportLayer_t* userDataOfTransportLayer)
 {//write serialization code:Add()
 SerializationManager sm;
-EmbedXrpc_Memset(&sm,0,sizeof(SerializationManager));
+El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 auto waitstate=ResponseState_Timeout;
-EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
 #else
-EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -70,7 +70,7 @@ SerializationManager_SetReferenceSum(&sm,recData.CheckSum);
 #endif
 Inter_Add_Return_Deserialize(&sm,&Add_reqresp);
 #if  EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));
+El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));
 #endif
 }
 #if  EmbedXrpc_UseRingBufferWhenReceiving==0
@@ -78,13 +78,12 @@ if(waitstate != RequestResponseState::ResponseState_Timeout)
 {
 if (recData.DataLen > 0)
 {
-EmbedXrpc_Free(recData.Data);
+El_Free(recData.Data);
 }
 }
 #endif
 Add_reqresp.State=waitstate;
-exi:
-EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
+exi:El_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return Add_reqresp;
 }
 void InterClientImpl::Free_Add(Inter_Add_Return *response)
@@ -102,14 +101,14 @@ Inter_NoArg_Return& InterClientImpl::NoArg(UserDataOfTransportLayer_t* userDataO
 {
 //write serialization code:NoArg()
 SerializationManager sm;
-EmbedXrpc_Memset(&sm,0,sizeof(SerializationManager));
+El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 auto waitstate=ResponseState_Timeout;
-EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
 #else
-EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -148,7 +147,7 @@ SerializationManager_SetReferenceSum(&sm,recData.CheckSum);
 #endif
 Inter_NoArg_Return_Deserialize(&sm,&NoArg_reqresp);
 #if  EmbedXrpc_CheckSumValid==1
-EmbedSerializationAssert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));
+El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));
 #endif
 }
 #if  EmbedXrpc_UseRingBufferWhenReceiving==0
@@ -156,13 +155,12 @@ if(waitstate != RequestResponseState::ResponseState_Timeout)
 {
 if (recData.DataLen > 0)
 {
-EmbedXrpc_Free(recData.Data);
+El_Free(recData.Data);
 }
 }
 #endif
 NoArg_reqresp.State=waitstate;
-exi:
-EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
+exi:El_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return NoArg_reqresp;
 }
 void InterClientImpl::Free_NoArg(Inter_NoArg_Return *response)
@@ -180,13 +178,13 @@ Inter_NoReturn_Return& InterClientImpl::NoReturn(UserDataOfTransportLayer_t* use
 {
 //write serialization code:NoReturn(a,)
 SerializationManager sm;
-EmbedXrpc_Memset(&sm,0,sizeof(SerializationManager));
+El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
-EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
 #else
-EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -209,8 +207,7 @@ else
 {
 NoReturn_reqresp.State=RequestState_Ok;
 }
-exi:
-EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
+exi:El_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return NoReturn_reqresp;
 }
 
@@ -221,13 +218,13 @@ Inter_NoArgAndReturn_Return& InterClientImpl::NoArgAndReturn(UserDataOfTransport
 {
 //write serialization code:NoArgAndReturn()
 SerializationManager sm;
-EmbedXrpc_Memset(&sm,0,sizeof(SerializationManager));
+El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
-EmbedXrpc_TakeMutex(RpcObject->ObjectMutexHandle, EmbedXrpc_WAIT_FOREVER);
+El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
 #else
-EmbedXrpc_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
@@ -249,8 +246,7 @@ else
 {
 NoArgAndReturn_reqresp.State=RequestState_Ok;
 }
-exi:
-EmbedXrpc_ReleaseMutex(RpcObject->ObjectMutexHandle);
+exi:El_ReleaseMutex(RpcObject->ObjectMutexHandle);
 return NoArgAndReturn_reqresp;
 }
 

@@ -1,16 +1,18 @@
 #ifndef EmbedXrpc_Port_H
 #define EmbedXrpc_Port_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	struct Win32UserDataOfTransportLayerTest
+	{
+		char IpAddress[16];
+		int Port;
+	};
+	typedef struct Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
 
-struct Win32UserDataOfTransportLayerTest
-{
-	char IpAddress[16];
-	int Port;
-};
-typedef struct Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
-#define EmbedXrpc_WAIT_FOREVER	0xFFFFFFFF
 
-//common
+	//common
 #define EmbedXrpc_SendBufferSize			1024//∑¢ÀÕBuffer¥Û–°
 #define EmbedXrpc_CheckSumValid				1
 #define EmbedXrpc_IsSendToQueue				1
@@ -40,7 +42,9 @@ typedef struct Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
 #endif
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

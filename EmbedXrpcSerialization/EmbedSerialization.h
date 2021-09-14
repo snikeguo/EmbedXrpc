@@ -2,7 +2,7 @@
 #define EmbedSerialization_H
 
 
-#include "EmbedSerialization.Port.h"
+#include "EmbedLibrary.h"
 #include "BlockBufferProvider.h"
 
 #ifdef __cplusplus

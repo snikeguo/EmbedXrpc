@@ -33,12 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.cpp">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
-    </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\Win32.Port\Win32EmbedXrpcPort.cpp">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
-    </ClCompile>
     <ClCompile Include="XrpcCodeGen\Sample1.cpp">
       <Filter>CodeGen</Filter>
     </ClCompile>
@@ -54,14 +48,20 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp">
+    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp">
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.cpp">
+    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c">
       <Filter>EmbedXrpcLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -69,9 +69,6 @@
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.Port.h">
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h">
@@ -82,9 +79,6 @@
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h">
       <Filter>EmbedXrpcLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\BlockQueue.h">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h">
       <Filter>CodeGen</Filter>
@@ -100,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h">
       <Filter>CodeGen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h">
+      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
