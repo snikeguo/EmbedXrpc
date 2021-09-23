@@ -155,4 +155,14 @@ namespace EmbedXrpcIdlParser
     {
    
     }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
+    public class BitFieldAttribute : Attribute
+    {
+        public BitFieldAttribute(int bitWidthLength)
+        {
+            BitWidthLength = bitWidthLength;
+        }
+        public int BitWidthLength { get; private set; }
+    }
 }

@@ -6,14 +6,35 @@ struct AddResult
 {
     
     [FieldNumber(1)]
-    int Sum;
+    [BitField(11)]
+    uint Sum;
+
+    [BitField(19)]
+    uint Sum2;
+
+    [BitField(2)]
+    uint Sum3;
+
     [FieldNumber(2)]
     Int32 dataLen;
+
     [FieldNumber(3)]
     [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
     [NoSerialization]
     byte[] data;
 
+
+    [FieldNumber(1)]
+    [BitField(11)]
+    UInt64 Sum4;
+
+    [BitField(19)]
+    UInt64 Sum5;
+
+    [BitField(2)]
+    UInt64 Sum6;
+
+    UInt32 Sum7;
 }
 
 [FileName("sample1.cs")]

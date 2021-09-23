@@ -162,6 +162,7 @@ namespace EmbedXrpcIdlParser
         public bool IsUnionTargetTypeField { get; set; } = false;//是否是target type field类型。
         public UnionFieldAttribute UnionFieldAttr { get; set; }
         public NoSerializationAttribute NoSerializationAttr { get; set; }
+        public BitFieldAttribute BitFieldAttribute { get; set; }
 
     }
     public class Enum_TargetField: Base_TargetField
@@ -423,6 +424,7 @@ namespace EmbedXrpcIdlParser
                     var unionTargetTypeAtt = field.GetCustomAttribute<UnionTargetTypeAttribute>();
                     targetfield.UnionFieldAttr= field.GetCustomAttribute<UnionFieldAttribute>();
                     targetfield.NoSerializationAttr= field.GetCustomAttribute<NoSerializationAttribute>();
+                    targetfield.BitFieldAttribute = field.GetCustomAttribute<BitFieldAttribute>();
                     if (unionTargetTypeAtt != null)
                     {
                         targetfield.IsUnionTargetTypeField = true;

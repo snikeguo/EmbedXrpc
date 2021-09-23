@@ -39,6 +39,15 @@ namespace EmbedXrpcIdlParser
             else
             {
                 valueName = field.FieldName;
+                if (field is Base_TargetField)
+                {
+                    Base_TargetField base_TargetField = field as Base_TargetField;
+                    if (base_TargetField.BitFieldAttribute != null)
+                    {
+                        valueName = base_TargetField.FieldName + $":{base_TargetField.BitFieldAttribute.BitWidthLength}";
+                    }
+                }
+                
             }
             string returnvalue = $"{cppType} {valueName}";
             

@@ -13,13 +13,25 @@ WoMan = 9,
 }Sex;
 typedef struct _AddResult
 {
-Int32 Sum;   //FieldNumber:1     
-Int32 dataLen;   //FieldNumber:2     
-UInt8* data;   //FieldNumber:3     NoSerialization
+UInt32 Sum:11;   //FieldNumber:1     
+UInt32 Sum2:19;   //FieldNumber:2     
+UInt32 Sum3:2;   //FieldNumber:3     
+Int32 dataLen;   //FieldNumber:4     
+UInt8* data;   //FieldNumber:5     NoSerialization
+UInt64 Sum4:11;   //FieldNumber:6     
+UInt64 Sum5:19;   //FieldNumber:7     
+UInt64 Sum6:2;   //FieldNumber:8     
+UInt32 Sum7;   //FieldNumber:9     
 }AddResult;
 #define AddResult_Sum_FieldNumber  1
-#define AddResult_dataLen_FieldNumber  2
-#define AddResult_data_FieldNumber  3
+#define AddResult_Sum2_FieldNumber  2
+#define AddResult_Sum3_FieldNumber  3
+#define AddResult_dataLen_FieldNumber  4
+#define AddResult_data_FieldNumber  5
+#define AddResult_Sum4_FieldNumber  6
+#define AddResult_Sum5_FieldNumber  7
+#define AddResult_Sum6_FieldNumber  8
+#define AddResult_Sum7_FieldNumber  9
 
 
 typedef struct _Student

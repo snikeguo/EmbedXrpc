@@ -39,7 +39,70 @@ namespace EmbedXrpcIdlParser
             TargetTypeString.Add(TargetType_t.TYPE_ARRAY, "TYPE_ARRAY");
             TargetTypeString.Add(TargetType_t.TYPE_STRUCT, "TYPE_OBJECT");
         }
-
+        internal class BitFieldStateMachine
+        {
+            internal List<string> SerializeCodeString = new List<string>();
+            internal List<string> DeserializeCodeString = new List<string>();
+            internal int BitFieldLeftShiftAccer = 0;
+            static internal int BitFieldTempValueCount = 0;
+            internal string BitFieldCppTypeString = string.Empty;
+            internal void Reset()
+            {
+                SerializeCodeString.Clear();
+                DeserializeCodeString.Clear();
+                BitFieldLeftShiftAccer = 0;
+                //BitFieldTempValueCount++;
+                BitFieldCppTypeString = string.Empty;
+            }
+            internal void BitFieldProcess(StringBuilder s, StringBuilder d, ITargetField nextTargetField)
+            {
+                bool writeFlag = false;
+                if (nextTargetField is Base_TargetField)
+                {
+                    Base_TargetField nextBaseTargetField = nextTargetField as Base_TargetField;
+                    if (nextBaseTargetField.BitFieldAttribute == null)
+                    {
+                        writeFlag = true;
+                    }
+                    else
+                    {
+                        writeFlag = false;
+                        var subBitFieldCppTypeString = $"{BaseType_TargetType.TypeReplaceDic[nextTargetField.TargetType.TargetType]}";
+                        if (subBitFieldCppTypeString != this.BitFieldCppTypeString)
+                        {
+                            throw new Exception("相邻的bit字段的类型必须一样!");
+                        }
+                    }
+                }
+                else
+                {
+                    //nextTargetField ：null/enum/array/object
+                    writeFlag = true;
+                }
+                if (writeFlag==true) 
+                {
+                    SerializeCodeString.Add($"El_Memcpy(&sm->Buf[sm->Index],&bitsTempValue{BitFieldTempValueCount},sizeof({BitFieldCppTypeString}));");
+                    SerializeCodeString.Add($"sm->Index+=sizeof({BitFieldCppTypeString});");
+                   
+                    foreach (var ss in SerializeCodeString)
+                    {
+                        s.AppendLine(ss);
+                    }
+                    s.AppendLine();
+                    foreach (var ds in DeserializeCodeString)
+                    {
+                        d.AppendLine(ds);
+                    }
+                    d.AppendLine();
+                    if (BitFieldCppTypeString!=string.Empty)
+                    {
+                        BitFieldTempValueCount++;
+                    }
+                    Reset();
+                }
+            }
+        }
+        
         public void EmitStruct(StructType_TargetType targetStructUnion, StreamWriter cfilewriter, StreamWriter hfilewriter)
         {
             StringBuilder SerializeCodeSb = new StringBuilder();
@@ -71,6 +134,8 @@ namespace EmbedXrpcIdlParser
             {
                 SerializeCodeSb.AppendLine($"SerializeKey(0,{TargetTypeString[(int)field.TargetType.TargetType]});");
             }*/
+            BitFieldStateMachine bitFieldStateMachine = new BitFieldStateMachine();
+            BitFieldStateMachine.BitFieldTempValueCount = 0;
             for (int i=0;i<TargetFields.Count;i++)
             {
                 field = TargetFields[i];
@@ -101,14 +166,39 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
                     //}
-                    SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof(obj->{field.FieldName}));");
-                    SerializeCodeSb.AppendLine($"sm->Index+=sizeof(obj->{field.FieldName});\r\n");
+                    Base_TargetField base_TargetField = field as Base_TargetField;
+                    if (base_TargetField == null)
+                    {
+                        throw new Exception();
+                    }
+                    if (base_TargetField.BitFieldAttribute != null)
+                    {
+                        var bitFieldCppTypeString = $"{BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}";
+                        if(bitFieldStateMachine.SerializeCodeString.Count==0)
+                        {
+                            bitFieldStateMachine.BitFieldCppTypeString = bitFieldCppTypeString;
 
-                    DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof(obj->{field.FieldName}));");
+                            bitFieldStateMachine.SerializeCodeString.Add($"{bitFieldStateMachine.BitFieldCppTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
+                           
+                            bitFieldStateMachine.DeserializeCodeString.Add($"{bitFieldStateMachine.BitFieldCppTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
+                            bitFieldStateMachine.DeserializeCodeString.Add($"DeserializeField((uint8_t *)&bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount},sm,sizeof({bitFieldStateMachine.BitFieldCppTypeString}));");
+                        }
+                        bitFieldStateMachine.SerializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount} |= (({bitFieldStateMachine.BitFieldCppTypeString})(obj->{field.FieldName}))<< {bitFieldStateMachine.BitFieldLeftShiftAccer} ;");
+                        bitFieldStateMachine.DeserializeCodeString.Add($"obj->{field.FieldName}=bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}>>{bitFieldStateMachine.BitFieldLeftShiftAccer};");
+                        bitFieldStateMachine.BitFieldLeftShiftAccer += base_TargetField.BitFieldAttribute.BitWidthLength;
+                        bitFieldStateMachine.BitFieldProcess(SerializeCodeSb, DeserializeCodeSb, i + 1 >= TargetFields.Count ? null : TargetFields[i + 1]);
+                    }
+                    else
+                    {
+                        SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{base_TargetField.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}));");
+                        SerializeCodeSb.AppendLine($"sm->Index+=sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]});");
+                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}));");
+                    }
+                    
 
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
-                {
+                { 
                     EnumType_TargetType ettt = field.TargetType as EnumType_TargetType;
                     //if (isEncodeTlv == true)
                     //{

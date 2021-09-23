@@ -107,7 +107,7 @@ EmbedXrpcObject ServerRpc(ServerSend,
 DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(-1));
+	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;
@@ -154,7 +154,15 @@ void Inter_AddService::Add(UserDataOfTransportLayer_t* request_UserDataOfTranspo
 	RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
 	El_TimerStart(RpcObj->SuspendTimer, targetTimeOut/2);
 	IsFreeResponse = false;
-	Response.ReturnValue.Sum = a + b;
+	Response.ReturnValue.Sum = 1;
+	Response.ReturnValue.Sum2 = 2;
+	Response.ReturnValue.Sum3 = 3;
+
+	Response.ReturnValue.Sum4 = 1;
+	Response.ReturnValue.Sum5 = 2;
+	Response.ReturnValue.Sum6 = 3;
+	Response.ReturnValue.Sum7 = 0x66661111;
+
 	Response.ReturnValue.dataLen = 0;
 	Response.ReturnValue.data = NULL;
 	printf("模拟耗时操作  延时2秒\n");
