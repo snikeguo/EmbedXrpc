@@ -387,6 +387,11 @@ namespace EmbedXrpcIdlParser
             }
             throw new NotSupportedException();
         }
+        private class BitFieldStateMachine
+        {
+
+            internal ITargetType BitFieldBaseTargetType { get; set; } = null;
+        }
         private StructType_TargetType StructTypeParse(Type object_type)
         {
             StructType_TargetType targetStructType = new StructType_TargetType();
@@ -395,8 +400,11 @@ namespace EmbedXrpcIdlParser
             //var unionatt = object_type.GetCustomAttribute<UnionAttribute>();
             List<int> FieldNumbers = new List<int>();
             int fieldNumber = 1;
-            foreach (var field in fields)
+            BitFieldStateMachine bitFieldStateMachine = new BitFieldStateMachine();
+            //foreach (var field in fields)
+            for (int field_index=0; field_index<fields.Length;field_index++)
             {
+                var field = fields[field_index];
                 var FieldNumberAttr = field.GetCustomAttribute<FieldNumberAttribute>();
                 ITargetField needAddField = null;
                 if (FieldNumberAttr == null)
@@ -425,6 +433,34 @@ namespace EmbedXrpcIdlParser
                     targetfield.UnionFieldAttr= field.GetCustomAttribute<UnionFieldAttribute>();
                     targetfield.NoSerializationAttr= field.GetCustomAttribute<NoSerializationAttribute>();
                     targetfield.BitFieldAttribute = field.GetCustomAttribute<BitFieldAttribute>();
+                    if(targetfield.BitFieldAttribute!=null)
+                    {
+                        if (bitFieldStateMachine.BitFieldBaseTargetType != null)//这不是第一个bitfield
+                        {
+                            if (targetfield.TargetType.TargetType != bitFieldStateMachine.BitFieldBaseTargetType.TargetType)
+                            {
+                                throw new Exception("所有相邻的位域字段的类型应该要一样!");
+                            }
+                            else
+                            {
+                                ;
+                            }
+                        }
+                        else
+                        {
+                            ;
+                        }
+                        bitFieldStateMachine.BitFieldBaseTargetType = targetfield.TargetType;
+                        if (targetfield.NoSerializationAttr != null)
+                            throw new Exception("不支持BitField&NoSerialization组合");
+                        if(targetfield.UnionFieldAttr!=null)
+                            throw new Exception("不支持BitField&UnionField组合");
+                    }
+                    else
+                    {
+                        
+                        bitFieldStateMachine.BitFieldBaseTargetType = null;
+                    }
                     if (unionTargetTypeAtt != null)
                     {
                         targetfield.IsUnionTargetTypeField = true;

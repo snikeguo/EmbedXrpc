@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -387,48 +388,48 @@ namespace EmbedXrpc
                 throw new InvalidDataException();
             }
         }
-        private void BaseValueSerialize(object v)
+        private void BaseValueSerialize(object v,Type vt)
         {
-            Type vt = v.GetType();
+            //Type vt = v.GetType();
             if (vt.IsEnum == true)
             {
                 vt = vt.GetEnumUnderlyingType();
             }
             if (vt == typeof(bool))
             {   
-                ToBytes((byte)v);
+                ToBytes(Convert.ToByte(v));
             }
             else if (vt == typeof(byte))
             {
-                ToBytes((byte)v);
+                ToBytes(Convert.ToByte(v));
             }
             else if (vt == typeof(sbyte))
             {
-                ToBytes((sbyte)v);
+                ToBytes(Convert.ToSByte(v));
             }
             else if (vt == typeof(UInt16))
             {
-                ToBytes( (UInt16)v);
+                ToBytes(Convert.ToUInt16(v));
             }
             else if (vt == typeof(Int16))
             {
-                ToBytes((Int16)v);
+                ToBytes(Convert.ToInt16(v));
             }
             else if (vt == typeof(UInt32))
             {
-                ToBytes((UInt32)v);
+                ToBytes(Convert.ToUInt32(v));
             }
             else if (vt == typeof(Int32))
             {
-                ToBytes((Int32)v);
+                ToBytes(Convert.ToInt32(v));
             }
             else if (vt == typeof(UInt64))
             {
-                ToBytes( (UInt64)v);
+                ToBytes(Convert.ToUInt64(v));
             }
             else if (vt == typeof(Int64))
             {
-                ToBytes((Int64)v);
+                ToBytes(Convert.ToInt64(v));
             }
             else
             {
@@ -480,7 +481,7 @@ namespace EmbedXrpc
                     if (isBaseValueTypeFlag == true && IsArrayLenFieldAttribute.Flag == false)
                     {
                         SerializeKey(fieldNumberAttribute.Number, lost_t);
-                        BaseValueSerialize(value);
+                        BaseValueSerialize(value,value.GetType());
                     }
                     else if(lost_t== Type_t.TYPE_STRUCT)
                     {
@@ -518,7 +519,7 @@ namespace EmbedXrpc
                         for (Int64 i = 0; i < len; i++)
                         {
                             var aev = arrayValue[i];
-                            BaseValueSerialize(aev);
+                            BaseValueSerialize(aev,aev.GetType());
                         }
                     }
                     else
@@ -536,6 +537,18 @@ namespace EmbedXrpc
             }
             SerializeEndFlag();
         }
+        internal class BitFieldStateMachine
+        {
+            internal int BitFieldLeftShiftAccer = 0;
+            internal UInt64 BitFieldTempValue=0;
+            internal Type CurrentBitFieldType=null;//指向当前的位域字段，如果该字段为null 说明一个连续的位域字段结束了。结构体刚开始时这个为null
+            internal void Reset()
+            {
+                BitFieldLeftShiftAccer = 0;
+                BitFieldTempValue = 0;
+                CurrentBitFieldType = null;
+            }
+        }
         void NoMataData_SerializeSubField(object s)
         {
             Type st = s.GetType();
@@ -543,17 +556,20 @@ namespace EmbedXrpc
             Int32 unionTargetTypeValue = -1;
             PropertyInfo field = pros[0];
             int index = 0;
+            BitFieldStateMachine bitFieldStateMachine = new BitFieldStateMachine();
             for (; index < pros.Length; index++)
             {
                 field = pros[index];
-                object value = field.GetValue(s);
+                object FieldValueOfStruct = field.GetValue(s);
                 var vt = field.PropertyType;
                 FieldNumberAttribute fieldNumberAttribute = field.GetCustomAttribute<FieldNumberAttribute>();
                 UnionTargetTypeAttribute unionTargetTypeAttribute = field.GetCustomAttribute<UnionTargetTypeAttribute>();
                 UnionFieldAttribute unionFieldAttribute = field.GetCustomAttribute<UnionFieldAttribute>();
                 NoSerializationAttribute noSerializationAttribute = field.GetCustomAttribute<NoSerializationAttribute>();
+                BitFieldAttribute bitFieldAttribute = field.GetCustomAttribute<BitFieldAttribute>();
                 if ((unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number) ||(noSerializationAttribute!=null) )
                     continue;
+                
                 if (vt.IsArray == false)
                 {
                     Type_t lost_t = Type_t.TYPE_STRUCT;
@@ -561,26 +577,88 @@ namespace EmbedXrpc
                     if (isBaseValueTypeFlag == true)
                     {
                         //SerializeKey(fieldNumberAttribute.Number, lost_t);
-                        BaseValueSerialize(value);
+                        if(bitFieldAttribute==null)
+                        {
+                            BaseValueSerialize(FieldValueOfStruct, FieldValueOfStruct.GetType());
+                        }
+                        else
+                        {
+                            if (bitFieldStateMachine.CurrentBitFieldType == null)
+                            {
+                                bitFieldStateMachine.CurrentBitFieldType = FieldValueOfStruct.GetType();
+                                if (bitFieldStateMachine.BitFieldTempValue != 0 || bitFieldStateMachine.BitFieldLeftShiftAccer != 0)
+                                {
+                                    throw new Exception();
+                                    //BitFieldTempValue/BitFieldLeftShiftAccer这里应该是0
+                                }
+                            }
+                            UInt64 bitFieldMaxValue = 0;
+                            for (int shift_index = 0; shift_index < bitFieldAttribute.BitFieldLength; shift_index++)
+                            {
+                                bitFieldMaxValue <<= 1;
+                                bitFieldMaxValue |= 0x01;
+                            }
+                            UInt64 Field64ValueOfStruct = Convert.ToUInt64(FieldValueOfStruct);
+                            if (Field64ValueOfStruct>bitFieldMaxValue)
+                            {
+                                throw new OverflowException($"{field.Name}的bit宽度是:{bitFieldAttribute.BitFieldLength}," +
+                                    $"最大值是{bitFieldMaxValue},而当前值{Field64ValueOfStruct}超过了最大值!");
+                            }
+                            bitFieldStateMachine.BitFieldTempValue |= Field64ValueOfStruct << bitFieldStateMachine.BitFieldLeftShiftAccer;
+                            bitFieldStateMachine.BitFieldLeftShiftAccer += bitFieldAttribute.BitFieldLength;
+
+                            PropertyInfo nextField = index + 1 >= pros.Length ? null : pros[index + 1];
+                            bool writeFlag = false;
+                            if(nextField!=null)
+                            {
+                                BitFieldAttribute nextFieldBitFieldAttribute = nextField.GetCustomAttribute<BitFieldAttribute>();
+                                if(nextFieldBitFieldAttribute==null)
+                                {
+                                    writeFlag = true;
+                                }
+                                else
+                                {
+                                    //如果下一个字段还是位域 则不进行任何序列化操作
+                                    writeFlag = false;
+                                }
+                            }
+                            else
+                            {
+                                //下一个字段是是结束，需要序列化
+                                writeFlag = true;
+                            }
+                            if(writeFlag==true)
+                            {
+                                //序列化 并复位bitfield状态机
+                                UInt64 lshiftValue = 0;
+                                for (int shift_index = 0; shift_index < bitFieldStateMachine.BitFieldLeftShiftAccer; shift_index++)
+                                {
+                                    lshiftValue <<= 1;
+                                    lshiftValue |= 0x01;
+                                }
+                                BaseValueSerialize(bitFieldStateMachine.BitFieldTempValue& lshiftValue, bitFieldStateMachine.CurrentBitFieldType);
+                                bitFieldStateMachine.Reset();
+                            }
+                        }
                         
                         if(unionTargetTypeAttribute!=null)
                         {
-                            unionTargetTypeValue = (Int32)value;
+                            unionTargetTypeValue = (Int32)FieldValueOfStruct;
                         }
                     }
                     else if(lost_t== Type_t.TYPE_STRUCT)
                     {
-                        if (value == null)
+                        if (FieldValueOfStruct == null)
                         {
-                            value = Assembly.CreateInstance(field.PropertyType.FullName);
+                            FieldValueOfStruct = Assembly.CreateInstance(field.PropertyType.FullName);
                         }
-                        Serialize(value, fieldNumberAttribute.Number);
+                        Serialize(FieldValueOfStruct, fieldNumberAttribute.Number);
                     }
                 }
                 else
                 {
                     //object[] arrayValue = (object[])v;
-                    object[] arrayValue = ConvertArray(value as Array);
+                    object[] arrayValue = ConvertArray(FieldValueOfStruct as Array);
                     ArrayPropertyAttribute att = field.GetCustomAttribute<ArrayPropertyAttribute>();
                     if (att == null)
                     {
@@ -604,7 +682,7 @@ namespace EmbedXrpc
                         for (Int64 i = 0; i < len; i++)
                         {
                             var aev = arrayValue[i];
-                            BaseValueSerialize(aev);
+                            BaseValueSerialize(aev, aev.GetType());
                         }
                     }
                     else
@@ -626,51 +704,70 @@ namespace EmbedXrpc
         {
             if (vt ==  Type_t.TYPE_UINT8)
             {
-                byte v = Data[Index];
+                byte v =Convert.ToByte(Data[Index]);
                 Index++;
                 return v;
             }
             if (vt == Type_t.TYPE_INT8)
             {
-                sbyte v = (sbyte)Data[Index];
+                sbyte v = Convert.ToSByte(Data[Index]);
                 Index++;
                 return v;
             }
             else if (vt == Type_t.TYPE_UINT16)
             {
-                UInt16 v = (UInt16)(Data[Index + 1] << 8 | Data[Index]);
-                Index += 2;
+                UInt16 v = Convert.ToUInt16((UInt16)Data[Index + 1] << 8);
+                v |= Convert.ToUInt16((UInt16)Data[Index]);
                 return v;
             }
             else if (vt == Type_t.TYPE_INT16)
             {
-                Int16 v = (Int16)(Data[Index + 1] << 8 | Data[Index]);
+                Int16 v = Convert.ToInt16((Int16)Data[Index + 1] << 8);
+                v |= Convert.ToInt16((Int16)Data[Index]);
                 Index += 2;
                 return v;
             }
             else if (vt == Type_t.TYPE_UINT32)
             {
-                UInt32 v = (UInt32)(Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
+                UInt32 v = Convert.ToUInt32((UInt32)Data[Index + 3] << 24);
+                v |= Convert.ToUInt32((UInt32)Data[Index + 2] << 16);
+                v |= Convert.ToUInt32((UInt32)Data[Index + 1] << 8);
+                v |= Convert.ToUInt32((UInt32)Data[Index]);
                 Index += 4;
                 return v;
             }
             else if (vt == Type_t.TYPE_INT32)
             {
-                Int32 v = (Int32)(Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
+                Int32 v = Convert.ToInt32((Int32)Data[Index + 3] << 24);
+                v |= Convert.ToInt32((Int32)Data[Index + 2] << 16);
+                v |= Convert.ToInt32((Int32)Data[Index + 1] << 8);
+                v |= Convert.ToInt32((Int32)Data[Index]);
                 Index += 4;
                 return v;
             }
             else if (vt == Type_t.TYPE_UINT64)
             {
-                UInt64 v = (UInt64)(Data[Index + 7] << 56 | Data[Index + 6] << 48 | Data[Index + 5] << 40 | Data[Index + 4] << 32
-                    | Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
+                UInt64 v = Convert.ToUInt64((UInt64)Data[Index + 7] << 56);
+                v |= Convert.ToUInt64((UInt64)Data[Index + 6] << 48);
+                v |= Convert.ToUInt64((UInt64)Data[Index + 5] << 40);
+                v |= Convert.ToUInt64((UInt64)Data[Index + 4] << 32);
+                v |= Convert.ToUInt64((UInt64)Data[Index + 3] << 24);
+                v |= Convert.ToUInt64((UInt64)Data[Index + 2] << 16);
+                v |= Convert.ToUInt64((UInt64)Data[Index + 1] << 8);
+                v |= Convert.ToUInt64((UInt64)Data[Index]);
                 Index += 8;
                 return v;
             }
             else if (vt == Type_t.TYPE_INT64)
             {
-                Int64 v = (Int64)(Data[Index + 7] << 56 | Data[Index + 6] << 48 | Data[Index + 5] << 40 | Data[Index + 4] << 32
-                    | Data[Index + 3] << 24 | Data[Index + 2] << 16 | Data[Index + 1] << 8 | Data[Index]);
+                Int64 v = Convert.ToInt64((Int64)Data[Index + 7] << 56);
+                v |= Convert.ToInt64((Int64)Data[Index + 6] << 48);
+                v |= Convert.ToInt64((Int64)Data[Index + 5] << 40);
+                v |= Convert.ToInt64((Int64)Data[Index + 4] << 32);
+                v |= Convert.ToInt64((Int64)Data[Index + 3] << 24);
+                v |= Convert.ToInt64((Int64)Data[Index + 2] << 16);
+                v |= Convert.ToInt64((Int64)Data[Index + 1] << 8);
+                v |= Convert.ToInt64((Int64)Data[Index]);
                 Index += 8;
                 return v;
             }
@@ -846,12 +943,15 @@ namespace EmbedXrpc
                 pros = st.GetProperties();
             }
             PropertyInfo fieldinfo = pros[0];
+            BitFieldStateMachine bitFieldStateMachine = new BitFieldStateMachine();
             for (;index<pros.Length;index++)
             {
                 fieldinfo = pros[index];
                 FieldNumberAttribute fieldNumberAttribute = fieldinfo.GetCustomAttribute<FieldNumberAttribute>();
                 UnionFieldAttribute unionFieldAttribute= fieldinfo.GetCustomAttribute<UnionFieldAttribute>();
                 NoSerializationAttribute noSerializationAttribute = fieldinfo.GetCustomAttribute<NoSerializationAttribute>();
+                BitFieldAttribute bitFieldAttribute = fieldinfo.GetCustomAttribute<BitFieldAttribute>();
+
                 if (unionFieldAttribute != null && unionTargetTypeValue != fieldNumberAttribute.Number || (noSerializationAttribute != null))
                 {
                     continue;
@@ -860,13 +960,64 @@ namespace EmbedXrpc
                 IsBaseValueType(fieldinfo.PropertyType, ref tp);
                 if(tp <= Type_t.TYPE_DOUBLE)
                 {
-                    var fieldValue = BaseValueDeserialize(tp);
-                    fieldinfo.SetValue(localstruct, fieldValue);
-                    UnionTargetTypeAttribute unionTargetTypeAttribute = fieldinfo.GetCustomAttribute<UnionTargetTypeAttribute>();
-                    if(unionTargetTypeAttribute!=null)
+                    if(bitFieldAttribute==null)
                     {
-                        unionTargetTypeValue = (Int32)fieldValue;
+                        var fieldValue = BaseValueDeserialize(tp);
+                        fieldinfo.SetValue(localstruct, fieldValue);
+                        UnionTargetTypeAttribute unionTargetTypeAttribute = fieldinfo.GetCustomAttribute<UnionTargetTypeAttribute>();
+                        if (unionTargetTypeAttribute != null)
+                        {
+                            unionTargetTypeValue = (Int32)fieldValue;
+                        }
                     }
+                    else
+                    {
+                        if(bitFieldStateMachine.CurrentBitFieldType==null)
+                        {
+                            bitFieldStateMachine.CurrentBitFieldType = fieldinfo.PropertyType;
+                            if (bitFieldStateMachine.BitFieldTempValue != 0 || bitFieldStateMachine.BitFieldLeftShiftAccer != 0)
+                            {
+                                throw new Exception();
+                                //BitFieldTempValue/BitFieldLeftShiftAccer这里应该是0
+                            }
+                            bitFieldStateMachine.BitFieldTempValue = Convert.ToUInt64(BaseValueDeserialize(tp));//只反序列化一次;
+                        }
+                        UInt64 lshiftValue = 0;
+                        for (int shift_index = 0; shift_index < bitFieldAttribute.BitFieldLength; shift_index++)
+                        {
+                            lshiftValue <<= 1;
+                            lshiftValue |= 0x01;
+                        }
+                        fieldinfo.SetValue(localstruct, BaseValueBox((bitFieldStateMachine.BitFieldTempValue)& lshiftValue,tp));
+                        bitFieldStateMachine.BitFieldTempValue >>= bitFieldAttribute.BitFieldLength;
+
+                        //判断下一个字段
+                        PropertyInfo nextField = index + 1 >= pros.Length ? null : pros[index + 1];
+                        bool resetFlag = false;
+                        if (nextField != null)
+                        {
+                            BitFieldAttribute nextFieldBitFieldAttribute = nextField.GetCustomAttribute<BitFieldAttribute>();
+                            if (nextFieldBitFieldAttribute == null)
+                            {
+                                resetFlag = true;
+                            }
+                            else
+                            {
+                                //如果下一个字段还是位域 则不进行任何操作
+                                resetFlag = false;
+                            }
+                        }
+                        else
+                        {
+                            //下一个字段是是结束，需要复位
+                            resetFlag = true;
+                        }
+                        if (resetFlag == true)
+                        {
+                            bitFieldStateMachine.Reset();
+                        }
+                    }
+                    
                 }
                 else if (tp == Type_t.TYPE_ARRAY)
                 {
@@ -935,6 +1086,53 @@ namespace EmbedXrpc
                 }
             }
             return true;
+        }
+        private object BaseValueBox(UInt64 u64Value,Type_t vt)
+        {
+            if (vt == Type_t.TYPE_UINT8)
+            {
+                return Convert.ToByte(u64Value);
+            }
+            else if (vt == Type_t.TYPE_INT8)
+            {
+                return Convert.ToSByte(u64Value);
+            }
+            else if (vt == Type_t.TYPE_UINT16)
+            {
+                return Convert.ToUInt16(u64Value);
+            }
+            else if (vt == Type_t.TYPE_INT16)
+            {
+                return Convert.ToInt16(u64Value);
+            }
+            else if (vt == Type_t.TYPE_UINT32)
+            {
+                return Convert.ToUInt32(u64Value);
+            }
+            else if (vt == Type_t.TYPE_INT32)
+            {
+                return Convert.ToInt32(u64Value);
+            }
+            else if (vt == Type_t.TYPE_FLOAT)
+            {
+                return Convert.ToDouble(u64Value);
+            }
+            else if (vt == Type_t.TYPE_UINT64)
+            {
+                return Convert.ToUInt64(u64Value);
+            }
+            else if (vt == Type_t.TYPE_INT64)
+            {
+                return Convert.ToInt64(u64Value);
+            }
+            else if (vt == Type_t.TYPE_DOUBLE)
+            {
+                return Convert.ToDouble(u64Value);
+            }
+            else
+            {
+                throw new Exception("not support!");
+            }
         }
         private object BaseValueDeserialize(Type_t vt)
         {
@@ -1023,15 +1221,6 @@ namespace EmbedXrpc
         }
     }
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
-    public sealed class BitsFieldLengthAttribute : Attribute
-    {
-        public int Length { get; set; }
-        public BitsFieldLengthAttribute(int len)
-        {
-            Length = len;
-        }
-    }
-    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class FieldNumberAttribute : Attribute
     {
         public FieldNumberAttribute(Int32 number)
@@ -1069,5 +1258,14 @@ namespace EmbedXrpc
     public class NoSerializationAttribute : Attribute
     {
 
+    }
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public sealed class BitFieldAttribute : Attribute
+    {
+        public BitFieldAttribute(int bitFieldLength)
+        {
+            BitFieldLength = bitFieldLength;
+        }
+        public int BitFieldLength { get; private set; }
     }
 }

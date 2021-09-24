@@ -47,6 +47,10 @@ namespace EmbedXrpcIdlParser
                     {
                         sw.WriteLine($"[UnionField]");
                     }
+                    if(base_TargetField.BitFieldAttribute!=null)
+                    {
+                        sw.WriteLine($"[BitField({base_TargetField.BitFieldAttribute.BitWidthLength})]");
+                    }
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
                     sw.WriteLine($"[ArrayLenFieldFlag( {base_TargetField.IsArrayLenField.ToString().ToString().ToLower()} ) ]");
                     sw.WriteLine($"public {field.TargetType.TypeName} {field.FieldName}{{get;set;}}");

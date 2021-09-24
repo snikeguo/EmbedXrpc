@@ -33,7 +33,7 @@ namespace Sample1
         public void Add(DTL request_UserDataOfTransportLayer, ref DTL response_UserDataOfTransportLayer, EmbedXrpcObject<DTL> rpcObject, UInt16 targetTimeOut, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
         {
             rpcObject.Start_SuspendTimer(targetTimeOut / 2);
-            Response.ReturnValue.Sum = a + b;
+            Response.ReturnValue.Sum = 1;
             Response.ReturnValue.dataLen = 0;
             Thread.Sleep(5000);
             rpcObject.Stop_SuspendTimer();
@@ -73,6 +73,26 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
+            Int64 testValue = Convert.ToInt64(4);
+            testValue |= Convert.ToInt64(5) << 11;
+            testValue |= Convert.ToInt64(6) << 30;
+            SerializationManager serializationManager = new SerializationManager(Assembly.GetExecutingAssembly(), new List<byte>());
+            AddResult addResult = new AddResult();
+            addResult.Sum = 1;
+            addResult.Sum2 = 2;
+            addResult.Sum3 = 3;
+            addResult.Sum4 = 1;
+            addResult.Sum5 = 2;
+            addResult.Sum6 = 3;
+            addResult.Sum7 = 0x66661111;
+            serializationManager.Serialize(addResult, 0);
+
+            serializationManager.Index = 0;
+            AddResult addResult1 = serializationManager.Deserialize<AddResult>();
+
+
+            return;
+
             client = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(100, clientSend, Assembly.GetExecutingAssembly());
             client.Start();
             server = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(2000, serverSend, Assembly.GetExecutingAssembly());

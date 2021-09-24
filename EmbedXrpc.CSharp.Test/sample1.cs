@@ -2,8 +2,47 @@
 using EmbedXrpcIdlParser;
 
 [FileName("sample1.cs")]
+struct AddResult
+{
+
+    [FieldNumber(1)]
+    [BitField(11)]
+    uint Sum;
+
+    [BitField(19)]
+    uint Sum2;
+
+    [BitField(2)]
+    uint Sum3;
+
+    [FieldNumber(2)]
+    Int32 dataLen;
+
+    [FieldNumber(3)]
+    [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
+    [NoSerialization]
+    byte[] data;
+
+
+    [FieldNumber(1)]
+    [BitField(11)]
+    UInt64 Sum4;
+
+    [BitField(19)]
+    UInt64 Sum5;
+
+    [BitField(2)]
+    UInt64 Sum6;
+
+    UInt32 Sum7;
+}
+
+
+[FileName("sample1.cs")]
 struct Student
 {
+
+
     [NoSerialization]
     [FieldNumber(1)]
     int a;
@@ -32,10 +71,38 @@ struct Student
     AddResult u4;
 
 
+    [FieldNumber(8)]
+    [BitField(11)]
+    uint Sum;
+
+    [FieldNumber(9)]
+    [BitField(19)]
+    uint Sum2;
+
+    [FieldNumber(10)]
+    [BitField(2)]
+    uint Sum3;
+
     [FieldNumber(100)]
     byte uend1;
     [FieldNumber(101)]
     byte uend2;
+
+    [FieldNumber(11)]
+    [BitField(11)]
+    UInt64 Sum4;
+
+    [BitField(19)]
+    [FieldNumber(12)]
+    UInt64 Sum5;
+
+    [BitField(2)]
+    [FieldNumber(13)]
+    UInt64 Sum6;
+
+    [FieldNumber(14)]
+    UInt32 Sum7;
+
 }
 [FileName("sample1.cs")]
 enum Sex : ulong
@@ -72,18 +139,7 @@ delegate void DateTimeChange(DateTime_t[] now);
 [FileName("sample1.cs")]
 [ExternalParameter(true)]
 delegate void TestDelegate(DateTime_t[] now);
-[FileName("sample1.cs")]
-struct AddResult
-{
-    [FieldNumber(1)]
-    int Sum;
-    [FieldNumber(2)]
-    Int32 dataLen;
-    [FieldNumber(3)]
-    [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
-    byte[] data;
 
-}
 [FileName("sample1.cs")]
 interface Inter
 {
