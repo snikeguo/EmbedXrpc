@@ -25,11 +25,7 @@ namespace David.Common
         }
         public void Reset()
         {
-            int i = queue.Count;
-            for (int j = 0; j < i; j++)
-            {
-                queue.Take();
-            }
+            while (queue.TryTake(out _)) ;
         }
         public int Count { get { return queue.Count; } }
         private BlockingCollection<T> queue = null;
