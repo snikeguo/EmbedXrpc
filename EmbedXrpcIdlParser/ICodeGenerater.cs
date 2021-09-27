@@ -452,11 +452,11 @@ namespace EmbedXrpcIdlParser
                         }
                         bitFieldStateMachine.BitFieldBaseTargetType = targetfield.TargetType;
                         if(bitFieldStateMachine.BitFieldBaseTargetType.TargetType!= TargetType_t.TYPE_UINT8
-                            || bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT16
-                            || bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT32
-                            || bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT64)
+                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT16
+                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT32
+                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT64)
                         {
-                            throw new Exception("位域字段只能用UINT8/UINT16/UINT32/UINT64类型");
+                            throw new Exception($"当前位域字段类型:{bitFieldStateMachine.BitFieldBaseTargetType.TargetType},位域字段只能用UINT8/UINT16/UINT32/UINT64类型");
                         }
                         if (targetfield.NoSerializationAttr != null)
                             throw new Exception("不支持BitField&NoSerialization组合");
