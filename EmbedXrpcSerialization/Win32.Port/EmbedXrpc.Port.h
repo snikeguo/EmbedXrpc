@@ -13,7 +13,7 @@ extern "C" {
 
 
 	//common
-#define EmbedXrpc_SendBufferSize			1024//发送Buffer大小
+//#define EmbedXrpc_SendBufferSize			1024//发送Buffer大小
 #define EmbedXrpc_CheckSumValid				1
 #define EmbedXrpc_IsSendToQueue				1
 

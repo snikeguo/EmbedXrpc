@@ -5,8 +5,11 @@
 extern EmbedXrpcObject ClientRpc;
 extern EmbedXrpcObject ServerRpc;
 
+#define DataLinkBufferLen	4096
+
 //-------------------------------------------------------------------------
 //client 
+uint8_t ClientDataLinkBuffer[DataLinkBufferLen];
 bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,EmbedXrpcObject* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer)==true);
@@ -29,7 +32,9 @@ ResponseDescribe Responses[4] =
 	{"Inter_NoArgAndReturn"    ,    Inter_NoArgAndReturn_ServiceId},
 };
 
-EmbedXrpcObject ClientRpc(ClientSend,
+EmbedXrpcObject ClientRpc(ClientDataLinkBuffer,
+	DataLinkBufferLen,
+	ClientSend,
 	1000,
 	Responses,
 	4,
@@ -66,10 +71,7 @@ void ClientThread()
 		Client.Add_SendData.dataLen = 4;
 		Client.Add_SendData.data = (UInt8 *)"123";
 		auto sum=Client.Add(&win32UserDataOfTransportLayerTest);
-		if (sum.State == ResponseState_Ok)
-		{
-			printf("%d+%d=%d\n", a,b,sum.ReturnValue.Sum);
-		}
+		El_Assert(sum.State == ResponseState_Ok);
 		Client.Free_Add(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	}
@@ -78,6 +80,7 @@ void ClientThread()
 }
 //--------------------------------------------------------------------
 //server
+uint8_t ServerDataLinkBuffer[DataLinkBufferLen];
 bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
 	/*for (size_t i = 4; i < dataLen; i++)
@@ -99,7 +102,9 @@ RequestDescribe Requests[] =
 	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
 	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
 };
-EmbedXrpcObject ServerRpc(ServerSend,
+EmbedXrpcObject ServerRpc(ServerDataLinkBuffer,
+	DataLinkBufferLen,
+	ServerSend,
 	500,
 	Requests,
 	4,

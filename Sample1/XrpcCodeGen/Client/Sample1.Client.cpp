@@ -35,7 +35,7 @@ El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
-sm.BufferLen = EmbedXrpc_SendBufferSize-4;
+sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;
 Inter_Add_Parameter_Serialize(&sm,&Add_SendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_Add_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_Add_ServiceId>>8&0xff);
@@ -112,7 +112,7 @@ El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
-sm.BufferLen = EmbedXrpc_SendBufferSize-4;
+sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;
 Inter_NoArg_Parameter_Serialize(&sm,&NoArg_SendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_NoArg_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoArg_ServiceId>>8&0xff);
@@ -188,7 +188,7 @@ El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
-sm.BufferLen = EmbedXrpc_SendBufferSize-4;
+sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;
 NoReturn_SendData.a=a;
 Inter_NoReturn_Parameter_Serialize(&sm,&NoReturn_SendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_NoReturn_ServiceId&0xff);
@@ -228,7 +228,7 @@ El_ResetQueue(RpcObject->ResponseBlockQueue);
 #endif
 SerializationManager_Reset(&sm);
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
-sm.BufferLen = EmbedXrpc_SendBufferSize-4;
+sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;
 Inter_NoArgAndReturn_Parameter_Serialize(&sm,&NoArgAndReturn_SendData);
 RpcObject->DataLinkLayoutBuffer[0]=(uint8_t)(Inter_NoArgAndReturn_ServiceId&0xff);
 RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(Inter_NoArgAndReturn_ServiceId>>8&0xff);

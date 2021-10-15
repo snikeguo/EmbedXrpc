@@ -310,7 +310,7 @@ namespace EmbedXrpcIdlParser
                     FreeCodeSb.AppendLine("}");
                 }
             }
-            
+            SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
             SerializeCodeSb.AppendLine("}\r\n");
             DeserializeCodeSb.AppendLine("}\r\n");
             FreeCodeSb.AppendLine("}\r\n");

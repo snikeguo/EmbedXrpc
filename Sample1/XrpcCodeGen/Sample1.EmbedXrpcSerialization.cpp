@@ -24,6 +24,7 @@ sm->Index+=sizeof(UInt64);
 
 El_Memcpy(&sm->Buf[sm->Index],&obj->Sum7,sizeof(UInt32));
 sm->Index+=sizeof(UInt32);
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -86,6 +87,7 @@ El_Memcpy(&sm->Buf[sm->Index],&obj->uend1,sizeof(UInt8));
 sm->Index+=sizeof(UInt8);
 El_Memcpy(&sm->Buf[sm->Index],&obj->uend2,sizeof(UInt8));
 sm->Index+=sizeof(UInt8);
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -163,6 +165,7 @@ sm->Index+=sizeof(UInt8);
 
 Student_Serialize(sm,&obj->David);
 
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -209,6 +212,7 @@ DateTime_t_Serialize(sm,&obj->now[now_index]);
 
 }
 
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -242,6 +246,7 @@ DateTime_t_Serialize(sm,&obj->now[now_index]);
 
 }
 
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -282,6 +287,7 @@ sm->Index+=sizeof(UInt8);
 
 }
 
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -318,6 +324,7 @@ sm->Index+=sizeof(UInt8);
 
 AddResult_Serialize(sm,&obj->ReturnValue);
 
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -338,6 +345,7 @@ AddResult_FreeData(&obj->ReturnValue);
 
 void Inter_NoArg_Parameter_Serialize(SerializationManager *sm,Inter_NoArg_Parameter *obj)
 {
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -358,6 +366,7 @@ sm->Index+=sizeof(UInt8);
 
 El_Memcpy(&sm->Buf[sm->Index],&obj->ReturnValue,sizeof(UInt8));
 sm->Index+=sizeof(UInt8);
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -377,6 +386,7 @@ void Inter_NoReturn_Parameter_Serialize(SerializationManager *sm,Inter_NoReturn_
 {
 El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(Int32));
 sm->Index+=sizeof(Int32);
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -396,6 +406,7 @@ void Inter_NoReturn_Return_Serialize(SerializationManager *sm,Inter_NoReturn_Ret
 El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(UInt8));
 sm->Index+=sizeof(UInt8);
 
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -412,6 +423,7 @@ void Inter_NoReturn_Return_FreeData(Inter_NoReturn_Return *obj)
 
 void Inter_NoArgAndReturn_Parameter_Serialize(SerializationManager *sm,Inter_NoArgAndReturn_Parameter *obj)
 {
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 
@@ -430,6 +442,7 @@ void Inter_NoArgAndReturn_Return_Serialize(SerializationManager *sm,Inter_NoArgA
 El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(UInt8));
 sm->Index+=sizeof(UInt8);
 
+El_Assert(sm->Index<=sm->BufferLen);
 }
 
 

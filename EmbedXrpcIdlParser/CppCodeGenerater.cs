@@ -434,7 +434,7 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine("El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);");
                 ServerCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
-                        "sm.BufferLen = EmbedXrpc_SendBufferSize-4;");
+                        "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
 
                 if(targetDelegate.ExternalParameter.IsExternal==false)//Copy to SendData
                 {
@@ -618,7 +618,7 @@ namespace EmbedXrpcIdlParser
                     //ClientCsw.WriteLine("ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
                         "sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];\n" +
-                        "sm.BufferLen = EmbedXrpc_SendBufferSize-4;");
+                        "sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;");
 
                     if(service.ExternalParameter.IsExternal==false)
                     {

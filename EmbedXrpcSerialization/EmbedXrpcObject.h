@@ -6,12 +6,13 @@
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 #include "BlockBufferProvider.h"
 #endif
-#define EmbedXrpcObjectVersion	"2.0.1"
+#define EmbedXrpcObjectVersion	"2.0.3"
 class EmbedXrpcObject
 {
 public:
 
-	uint8_t DataLinkLayoutBuffer[EmbedXrpc_SendBufferSize];
+	uint8_t *DataLinkLayoutBuffer;
+	uint32_t DataLinkLayoutBufferLen;
 
 	uint32_t TimeOut;
 	SendPack_t Send;
@@ -60,6 +61,8 @@ public:
 	RequestDescribe* Requests;
 
 	EmbedXrpcObject(
+		uint8_t* dataLinkLayoutBuffer,
+		uint32_t dataLinkLayoutBufferLen,
 		SendPack_t send,
 		uint32_t timeOut,
 
@@ -74,6 +77,10 @@ public:
 
 		//bool isEnableMataDataEncode,
 		void* ud = nullptr) :
+
+		DataLinkLayoutBuffer(dataLinkLayoutBuffer),
+		DataLinkLayoutBufferLen(dataLinkLayoutBufferLen),
+
 		TimeOut(timeOut),
 		Send(send),
 		ObjectMutexHandle(nullptr),
@@ -98,7 +105,10 @@ public:
 
 	}
 	//client节点构造函数
-	EmbedXrpcObject(SendPack_t send,
+	EmbedXrpcObject(
+		uint8_t* dataLinkLayoutBuffer,
+		uint32_t dataLinkLayoutBufferLen,
+		SendPack_t send,
 		uint32_t timeOut,
 
 		ResponseDescribe* responses,
@@ -108,7 +118,10 @@ public:
 		uint32_t delegatesCount,
 
 		//bool isEnableMataDataEncode,
-		void* ud = nullptr) :EmbedXrpcObject(send,
+		void* ud = nullptr) :EmbedXrpcObject(dataLinkLayoutBuffer, 
+			dataLinkLayoutBufferLen,
+
+			send,
 			timeOut,
 
 			responses,
@@ -127,14 +140,20 @@ public:
 
 	}
 	//server节点的构造函数
-	EmbedXrpcObject(SendPack_t send,
+	EmbedXrpcObject(
+		uint8_t* dataLinkLayoutBuffer,
+		uint32_t dataLinkLayoutBufferLen,
+		SendPack_t send,
 		uint32_t timeOut,
 
 		RequestDescribe* requests,//server 请求的services
 		uint32_t requestsCount,//server
 
 		//bool isEnableMataDataEncode,
-		void* ud = nullptr) :EmbedXrpcObject(send,
+		void* ud = nullptr) :EmbedXrpcObject(dataLinkLayoutBuffer, 
+			dataLinkLayoutBufferLen,
+
+			send,
 			timeOut,
 
 			nullptr,
@@ -299,7 +318,7 @@ public:
 				//sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 				SerializationManager_Reset(&sendsm);
 				sendsm.Buf = &obj->DataLinkLayoutBuffer[4];
-				sendsm.BufferLen = EmbedXrpc_SendBufferSize - 4;
+				sendsm.BufferLen = obj->DataLinkLayoutBufferLen - 4;
 
 				//EmbedXrpc_TimerReset(obj->SuspendTimer);
 				//EmbedXrpc_TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
