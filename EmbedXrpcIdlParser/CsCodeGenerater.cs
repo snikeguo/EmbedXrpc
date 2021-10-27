@@ -211,10 +211,7 @@ namespace EmbedXrpcIdlParser
                 {
                     sw.WriteLine($"private {service.ReturnStructType.TypeName} Response = new {service.ReturnStructType.TypeName}();");
                 }
-                sw.WriteLine("public  void Invoke(DTL request_UserDataOfTransportLayer,"+
-         "ref DTL response_UserDataOfTransportLayer,"+
-         "EmbedXrpcObject < DTL > rpcObject,"+
-         "UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager)");
+                sw.WriteLine("public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)");
                 sw.WriteLine("{");//function begin
                 sw.WriteLine($"{service.ParameterStructType.TypeName} request = recManager.Deserialize < {service.ParameterStructType.TypeName}>();");
                 string pars = string.Empty;
@@ -231,13 +228,13 @@ namespace EmbedXrpcIdlParser
                     }
                 }
                 var dh = pars == "" ? "" : ",";
-                sw.WriteLine($"{service.ServiceName}(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut{dh}{pars});");
+                sw.WriteLine($"{service.ServiceName}(ref serviceInvokeParameter{dh}{pars});");
                 if (service.ReturnStructType.TargetFields.Count > 1)
                 {
                     sw.WriteLine($"sendManager.Serialize(Response, 0);");
                 }
                 sw.WriteLine("}");//function end
-                sw.WriteLine($"//public void {service.ServiceName}(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut{dh}{externstr});");
+                sw.WriteLine($"//public void {service.ServiceName}(ref serviceInvokeParameter{dh}{externstr});");
                 sw.WriteLine("}");//class end
 
                 MacroControlWriteEnd(sw, service.MacroControlAttribute);

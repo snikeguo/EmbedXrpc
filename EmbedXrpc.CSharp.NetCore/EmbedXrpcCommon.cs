@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpc
 {
-    public enum RequestResponseState:Byte
+    public enum RequestResponseState : Byte
     {
         RequestState_Ok = 1,
         RequestState_Failed = 2,
@@ -17,9 +17,9 @@ namespace EmbedXrpc
     }
     public enum ReceiveType
     {
-        Request=0x1,
-        Response=0x2,
-        Delegate=0x3,
+        Request = 0x1,
+        Response = 0x2,
+        Delegate = 0x3,
     };
     public interface IDelegate<DTL> where DTL : struct
     {
@@ -31,13 +31,19 @@ namespace EmbedXrpc
         public static readonly UInt16 EmbedXrpcSuspendSid = 0x1;
     }
 
+    public class ServiceInvokeParameter<DTL> where DTL : struct
+    {
+        public DTL request_UserDataOfTransportLayer;
+        public DTL response_UserDataOfTransportLayer;
+        public EmbedXrpcObject<DTL> rpcObject;
+        public UInt16 targetTimeOut;
+    };
+
+
     public interface IService<DTL> where DTL : struct
     {
         UInt16 GetSid();
-        void Invoke(DTL request_UserDataOfTransportLayer,
-         ref DTL response_UserDataOfTransportLayer,
-         EmbedXrpcObject<DTL> rpcObject,
-         UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager);
+        void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager);
     }
     public interface IRequestService<DTL> where DTL : struct
     {
@@ -58,7 +64,7 @@ namespace EmbedXrpc
         public string Name { get; set; }
         public UInt16 Sid { get; set; }//有可能是Response/Delegate
     };
-    public delegate bool Send<DTL>(DTL userDataOfTransportLayer,  int dataLen, int offset ,byte[] data);
+    public delegate bool Send<DTL>(DTL userDataOfTransportLayer, int dataLen, int offset, byte[] data);
     public struct EmbeXrpcRawData<DTL> where DTL : struct
     {
         public UInt16 Sid { get; set; }
@@ -81,7 +87,7 @@ namespace EmbedXrpc
     {
         public ResponseServiceInfoAttribute()
         {
-           
+
         }
         public string Name { get; set; }
         public UInt16 ServiceId { get; set; }
@@ -90,14 +96,14 @@ namespace EmbedXrpc
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public sealed class RequestServiceInfoAttribute : Attribute
     {
-       
+
         public RequestServiceInfoAttribute()
         {
-            
+
         }
         // This is a named argument
         public string Name { get; set; }
         public UInt16 ServiceId { get; set; }
     }
-    
+
 }

@@ -249,7 +249,7 @@ namespace EmbedXrpc
         private void RequestServiceThread()
         {
             EmbeXrpcRawData<DTL> recData;
-            DTL response_UserDataOfTransportLayer=default;
+            ServiceInvokeParameter < DTL > serviceInvokeParameter =new ServiceInvokeParameter<DTL>();
             //try
             {
                 while (true)
@@ -266,11 +266,12 @@ namespace EmbedXrpc
                             SerializationManager sendsm = new SerializationManager(Assembly,new List<byte>());
 
                             //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
-                            //SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);
-                            Requests[i].Service.Invoke(recData.UserDataOfTransportLayer,
-                                ref response_UserDataOfTransportLayer,
-                                this,
-                                recData.TargetTimeOut,
+                            //SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);.
+                            serviceInvokeParameter.request_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
+                            serviceInvokeParameter.response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
+                            serviceInvokeParameter.rpcObject = this;
+                            serviceInvokeParameter.targetTimeOut = recData.TargetTimeOut;
+                            Requests[i].Service.Invoke(ref serviceInvokeParameter,
                                 rsm, 
                                 sendsm);
                             SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);//手动关闭 怕用户忘了
@@ -286,7 +287,7 @@ namespace EmbedXrpc
                                     sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff)&(0x3F));
                                     sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
                                     Array.Copy(sendsm.Data.ToArray(), 0, sendBytes, 4, sendsm.Index);
-                                    Send(response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
+                                    Send(serviceInvokeParameter.response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
                                 }
                             }
                             break;

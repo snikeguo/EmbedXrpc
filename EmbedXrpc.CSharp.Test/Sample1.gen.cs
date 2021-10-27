@@ -2,8 +2,8 @@
 using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
-// auto code gen ! DO NOT modify this file! create time 2021 - 09 - 24 14: 21:51.133;
-//C# Code Generater Version:2.0.2.0
+// auto code gen ! DO NOT modify this file! create time 2021 - 10 - 27 15: 36:09.032;
+//C# Code Generater Version:2.0.4.0
 namespace Sample1
 {
 using UInt8 = Byte;
@@ -376,13 +376,13 @@ public partial class Inter_AddService<DTL>:IService<DTL> where DTL:struct
 public static readonly UInt16 Add_ServiceId=18;//0x12
 public UInt16 GetSid(){ return Add_ServiceId;}
 private Inter_Add_Return Response = new Inter_Add_Return();
-public  void Invoke(DTL request_UserDataOfTransportLayer,ref DTL response_UserDataOfTransportLayer,EmbedXrpcObject < DTL > rpcObject,UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager)
+public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 Inter_Add_Parameter request = recManager.Deserialize < Inter_Add_Parameter>();
-Add(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut,request.a,request.b,request.dataLen,request.data);
+Add(ref serviceInvokeParameter,request.a,request.b,request.dataLen,request.data);
 sendManager.Serialize(Response, 0);
 }
-//public void Add(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut,Int32 a,Int32 b,Int32 dataLen,Byte[] data);
+//public void Add(ref serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,Byte[] data);
 }
 [RequestServiceInfo(Name="Inter_Add",ServiceId=18)]
 public class Inter_Add<DTL>:IRequestService<DTL> where DTL:struct
@@ -458,13 +458,13 @@ public partial class Inter_NoArgService<DTL>:IService<DTL> where DTL:struct
 public static readonly UInt16 NoArg_ServiceId=19;//0x13
 public UInt16 GetSid(){ return NoArg_ServiceId;}
 private Inter_NoArg_Return Response = new Inter_NoArg_Return();
-public  void Invoke(DTL request_UserDataOfTransportLayer,ref DTL response_UserDataOfTransportLayer,EmbedXrpcObject < DTL > rpcObject,UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager)
+public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 Inter_NoArg_Parameter request = recManager.Deserialize < Inter_NoArg_Parameter>();
-NoArg(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut);
+NoArg(ref serviceInvokeParameter);
 sendManager.Serialize(Response, 0);
 }
-//public void NoArg(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut);
+//public void NoArg(ref serviceInvokeParameter);
 }
 [RequestServiceInfo(Name="Inter_NoArg",ServiceId=19)]
 public class Inter_NoArg<DTL>:IRequestService<DTL> where DTL:struct
@@ -535,12 +535,12 @@ public partial class Inter_NoReturnService<DTL>:IService<DTL> where DTL:struct
 {
 public static readonly UInt16 NoReturn_ServiceId=20;//0x14
 public UInt16 GetSid(){ return NoReturn_ServiceId;}
-public  void Invoke(DTL request_UserDataOfTransportLayer,ref DTL response_UserDataOfTransportLayer,EmbedXrpcObject < DTL > rpcObject,UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager)
+public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 Inter_NoReturn_Parameter request = recManager.Deserialize < Inter_NoReturn_Parameter>();
-NoReturn(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut,request.a);
+NoReturn(ref serviceInvokeParameter,request.a);
 }
-//public void NoReturn(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut,Int32 a);
+//public void NoReturn(ref serviceInvokeParameter,Int32 a);
 }
 [RequestServiceInfo(Name="Inter_NoReturn",ServiceId=20)]
 public class Inter_NoReturn<DTL>:IRequestService<DTL> where DTL:struct
@@ -601,12 +601,12 @@ public partial class Inter_NoArgAndReturnService<DTL>:IService<DTL> where DTL:st
 {
 public static readonly UInt16 NoArgAndReturn_ServiceId=21;//0x15
 public UInt16 GetSid(){ return NoArgAndReturn_ServiceId;}
-public  void Invoke(DTL request_UserDataOfTransportLayer,ref DTL response_UserDataOfTransportLayer,EmbedXrpcObject < DTL > rpcObject,UInt16 targetTimeOut, SerializationManager recManager, SerializationManager sendManager)
+public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 Inter_NoArgAndReturn_Parameter request = recManager.Deserialize < Inter_NoArgAndReturn_Parameter>();
-NoArgAndReturn(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut);
+NoArgAndReturn(ref serviceInvokeParameter);
 }
-//public void NoArgAndReturn(request_UserDataOfTransportLayer,ref response_UserDataOfTransportLayer,rpcObject,targetTimeOut);
+//public void NoArgAndReturn(ref serviceInvokeParameter);
 }
 [RequestServiceInfo(Name="Inter_NoArgAndReturn",ServiceId=21)]
 public class Inter_NoArgAndReturn<DTL>:IRequestService<DTL> where DTL:struct
