@@ -41,50 +41,50 @@ El_ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
 
 
-void Inter_AddService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager *recManager, SerializationManager* sendManager)
+void Inter_AddService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_Add_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 #endif
-Add(request_UserDataOfTransportLayer,response_UserDataOfTransportLayer,rpcObject,targetTimeOut,request.a,request.b,request.dataLen,request.data);
+Add(serviceInvokeParameter,request.a,request.b,request.dataLen,request.data);
 Inter_Add_Parameter_FreeData(&request);
 Inter_Add_Return_Serialize(sendManager,&Response);
 if(IsFreeResponse==true) Inter_Add_Return_FreeData(&Response);
 }
 
 
-void Inter_NoArgService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager *recManager, SerializationManager* sendManager)
+void Inter_NoArgService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_NoArg_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 #endif
-NoArg(request_UserDataOfTransportLayer,response_UserDataOfTransportLayer,rpcObject,targetTimeOut);
+NoArg(serviceInvokeParameter);
 Inter_NoArg_Parameter_FreeData(&request);
 Inter_NoArg_Return_Serialize(sendManager,&Response);
 if(IsFreeResponse==true) Inter_NoArg_Return_FreeData(&Response);
 }
 
 
-void Inter_NoReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager *recManager, SerializationManager* sendManager)
+void Inter_NoReturnService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_NoReturn_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 #endif
-NoReturn(request_UserDataOfTransportLayer,response_UserDataOfTransportLayer,rpcObject,targetTimeOut,request.a);
+NoReturn(serviceInvokeParameter,request.a);
 Inter_NoReturn_Parameter_FreeData(&request);
 }
 
 
-void Inter_NoArgAndReturnService::Invoke(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,EmbedXrpcObject* rpcObject,uint16_t targetTimeOut,SerializationManager *recManager, SerializationManager* sendManager)
+void Inter_NoArgAndReturnService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_NoArgAndReturn_Parameter_Deserialize(recManager,&request);
 #if EmbedXrpc_CheckSumValid==1
 El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 #endif
-NoArgAndReturn(request_UserDataOfTransportLayer,response_UserDataOfTransportLayer,rpcObject,targetTimeOut);
+NoArgAndReturn(serviceInvokeParameter);
 Inter_NoArgAndReturn_Parameter_FreeData(&request);
 }
 

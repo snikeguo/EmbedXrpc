@@ -6,7 +6,7 @@
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
 #include "BlockBufferProvider.h"
 #endif
-#define EmbedXrpcObjectVersion	"2.0.3"
+#define EmbedXrpcObjectVersion	"2.0.4"
 class EmbedXrpcObject
 {
 public:
@@ -290,7 +290,7 @@ public:
 		bool isContain;
 		isContain = false;
 		(void)isContain;
-		UserDataOfTransportLayer_t response_UserDataOfTransportLayer;
+		ServiceInvokeParameter serviceInvokeParameter;
 		for (uint32_t collectionIndex = 0; collectionIndex < obj->RequestsCount; collectionIndex++)
 		{
 			isContain = true;
@@ -322,7 +322,11 @@ public:
 
 				//EmbedXrpc_TimerReset(obj->SuspendTimer);
 				//EmbedXrpc_TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
-				iter->Service->Invoke(&recData.UserDataOfTransportLayer, &response_UserDataOfTransportLayer, obj, recData.TargetTimeout, &rsm, &sendsm);
+				serviceInvokeParameter.request_UserDataOfTransportLayer = &recData.UserDataOfTransportLayer;
+				serviceInvokeParameter.response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
+				serviceInvokeParameter.rpcObject = obj;
+				serviceInvokeParameter.targetTimeOut = recData.TargetTimeout;
+				iter->Service->Invoke(&serviceInvokeParameter, &rsm, &sendsm);
 				El_TimerStop(obj->SuspendTimer);
 
 				if (sendsm.Index > 0)//
@@ -332,7 +336,7 @@ public:
 					obj->DataLinkLayoutBuffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
 					obj->DataLinkLayoutBuffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
 					obj->DataLinkLayoutBuffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-					obj->Send(&response_UserDataOfTransportLayer,obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
+					obj->Send(&serviceInvokeParameter.response_UserDataOfTransportLayer,obj, sendsm.Index + 4, obj->DataLinkLayoutBuffer);
 				}
 				El_ReleaseMutex(obj->ObjectMutexHandle);
 

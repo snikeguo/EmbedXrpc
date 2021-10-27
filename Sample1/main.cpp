@@ -58,7 +58,7 @@ void ClientThread()
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	int a=1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
-	int testcount = 5;
+	int testcount = 1;
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
 	win32UserDataOfTransportLayerTest.Port = 6666;
@@ -73,7 +73,7 @@ void ClientThread()
 		auto sum=Client.Add(&win32UserDataOfTransportLayerTest);
 		El_Assert(sum.State == ResponseState_Ok);
 		Client.Free_Add(&sum);
-		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
 	ClientRpc.DeInit();
@@ -116,7 +116,7 @@ void ServerThread()
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;
-	int testcount = 5;
+	int testcount = 1;
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "192.168.1.101");
 	win32UserDataOfTransportLayerTest.Port = 7777;
@@ -143,21 +143,18 @@ void ServerThread()
 		t.David.uend1 = 1;
 		t.David.uend2 = 2;
 		DateTimeChanger.Invoke(&win32UserDataOfTransportLayerTest,&t);
-		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(10000));//等待RPC调用全部完毕
 	ServerRpc.DeInit();
 }
 
-void Inter_AddService::Add(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
-	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
-	EmbedXrpcObject* rpcObject,
-	uint16_t targetTimeOut,
+void Inter_AddService::Add(ServiceInvokeParameter* serviceInvokeParameter,
 	Int32 a, Int32 b, Int32 dataLen, UInt8* data)
 {
-	EmbedXrpcObject* RpcObj = (EmbedXrpcObject*)rpcObject;
+	EmbedXrpcObject* RpcObj = (EmbedXrpcObject*)serviceInvokeParameter->rpcObject;
 	RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
-	El_TimerStart(RpcObj->SuspendTimer, targetTimeOut/2);
+	El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->targetTimeOut/2);
 	IsFreeResponse = false;
 	Response.ReturnValue.Sum = 1;
 	Response.ReturnValue.Sum2 = 2;
@@ -171,33 +168,24 @@ void Inter_AddService::Add(UserDataOfTransportLayer_t* request_UserDataOfTranspo
 	Response.ReturnValue.dataLen = 0;
 	Response.ReturnValue.data = NULL;
 	printf("模拟耗时操作  延时2秒\n");
-	std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 	//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 	//printf("len:%d\n", dataLen);
 }
 
 
-void Inter_NoArgService::NoArg(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer, 
-	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
-	EmbedXrpcObject* rpcObject,
-	uint16_t targetTimeOut)
+void Inter_NoArgService::NoArg(ServiceInvokeParameter* serviceInvokeParameter)
 {
 	IsFreeResponse = true;
 	Response.ReturnValue = true;
 }
 
-void Inter_NoReturnService::NoReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
-	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer,
-	EmbedXrpcObject* rpcObject,
-	uint16_t targetTimeOut,
+void Inter_NoReturnService::NoReturn(ServiceInvokeParameter* serviceInvokeParameter,
 	int a)
 {
 
 }
-void Inter_NoArgAndReturnService::NoArgAndReturn(UserDataOfTransportLayer_t* request_UserDataOfTransportLayer,
-	UserDataOfTransportLayer_t* response_UserDataOfTransportLayer, 
-	EmbedXrpcObject* rpcObject,
-	uint16_t targetTimeOut)
+void Inter_NoArgAndReturnService::NoArgAndReturn(ServiceInvokeParameter* serviceInvokeParameter)
 {
 
 }
