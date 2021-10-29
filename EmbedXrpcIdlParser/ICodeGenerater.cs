@@ -119,6 +119,10 @@ namespace EmbedXrpcIdlParser
                     return v;
                 }
             }
+            if (arrayField.MaxCountAttribute.LenFieldName != string.Empty)
+            {
+                throw new Exception($"{TypeName}结构体类型中,表示数组字段{arrayField.FieldName}元素个数的字段名未找到!"); 
+            }
             return null;
         }
         public ITargetField UnionTargetTypeField { get; set; }
