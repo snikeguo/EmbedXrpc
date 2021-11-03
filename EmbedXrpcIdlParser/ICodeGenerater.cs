@@ -126,6 +126,8 @@ namespace EmbedXrpcIdlParser
             return null;
         }
         public ITargetField UnionTargetTypeField { get; set; }
+
+        public List<CppCustomMethodSignatureAttribute> CppCustomMethodSignatures { get; set; }
     }
     /*public class UnionType_TargetType:ITargetType
     {
@@ -405,7 +407,8 @@ namespace EmbedXrpcIdlParser
             List<int> FieldNumbers = new List<int>();
             int fieldNumber = 1;
             BitFieldStateMachine bitFieldStateMachine = new BitFieldStateMachine();
-            //foreach (var field in fields)
+            List<CppCustomMethodSignatureAttribute> cppCustomMethodSignatures = new List<CppCustomMethodSignatureAttribute>(object_type.GetCustomAttributes<CppCustomMethodSignatureAttribute>());
+            targetStructType.CppCustomMethodSignatures = cppCustomMethodSignatures;
             for (int field_index=0; field_index<fields.Length;field_index++)
             {
                 var field = fields[field_index];

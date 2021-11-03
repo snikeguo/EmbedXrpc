@@ -165,4 +165,22 @@ namespace EmbedXrpcIdlParser
         }
         public int BitWidthLength { get; private set; }
     }
+
+    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
+    public class CppCustomMethodSignatureAttribute : Attribute
+    {
+        
+        readonly string signature;
+
+        public CppCustomMethodSignatureAttribute(string sign)
+        {
+            signature = sign;
+        }
+
+        public string Signature
+        {
+            get { return signature; }
+        }
+
+    }
 }

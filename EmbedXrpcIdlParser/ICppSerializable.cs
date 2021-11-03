@@ -74,8 +74,13 @@ namespace EmbedXrpcIdlParser
             StringBuilder FieldNumberSb = new StringBuilder();
             bool isWriteUnion = false;
             bool IsUnionComplete = false;
-            CommonHsw.WriteLine("typedef struct _" + structType.TypeName);
+            CommonHsw.WriteLine("struct " + structType.TypeName);
             CommonHsw.WriteLine("{");
+            foreach (var customMethodSign in structType.CppCustomMethodSignatures)
+            {
+                string fh = customMethodSign.Signature[customMethodSign.Signature.Length - 1] == ';' ? "" : ";";
+                CommonHsw.WriteLine(customMethodSign.Signature+fh);
+            }
             foreach (var field in structType.TargetFields)
             {
                 if(field.UnionFieldAttr!=null&& isWriteUnion==false)
@@ -109,7 +114,7 @@ namespace EmbedXrpcIdlParser
                 CommonHsw.WriteLine("};//union end");
                 IsUnionComplete = true;
             }
-            CommonHsw.WriteLine("}" + structType.TypeName + ";");
+            CommonHsw.WriteLine("};");
             FieldNumberSb.Append("\r\n");
             CommonHsw.WriteLine(FieldNumberSb.ToString());
 
