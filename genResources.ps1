@@ -19,11 +19,11 @@ Copy-Item -Path  .\EmbedXrpcSerialization\ringbuffer.h -Destination PublishVersi
 Copy-Item -Path  .\Sample1\sample1.cs -Destination PublishVersion\CodeGenTool\sample1.cs
 
 # EmbedLibrary
-Copy-Item -Path .\EmbedLibrary\EmbedLibrary.h -Destination PublishVersion\Runtime\Cpp\EmbedLibrary\EmbedLibrary.h
-Copy-Item -Path .\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp  -Destination PublishVersion\Runtime\Cpp\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp
-Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.cpp  -Destination PublishVersion\Runtime\Cpp\EmbedLibrary\Win32.Port\BlockQueue.cpp
-Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.h  -Destination PublishVersion\Runtime\Cpp\EmbedLibrary\Win32.Port\BlockQueue.h
-Copy-Item -Path .\EmbedLibrary\Win32.Port\El.Win32.Port.cpp  -Destination PublishVersion\Runtime\Cpp\EmbedLibrary\Win32.Port\El.Win32.Port.cpp
+Copy-Item -Path .\EmbedLibrary\EmbedLibrary.h -Destination PublishVersion\EmbedLibrary\EmbedLibrary.h
+Copy-Item -Path .\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp  -Destination PublishVersion\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp
+Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.cpp  -Destination PublishVersion\EmbedLibrary\Win32.Port\BlockQueue.cpp
+Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.h  -Destination PublishVersion\EmbedLibrary\Win32.Port\BlockQueue.h
+Copy-Item -Path .\EmbedLibrary\Win32.Port\El.Win32.Port.cpp  -Destination PublishVersion\EmbedLibrary\Win32.Port\El.Win32.Port.cpp
 
 Copy-Item -Path .\EmbedXrpcSerialization\FreeRTOS.Port\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\FreeRTOS.Port\EmbedXrpc.Port.h
 Copy-Item -Path .\EmbedXrpcSerialization\Win32.Port\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\Win32.Port\EmbedXrpc.Port.h
