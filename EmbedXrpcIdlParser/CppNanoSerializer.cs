@@ -262,6 +262,7 @@ namespace EmbedXrpcIdlParser
                     if (array_TargetField.MaxCountAttribute.IsFixed == false)
                     {
                         DeserializeCodeSb.AppendLine($"obj->{field.FieldName}=({attt.ElementType.TypeName} *)El_Malloc(sizeof({attt.ElementType.TypeName})*{lenstring});");
+                        //DeserializeCodeSb.AppendLine($"obj->{field.FieldName}= new {attt.ElementType.TypeName}[{lenstring}];");
                         DeserializeCodeSb.AppendLine($"El_Memset(obj->{field.FieldName},0,sizeof({attt.ElementType.TypeName})*{lenstring});");
                     }
 
@@ -307,6 +308,7 @@ namespace EmbedXrpcIdlParser
                     if (array_TargetField.MaxCountAttribute.IsFixed == false)
                     {
                         FreeCodeSb.AppendLine($"El_Free(obj->{field.FieldName});");
+                        //FreeCodeSb.AppendLine($"delete[] obj->{field.FieldName};");
                     }
                     SerializeCodeSb.AppendLine("\r\n");
                     DeserializeCodeSb.AppendLine("\r\n");

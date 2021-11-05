@@ -58,7 +58,7 @@ void ClientThread()
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	int a=1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
-	int testcount = 1;
+	int testcount = 10;
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
 	win32UserDataOfTransportLayerTest.Port = 6666;

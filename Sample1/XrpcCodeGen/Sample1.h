@@ -11,7 +11,7 @@ typedef enum _Sex
 Man = 2,
 WoMan = 9,
 }Sex;
-typedef struct _AddResult
+struct AddResult
 {
 UInt32 Sum:11;   //FieldNumber:1     
 UInt32 Sum2:19;   //FieldNumber:2     
@@ -22,7 +22,7 @@ UInt64 Sum4:11;   //FieldNumber:6
 UInt64 Sum5:19;   //FieldNumber:7     
 UInt64 Sum6:2;   //FieldNumber:8     
 UInt32 Sum7;   //FieldNumber:9     
-}AddResult;
+};
 #define AddResult_Sum_FieldNumber  1
 #define AddResult_Sum2_FieldNumber  2
 #define AddResult_Sum3_FieldNumber  3
@@ -34,7 +34,7 @@ UInt32 Sum7;   //FieldNumber:9
 #define AddResult_Sum7_FieldNumber  9
 
 
-typedef struct _Student
+struct Student
 {
 Int32 a;   //FieldNumber:1     
 Int32 b;   //FieldNumber:2     
@@ -47,7 +47,7 @@ AddResult u4;   //FieldNumber:7
 };//union end
 UInt8 uend1;   //FieldNumber:100     
 UInt8 uend2;   //FieldNumber:8     
-}Student;
+};
 #define Student_a_FieldNumber  1
 #define Student_b_FieldNumber  2
 #define Student_AddressType_FieldNumber  3
@@ -59,7 +59,7 @@ UInt8 uend2;   //FieldNumber:8
 #define Student_uend2_FieldNumber  8
 
 
-typedef struct _DateTime_t
+struct DateTime_t
 {
 Int32 Year;   //FieldNumber:10086     
 Int32 Month;   //FieldNumber:2     
@@ -71,7 +71,7 @@ Sex Sex;   //FieldNumber:8
 UInt8 DateStringLen;   //FieldNumber:1     
 UInt8* DateString;   //FieldNumber:7     
 Student David;   //FieldNumber:9     
-}DateTime_t;
+};
 #define DateTime_t_Year_FieldNumber  10086
 #define DateTime_t_Month_FieldNumber  2
 #define DateTime_t_Day_FieldNumber  3
@@ -84,79 +84,79 @@ Student David;   //FieldNumber:9
 #define DateTime_t_David_FieldNumber  9
 
 
-typedef struct _DateTimeChange_Parameter
+struct DateTimeChange_Parameter
 {
 DateTime_t now[1];   //FieldNumber:1     
-}DateTimeChange_Parameter;
+};
 #define DateTimeChange_Parameter_now_FieldNumber  1
 
 
-typedef struct _TestDelegate_Parameter
+struct TestDelegate_Parameter
 {
 DateTime_t now[1];   //FieldNumber:1     
-}TestDelegate_Parameter;
+};
 #define TestDelegate_Parameter_now_FieldNumber  1
 
 
-typedef struct _Inter_Add_Parameter
+struct Inter_Add_Parameter
 {
 Int32 a;   //FieldNumber:1     
 Int32 b;   //FieldNumber:2     
 Int32 dataLen;   //FieldNumber:3     
 UInt8* data;   //FieldNumber:4     
-}Inter_Add_Parameter;
+};
 #define Inter_Add_Parameter_a_FieldNumber  1
 #define Inter_Add_Parameter_b_FieldNumber  2
 #define Inter_Add_Parameter_dataLen_FieldNumber  3
 #define Inter_Add_Parameter_data_FieldNumber  4
 
 
-typedef struct _Inter_Add_Return
+struct Inter_Add_Return
 {
 RequestResponseState State;   //FieldNumber:1     
 AddResult ReturnValue;   //FieldNumber:2     
-}Inter_Add_Return;
+};
 #define Inter_Add_Return_State_FieldNumber  1
 #define Inter_Add_Return_ReturnValue_FieldNumber  2
 
 
-typedef struct _Inter_NoArg_Parameter
+struct Inter_NoArg_Parameter
 {
-}Inter_NoArg_Parameter;
+};
 
 
-typedef struct _Inter_NoArg_Return
+struct Inter_NoArg_Return
 {
 RequestResponseState State;   //FieldNumber:1     
 UInt8 ReturnValue;   //FieldNumber:2     
-}Inter_NoArg_Return;
+};
 #define Inter_NoArg_Return_State_FieldNumber  1
 #define Inter_NoArg_Return_ReturnValue_FieldNumber  2
 
 
-typedef struct _Inter_NoReturn_Parameter
+struct Inter_NoReturn_Parameter
 {
 Int32 a;   //FieldNumber:1     
-}Inter_NoReturn_Parameter;
+};
 #define Inter_NoReturn_Parameter_a_FieldNumber  1
 
 
-typedef struct _Inter_NoReturn_Return
+struct Inter_NoReturn_Return
 {
 RequestResponseState State;   //FieldNumber:1     
-}Inter_NoReturn_Return;
+};
 #define Inter_NoReturn_Return_State_FieldNumber  1
 
 
-typedef struct _Inter_NoArgAndReturn_Parameter
+struct Inter_NoArgAndReturn_Parameter
 {
-}Inter_NoArgAndReturn_Parameter;
+};
 
 
-typedef struct _Inter_NoArgAndReturn_Return
+struct Inter_NoArgAndReturn_Return
 {
 RequestResponseState State;   //FieldNumber:1     
-}Inter_NoArgAndReturn_Return;
+};
 #define Inter_NoArgAndReturn_Return_State_FieldNumber  1
 
 

@@ -76,11 +76,15 @@ namespace EmbedXrpcIdlParser
             bool IsUnionComplete = false;
             CommonHsw.WriteLine("struct " + structType.TypeName);
             CommonHsw.WriteLine("{");
-            foreach (var customMethodSign in structType.CppCustomMethodSignatures)
+            if(structType.CppCustomMethodSignatures!=null)
             {
-                string fh = customMethodSign.Signature[customMethodSign.Signature.Length - 1] == ';' ? "" : ";";
-                CommonHsw.WriteLine(customMethodSign.Signature+fh);
+                foreach (var customMethodSign in structType.CppCustomMethodSignatures)
+                {
+                    string fh = customMethodSign.Signature[customMethodSign.Signature.Length - 1] == ';' ? "" : ";";
+                    CommonHsw.WriteLine(customMethodSign.Signature + fh);
+                }
             }
+            
             foreach (var field in structType.TargetFields)
             {
                 if(field.UnionFieldAttr!=null&& isWriteUnion==false)
