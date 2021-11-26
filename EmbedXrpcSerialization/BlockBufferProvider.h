@@ -24,11 +24,11 @@ extern "C" {
     Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint8_t* buf, uint16_t bufLen);
     void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj);
 
-    inline void BlockRingBufferProvider_SetCalculateSum(BlockRingBufferProvider* obj, uint32_t s) { obj->CalculateSumValue = s; }
-    inline uint32_t BlockRingBufferProvider_GetCalculateSum(BlockRingBufferProvider* obj) { return obj->CalculateSumValue; }
-    inline void BlockRingBufferProvider_SetReferenceSum(BlockRingBufferProvider* obj, uint32_t ref) { obj->ReferenceSumValue = ref; }
-    inline uint32_t BlockRingBufferProvider_GetReferenceSum(BlockRingBufferProvider* obj) { return obj->ReferenceSumValue; }
-    inline uint32_t BlockRingBufferProvider_CalculateSum(uint8_t* d, uint16_t len);
+    static inline void BlockRingBufferProvider_SetCalculateSum(BlockRingBufferProvider* obj, uint32_t s) { obj->CalculateSumValue = s; }
+    static inline uint32_t BlockRingBufferProvider_GetCalculateSum(BlockRingBufferProvider* obj) { return obj->CalculateSumValue; }
+    static inline void BlockRingBufferProvider_SetReferenceSum(BlockRingBufferProvider* obj, uint32_t ref) { obj->ReferenceSumValue = ref; }
+    static inline uint32_t BlockRingBufferProvider_GetReferenceSum(BlockRingBufferProvider* obj) { return obj->ReferenceSumValue; }
+    static inline uint32_t BlockRingBufferProvider_CalculateSum(uint8_t* d, uint16_t len);
 
 #ifdef __cplusplus
 }

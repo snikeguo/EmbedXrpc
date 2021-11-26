@@ -2,6 +2,8 @@
 #define El_PortInterface_H
 #include "stdint.h"
 #include "assert.h"
+#include "string.h"
+#include "console.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,7 +41,7 @@ extern "C" {
 
 #define Windows 1
 #define FreeRtos	2
-#define SupportedOs	Windows
+#define SupportedOs	FreeRtos
 
 #if SupportedOs==Windows
 	typedef void* El_Semaphore_t;
@@ -50,22 +52,27 @@ extern "C" {
 	typedef void* El_Timer_t;
 	#define El_Assert assert
 #define El_Debug	printf
-#define El_Sprintf     sprintf//不要使用sprintf
+#define El_Sprintf     sprintf//??????sprintf
 #define El_Delay(x)    Sleep(x)
 #elif SupportedOs==FreeRtos
-	typedef SemaphoreHandle_t  Embeded_Mutex;
-	typedef TimerHandle_t Embeded_Timer;
-	typedef SemaphoreHandle_t  Embeded_Semaphore;
-	typedef TaskHandle_t Embeded_Thread;
-	typedef QueueHandle_t Embeded_Queue;
-#define El_Debug	
+	#include "FreeRTOS.h"
+	#include "task.h"
+	#include "semphr.h"
+	#include "timers.h"
+	typedef SemaphoreHandle_t  El_Mutex_t;
+	typedef TimerHandle_t El_Timer_t;
+	typedef SemaphoreHandle_t  El_Semaphore_t;
+	typedef TaskHandle_t El_Thread_t;
+	typedef QueueHandle_t El_Queue_t;
+#define El_Debug	rt_kprintf
 #define El_Assert configASSERT
-#define El_Sprintf     rt_sprintf//不要使用sprintf
+#define El_Sprintf     rt_sprintf//2?òaê1ó?sprintf
 #define El_Delay(x)    vTaskDelay(x)
 #endif
 #define El_Strncpy strncpy
 #define El_Strncmp    strncmp
 #define El_Strlen      strlen
+#define El_Strcat		strcat
 
 #define CallFunction(Function,...) do{if (Function != NULL){Function(__VA_ARGS__);}}while(0); //using C99 Mode.
 	void* El_Malloc(uint32_t size);

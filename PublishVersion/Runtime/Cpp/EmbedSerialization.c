@@ -1,6 +1,6 @@
 #include "EmbedSerialization.h"
 #include <stdarg.h>
-
+#include "EmbedXrpc.Port.h"
 uint32_t GetSum(uint8_t* d, uint32_t len)
 {
 	uint32_t sum = 0;

@@ -12,8 +12,7 @@ extern "C" {
 	typedef struct Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
 
 
-	//common
-//#define EmbedXrpc_SendBufferSize			1024//∑¢ÀÕBuffer¥Û–°
+
 #define EmbedXrpc_CheckSumValid				1
 #define EmbedXrpc_IsSendToQueue				1
 

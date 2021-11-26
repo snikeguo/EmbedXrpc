@@ -5,9 +5,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	typedef void* UserDataOfTransportLayer_t;
-	//common
-#define EmbedXrpc_SendBufferSize			1024//发送Buffer大小
+
+typedef uint8_t UserDataOfTransportLayer_t;
+
 #define EmbedXrpc_CheckSumValid				1
 #define EmbedXrpc_IsSendToQueue				1
 
