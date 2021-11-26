@@ -72,7 +72,7 @@ extern "C" {
     uint32_t rt_ringbuffer_data_len(struct rt_ringbuffer* rb);
 
 
-    inline uint16_t rt_ringbuffer_get_size(struct rt_ringbuffer* rb)
+    static inline uint16_t rt_ringbuffer_get_size(struct rt_ringbuffer* rb)
     {
         El_Assert(rb != NULL);
         return rb->buffer_size;
