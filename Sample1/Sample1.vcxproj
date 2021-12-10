@@ -23,6 +23,7 @@
     <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c" />
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="XrpcCodeGen\Client\Sample1.Client.cpp" />

@@ -1,6 +1,7 @@
 #include "EmbedSerialization.h"
 #include <stdarg.h>
 #include "EmbedXrpc.Port.h"
+#if EmbedXrpc_CheckSumValid==1
 uint32_t GetSum(uint8_t* d, uint32_t len)
 {
 	uint32_t sum = 0;
@@ -10,6 +11,7 @@ uint32_t GetSum(uint8_t* d, uint32_t len)
 	}
 	return sum;
 }
+#endif
 #if EmbedXrpc_CheckSumValid==1
 #define SerializationManagerAppendDataSum(sm,sum)    SerializationManager_SetCalculateSum(sm,SerializationManager_GetCalculateSum(sm)+sum)
 #else

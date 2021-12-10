@@ -3,7 +3,7 @@
 #include "stdint.h"
 #include "assert.h"
 #include "string.h"
-#include "console.h"
+//#include "console.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,7 +41,7 @@ extern "C" {
 
 #define Windows 1
 #define FreeRtos	2
-#define SupportedOs	FreeRtos
+#define SupportedOs	Windows
 
 #if SupportedOs==Windows
 	typedef void* El_Semaphore_t;

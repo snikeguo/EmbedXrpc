@@ -56,6 +56,9 @@
     <ClCompile Include="ringbuffer.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="EmbedXrpcObject.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="FreeRTOS.Port\readme.md">

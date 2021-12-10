@@ -14,7 +14,7 @@ extern "C" {
 
 
 #define EmbedXrpc_CheckSumValid				1
-#define EmbedXrpc_IsSendToQueue				1
+#define EmbedXrpc_IsSendToQueue				0
 
 
 //client部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
@@ -30,7 +30,9 @@ extern "C" {
 
 #define EmbedXrpc_UseRingBufferWhenReceiving 0
 
+
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
+
 //client
 #define EmbedXrpc_DelegateRingBufferSize	1024//接收到委托数据后要把数据插入到DelegateRingBuffer
 #define EmbedXrpc_ResponseRingBufferSize	1024//接收到回复数据后要把数据插入到ResponseRingBuffer
