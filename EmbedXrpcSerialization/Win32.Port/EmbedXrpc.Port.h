@@ -9,12 +9,12 @@ extern "C" {
 		char IpAddress[16];
 		int Port;
 	};
-	typedef struct Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
-
+	typedef Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
+#if 0
 
 
 #define EmbedXrpc_CheckSumValid				1
-#define EmbedXrpc_IsSendToQueue				0
+#define EmbedXrpc_IsSendToQueue				1
 
 
 //client部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
@@ -28,7 +28,7 @@ extern "C" {
 #define Client_ThreadPriority				0x6
 
 
-#define EmbedXrpc_UseRingBufferWhenReceiving 0
+#define EmbedXrpc_UseRingBufferWhenReceiving 1
 
 
 #if EmbedXrpc_UseRingBufferWhenReceiving==1
@@ -41,7 +41,7 @@ extern "C" {
 #define EmbedXrpc_RequestRingBufferSize		1024//接收到请求数据后要把数据插入到RequestRingBuffer
 
 #endif
-
+#endif
 
 #ifdef __cplusplus
 }

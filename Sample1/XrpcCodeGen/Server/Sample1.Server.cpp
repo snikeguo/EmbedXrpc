@@ -1,11 +1,12 @@
 ﻿#include"Sample1.Server.h"
-void  DateTimeChangeDelegate::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1])
+template<class DTL>
+void  DateTimeChangeDelegate<DTL>::Invoke(DTL* userDataOfTransportLayer,DateTime_t now[1])
 {
 //write serialization code:DateTimeChange(now,)
 SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);
-SerializationManager_Reset(&sm);
+sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
 sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;
 SendData.now[0]=now[0];
@@ -15,18 +16,19 @@ RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(DateTimeChange_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);
-RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
-SerializationManager_Reset(&sm);
+RpcObject->Sender.Invoke(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
+sm.Reset();
 El_ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
 
 
-void  TestDelegateDelegate::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer)
+template<class DTL>
+void  TestDelegateDelegate<DTL>::Invoke(DTL* userDataOfTransportLayer)
 {//write serialization code:TestDelegate(now,)
 SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);
-SerializationManager_Reset(&sm);
+sm.Reset();
 sm.Buf = &RpcObject->DataLinkLayoutBuffer[4];
 sm.BufferLen = RpcObject->DataLinkLayoutBufferLen-4;
 TestDelegate_Parameter_Serialize(&sm,&SendData);
@@ -35,55 +37,63 @@ RpcObject->DataLinkLayoutBuffer[1]=(uint8_t)(TestDelegate_ServiceId>>8&0xff);
 RpcObject->DataLinkLayoutBuffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkLayoutBuffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkLayoutBuffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);
-RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
-SerializationManager_Reset(&sm);
+RpcObject->Sender.Invoke(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkLayoutBuffer);
+sm.Reset();
 El_ReleaseMutex(RpcObject->ObjectMutexHandle);
 }
 
 
-void Inter_AddService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
+template<class DTL>
+void Inter_AddService<DTL>::Invoke(ServiceInvokeParameter<DTL> * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_Add_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_CheckSumValid==1
-El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
-#endif
+if(serviceInvokeParameter->rpcObject->RpcConfig->CheckSumValid==true)
+{
+El_Assert(recManager->GetReferenceSum()==recManager->GetCalculateSum());
+}
 Add(serviceInvokeParameter,request.a,request.b,request.dataLen,request.data);
 Inter_Add_Parameter_FreeData(&request);
 Inter_Add_Return_Serialize(sendManager,&Response);
-if(IsFreeResponse==true) Inter_Add_Return_FreeData(&Response);
+if(this->IsFreeResponse==true) Inter_Add_Return_FreeData(&Response);
 }
 
 
-void Inter_NoArgService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
+template<class DTL>
+void Inter_NoArgService<DTL>::Invoke(ServiceInvokeParameter<DTL> * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_NoArg_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_CheckSumValid==1
-El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
-#endif
+if(serviceInvokeParameter->rpcObject->RpcConfig->CheckSumValid==true)
+{
+El_Assert(recManager->GetReferenceSum()==recManager->GetCalculateSum());
+}
 NoArg(serviceInvokeParameter);
 Inter_NoArg_Parameter_FreeData(&request);
 Inter_NoArg_Return_Serialize(sendManager,&Response);
-if(IsFreeResponse==true) Inter_NoArg_Return_FreeData(&Response);
+if(this->IsFreeResponse==true) Inter_NoArg_Return_FreeData(&Response);
 }
 
 
-void Inter_NoReturnService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
+template<class DTL>
+void Inter_NoReturnService<DTL>::Invoke(ServiceInvokeParameter<DTL> * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_NoReturn_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_CheckSumValid==1
-El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
-#endif
+if(serviceInvokeParameter->rpcObject->RpcConfig->CheckSumValid==true)
+{
+El_Assert(recManager->GetReferenceSum()==recManager->GetCalculateSum());
+}
 NoReturn(serviceInvokeParameter,request.a);
 Inter_NoReturn_Parameter_FreeData(&request);
 }
 
 
-void Inter_NoArgAndReturnService::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
+template<class DTL>
+void Inter_NoArgAndReturnService<DTL>::Invoke(ServiceInvokeParameter<DTL> * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Inter_NoArgAndReturn_Parameter_Deserialize(recManager,&request);
-#if EmbedXrpc_CheckSumValid==1
-El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
-#endif
+if(serviceInvokeParameter->rpcObject->RpcConfig->CheckSumValid==true)
+{
+El_Assert(recManager->GetReferenceSum()==recManager->GetCalculateSum());
+}
 NoArgAndReturn(serviceInvokeParameter);
 Inter_NoArgAndReturn_Parameter_FreeData(&request);
 }

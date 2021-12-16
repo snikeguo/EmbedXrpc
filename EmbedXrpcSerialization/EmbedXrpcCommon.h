@@ -2,11 +2,18 @@
 #define EmbedXrpcCommon_H
 
 
-#include "EmbedXrpcPortInterface.h"
+//#include "EmbedXrpcPortInterface.h"
 #include "EmbedSerialization.h"
 #define EmbedXrpcSuspendSid 0x01
 #define EmbedXrpcUnsupportedSid 0x2
+template<class DTL>
 class EmbedXrpcObject;
+
+class BlockRingBufferProvider;
+class SerializationManager;
+
+template<class DTL>
+struct ReceiveItemInfo;
  enum RequestResponseState
  {
      RequestState_Ok=1,
@@ -16,30 +23,58 @@ class EmbedXrpcObject;
      ResponseState_SidError=5,
      ResponseState_UnsupportedSid = 6,
  };
+
+ struct EmbedXrpcConfig
+ {
+     bool CheckSumValid;
+     bool IsSendToQueue;
+
+     //client部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
+     uint32_t DelegateBlockQueue_MaxItemNumber;
+     uint32_t ResponseBlockQueue_MaxItemNumber;
+
+//server部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
+     uint32_t RequestBlockQueue_MaxItemNumber;
+
+     uint32_t ServerThreadPriority;
+     uint32_t ClientThreadPriority;
+
+
+     bool UseRingBufferWhenReceiving;
+
+    //client
+     BlockRingBufferProvider* DelegateBlockBufferProvider = nullptr;
+     BlockRingBufferProvider* ResponseBlockBufferProvider = nullptr;
+
+    //server
+     BlockRingBufferProvider* RequestBlockBufferProvider = nullptr;
+
+ };
  enum ReceiveType_t
  {
      ReceiveType_Request=0x1,
 	 ReceiveType_Response=0x2,
 	 ReceiveType_Delegate=0x3,
  };
+ template<class DTL>
  class IDelegate
  {
  public:
      void* UserData;
      virtual uint16_t GetSid() = 0;
-	 virtual void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,
+	 virtual void Invoke(EmbedXrpcConfig *rpcConfig,DTL* userDataOfTransportLayer,
          SerializationManager* recManager) = 0;
  };
-
+ template<class DTL>
  class ServiceInvokeParameter
  {
  public:
-     UserDataOfTransportLayer_t* request_UserDataOfTransportLayer;
-     UserDataOfTransportLayer_t response_UserDataOfTransportLayer;
-     EmbedXrpcObject* rpcObject;
+     DTL* request_UserDataOfTransportLayer;
+     DTL response_UserDataOfTransportLayer;
+     EmbedXrpcObject<DTL>* rpcObject;
      uint16_t targetTimeOut;
  };
-
+ template<class DTL>
  class IService
  {
  public:
@@ -53,25 +88,44 @@ class EmbedXrpcObject;
      bool IsFreeResponse = true;
      virtual uint16_t GetSid() = 0;
 	 virtual void Invoke(
-         ServiceInvokeParameter * serviceInvokeParameter,
-         SerializationManager* recManager, 
+         ServiceInvokeParameter<DTL> * serviceInvokeParameter,
+         SerializationManager* recManager,
          SerializationManager* sendManager) = 0;
  };
+ template<class DTL>
  struct RequestDescribe
  {
      const char* Name;
-     IService* Service;
+     IService<DTL>* Service;
  };
+ template<class DTL>
  struct DelegateDescribe
  {
      const char* Name;
-     IDelegate* Delegate;
+     IDelegate<DTL>* Delegate;
  };
  struct ResponseDescribe
  {
      const char* Name;
      uint16_t Sid;
  };
-typedef bool (*SendPack_t)(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj,uint32_t dataLen, uint8_t* data);
+ 
+ template<class DTL>
+ struct ReceiveItemInfo
+ {
+     uint32_t DataLen;
+     uint32_t CheckSum;
+     uint16_t Sid;
+     uint16_t TargetTimeout;
+     uint8_t* Data;
+     DTL UserDataOfTransportLayer;
+ };
+
+ template<class DTL>
+ struct SendAction
+ {
+     bool (*Invoke)(DTL* userDataOfTransportLayer, EmbedXrpcObject<DTL>* rpcObj, uint32_t dataLen, uint8_t* data);
+ };
+
 
 #endif

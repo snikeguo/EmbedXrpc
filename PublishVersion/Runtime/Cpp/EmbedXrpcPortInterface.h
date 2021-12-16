@@ -6,17 +6,7 @@
 extern "C" {
 #endif
    
-    typedef struct ReceiveItemInfo
-    {
-        uint32_t DataLen;
-        uint32_t CheckSum;
-        uint16_t Sid;
-        uint16_t TargetTimeout;
-#if EmbedXrpc_UseRingBufferWhenReceiving==0
-        uint8_t* Data;
-#endif
-        UserDataOfTransportLayer_t UserDataOfTransportLayer;
-    }ReceiveItemInfo;
+
 #ifdef __cplusplus
 }
 #endif

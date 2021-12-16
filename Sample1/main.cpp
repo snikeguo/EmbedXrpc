@@ -1,24 +1,45 @@
+#if 1
 #include <thread>
 #include "Sample1.Client.h"
 #include "Sample1.Server.h"
-
-extern EmbedXrpcObject ClientRpc;
-extern EmbedXrpcObject ServerRpc;
-
+#include "EmbedXrpc.Port.h"
+extern EmbedXrpcObject<UserDataOfTransportLayer_t> ClientRpc;
+extern EmbedXrpcObject<UserDataOfTransportLayer_t> ServerRpc;
+EmbedXrpcConfig RpcConfig = {true,false,10,10,10,6,6,false,};
 #define DataLinkBufferLen	4096
 
 //-------------------------------------------------------------------------
 //client 
 uint8_t ClientDataLinkBuffer[DataLinkBufferLen];
-bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,EmbedXrpcObject* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
+bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,EmbedXrpcObject<UserDataOfTransportLayer_t>* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer)==true);
 	return true;
 }
-DateTimeChangeClientImpl DateTimeChange;
-TestDelegateClientImpl Test;
+//特化子类继承
+class DateTimeChangeDelegateReceiver :public DateTimeChange_DelegateReceiver<UserDataOfTransportLayer_t>
+{
+public:
+	void DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
+	{
+		printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
+		//printf("%s", now[0].DateString);
+	}
+};
+//特化子类继承
+class TestDelegateDelegateReceiver :public TestDelegate_DelegateReceiver<UserDataOfTransportLayer_t>
+{
+public:
+	void TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
+	{
+		printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
+		//printf("%s", now[0].DateString);
+	}
+};
+DateTimeChangeDelegateReceiver DateTimeChange;
+TestDelegateDelegateReceiver Test;
 
-DelegateDescribe AllDelegates[2] =
+DelegateDescribe<UserDataOfTransportLayer_t> AllDelegates[2] =
 {
 	{"DateTimeChange"  ,&DateTimeChange},
 	{"TestDelegate"  ,&Test},
@@ -31,28 +52,20 @@ ResponseDescribe Responses[4] =
 	{"Inter_NoReturn"   ,     Inter_NoReturn_ServiceId},
 	{"Inter_NoArgAndReturn"    ,    Inter_NoArgAndReturn_ServiceId},
 };
-
-EmbedXrpcObject ClientRpc(ClientDataLinkBuffer,
+SendAction<UserDataOfTransportLayer_t> ClientSendAction = {ClientSend};
+EmbedXrpcObject<UserDataOfTransportLayer_t> ClientRpc(ClientDataLinkBuffer,
 	DataLinkBufferLen,
-	ClientSend,
+	ClientSendAction,
 	1000,
 	Responses,
 	4,
 	AllDelegates,
 	2,
+	&RpcConfig,
 	nullptr);//client rpc 对象
 
-void DateTimeChangeClientImpl::DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
-{
-	printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
-	//printf("%s", now[0].DateString);
-}
-void TestDelegateClientImpl::TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
-{
-	printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
-	//printf("%s", now[0].DateString);
-}
-InterClientImpl Client(&ClientRpc);
+
+InterClientImpl<UserDataOfTransportLayer_t> Client(&ClientRpc);
 void ClientThread()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -81,7 +94,7 @@ void ClientThread()
 //--------------------------------------------------------------------
 //server
 uint8_t ServerDataLinkBuffer[DataLinkBufferLen];
-bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
+bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject<UserDataOfTransportLayer_t>* rpcObj, uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
 	/*for (size_t i = 4; i < dataLen; i++)
 	{
@@ -91,25 +104,91 @@ bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcO
 	ClientRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer);
 	return true;
 }
-Inter_AddService Inter_AddService_Instance;
-Inter_NoArgService Inter_NoArgService_Instance;
-Inter_NoReturnService Inter_NoReturnService_Instance;
-Inter_NoArgAndReturnService Inter_NoArgAndReturnService_Instance;
-RequestDescribe Requests[] =
+//特化子类继承
+class Inter_AddServiceProvider :public Inter_AddService<Win32UserDataOfTransportLayerTest>
+{
+public:
+	void Add(ServiceInvokeParameter<Win32UserDataOfTransportLayerTest>* serviceInvokeParameter,
+		Int32 a, Int32 b, Int32 dataLen, UInt8* data)
+	{
+		EmbedXrpcObject<Win32UserDataOfTransportLayerTest>* RpcObj = (EmbedXrpcObject<Win32UserDataOfTransportLayerTest>*)serviceInvokeParameter->rpcObject;
+		RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
+		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->targetTimeOut / 2);
+		this->IsFreeResponse = true;
+		Response.ReturnValue.Sum = 1;
+		Response.ReturnValue.Sum2 = 2;
+		Response.ReturnValue.Sum3 = 3;
+
+		Response.ReturnValue.Sum4 = 1;
+		Response.ReturnValue.Sum5 = 2;
+		Response.ReturnValue.Sum6 = 3;
+		Response.ReturnValue.Sum7 = 0x66661111;
+
+		Response.ReturnValue.dataLen = 0;
+		Response.ReturnValue.data = NULL;
+		printf("模拟耗时操作  延时2秒\n");
+		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
+		//printf("len:%d\n", dataLen);
+	}
+};
+
+//特化子类继承
+class Inter_NoArgServiceProvider :public Inter_NoArgService<Win32UserDataOfTransportLayerTest>
+{
+public:
+	void NoArg(ServiceInvokeParameter<Win32UserDataOfTransportLayerTest>* serviceInvokeParameter)
+	{
+		this->IsFreeResponse = true;
+		Response.ReturnValue = true;
+	}
+};
+
+
+//特化子类继承
+class Inter_NoReturnServiceProvider :public Inter_NoReturnService<Win32UserDataOfTransportLayerTest>
+{
+public:
+	void NoReturn(ServiceInvokeParameter<Win32UserDataOfTransportLayerTest>* serviceInvokeParameter,
+		int a)
+	{
+
+	}
+
+};
+
+//特化子类继承
+class Inter_NoArgAndReturnServiceProvider :public Inter_NoArgAndReturnService<Win32UserDataOfTransportLayerTest>
+{
+public:
+	void NoArgAndReturn(ServiceInvokeParameter<Win32UserDataOfTransportLayerTest>* serviceInvokeParameter)
+	{
+
+	}
+};
+
+
+Inter_AddServiceProvider Inter_AddService_Instance;
+Inter_NoArgServiceProvider Inter_NoArgService_Instance;
+Inter_NoReturnServiceProvider Inter_NoReturnService_Instance;
+Inter_NoArgAndReturnServiceProvider Inter_NoArgAndReturnService_Instance;
+RequestDescribe<UserDataOfTransportLayer_t> Requests[] =
 {
 	{"Inter_Add",					&Inter_AddService_Instance},
 	{"Inter_NoArg",					&Inter_NoArgService_Instance},
 	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
 	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
 };
-EmbedXrpcObject ServerRpc(ServerDataLinkBuffer,
+SendAction<UserDataOfTransportLayer_t> ServerSendAction = { ServerSend };
+EmbedXrpcObject<UserDataOfTransportLayer_t> ServerRpc(ServerDataLinkBuffer,
 	DataLinkBufferLen,
-	ServerSend,
+	ServerSendAction,
 	500,
 	Requests,
 	4,
+	&RpcConfig,
 	nullptr);//server rpc 对象
-DateTimeChangeDelegate DateTimeChanger(&ServerRpc);
+DateTimeChange_DelegateSender<UserDataOfTransportLayer_t> DateTimeChanger(&ServerRpc);
 void ServerThread()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
@@ -149,46 +228,6 @@ void ServerThread()
 	ServerRpc.DeInit();
 }
 
-void Inter_AddService::Add(ServiceInvokeParameter* serviceInvokeParameter,
-	Int32 a, Int32 b, Int32 dataLen, UInt8* data)
-{
-	EmbedXrpcObject* RpcObj = (EmbedXrpcObject*)serviceInvokeParameter->rpcObject;
-	RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
-	El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->targetTimeOut/2);
-	IsFreeResponse = false;
-	Response.ReturnValue.Sum = 1;
-	Response.ReturnValue.Sum2 = 2;
-	Response.ReturnValue.Sum3 = 3;
-
-	Response.ReturnValue.Sum4 = 1;
-	Response.ReturnValue.Sum5 = 2;
-	Response.ReturnValue.Sum6 = 3;
-	Response.ReturnValue.Sum7 = 0x66661111;
-
-	Response.ReturnValue.dataLen = 0;
-	Response.ReturnValue.data = NULL;
-	printf("模拟耗时操作  延时2秒\n");
-	//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-	//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
-	//printf("len:%d\n", dataLen);
-}
-
-
-void Inter_NoArgService::NoArg(ServiceInvokeParameter* serviceInvokeParameter)
-{
-	IsFreeResponse = true;
-	Response.ReturnValue = true;
-}
-
-void Inter_NoReturnService::NoReturn(ServiceInvokeParameter* serviceInvokeParameter,
-	int a)
-{
-
-}
-void Inter_NoArgAndReturnService::NoArgAndReturn(ServiceInvokeParameter* serviceInvokeParameter)
-{
-
-}
 int main(int argc, char *argv[])
 {
 	
@@ -209,3 +248,30 @@ int main(int argc, char *argv[])
 是因为QT不允许其他线程操作QT的定时器，你可以临时把Win32EmbedXrpcPort.cpp的
 t->Start(interval);、t->Reset();、t->Stop();注释掉  这样就没有这个问题了。
 */
+
+#else
+
+template<class T>
+class IClass
+{
+public:
+	virtual T Test()=0;
+};
+class MyClass :public IClass<int>
+{
+public:
+	int Test()
+	{
+		return 5;
+	}
+};
+int main()
+{
+	MyClass Tester;
+	auto v = Tester.Test();
+
+	IClass<int>* base = &Tester;
+	auto v2=base->Test();
+
+}
+#endif

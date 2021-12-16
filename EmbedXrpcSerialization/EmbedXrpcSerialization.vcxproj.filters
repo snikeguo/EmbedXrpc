@@ -47,10 +47,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EmbedSerialization.c">
+    <ClCompile Include="EmbedSerialization.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BlockBufferProvider.c">
+    <ClCompile Include="BlockBufferProvider.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ringbuffer.c">

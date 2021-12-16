@@ -5,10 +5,6 @@
 #include "EmbedLibrary.h"
 #include "BlockBufferProvider.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef offsetof
 #define offsetof(s, m) (uint32_t)((char*)(&((s*)0)->m))
 #endif
@@ -39,37 +35,79 @@ typedef enum {
 
 } Type_t;
 
+//template<class DTL>
+class  BlockRingBufferProvider;
 
-typedef struct _SerializationManager
+
+class SerializationManager
 {
-
+public:
 	uint32_t Index;
 	uint8_t* Buf;
 	uint32_t BufferLen;
 	BlockRingBufferProvider* BlockBufferProvider;
 
-#if EmbedXrpc_CheckSumValid==1
 	uint32_t ReferenceSum ;
 	uint32_t CalculateSum ;
-#endif
-}SerializationManager;
-#if EmbedXrpc_CheckSumValid==1
-#define SerializationManagerAppendDataSum(sm,sum)    SerializationManager_SetCalculateSum(sm,SerializationManager_GetCalculateSum(sm)+sum)
-#else
-#define SerializationManagerAppendDataSum(sm,sum)
-#endif
-void  SerializationManager_Reset(SerializationManager* sm);
-#if EmbedXrpc_CheckSumValid==1
-void SerializationManager_SetReferenceSum(SerializationManager* sm, uint32_t sum);
-void SerializationManager_SetCalculateSum(SerializationManager* sm, uint32_t sum);
-uint32_t SerializationManager_GetReferenceSum(SerializationManager* sm);
-uint32_t SerializationManager_GetCalculateSum(SerializationManager* sm);
-void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum);//只有ringbuffer mode 为0的情况下使用。
-#endif
+
+	void  Reset() 
+	{
+		Index = 0;
+		Buf = nullptr;
+		BufferLen = 0;
+		BlockBufferProvider = nullptr;
+		ReferenceSum = 0;
+		CalculateSum = 0;
+	}
+	void SetReferenceSum(uint32_t sum)
+	{
+		if (BlockBufferProvider != NULL)
+		{
+			BlockBufferProvider->SetReferenceSum(sum);
+		}
+		else
+		{
+			ReferenceSum = sum;
+		}
+	}
+	void SetCalculateSum(uint32_t sum)
+	{
+		if (BlockBufferProvider != NULL)
+		{
+			BlockBufferProvider->SetCalculateSum(sum);
+		}
+		else
+		{
+			CalculateSum = sum;
+		}
+	}
+	uint32_t GetReferenceSum()
+	{
+		if (BlockBufferProvider != NULL)
+		{
+			return BlockBufferProvider->GetReferenceSum();
+		}
+		else
+		{
+			return ReferenceSum;
+		}
+	}
+	uint32_t GetCalculateSum()
+	{
+		if (BlockBufferProvider != NULL)
+		{
+			return BlockBufferProvider->GetCalculateSum();
+		}
+		else
+		{
+			return CalculateSum;
+		}
+	}
+	void AppendSumToCalculateSum(uint32_t sum)//只有ringbuffer mode 为0的情况下使用。
+	{
+		CalculateSum += sum;
+	}
+	
+};
 void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif
