@@ -97,12 +97,12 @@ namespace EmbedXrpcIdlParser
 
 
 
-            SerializeCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, encode);
+            //SerializeCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.cpp", false, encode);
 
 
-            SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
-            SerializeCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
-            SerializeCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
+            //SerializeCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.EmbedXrpcSerialization.h\"");
+            //SerializeCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
+            //SerializeCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
 
             SerializeHsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".EmbedXrpcSerialization.h", false, encode);
             SerializeHsw.WriteLine($"#ifndef {outputattr.OutPutFileName.Replace(".","_")}_EmbedXrpcSerialization_H");
@@ -217,8 +217,8 @@ namespace EmbedXrpcIdlParser
             //fbsStreamWriter.Close();
             //FbsHelper.GenerateSerializationCode(outputpath+outputattr.OutPutFileName + ".fbs");
 
-            SerializeCsw.Flush();
-            SerializeCsw.Close();
+            //SerializeCsw.Flush();
+            //SerializeCsw.Close();
 
             
 
@@ -253,7 +253,7 @@ namespace EmbedXrpcIdlParser
         //private StreamWriter ClientCsw;
         private StreamWriter ServerHsw;
         //private StreamWriter ServerCsw;
-        private StreamWriter SerializeCsw;
+        //private StreamWriter SerializeCsw;
         private StreamWriter SerializeHsw;
      
         public void EmitStruct(StructType_TargetType structType, CppCodeGenParameter cppCodeGenParameter)
@@ -264,7 +264,7 @@ namespace EmbedXrpcIdlParser
              */
             CppSerializableCommon.EmitStruct(structType, CommonHsw);
             embedXrpcSerializationGenerator.EmitStruct(structType,
-                    SerializeCsw,
+                    //SerializeCsw,
                     SerializeHsw);
             embedXrpcSerializationGenerator.EmitSerializeMacro(structType, SerializeHsw);
             embedXrpcSerializationGenerator.EmitDeserializeMacro(structType, SerializeHsw);
@@ -344,7 +344,7 @@ namespace EmbedXrpcIdlParser
 
                 //code gen invoke
                 ClientHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName} request;");
-                ClientHsw.WriteLine("void Invoke(EmbedXrpcConfig *rpcConfig,DTL* userDataOfTransportLayer,SerializationManager *recManager)");//声明
+                ClientHsw.WriteLine("void Invoke(EmbedXrpcConfig<DTL> *rpcConfig,DTL* userDataOfTransportLayer,SerializationManager<DTL> *recManager)");//声明
 
                 //MacroControlWriteBegin(ClientCsw, targetDelegate.MacroControlAttribute);
                 //ClientCsw.WriteLine("template<class DTL>");
@@ -373,7 +373,7 @@ namespace EmbedXrpcIdlParser
                 ClientHsw.WriteLine(");");//生成调用目标函数。
                 //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
                 //ClientCsw.WriteLine($"SerializationManager::FreeData(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
-                ClientHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_FreeData(&request);");//free掉request
+                ClientHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_FreeData<DTL>(&request);");//free掉request
 
                 ClientHsw.WriteLine("}");//函数生成完毕
                 //MacroControlWriteEnd(ClientCsw, targetDelegate.MacroControlAttribute);
@@ -434,8 +434,8 @@ namespace EmbedXrpcIdlParser
                 //函数实现
                 ServerHsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
                 //ServerCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} SendData;");
-                ServerHsw.WriteLine($"SerializationManager sm;");
-                ServerHsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
+                ServerHsw.WriteLine($"SerializationManager<DTL> sm;");
+                ServerHsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager<DTL>));");
                 //ServerCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
                 ServerHsw.WriteLine("El_TakeMutex(RpcObject->ObjectMutexHandle, El_WAIT_FOREVER);");
                 ServerHsw.WriteLine("sm.Reset();\n" +
@@ -606,7 +606,7 @@ namespace EmbedXrpcIdlParser
                     ClientHsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
 
                     //ClientCsw.WriteLine($"static {service.ParameterStructType.TypeName} SendData;");
-                    ClientHsw.WriteLine($"SerializationManager sm;");
+                    ClientHsw.WriteLine($"SerializationManager<DTL> sm;");
                     ClientHsw.WriteLine("sm.Reset();");
                     //ClientCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
                     //ClientCsw.WriteLine($"static {service.ReturnStructType.TypeName} reqresp;");
@@ -748,7 +748,7 @@ namespace EmbedXrpcIdlParser
                         ClientHsw.WriteLine("{\nif(response->State==ResponseState_Ok)\n{");
                         //ClientCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(response);");
                         //ClientCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,response);");
-                        ClientHsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(response);");
+                        ClientHsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData<DTL>(response);");
                         ClientHsw.WriteLine("}\n}");
                     }
                     ClientHsw.WriteLine("\n"); //client interface end class
@@ -804,7 +804,7 @@ namespace EmbedXrpcIdlParser
 
                     //code gen invoke
                     ServerHsw.WriteLine($"{service.ParameterStructType.TypeName} request;");
-                    ServerHsw.WriteLine("void Invoke(ServiceInvokeParameter<DTL> * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)");
+                    ServerHsw.WriteLine("void Invoke(ServiceInvokeParameter<DTL> * serviceInvokeParameter,SerializationManager<DTL> *recManager, SerializationManager<DTL>* sendManager)");
                     //ServerCsw.WriteLine("template<class DTL>");
                     //ServerCsw.WriteLine($"void {service.FullName}Service<DTL>::Invoke(ServiceInvokeParameter<DTL> * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)");
                     ServerHsw.WriteLine("{");
@@ -833,7 +833,7 @@ namespace EmbedXrpcIdlParser
 
                     //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Free(&request);");//free
                     //ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");//free
-                    ServerHsw.WriteLine($"{service.ParameterStructType.TypeName}_FreeData(&request);");//free
+                    ServerHsw.WriteLine($"{service.ParameterStructType.TypeName}_FreeData<DTL>(&request);");//free
                     if (service.ReturnStructType.TargetFields.Count>1)
                     {
                         //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
@@ -843,7 +843,7 @@ namespace EmbedXrpcIdlParser
                         //ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,&Response);");//生成返回值序列化
 
                         //ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 让用户去 free,所以注释了这条语句
-                        ServerHsw.WriteLine($"if(this->IsFreeResponse==true) {service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 可以选择free,有用户控制所以有了这条语句
+                        ServerHsw.WriteLine($"if(this->IsFreeResponse==true) {service.ReturnStructType.TypeName}_FreeData<DTL>(&Response);");//2021.3.10 用户malloc的空间 可以选择free,有用户控制所以有了这条语句
                     }
 
                     ServerHsw.WriteLine("}");//end function

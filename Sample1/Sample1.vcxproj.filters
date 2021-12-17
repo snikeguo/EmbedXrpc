@@ -42,17 +42,14 @@
     <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
     <ClCompile Include="XrpcCodeGen\Sample1.cpp">
       <Filter>XRPCCodeGen</Filter>
     </ClCompile>
-    <ClCompile Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.cpp">
-      <Filter>XRPCCodeGen</Filter>
+    <ClCompile Include="Client.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +88,9 @@
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\EmbedXrpc.Port.h">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
+    </ClInclude>
+    <ClInclude Include="DTL.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

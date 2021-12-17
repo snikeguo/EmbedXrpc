@@ -36,15 +36,6 @@
     <ClInclude Include="EmbedXrpcObject.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="EmbedXrpcPortInterface.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="FreeRTOS.Port\EmbedXrpc.Port.h">
-      <Filter>FreeRTOS.Port</Filter>
-    </ClInclude>
-    <ClInclude Include="Win32.Port\EmbedXrpc.Port.h">
-      <Filter>WIN32.Port</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EmbedSerialization.cpp">

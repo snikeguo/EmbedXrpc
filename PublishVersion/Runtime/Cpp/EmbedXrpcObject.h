@@ -6,6 +6,39 @@
 #define EmbedXrpcObjectVersion	"2.1.0"
 
 
+template <class DTL>
+struct ClientNodeQuicklyInitConfig
+{
+	uint8_t* DataLinkBuffer;
+	uint32_t DataLinkBufferLen;
+	SendAction<DTL> Sender;
+	uint32_t TimeOut;
+
+	ResponseDescribe* Responses;
+	uint32_t ResponsesCount;
+
+	DelegateDescribe<DTL>* Delegates;
+	uint32_t DelegatesCount;
+
+	EmbedXrpcConfig<DTL> RpcConfig;
+
+	void* UserData;
+};
+
+template <class DTL>
+struct ServerNodeQuicklyInitConfig
+{
+	uint8_t* DataLinkBuffer;
+	uint32_t DataLinkBufferLen;
+	SendAction<DTL> Sender;
+	uint32_t TimeOut;
+
+	RequestDescribe<DTL>* Requests;//server 请求的services
+	uint32_t RequestsCount;//server
+
+	EmbedXrpcConfig<DTL> RpcConfig;
+	void* UserData ;
+};
 
 template<class DTL>
 class EmbedXrpcObject
@@ -20,8 +53,8 @@ public:
 	El_Mutex_t ObjectMutexHandle;
 
 //#if EmbedXrpc_UseRingBufferWhenReceiving==1
-	BlockRingBufferProvider* DelegateBlockBufferProvider = nullptr;
-	BlockRingBufferProvider* ResponseBlockBufferProvider = nullptr;
+	BlockRingBufferProvider<DTL>* DelegateBlockBufferProvider = nullptr;
+	BlockRingBufferProvider<DTL>* ResponseBlockBufferProvider = nullptr;
 //#else
 	El_Queue_t DelegateBlockQueue = nullptr;
 	El_Queue_t ResponseBlockQueue = nullptr;
@@ -41,13 +74,13 @@ public:
 	volatile bool DeInitFlag;
 	volatile bool DelegateServiceThreadExitState;
 	volatile bool RequestProcessServiceThreadExitState;
-	EmbedXrpcConfig* RpcConfig;
+	EmbedXrpcConfig<DTL>* RpcConfig;
 
 	//server:
 	El_Thread_t RequestProcessServiceThreadHandle; 
 	//El_Mutex_t ObjectMutexHandle;
 //#if EmbedXrpc_UseRingBufferWhenReceiving==1
-	BlockRingBufferProvider* RequestBlockBufferProvider;
+	BlockRingBufferProvider<DTL>* RequestBlockBufferProvider;
 //#else
 	El_Queue_t	RequestBlockQueue;
 //#endif
@@ -72,7 +105,7 @@ public:
 		RequestDescribe<DTL>* requests,//server 请求的services
 		uint32_t requestsCount,//server
 
-		EmbedXrpcConfig*rpcConfig,
+		EmbedXrpcConfig<DTL>*rpcConfig,
 		void* ud = nullptr) :
 
 		DataLinkLayoutBuffer(dataLinkLayoutBuffer),
@@ -92,9 +125,9 @@ public:
 		UserData(ud),
 		DeInitFlag(false),
 
-		DelegateBlockBufferProvider(rpcConfig->DelegateBlockBufferProvider),
-		ResponseBlockBufferProvider(rpcConfig->ResponseBlockBufferProvider),
-		RequestBlockBufferProvider(rpcConfig->RequestBlockBufferProvider),
+		DelegateBlockBufferProvider(rpcConfig->RingBufferConfig.DelegateBlockBufferProvider),
+		ResponseBlockBufferProvider(rpcConfig->RingBufferConfig.ResponseBlockBufferProvider),
+		RequestBlockBufferProvider(rpcConfig->RingBufferConfig.RequestBlockBufferProvider),
 
 		RequestProcessServiceThreadHandle(nullptr),
 		SuspendTimer(nullptr),
@@ -107,55 +140,34 @@ public:
 	}
 	//client节点构造函数
 	EmbedXrpcObject(
-		uint8_t* dataLinkLayoutBuffer,
-		uint32_t dataLinkLayoutBufferLen,
-		SendAction<DTL> send,
-		uint32_t timeOut,
+		ClientNodeQuicklyInitConfig<DTL> *client) :EmbedXrpcObject(client->DataLinkBuffer,
+			client->DataLinkBufferLen,
 
-		ResponseDescribe* responses,
-		uint32_t responsesCount,
+			client->Sender,
+			client->TimeOut,
 
-		DelegateDescribe<DTL>* delegates,
-		uint32_t delegatesCount,
+			client->Responses,
+			client->ResponsesCount,
 
-		EmbedXrpcConfig*rpcConfig,
-		void* ud = nullptr) :EmbedXrpcObject(dataLinkLayoutBuffer, 
-			dataLinkLayoutBufferLen,
-
-			send,
-			timeOut,
-
-			responses,
-			responsesCount,
-
-			delegates,
-			delegatesCount,
+			client->Delegates,
+			client->DelegatesCount,
 
 			nullptr,
 			0,
 
-			rpcConfig,
-			ud
+			&client->RpcConfig,
+			client->UserData
 		)
 	{
 
 	}
 	//server节点的构造函数
 	EmbedXrpcObject(
-		uint8_t* dataLinkLayoutBuffer,
-		uint32_t dataLinkLayoutBufferLen,
-		SendAction<DTL> send,
-		uint32_t timeOut,
+		ServerNodeQuicklyInitConfig<DTL> *server) :EmbedXrpcObject(server->DataLinkBuffer,
+			server->DataLinkBufferLen,
 
-		RequestDescribe<DTL>* requests,//server 请求的services
-		uint32_t requestsCount,//server
-
-		EmbedXrpcConfig*rpcConfig,
-		void* ud = nullptr) :EmbedXrpcObject(dataLinkLayoutBuffer, 
-			dataLinkLayoutBufferLen,
-
-			send,
-			timeOut,
+			server->Sender,
+			server->TimeOut,
 
 			nullptr,
 			0,
@@ -163,11 +175,11 @@ public:
 			nullptr,
 			0,
 
-			requests,
-			requestsCount,
+			server->Requests,
+			server->RequestsCount,
 
-			rpcConfig,
-			ud
+			&server->RpcConfig,
+			server->UserData
 		)
 	{
 
@@ -180,43 +192,34 @@ public:
 
 		ObjectMutexHandle = El_CreateMutex("ObjectMutex");
 
-//#if EmbedXrpc_UseRingBufferWhenReceiving==1
-		//DelegateBlockBufferProvider = new BlockRingBufferProvider();
-		//BlockRingBufferProvider_Init(DelegateBlockBufferProvider, DelegateRingBuffer, EmbedXrpc_DelegateRingBufferSize, EmbedXrpc_DelegateBlockQueue_MaxItemNumber);
-
-		//ResponseBlockBufferProvider = new BlockRingBufferProvider();
-		//BlockRingBufferProvider_Init(ResponseBlockBufferProvider, ResponseRingBuffer, EmbedXrpc_ResponseRingBufferSize, EmbedXrpc_ResponseBlockQueue_MaxItemNumber);
-
-		//RequestBlockBufferProvider = new BlockRingBufferProvider();
-		//BlockRingBufferProvider_Init(RequestBlockBufferProvider, RequestRingBuffer, EmbedXrpc_RequestRingBufferSize, EmbedXrpc_RequestBlockQueue_MaxItemNumber);
-//#else
 		if (RpcConfig->UseRingBufferWhenReceiving == false)
 		{
-			DelegateBlockQueue = El_CreateQueue("DelegateBlockQueue", sizeof(ReceiveItemInfo<DTL>), RpcConfig->DelegateBlockQueue_MaxItemNumber);
-			ResponseBlockQueue = El_CreateQueue("ResponseBlockQueue", sizeof(ReceiveItemInfo<DTL>), RpcConfig->ResponseBlockQueue_MaxItemNumber);
-			RequestBlockQueue = El_CreateQueue("RequestBlockQueue", sizeof(ReceiveItemInfo<DTL>), RpcConfig->RequestBlockQueue_MaxItemNumber);
+			DelegateBlockQueue = El_CreateQueue("DelegateBlockQueue", sizeof(ReceiveItemInfo<DTL>), RpcConfig->DynamicMemoryConfig.DelegateBlockQueue_MaxItemNumber);
+			ResponseBlockQueue = El_CreateQueue("ResponseBlockQueue", sizeof(ReceiveItemInfo<DTL>), RpcConfig->DynamicMemoryConfig.ResponseBlockQueue_MaxItemNumber);
+			RequestBlockQueue = El_CreateQueue("RequestBlockQueue", sizeof(ReceiveItemInfo<DTL>), RpcConfig->DynamicMemoryConfig.RequestBlockQueue_MaxItemNumber);
 		}
 		
-//#endif
-
-//#if EmbedXrpc_DelegateBlockQueue_MaxItemNumber>0&&EmbedXrpc_IsSendToQueue==1 //client
-		if ((RpcConfig->DelegateBlockQueue_MaxItemNumber > 0) && (RpcConfig->IsSendToQueue == true))
+		if (
+			((RpcConfig->UseRingBufferWhenReceiving==false) 
+				&& (RpcConfig->DynamicMemoryConfig.DelegateBlockQueue_MaxItemNumber > 0) 
+				&& (RpcConfig->DynamicMemoryConfig.IsSendToQueue == true))//动态内存模式
+			||(RpcConfig->UseRingBufferWhenReceiving==true)//ringbuffer模式
+			)
 		{
 			DelegateServiceThreadHandle = El_CreateThread("DelegateServiceThread", RpcConfig->ClientThreadPriority, DelegateServiceThread, this, 2048);
 			El_ThreadStart(DelegateServiceThreadHandle);
 		}
-		
-//#endif
 
-		//server
-//#if EmbedXrpc_RequestBlockQueue_MaxItemNumber>0&&EmbedXrpc_IsSendToQueue==1
-		if ((RpcConfig->RequestBlockQueue_MaxItemNumber > 0) && (RpcConfig->IsSendToQueue == true))
+		if (
+			((RpcConfig->UseRingBufferWhenReceiving == false)
+				&&(RpcConfig->DynamicMemoryConfig.RequestBlockQueue_MaxItemNumber > 0)
+				&& (RpcConfig->DynamicMemoryConfig.IsSendToQueue == true))//动态内存模式
+			|| (RpcConfig->UseRingBufferWhenReceiving == true)//ringbuffer模式
+			)
 		{
 			RequestProcessServiceThreadHandle = El_CreateThread("RequestProcessServiceThread", RpcConfig->ServerThreadPriority, RequestProcessServiceThread, this, 2048);
 			El_ThreadStart(RequestProcessServiceThreadHandle);
 		}
-		
-//#endif
 		SuspendTimer = El_CreateTimer("SuspendTimer", El_WAIT_FOREVER, SuspendTimerCallBack, this);
 	}
 	void DeInit()
@@ -224,7 +227,7 @@ public:
 		DeInitFlag = true;
 		El_DeleteMutex(ObjectMutexHandle);
 
-		if (RpcConfig->DelegateBlockQueue_MaxItemNumber > 0 && RpcConfig->IsSendToQueue == true)
+		if (RpcConfig->DynamicMemoryConfig.DelegateBlockQueue_MaxItemNumber > 0 && RpcConfig->DynamicMemoryConfig.IsSendToQueue == true)
 		{
 			El_DeleteThread(DelegateServiceThreadHandle);
 		}
@@ -244,7 +247,7 @@ public:
 			El_DeleteQueue(ResponseBlockQueue);
 		}
 
-		if ((RpcConfig->RequestBlockQueue_MaxItemNumber > 0) && RpcConfig->IsSendToQueue == true)
+		if ((RpcConfig->DynamicMemoryConfig.RequestBlockQueue_MaxItemNumber > 0) && RpcConfig->DynamicMemoryConfig.IsSendToQueue == true)
 		{
 			El_DeleteThread(RequestProcessServiceThreadHandle);
 		}
@@ -281,8 +284,8 @@ public:
 			auto iter = &obj->Delegates[collectionIndex];
 			if (iter->Delegate->GetSid() == recData.Sid)
 			{
-				SerializationManager rsm;
-				El_Memset(&rsm, 0, sizeof(SerializationManager));
+				SerializationManager<DTL> rsm;
+				El_Memset(&rsm, 0, sizeof(SerializationManager<DTL>));
 				//rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 				rsm.Reset();
 				rsm.BufferLen = recData.DataLen;
@@ -346,10 +349,10 @@ public:
 			if (iter->Service->GetSid() == recData.Sid)
 			{
 
-				SerializationManager rsm;
-				SerializationManager sendsm;
-				El_Memset(&rsm, 0, sizeof(SerializationManager));
-				El_Memset(&sendsm, 0, sizeof(SerializationManager));
+				SerializationManager<DTL> rsm;
+				SerializationManager<DTL> sendsm;
+				El_Memset(&rsm, 0, sizeof(SerializationManager<DTL>));
+				El_Memset(&sendsm, 0, sizeof(SerializationManager<DTL>));
 				//rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 				rsm.Reset();
 				rsm.BufferLen = recData.DataLen;
@@ -446,6 +449,7 @@ public:
 		uint32_t dataLen = allDataLen - 4;
 		uint8_t* data = &allData[4];
 		ReceiveType_t rt = (ReceiveType_t)(allData[3] >> 6);
+		El_Memset(&raw, 0, sizeof(ReceiveItemInfo<DTL>));
 		raw.UserDataOfTransportLayer = userDataOfTransportLayer;
 		raw.Sid = serviceId;
 		raw.DataLen = dataLen;
@@ -498,7 +502,7 @@ public:
 			{
 				El_SendQueueResult = DelegateBlockBufferProvider->Send(&raw, data) == True ? QueueState_OK : QueueState_Full;
 			}
-			else if (RpcConfig->IsSendToQueue == true)
+			else if (RpcConfig->DynamicMemoryConfig.IsSendToQueue == true)
 			{
 				TrySendDataToQueue(DelegateBlockQueue, dataLen, data, raw, sqr, ReceiveItemInfo<DTL>, El_SendQueueResult);
 			}
@@ -516,7 +520,7 @@ public:
 			{
 				El_SendQueueResult = RequestBlockBufferProvider->Send( &raw, data) == True ? QueueState_OK : QueueState_Full;
 			}
-			else if (RpcConfig->IsSendToQueue == true)
+			else if (RpcConfig->DynamicMemoryConfig.IsSendToQueue == true)
 			{
 				TrySendDataToQueue(RequestBlockQueue, dataLen, data, raw, sqr, ReceiveItemInfo<DTL>, El_SendQueueResult);
 			}

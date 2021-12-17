@@ -9,7 +9,7 @@ namespace EmbedXrpcIdlParser
 {
     public interface ICppSerializable
     {
-        void EmitStruct(StructType_TargetType targetStructUnion, StreamWriter cfilewriter, StreamWriter hfilewriter);
+        void EmitStruct(StructType_TargetType targetStructUnion,  StreamWriter hfilewriter);
         void EmitSerializeMacro(StructType_TargetType targetStructUnion, StreamWriter writer);
         void EmitDeserializeMacro(StructType_TargetType targetStructUnion, StreamWriter writer);
 

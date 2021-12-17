@@ -6,14 +6,19 @@
 #include "EmbedSerialization.h"
 #define EmbedXrpcSuspendSid 0x01
 #define EmbedXrpcUnsupportedSid 0x2
+
 template<class DTL>
 class EmbedXrpcObject;
 
+template<class DTL>
 class BlockRingBufferProvider;
+
+template<class DTL>
 class SerializationManager;
 
 template<class DTL>
 struct ReceiveItemInfo;
+
  enum RequestResponseState
  {
      RequestState_Ok=1,
@@ -23,32 +28,33 @@ struct ReceiveItemInfo;
      ResponseState_SidError=5,
      ResponseState_UnsupportedSid = 6,
  };
-
+ template<class DTL>
  struct EmbedXrpcConfig
  {
      bool CheckSumValid;
-     bool IsSendToQueue;
-
-     //client部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
-     uint32_t DelegateBlockQueue_MaxItemNumber;
-     uint32_t ResponseBlockQueue_MaxItemNumber;
-
-//server部分:RingBuffer 模式下 and Dynamic Memory 下 都需要配置的
-     uint32_t RequestBlockQueue_MaxItemNumber;
-
      uint32_t ServerThreadPriority;
      uint32_t ClientThreadPriority;
+     bool UseRingBufferWhenReceiving;//如果为1，则使用RingBufferConfig 否则使用DynamicMemoryConfig
+     struct 
+     {
+         bool IsSendToQueue;
 
+         //client部分:
+         uint32_t DelegateBlockQueue_MaxItemNumber;
+         uint32_t ResponseBlockQueue_MaxItemNumber;
 
-     bool UseRingBufferWhenReceiving;
+         //server部分:
+         uint32_t RequestBlockQueue_MaxItemNumber;
+     }DynamicMemoryConfig;
+     struct 
+     {
+         //client
+         BlockRingBufferProvider<DTL>* DelegateBlockBufferProvider = nullptr;
+         BlockRingBufferProvider<DTL>* ResponseBlockBufferProvider = nullptr;
 
-    //client
-     BlockRingBufferProvider* DelegateBlockBufferProvider = nullptr;
-     BlockRingBufferProvider* ResponseBlockBufferProvider = nullptr;
-
-    //server
-     BlockRingBufferProvider* RequestBlockBufferProvider = nullptr;
-
+         //server
+         BlockRingBufferProvider<DTL>* RequestBlockBufferProvider = nullptr;
+     }RingBufferConfig;
  };
  enum ReceiveType_t
  {
@@ -62,8 +68,8 @@ struct ReceiveItemInfo;
  public:
      void* UserData;
      virtual uint16_t GetSid() = 0;
-	 virtual void Invoke(EmbedXrpcConfig *rpcConfig,DTL* userDataOfTransportLayer,
-         SerializationManager* recManager) = 0;
+	 virtual void Invoke(EmbedXrpcConfig<DTL>*rpcConfig,DTL* userDataOfTransportLayer,
+         SerializationManager<DTL>* recManager) = 0;
  };
  template<class DTL>
  class ServiceInvokeParameter
@@ -89,8 +95,8 @@ struct ReceiveItemInfo;
      virtual uint16_t GetSid() = 0;
 	 virtual void Invoke(
          ServiceInvokeParameter<DTL> * serviceInvokeParameter,
-         SerializationManager* recManager,
-         SerializationManager* sendManager) = 0;
+         SerializationManager<DTL>* recManager,
+         SerializationManager<DTL>* sendManager) = 0;
  };
  template<class DTL>
  struct RequestDescribe

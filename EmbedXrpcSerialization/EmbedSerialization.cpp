@@ -1,6 +1,6 @@
 #include "EmbedSerialization.h"
 #include <stdarg.h>
-#include "EmbedXrpc.Port.h"
+#include "EmbedLibrary.h"
 
 uint32_t GetSum(uint8_t* d, uint32_t len)
 {
@@ -10,19 +10,6 @@ uint32_t GetSum(uint8_t* d, uint32_t len)
 		sum += d[i];
 	}
 	return sum;
-}
-void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width)
-{
-	if (sm->BlockBufferProvider != nullptr)
-	{
-		sm->BlockBufferProvider->PopChars(field_ptr, (uint16_t)field_width);
-	}
-	else
-	{
-		El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width);
-		sm->AppendSumToCalculateSum(GetSum(&sm->Buf[sm->Index], field_width));
-		sm->Index += field_width;
-	}
 }
 
 //static const char* FilterStrings[] = FilterStringHeader;

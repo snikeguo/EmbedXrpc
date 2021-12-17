@@ -6,7 +6,7 @@
 
 template<class DTL>
 struct ReceiveItemInfo;
-
+    template<class DTL>
     class  BlockRingBufferProvider
     {
     public:
@@ -18,8 +18,8 @@ struct ReceiveItemInfo;
         uint32_t CalculateSumValue;
         uint32_t ReferenceSumValue;
 
-        template<class DTL>
-        void Init(     uint8_t* pool, uint16_t size, uint32_t queue_item_max_number)
+        
+        BlockRingBufferProvider(     uint8_t* pool, uint16_t size, uint32_t queue_item_max_number)
         {
             if (size == 0 || pool == NULL)
                 return;
@@ -107,7 +107,7 @@ struct ReceiveItemInfo;
             El_ReleaseMutex(Mutex);
             return True;
         }
-        template<class DTL>
+        //template<class DTL>
         Bool Receive(  ReceiveItemInfo<DTL>* header, uint32_t timeout)
         {
             if (Size == 0 || Pool == NULL)
@@ -115,7 +115,7 @@ struct ReceiveItemInfo;
             Bool r = El_ReceiveQueue(Queue, header, sizeof(ReceiveItemInfo<DTL>), timeout) == QueueState_OK ? True : False;
             return r;
         }
-        template<class DTL>
+        //template<class DTL>
         Bool Send(ReceiveItemInfo<DTL>* header, uint8_t* data)
         {
             if (Size == 0 || Pool == NULL)

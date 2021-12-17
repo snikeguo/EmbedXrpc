@@ -35,17 +35,17 @@ typedef enum {
 
 } Type_t;
 
-//template<class DTL>
+template<class DTL>
 class  BlockRingBufferProvider;
 
-
+template<class DTL>
 class SerializationManager
 {
 public:
 	uint32_t Index;
 	uint8_t* Buf;
 	uint32_t BufferLen;
-	BlockRingBufferProvider* BlockBufferProvider;
+	BlockRingBufferProvider<DTL>* BlockBufferProvider;
 
 	uint32_t ReferenceSum ;
 	uint32_t CalculateSum ;
@@ -109,5 +109,18 @@ public:
 	}
 	
 };
-void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width);
+template<class DTL>
+void DeserializeField(uint8_t* field_ptr, SerializationManager<DTL>* sm, uint16_t field_width)
+{
+	if (sm->BlockBufferProvider != nullptr)
+	{
+		sm->BlockBufferProvider->PopChars(field_ptr, (uint16_t)field_width);
+	}
+	else
+	{
+		El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width);
+		sm->AppendSumToCalculateSum(GetSum(&sm->Buf[sm->Index], field_width));
+		sm->Index += field_width;
+	}
+}
 #endif

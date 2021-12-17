@@ -21,13 +21,12 @@
   <ItemGroup>
     <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp" />
     <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="XrpcCodeGen\Sample1.cpp" />
-    <ClCompile Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h" />
@@ -37,6 +36,7 @@
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcObject.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\Win32.Port\EmbedXrpc.Port.h" />
+    <ClInclude Include="DTL.h" />
     <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h" />
     <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h" />
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h" />
@@ -103,7 +103,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
-    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
