@@ -16,6 +16,12 @@ class EmbedXrpcObject;
      ResponseState_SidError=5,
      ResponseState_UnsupportedSid = 6,
  };
+ struct BlockBufferProviderConfig
+ {
+     uint8_t* Buffer;
+     uint32_t Size;
+     uint32_t MaxItemNumber;
+ };
  struct EmbedXrpcConfig
  {
      bool CheckSumValid;
@@ -36,11 +42,11 @@ class EmbedXrpcObject;
      struct
      {
          //client
-         BlockRingBufferProvider* DelegateMessageBlockBufferProvider = nullptr;
-         BlockRingBufferProvider* ResponseMessageBlockBufferProvider = nullptr;
+         BlockBufferProviderConfig DelegateMessageBlockBufferConfig;
+         BlockBufferProviderConfig ResponseMessageBlockBufferConfig;
 
          //server
-         BlockRingBufferProvider* RequestMessageBlockBufferProvider = nullptr;
+         BlockBufferProviderConfig RequestMessageBlockBufferConfig;
      }RingBufferConfig;
 
  };

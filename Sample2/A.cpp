@@ -15,10 +15,10 @@ static ResponseDescribe Responses[1] =//定义回复 ID 集合
 {
 	{"Inter_Add"   ,     Inter_GetSum_ServiceId},
 };
-static ClientNodeQuicklyInitConfig InitConfig =
+static ClientNodeQuicklyInitConfig InitCfg =
 {
 	"A",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForRequest
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForRequest
 	{ Send },
 	1000,
 	Responses,
@@ -37,15 +37,19 @@ static ClientNodeQuicklyInitConfig InitConfig =
 			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			nullptr,//DelegateMessageBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//ResponseMessageBlockBufferProvider
-			nullptr,//RequestMessageBlockBufferProvider
+			{nullptr,0,0},//DelegateMessageBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseMessageBlockBufferProvider
+			{nullptr,0,0},//RequestMessageBlockBufferProvider
 		},
 		
 	},
 	nullptr,
 };
-EmbedXrpcObject A_RpcObject(&InitConfig);//client rpc 对象
+EmbedXrpcObject A_RpcObject;//client rpc 对象
+void A_Init()
+{
+	A_RpcObject.Init(&InitCfg);
+}
 Inter_Requester A_Requester(&A_RpcObject);//定义request对象
 void ClientThread()
 {
@@ -69,4 +73,5 @@ void ClientThread()
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
 	A_RpcObject.DeInit();
+	
 }

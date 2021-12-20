@@ -1,7 +1,7 @@
 #include "EmbedSerialization.h"
 #include <stdarg.h>
 #include "EmbedXrpc.Port.h"
-#if EmbedXrpc_CheckSumValid==1
+
 uint32_t GetSum(uint8_t* d, uint32_t len)
 {
 	uint32_t sum = 0;
@@ -11,17 +11,13 @@ uint32_t GetSum(uint8_t* d, uint32_t len)
 	}
 	return sum;
 }
-#endif
-#if EmbedXrpc_CheckSumValid==1
-#define SerializationManagerAppendDataSum(sm,sum)    SerializationManager_SetCalculateSum(sm,SerializationManager_GetCalculateSum(sm)+sum)
-#else
-#define SerializationManagerAppendDataSum(sm,sum)
-#endif
+
+
 void  SerializationManager_Reset(SerializationManager* sm)
 {
 	sm->Index = 0;
 }
-#if EmbedXrpc_CheckSumValid==1
+
 void SerializationManager_SetReferenceSum(SerializationManager* sm, uint32_t sum)
 {
 	if (sm->BlockBufferProvider != NULL)
@@ -70,21 +66,22 @@ uint32_t SerializationManager_GetCalculateSum(SerializationManager* sm)
 void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum)//只有ringbuffer mode 为0的情况下使用。
 {
 	(void)sum;
-#if EmbedXrpc_UseRingBufferWhenReceiving==0
 	sm->CalculateSum += sum;
-#endif
 }
 
-#endif
+
 void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width)
 {
-#if EmbedXrpc_UseRingBufferWhenReceiving==1 
-	BlockRingBufferProvider_PopChars(sm->BlockBufferProvider,field_ptr, (uint16_t)field_width);
-#else 
-	El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width);
-	SerializationManagerAppendDataSum(sm, GetSum(&sm->Buf[sm->Index], field_width));
-	sm->Index += field_width;
-#endif 
+	if (sm->BlockBufferProvider != NULL)
+	{
+		BlockRingBufferProvider_PopChars(sm->BlockBufferProvider,field_ptr, (uint16_t)field_width);
+}
+	else
+	{
+		El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width);
+		SerializationManager_AppendSumToCalculateSum(sm,GetSum(&sm->Buf[sm->Index], field_width));
+		sm->Index += field_width;
+	}
 }
 
 //static const char* FilterStrings[] = FilterStringHeader;

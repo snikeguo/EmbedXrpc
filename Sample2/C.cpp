@@ -37,11 +37,11 @@ static RequestDescribe Requests[] = //定义请求集合
 };
 
 
-static ServerNodeQuicklyInitConfig InitConfig =
+static ServerNodeQuicklyInitConfig InitCfg =
 {
 	"C",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForResponse
-	{nullptr,0,nullptr},//DataLinkBufferForDelegate
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
+	{nullptr,0,false},//DataLinkBufferForDelegate
 	 { Send },
 	500,
 	Requests,
@@ -58,12 +58,16 @@ static ServerNodeQuicklyInitConfig InitConfig =
 			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			nullptr,//DelegateMessageBlockBufferProvider
-			nullptr,//ResponseMessageBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestMessageBlockBufferProvider
+			{nullptr,0,0},//DelegateMessageBlockBufferProvider
+			{nullptr,0,0},//ResponseMessageBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
 		},
 	},
 	nullptr,
 };
 
-EmbedXrpcObject C_RpcObject(&InitConfig);//server rpc 对象
+EmbedXrpcObject C_RpcObject;//server rpc 对象
+void C_Init()
+{
+	C_RpcObject.Init(&InitCfg);
+}

@@ -70,9 +70,9 @@ static ResponseDescribe Responses[1] =//定义回复 ID 集合
 static InitConfig InitCfg =
 {
 	"B",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},// buffer for request
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForResponse
-	{nullptr,0,nullptr},//DataLinkBufferForDelegate
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},// buffer for request
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
+	{nullptr,0,false},//DataLinkBufferForDelegate
 	Send,
 	500,
 	Responses,//Responses
@@ -85,7 +85,7 @@ static InitConfig InitCfg =
 		true,//CheckSumValid
 		6,//ServerThreadPriority
 		6,//ClientThreadPriority
-		true,//UseRingBufferWhenReceiving
+		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
 			10,//DelegateMessageQueue_MaxItemNumber
@@ -93,13 +93,17 @@ static InitConfig InitCfg =
 			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			nullptr,//DelegateMessageBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//ResponseMessageBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestMessageBlockBufferProvider
+			{nullptr,0,0},//DelegateMessageBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseMessageBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
 		},
 	},
 	nullptr,
 };
 
-EmbedXrpcObject B_RpcObject(&InitCfg);//server rpc 对象
+EmbedXrpcObject B_RpcObject;//server rpc 对象
+void B_Init()
+{
+	B_RpcObject.Init(&InitCfg);
+}
 Inter_Requester B_Requester(&B_RpcObject);

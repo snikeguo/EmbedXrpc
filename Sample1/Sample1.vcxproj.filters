@@ -48,7 +48,7 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp">
+    <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
     <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c">
@@ -69,7 +69,7 @@
     <ClCompile Include="Server.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.cpp">
+    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
   </ItemGroup>

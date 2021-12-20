@@ -5,7 +5,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    struct  BlockRingBufferProvider
+    typedef struct  _BlockRingBufferProvider
     {
         El_Queue_t Queue;
         struct rt_ringbuffer RingBuffer;
@@ -14,8 +14,7 @@ extern "C" {
         int16_t Size;
         uint32_t CalculateSumValue;
         uint32_t ReferenceSumValue;
-        BlockRingBufferProvider(uint8_t* pool, uint16_t size, uint32_t queue_item_max_number);
-    };
+    }BlockRingBufferProvider;
     void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, uint16_t size, uint32_t queue_item_size);
     void BlockRingBufferProvider_DeInit(BlockRingBufferProvider* obj);
     Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch);

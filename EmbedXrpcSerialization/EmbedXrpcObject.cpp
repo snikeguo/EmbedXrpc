@@ -1,13 +1,65 @@
 ﻿
 #include "EmbedXrpcObject.h"
 
-void EmbedXrpcObject::Init()
+void EmbedXrpcObject::Init(InitConfig* cfg)
 {
 	DelegateServiceThreadExitState = false;
 	RequestProcessServiceThreadExitState = false;
 	DeInitFlag = false;
 
-	//ObjectMutexHandle = El_CreateMutex("ObjectMutex");
+	El_Strncpy(Name, cfg->Name, EmbedXrpc_NameMaxLen);
+
+	DataLinkBufferForRequest.Buffer = cfg->DataLinkBufferConfigForRequest.Buffer;
+	DataLinkBufferForRequest.BufferLen = cfg->DataLinkBufferConfigForRequest.BufferLen;
+	if (cfg->DataLinkBufferConfigForRequest.IsUseMutex == true)
+	{
+		DataLinkBufferForRequest.MutexHandle = El_CreateMutex("DataLinkBufferForRequest.MutexHandle");
+	}
+	else
+	{
+		DataLinkBufferForRequest.MutexHandle = nullptr;
+	}
+
+	DataLinkBufferForResponse.Buffer = cfg->DataLinkBufferConfigForResponse.Buffer;
+	DataLinkBufferForResponse.BufferLen = cfg->DataLinkBufferConfigForResponse.BufferLen;
+	if (cfg->DataLinkBufferConfigForResponse.IsUseMutex == true)
+	{
+		DataLinkBufferForResponse.MutexHandle = El_CreateMutex("DataLinkBufferForResponse.MutexHandle");
+	}
+	else
+	{
+		DataLinkBufferForResponse.MutexHandle = nullptr;
+	}
+
+	DataLinkBufferForDelegate.Buffer = cfg->DataLinkBufferConfigForDelegate.Buffer;
+	DataLinkBufferForDelegate.BufferLen = cfg->DataLinkBufferConfigForDelegate.BufferLen;
+	if (cfg->DataLinkBufferConfigForDelegate.IsUseMutex == true)
+	{
+		DataLinkBufferForDelegate.MutexHandle = El_CreateMutex("DataLinkBufferForDelegate.MutexHandle");
+	}
+	else
+	{
+		DataLinkBufferForDelegate.MutexHandle = nullptr;
+	}
+
+	TimeOut = cfg->TimeOut;
+	Send = cfg->Sender;
+	DelegateServiceThreadHandle = nullptr;
+
+	DelegatesCount = cfg->DelegatesCount;
+	Delegates = cfg->Delegates;
+
+	ResponsesCount = cfg->ResponsesCount;
+	Responses = cfg->Responses;
+
+	UserData = cfg->UserData;
+
+	RequestProcessServiceThreadHandle = nullptr;
+	SuspendTimer = nullptr;
+
+	RequestsCount = cfg->RequestsCount;
+	Requests = cfg->Requests;
+	RpcConfig = cfg->RpcConfig;
 
 	if (RpcConfig.UseRingBufferWhenReceiving == false)
 	{
@@ -15,12 +67,32 @@ void EmbedXrpcObject::Init()
 		ResponseMessageQueue = El_CreateQueue("ResponseMessageQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.ResponseMessageQueue_MaxItemNumber);
 		RequestMessageQueue = El_CreateQueue("RequestMessageQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.RequestMessageQueue_MaxItemNumber);
 	}
+	else
+	{
+		DelegateMessageBlockBufferProvider = new BlockRingBufferProvider();
+		BlockRingBufferProvider_Init(DelegateMessageBlockBufferProvider,
+			RpcConfig.RingBufferConfig.DelegateMessageBlockBufferConfig.Buffer,
+				RpcConfig.RingBufferConfig.DelegateMessageBlockBufferConfig.Size, 
+				RpcConfig.RingBufferConfig.DelegateMessageBlockBufferConfig.MaxItemNumber);
+
+		ResponseMessageBlockBufferProvider=new BlockRingBufferProvider();
+		BlockRingBufferProvider_Init(ResponseMessageBlockBufferProvider,
+			RpcConfig.RingBufferConfig.ResponseMessageBlockBufferConfig.Buffer,
+			RpcConfig.RingBufferConfig.ResponseMessageBlockBufferConfig.Size,
+			RpcConfig.RingBufferConfig.ResponseMessageBlockBufferConfig.MaxItemNumber);
+
+		RequestMessageBlockBufferProvider = new BlockRingBufferProvider();
+		BlockRingBufferProvider_Init(RequestMessageBlockBufferProvider,
+			RpcConfig.RingBufferConfig.RequestMessageBlockBufferConfig.Buffer,
+			RpcConfig.RingBufferConfig.RequestMessageBlockBufferConfig.Size,
+			RpcConfig.RingBufferConfig.RequestMessageBlockBufferConfig.MaxItemNumber);
+	}
 
 	if (
 		((RpcConfig.UseRingBufferWhenReceiving == false)
 			&& (RpcConfig.DynamicMemoryConfig.DelegateMessageQueue_MaxItemNumber > 0)
 			&& (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true))//动态内存模式
-		|| ((RpcConfig.UseRingBufferWhenReceiving == true) && (RpcConfig.RingBufferConfig.DelegateMessageBlockBufferProvider != nullptr))//ringbuffer模式
+		|| (RpcConfig.UseRingBufferWhenReceiving == true)//ringbuffer模式
 		)
 	{
 		DelegateServiceThreadHandle = El_CreateThread("DelegateServiceThread", RpcConfig.ClientThreadPriority, DelegateServiceThread, this, 2048);
@@ -31,7 +103,7 @@ void EmbedXrpcObject::Init()
 		((RpcConfig.UseRingBufferWhenReceiving == false)
 			&& (RpcConfig.DynamicMemoryConfig.RequestMessageQueue_MaxItemNumber > 0)
 			&& (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true))//动态内存模式
-		|| ((RpcConfig.UseRingBufferWhenReceiving == true) && (RpcConfig.RingBufferConfig.RequestMessageBlockBufferProvider != nullptr))//ringbuffer模式
+		|| (RpcConfig.UseRingBufferWhenReceiving == true)//ringbuffer模式
 		)
 	{
 		RequestProcessServiceThreadHandle = El_CreateThread("RequestProcessServiceThread", RpcConfig.ServerThreadPriority, RequestProcessServiceThread, this, 2048);

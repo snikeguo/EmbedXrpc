@@ -7,12 +7,15 @@ extern EmbedXrpcObject B_RpcObject;
 extern EmbedXrpcObject C_RpcObject;
 extern void ClientThread();
 extern void ServerThread();
+extern void A_Init();
+extern void B_Init();
+extern void C_Init();
 int main(int argc, char *argv[])
 {
 
-	A_RpcObject.Init();
-	B_RpcObject.Init();
-	C_RpcObject.Init();
+	A_Init();
+	B_Init();
+	C_Init();
 
 	std::thread c = std::thread(ClientThread);
 	c.detach();

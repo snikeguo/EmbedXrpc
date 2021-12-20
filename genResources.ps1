@@ -7,9 +7,9 @@ Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\EmbedXrpcObject.cs -Destination Publ
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\Serialization.cs -Destination PublishVersion\Runtime\Cs\Serialization.cs
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\Win32Queue.cs -Destination PublishVersion\Runtime\Cs\Win32Queue.cs
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\Win32Signal.cs -Destination PublishVersion\Runtime\Cs\Win32Signal.cs
-Copy-Item -Path  .\EmbedXrpcSerialization\BlockBufferProvider.cpp -Destination PublishVersion\Runtime\Cpp\BlockBufferProvider.cpp
+Copy-Item -Path  .\EmbedXrpcSerialization\BlockBufferProvider.c -Destination PublishVersion\Runtime\Cpp\BlockBufferProvider.c
 Copy-Item -Path  .\EmbedXrpcSerialization\BlockBufferProvider.h -Destination PublishVersion\Runtime\Cpp\BlockBufferProvider.h
-Copy-Item -Path  .\EmbedXrpcSerialization\EmbedSerialization.cpp -Destination PublishVersion\Runtime\Cpp\EmbedSerialization.cpp
+Copy-Item -Path  .\EmbedXrpcSerialization\EmbedSerialization.c -Destination PublishVersion\Runtime\Cpp\EmbedSerialization.c
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedSerialization.h -Destination PublishVersion\Runtime\Cpp\EmbedSerialization.h
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcCommon.h -Destination PublishVersion\Runtime\Cpp\EmbedXrpcCommon.h
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcObject.h -Destination PublishVersion\Runtime\Cpp\EmbedXrpcObject.h

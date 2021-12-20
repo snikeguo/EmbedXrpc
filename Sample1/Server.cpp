@@ -95,11 +95,11 @@ RequestDescribe Requests[] = //定义请求集合
 	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
 	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
 };
-static ServerNodeQuicklyInitConfig InitConfig =
+static ServerNodeQuicklyInitConfig InitCfg =
 {
 	"Server",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},// DataLinkBufferForResponse
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForDelegate
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},// DataLinkBufferForResponse
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForDelegate
 	ServerSend,
 	500,
 	Requests,
@@ -116,19 +116,23 @@ static ServerNodeQuicklyInitConfig InitConfig =
 			10,//RequestBlockQueue_MaxItemNumber
 		},
 		{
-			nullptr,//DelegateBlockBufferProvider
-			nullptr,//ResponseBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestMessageBlockBufferProvider
+			{nullptr,0,0},//DelegateBlockBufferProvider
+			{nullptr,0,0},//ResponseBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
 		},
 	},
 	nullptr,
 };
 
-EmbedXrpcObject ServerRpc(&InitConfig);//server rpc 对象
+EmbedXrpcObject ServerRpc;//server rpc 对象
+void Server_Init()
+{
+	ServerRpc.Init(&InitCfg);
+}
 DateTimeChange_DelegateSender DateTimeChanger(&ServerRpc);//实例化委托对象
 void ServerThread()
 {
-	//std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;

@@ -53,10 +53,10 @@ ResponseDescribe Responses[4] =//定义回复 ID 集合
 };
 
 
-static ClientNodeQuicklyInitConfig InitConfig =
+static ClientNodeQuicklyInitConfig InitCfg =
 {
 	"Client",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//Buffer for Request
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
 	ClientSend,
 	1000,
 	Responses,
@@ -69,22 +69,26 @@ static ClientNodeQuicklyInitConfig InitConfig =
 		6,//ClientThreadPriority
 		false,//UseRingBufferWhenReceiving
 		{
-			false,//IsSendToQueue
+			true,//IsSendToQueue
 			10,//DelegateBlockQueue_MaxItemNumber
 			10,//ResponseBlockQueue_MaxItemNumber
 			10,//RequestBlockQueue_MaxItemNumber
 		},
 		{
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//DelegateBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//ResponseBlockBufferProvider
-			nullptr,//RequestBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//DelegateBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseBlockBufferProvider
+			{nullptr,0,0},//RequestBlockBufferProvider
 		},
 
 	},
 	nullptr,
 };
-EmbedXrpcObject ClientRpc(&InitConfig);//client rpc 对象
+EmbedXrpcObject ClientRpc;//client rpc 对象
 
+void Client_Init()
+{
+	ClientRpc.Init(&InitCfg);
+}
 
 Inter_Requester Client(&ClientRpc);//定义request对象
 void ClientThread()

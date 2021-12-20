@@ -6,6 +6,12 @@
 #include "BlockBufferProvider.h"
 #define EmbedXrpcObjectVersion	"2.1.0"
 
+struct EmbedXrpcBufferConfig
+{
+	uint8_t* Buffer;
+	uint32_t BufferLen;
+	bool IsUseMutex;
+};
 
 struct EmbedXrpcBuffer
 {
@@ -18,7 +24,7 @@ struct EmbedXrpcBuffer
 struct ClientNodeQuicklyInitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
-	EmbedXrpcBuffer DataLinkBufferForRequest;
+	EmbedXrpcBufferConfig DataLinkBufferConfigForRequest;
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
@@ -38,8 +44,8 @@ struct ClientNodeQuicklyInitConfig
 struct ServerNodeQuicklyInitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
-	EmbedXrpcBuffer DataLinkBufferForResponse;
-	EmbedXrpcBuffer DataLinkBufferForDelegate;
+	EmbedXrpcBufferConfig DataLinkBufferConfigForResponse;
+	EmbedXrpcBufferConfig DataLinkBufferConfigForDelegate;
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
@@ -56,10 +62,10 @@ struct InitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
 
-	EmbedXrpcBuffer DataLinkBufferForRequest;
+	EmbedXrpcBufferConfig DataLinkBufferConfigForRequest;
 
-	EmbedXrpcBuffer DataLinkBufferForResponse;
-	EmbedXrpcBuffer DataLinkBufferForDelegate;
+	EmbedXrpcBufferConfig DataLinkBufferConfigForResponse;
+	EmbedXrpcBufferConfig DataLinkBufferConfigForDelegate;
 
 
 	SendPack_t Sender;
@@ -95,7 +101,7 @@ public:
 
 	BlockRingBufferProvider* DelegateMessageBlockBufferProvider = nullptr;
 	BlockRingBufferProvider* ResponseMessageBlockBufferProvider = nullptr;
-	//#else
+	
 	El_Queue_t DelegateMessageQueue = nullptr;
 	El_Queue_t ResponseMessageQueue = nullptr;
 
@@ -117,7 +123,7 @@ public:
 
 	//server:
 	El_Thread_t RequestProcessServiceThreadHandle; 
-	//El_Mutex_t ObjectMutexHandle;
+	
 	BlockRingBufferProvider* RequestMessageBlockBufferProvider;
 	El_Queue_t	RequestMessageQueue;
 	El_Timer_t SuspendTimer;
@@ -125,54 +131,15 @@ public:
 
 	uint32_t RequestsCount;
 	RequestDescribe* Requests;
-private:
-	void ClassInit(InitConfig* cfg)
-	{
-		El_Strncpy(Name, cfg->Name, EmbedXrpc_NameMaxLen);
-		DataLinkBufferForRequest = cfg->DataLinkBufferForRequest;
-		DataLinkBufferForResponse = cfg->DataLinkBufferForResponse;
-		DataLinkBufferForDelegate = cfg->DataLinkBufferForDelegate;
-		
 
-		TimeOut = cfg->TimeOut;
-		Send = cfg->Sender;
-		//ObjectMutexHandle(nullptr;
-		DelegateServiceThreadHandle = nullptr;
-
-		DelegatesCount = cfg->DelegatesCount;
-		Delegates = cfg->Delegates;
-
-		ResponsesCount = cfg->ResponsesCount;
-		Responses = cfg->Responses;
-
-		UserData = cfg->UserData;
-		DeInitFlag = false;
-
-		DelegateMessageBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.DelegateMessageBlockBufferProvider;
-		ResponseMessageBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.ResponseMessageBlockBufferProvider;
-		RequestMessageBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.RequestMessageBlockBufferProvider;
-
-		RequestProcessServiceThreadHandle = nullptr;
-		SuspendTimer = nullptr;
-
-		RequestsCount = cfg->RequestsCount;
-		Requests = cfg->Requests;
-		RpcConfig = cfg->RpcConfig;
-	}
 public:
-	EmbedXrpcObject(
-		InitConfig* cfg)
-	{
-		ClassInit(cfg);
-	}
 	//client节点构造函数
-	EmbedXrpcObject(
-		ClientNodeQuicklyInitConfig* client)
+	void Init(ClientNodeQuicklyInitConfig* client)
 	{
 		InitConfig cfg;
 		El_Memset(&cfg, 0, sizeof(InitConfig));
 		El_Strncpy(cfg.Name, client->Name, EmbedXrpc_NameMaxLen);
-		cfg.DataLinkBufferForRequest = client->DataLinkBufferForRequest;
+		cfg.DataLinkBufferConfigForRequest = client->DataLinkBufferConfigForRequest;
 		cfg.Sender = client->Sender;
 		cfg.TimeOut = client->TimeOut;
 		cfg.Responses = client->Responses;
@@ -181,27 +148,26 @@ public:
 		cfg.DelegatesCount = client->DelegatesCount;
 		cfg.RpcConfig = client->RpcConfig;
 		cfg.UserData = client->UserData;
-		ClassInit(&cfg);
+		Init(&cfg);
 	}
 	//server节点的构造函数
-	EmbedXrpcObject(
-		ServerNodeQuicklyInitConfig* server) 
+	void Init(ServerNodeQuicklyInitConfig* server)
 	{
 		InitConfig cfg;
 		El_Memset(&cfg, 0, sizeof(InitConfig));
 		El_Strncpy(cfg.Name, server->Name, EmbedXrpc_NameMaxLen);
-		cfg.DataLinkBufferForResponse = server->DataLinkBufferForResponse;
-		cfg.DataLinkBufferForDelegate = server->DataLinkBufferForDelegate;
+		cfg.DataLinkBufferConfigForResponse = server->DataLinkBufferConfigForResponse;
+		cfg.DataLinkBufferConfigForDelegate = server->DataLinkBufferConfigForDelegate;
 		cfg.Sender = server->Sender;
 		cfg.TimeOut = server->TimeOut;
 		cfg.Requests = server->Requests;
 		cfg.RequestsCount = server->RequestsCount;
 		cfg.RpcConfig = server->RpcConfig;
 		cfg.UserData = server->UserData;
-		ClassInit(&cfg);
+		Init(&cfg);
 	}
 
-	void Init();
+	void Init(InitConfig* cfg);
 	void DeInit();
 	static void DelegateServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
 	static void ResponseServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
