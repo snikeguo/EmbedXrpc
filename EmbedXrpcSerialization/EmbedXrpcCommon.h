@@ -27,20 +27,20 @@ class EmbedXrpcObject;
          bool IsSendToQueue;
 
          //client部分:
-         uint32_t DelegateBlockQueue_MaxItemNumber;
-         uint32_t ResponseBlockQueue_MaxItemNumber;
+         uint32_t DelegateMessageQueue_MaxItemNumber;
+         uint32_t ResponseMessageQueue_MaxItemNumber;
 
          //server部分:
-         uint32_t RequestBlockQueue_MaxItemNumber;
+         uint32_t RequestMessageQueue_MaxItemNumber;
      }DynamicMemoryConfig;
      struct
      {
          //client
-         BlockRingBufferProvider* DelegateBlockBufferProvider = nullptr;
-         BlockRingBufferProvider* ResponseBlockBufferProvider = nullptr;
+         BlockRingBufferProvider* DelegateMessageBlockBufferProvider = nullptr;
+         BlockRingBufferProvider* ResponseMessageBlockBufferProvider = nullptr;
 
          //server
-         BlockRingBufferProvider* RequestBlockBufferProvider = nullptr;
+         BlockRingBufferProvider* RequestMessageBlockBufferProvider = nullptr;
      }RingBufferConfig;
 
  };

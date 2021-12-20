@@ -4,25 +4,25 @@ void  DateTimeChange_DelegateSender::Invoke(UserDataOfTransportLayer_t* userData
 //write serialization code:DateTimeChange(now,)
 SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
-if(RpcObject->DelegateBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->DelegateBuffer.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle, El_WAIT_FOREVER);
 }
 SerializationManager_Reset(&sm);
-sm.Buf = &RpcObject->DelegateBuffer.Buffer[4];
-sm.BufferLen = RpcObject->DelegateBuffer.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForDelegate.Buffer[4];
+sm.BufferLen = RpcObject->DataLinkBufferForDelegate.BufferLen-4;
 SendData.now[0]=now[0];
 DateTimeChange_Parameter_Serialize(&sm,&SendData);
-RpcObject->DelegateBuffer.Buffer[0]=(uint8_t)(DateTimeChange_ServiceId&0xff);
-RpcObject->DelegateBuffer.Buffer[1]=(uint8_t)(DateTimeChange_ServiceId>>8&0xff);
-RpcObject->DelegateBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
-RpcObject->DelegateBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
-RpcObject->DelegateBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);
-RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DelegateBuffer.Buffer);
+RpcObject->DataLinkBufferForDelegate.Buffer[0]=(uint8_t)(DateTimeChange_ServiceId&0xff);
+RpcObject->DataLinkBufferForDelegate.Buffer[1]=(uint8_t)(DateTimeChange_ServiceId>>8&0xff);
+RpcObject->DataLinkBufferForDelegate.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
+RpcObject->DataLinkBufferForDelegate.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
+RpcObject->DataLinkBufferForDelegate.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);
+RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForDelegate.Buffer);
 SerializationManager_Reset(&sm);
-if(RpcObject->DelegateBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->DelegateBuffer.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle);
 }
 }
 
@@ -31,24 +31,24 @@ void  TestDelegate_DelegateSender::Invoke(UserDataOfTransportLayer_t* userDataOf
 {//write serialization code:TestDelegate(now,)
 SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
-if(RpcObject->DelegateBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->DelegateBuffer.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle, El_WAIT_FOREVER);
 }
 SerializationManager_Reset(&sm);
-sm.Buf = &RpcObject->DelegateBuffer.Buffer[4];
-sm.BufferLen = RpcObject->DelegateBuffer.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForDelegate.Buffer[4];
+sm.BufferLen = RpcObject->DataLinkBufferForDelegate.BufferLen-4;
 TestDelegate_Parameter_Serialize(&sm,&SendData);
-RpcObject->DelegateBuffer.Buffer[0]=(uint8_t)(TestDelegate_ServiceId&0xff);
-RpcObject->DelegateBuffer.Buffer[1]=(uint8_t)(TestDelegate_ServiceId>>8&0xff);
-RpcObject->DelegateBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
-RpcObject->DelegateBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
-RpcObject->DelegateBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);
-RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DelegateBuffer.Buffer);
+RpcObject->DataLinkBufferForDelegate.Buffer[0]=(uint8_t)(TestDelegate_ServiceId&0xff);
+RpcObject->DataLinkBufferForDelegate.Buffer[1]=(uint8_t)(TestDelegate_ServiceId>>8&0xff);
+RpcObject->DataLinkBufferForDelegate.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
+RpcObject->DataLinkBufferForDelegate.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
+RpcObject->DataLinkBufferForDelegate.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);
+RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForDelegate.Buffer);
 SerializationManager_Reset(&sm);
-if(RpcObject->DelegateBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->DelegateBuffer.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle);
 }
 }
 

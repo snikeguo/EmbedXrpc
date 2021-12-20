@@ -20,7 +20,7 @@ class DateTimeChangeDelegateReceiver :public DateTimeChange_DelegateReceiver
 public:
 	void DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
 	{
-		printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
+		printf("client:%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 		//printf("%s", now[0].DateString);
 	}
 };
@@ -53,10 +53,11 @@ ResponseDescribe Responses[4] =//定义回复 ID 集合
 };
 
 
-ClientNodeQuicklyInitConfig InitConfig =
+static ClientNodeQuicklyInitConfig InitConfig =
 {
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},
-	{ ClientSend },
+	"Client",
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//Buffer for Request
+	ClientSend,
 	1000,
 	Responses,
 	1,
@@ -66,7 +67,7 @@ ClientNodeQuicklyInitConfig InitConfig =
 		true,//CheckSumValid
 		6,//ServerThreadPriority
 		6,//ClientThreadPriority
-		true,//UseRingBufferWhenReceiving
+		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
 			10,//DelegateBlockQueue_MaxItemNumber
@@ -88,10 +89,10 @@ EmbedXrpcObject ClientRpc(&InitConfig);//client rpc 对象
 Inter_Requester Client(&ClientRpc);//定义request对象
 void ClientThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	int a = 1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
-	int testcount = 10;
+	UInt32 testcount = 0xffffffff;
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
 	win32UserDataOfTransportLayerTest.Port = 6666;
@@ -105,6 +106,7 @@ void ClientThread()
 		Client.Add_SendData.data = (UInt8*)"123";
 		auto sum = Client.Add(&win32UserDataOfTransportLayerTest);//request对象请求service
 		El_Assert(sum.State == ResponseState_Ok);
+		printf("client:sum7 is:%d\n", sum.ReturnValue.Sum7);
 		Client.Free_Add(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}

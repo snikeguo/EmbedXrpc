@@ -33,6 +33,7 @@ public:
 	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, Int32 a, Int32 b)
 	{
 		
+		printf("B:Starting suppendTimer and Calling C's service...\n");
 
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.SourceAddress = 'B';
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.DestAddress = 'A';
@@ -51,6 +52,7 @@ public:
 			this->Response.ReturnValue.IsSuccess = false;
 			this->Response.ReturnValue.Value = 0;
 		}
+		printf("B:Call Complete!\n");
 		serviceInvokeParameter->Response_UserDataOfTransportLayer.SourceAddress = 'B';//B给A发
 		serviceInvokeParameter->Response_UserDataOfTransportLayer.DestAddress = 'A';
 	}
@@ -68,10 +70,9 @@ static ResponseDescribe Responses[1] =//定义回复 ID 集合
 static InitConfig InitCfg =
 {
 	"B",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//request buffer
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//ResponseBuffer
-	{nullptr,0,nullptr},//DelegateBuffer
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//SuspendTimerBuffer
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},// buffer for request
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForResponse
+	{nullptr,0,nullptr},//DataLinkBufferForDelegate
 	Send,
 	500,
 	Responses,//Responses
@@ -87,14 +88,14 @@ static InitConfig InitCfg =
 		true,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//DelegateBlockQueue_MaxItemNumber
-			10,//ResponseBlockQueue_MaxItemNumber
-			10,//RequestBlockQueue_MaxItemNumber
+			10,//DelegateMessageQueue_MaxItemNumber
+			10,//ResponseMessageQueue_MaxItemNumber
+			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			nullptr,//DelegateBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//ResponseBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestBlockBufferProvider
+			nullptr,//DelegateMessageBlockBufferProvider
+			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//ResponseMessageBlockBufferProvider
+			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestMessageBlockBufferProvider
 		},
 	},
 	nullptr,

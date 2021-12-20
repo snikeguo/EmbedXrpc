@@ -18,7 +18,7 @@ struct EmbedXrpcBuffer
 struct ClientNodeQuicklyInitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
-	EmbedXrpcBuffer RequestBuffer;
+	EmbedXrpcBuffer DataLinkBufferForRequest;
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
@@ -38,9 +38,9 @@ struct ClientNodeQuicklyInitConfig
 struct ServerNodeQuicklyInitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
-	EmbedXrpcBuffer ResponseBuffer;
-	EmbedXrpcBuffer DelegateBuffer;
-	EmbedXrpcBuffer SuspendTimerBuffer;
+	EmbedXrpcBuffer DataLinkBufferForResponse;
+	EmbedXrpcBuffer DataLinkBufferForDelegate;
+
 	SendPack_t Sender;
 	uint32_t TimeOut;
 
@@ -56,11 +56,11 @@ struct InitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
 
-	EmbedXrpcBuffer RequestBuffer;
+	EmbedXrpcBuffer DataLinkBufferForRequest;
 
-	EmbedXrpcBuffer ResponseBuffer;
-	EmbedXrpcBuffer DelegateBuffer;
-	EmbedXrpcBuffer SuspendTimerBuffer;
+	EmbedXrpcBuffer DataLinkBufferForResponse;
+	EmbedXrpcBuffer DataLinkBufferForDelegate;
+
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
@@ -84,20 +84,20 @@ public:
 
 	char Name[EmbedXrpc_NameMaxLen];
 
-	EmbedXrpcBuffer RequestBuffer;
-	EmbedXrpcBuffer ResponseBuffer;
-	EmbedXrpcBuffer DelegateBuffer;
-	EmbedXrpcBuffer SuspendTimerBuffer;
+	EmbedXrpcBuffer DataLinkBufferForRequest;
+	EmbedXrpcBuffer DataLinkBufferForResponse;
+	EmbedXrpcBuffer DataLinkBufferForDelegate;
+	
 
 	uint32_t TimeOut;
 	SendPack_t Send;
 
 
-	BlockRingBufferProvider* DelegateBlockBufferProvider = nullptr;
-	BlockRingBufferProvider* ResponseBlockBufferProvider = nullptr;
+	BlockRingBufferProvider* DelegateMessageBlockBufferProvider = nullptr;
+	BlockRingBufferProvider* ResponseMessageBlockBufferProvider = nullptr;
 	//#else
-	El_Queue_t DelegateBlockQueue = nullptr;
-	El_Queue_t ResponseBlockQueue = nullptr;
+	El_Queue_t DelegateMessageQueue = nullptr;
+	El_Queue_t ResponseMessageQueue = nullptr;
 
 
 	El_Thread_t DelegateServiceThreadHandle;
@@ -118,8 +118,8 @@ public:
 	//server:
 	El_Thread_t RequestProcessServiceThreadHandle; 
 	//El_Mutex_t ObjectMutexHandle;
-	BlockRingBufferProvider* RequestBlockBufferProvider;
-	El_Queue_t	RequestBlockQueue;
+	BlockRingBufferProvider* RequestMessageBlockBufferProvider;
+	El_Queue_t	RequestMessageQueue;
 	El_Timer_t SuspendTimer;
 	UserDataOfTransportLayer_t UserDataOfTransportLayerOfSuspendTimerUsed;
 
@@ -129,10 +129,10 @@ private:
 	void ClassInit(InitConfig* cfg)
 	{
 		El_Strncpy(Name, cfg->Name, EmbedXrpc_NameMaxLen);
-		RequestBuffer = cfg->RequestBuffer;
-		ResponseBuffer = cfg->ResponseBuffer;
-		DelegateBuffer = cfg->DelegateBuffer;
-		SuspendTimerBuffer = cfg->SuspendTimerBuffer;
+		DataLinkBufferForRequest = cfg->DataLinkBufferForRequest;
+		DataLinkBufferForResponse = cfg->DataLinkBufferForResponse;
+		DataLinkBufferForDelegate = cfg->DataLinkBufferForDelegate;
+		
 
 		TimeOut = cfg->TimeOut;
 		Send = cfg->Sender;
@@ -148,9 +148,9 @@ private:
 		UserData = cfg->UserData;
 		DeInitFlag = false;
 
-		DelegateBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.DelegateBlockBufferProvider;
-		ResponseBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.ResponseBlockBufferProvider;
-		RequestBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.RequestBlockBufferProvider;
+		DelegateMessageBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.DelegateMessageBlockBufferProvider;
+		ResponseMessageBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.ResponseMessageBlockBufferProvider;
+		RequestMessageBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.RequestMessageBlockBufferProvider;
 
 		RequestProcessServiceThreadHandle = nullptr;
 		SuspendTimer = nullptr;
@@ -172,7 +172,7 @@ public:
 		InitConfig cfg;
 		El_Memset(&cfg, 0, sizeof(InitConfig));
 		El_Strncpy(cfg.Name, client->Name, EmbedXrpc_NameMaxLen);
-		cfg.RequestBuffer = client->RequestBuffer;
+		cfg.DataLinkBufferForRequest = client->DataLinkBufferForRequest;
 		cfg.Sender = client->Sender;
 		cfg.TimeOut = client->TimeOut;
 		cfg.Responses = client->Responses;
@@ -190,8 +190,8 @@ public:
 		InitConfig cfg;
 		El_Memset(&cfg, 0, sizeof(InitConfig));
 		El_Strncpy(cfg.Name, server->Name, EmbedXrpc_NameMaxLen);
-		cfg.ResponseBuffer = server->ResponseBuffer;
-		cfg.DelegateBuffer = server->DelegateBuffer;
+		cfg.DataLinkBufferForResponse = server->DataLinkBufferForResponse;
+		cfg.DataLinkBufferForDelegate = server->DataLinkBufferForDelegate;
 		cfg.Sender = server->Sender;
 		cfg.TimeOut = server->TimeOut;
 		cfg.Requests = server->Requests;

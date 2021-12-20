@@ -29,29 +29,29 @@ SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 auto waitstate=ResponseState_Timeout;
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->RequestBuffer.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseMessageQueue);
 }
 
 SerializationManager_Reset(&sm);
-sm.Buf = &RpcObject->RequestBuffer.Buffer[4];
-sm.BufferLen = RpcObject->RequestBuffer.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 Inter_Add_Parameter_Serialize(&sm,&Add_SendData);
-RpcObject->RequestBuffer.Buffer[0]=(uint8_t)(Inter_Add_ServiceId&0xff);
-RpcObject->RequestBuffer.Buffer[1]=(uint8_t)(Inter_Add_ServiceId>>8&0xff);
-RpcObject->RequestBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
-RpcObject->RequestBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
-RpcObject->RequestBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->RequestBuffer.Buffer);
+RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(Inter_Add_ServiceId&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(Inter_Add_ServiceId>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
+RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
 SerializationManager_Reset(&sm);
 if(result==false)
 {
@@ -68,7 +68,7 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 {
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;
+sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;
 }
 else
 {
@@ -99,9 +99,9 @@ El_Free(recData.Data);
 }//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 Add_reqresp.State=waitstate;
 exi:
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->RequestBuffer.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return Add_reqresp;
 }
@@ -123,29 +123,29 @@ SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 auto waitstate=ResponseState_Timeout;
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->RequestBuffer.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseMessageQueue);
 }
 
 SerializationManager_Reset(&sm);
-sm.Buf = &RpcObject->RequestBuffer.Buffer[4];
-sm.BufferLen = RpcObject->RequestBuffer.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 Inter_NoArg_Parameter_Serialize(&sm,&NoArg_SendData);
-RpcObject->RequestBuffer.Buffer[0]=(uint8_t)(Inter_NoArg_ServiceId&0xff);
-RpcObject->RequestBuffer.Buffer[1]=(uint8_t)(Inter_NoArg_ServiceId>>8&0xff);
-RpcObject->RequestBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
-RpcObject->RequestBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
-RpcObject->RequestBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->RequestBuffer.Buffer);
+RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(Inter_NoArg_ServiceId&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(Inter_NoArg_ServiceId>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
+RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
 SerializationManager_Reset(&sm);
 if(result==false)
 {
@@ -162,7 +162,7 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 {
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;
+sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;
 }
 else
 {
@@ -193,9 +193,9 @@ El_Free(recData.Data);
 }//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 NoArg_reqresp.State=waitstate;
 exi:
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->RequestBuffer.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return NoArg_reqresp;
 }
@@ -216,30 +216,30 @@ Inter_NoReturn_Return& Inter_Requester::NoReturn(UserDataOfTransportLayer_t* use
 SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->RequestBuffer.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseMessageQueue);
 }
 
 SerializationManager_Reset(&sm);
-sm.Buf = &RpcObject->RequestBuffer.Buffer[4];
-sm.BufferLen = RpcObject->RequestBuffer.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 NoReturn_SendData.a=a;
 Inter_NoReturn_Parameter_Serialize(&sm,&NoReturn_SendData);
-RpcObject->RequestBuffer.Buffer[0]=(uint8_t)(Inter_NoReturn_ServiceId&0xff);
-RpcObject->RequestBuffer.Buffer[1]=(uint8_t)(Inter_NoReturn_ServiceId>>8&0xff);
-RpcObject->RequestBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
-RpcObject->RequestBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
-RpcObject->RequestBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->RequestBuffer.Buffer);
+RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(Inter_NoReturn_ServiceId&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(Inter_NoReturn_ServiceId>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
+RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
 SerializationManager_Reset(&sm);
 if(result==false)
 {
@@ -251,9 +251,9 @@ else
 NoReturn_reqresp.State=RequestState_Ok;
 }
 exi:
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->RequestBuffer.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return NoReturn_reqresp;
 }
@@ -267,29 +267,29 @@ Inter_NoArgAndReturn_Return& Inter_Requester::NoArgAndReturn(UserDataOfTransport
 SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->RequestBuffer.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseBlockQueue);
+El_ResetQueue(RpcObject->ResponseMessageQueue);
 }
 
 SerializationManager_Reset(&sm);
-sm.Buf = &RpcObject->RequestBuffer.Buffer[4];
-sm.BufferLen = RpcObject->RequestBuffer.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 Inter_NoArgAndReturn_Parameter_Serialize(&sm,&NoArgAndReturn_SendData);
-RpcObject->RequestBuffer.Buffer[0]=(uint8_t)(Inter_NoArgAndReturn_ServiceId&0xff);
-RpcObject->RequestBuffer.Buffer[1]=(uint8_t)(Inter_NoArgAndReturn_ServiceId>>8&0xff);
-RpcObject->RequestBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
-RpcObject->RequestBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
-RpcObject->RequestBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->RequestBuffer.Buffer);
+RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(Inter_NoArgAndReturn_ServiceId&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(Inter_NoArgAndReturn_ServiceId>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
+RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
 SerializationManager_Reset(&sm);
 if(result==false)
 {
@@ -301,9 +301,9 @@ else
 NoArgAndReturn_reqresp.State=RequestState_Ok;
 }
 exi:
-if(RpcObject->RequestBuffer.MutexHandle!=nullptr)
+if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->RequestBuffer.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return NoArgAndReturn_reqresp;
 }

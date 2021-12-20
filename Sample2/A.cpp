@@ -18,7 +18,7 @@ static ResponseDescribe Responses[1] =//定义回复 ID 集合
 static ClientNodeQuicklyInitConfig InitConfig =
 {
 	"A",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForRequest
 	{ Send },
 	1000,
 	Responses,
@@ -29,17 +29,17 @@ static ClientNodeQuicklyInitConfig InitConfig =
 		true,//CheckSumValid
 		6,//ServerThreadPriority
 		6,//ClientThreadPriority
-		true,//UseRingBufferWhenReceiving
+		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//DelegateBlockQueue_MaxItemNumber
-			10,//ResponseBlockQueue_MaxItemNumber
-			10,//RequestBlockQueue_MaxItemNumber
+			10,//DelegateMessageQueue_MaxItemNumber
+			10,//ResponseMessageQueue_MaxItemNumber
+			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			nullptr,//DelegateBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//ResponseBlockBufferProvider
-			nullptr,//RequestBlockBufferProvider
+			nullptr,//DelegateMessageBlockBufferProvider
+			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//ResponseMessageBlockBufferProvider
+			nullptr,//RequestMessageBlockBufferProvider
 		},
 		
 	},
@@ -52,7 +52,7 @@ void ClientThread()
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	int a = 1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
-	int testcount = 10;
+	int testcount = 5;
 	DTL abdtl;
 	abdtl.SourceAddress = 'A';
 	abdtl.DestAddress = 'B';
@@ -60,9 +60,10 @@ void ClientThread()
 	{
 		a++;
 		b++;
+		printf("A:Calling B's service....\n");
 		auto sum= A_Requester.GetSum(&abdtl,a, b);
 		El_Assert(sum.State == ResponseState_Ok);
-		printf("sum:%d\n\r\n", sum.ReturnValue.Value);
+		printf("A:sum:%d\n\r\n", sum.ReturnValue.Value);
 		A_Requester.Free_GetSum(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}

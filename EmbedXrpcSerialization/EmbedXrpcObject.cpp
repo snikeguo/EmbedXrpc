@@ -11,16 +11,16 @@ void EmbedXrpcObject::Init()
 
 	if (RpcConfig.UseRingBufferWhenReceiving == false)
 	{
-		DelegateBlockQueue = El_CreateQueue("DelegateBlockQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.DelegateBlockQueue_MaxItemNumber);
-		ResponseBlockQueue = El_CreateQueue("ResponseBlockQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.ResponseBlockQueue_MaxItemNumber);
-		RequestBlockQueue = El_CreateQueue("RequestBlockQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.RequestBlockQueue_MaxItemNumber);
+		DelegateMessageQueue = El_CreateQueue("DelegateMessageQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.DelegateMessageQueue_MaxItemNumber);
+		ResponseMessageQueue = El_CreateQueue("ResponseMessageQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.ResponseMessageQueue_MaxItemNumber);
+		RequestMessageQueue = El_CreateQueue("RequestMessageQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.RequestMessageQueue_MaxItemNumber);
 	}
 
 	if (
 		((RpcConfig.UseRingBufferWhenReceiving == false)
-			&& (RpcConfig.DynamicMemoryConfig.DelegateBlockQueue_MaxItemNumber > 0)
+			&& (RpcConfig.DynamicMemoryConfig.DelegateMessageQueue_MaxItemNumber > 0)
 			&& (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true))//动态内存模式
-		|| ((RpcConfig.UseRingBufferWhenReceiving == true) && (RpcConfig.RingBufferConfig.DelegateBlockBufferProvider != nullptr))//ringbuffer模式
+		|| ((RpcConfig.UseRingBufferWhenReceiving == true) && (RpcConfig.RingBufferConfig.DelegateMessageBlockBufferProvider != nullptr))//ringbuffer模式
 		)
 	{
 		DelegateServiceThreadHandle = El_CreateThread("DelegateServiceThread", RpcConfig.ClientThreadPriority, DelegateServiceThread, this, 2048);
@@ -29,41 +29,38 @@ void EmbedXrpcObject::Init()
 
 	if (
 		((RpcConfig.UseRingBufferWhenReceiving == false)
-			&& (RpcConfig.DynamicMemoryConfig.RequestBlockQueue_MaxItemNumber > 0)
+			&& (RpcConfig.DynamicMemoryConfig.RequestMessageQueue_MaxItemNumber > 0)
 			&& (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true))//动态内存模式
-		|| ((RpcConfig.UseRingBufferWhenReceiving == true) && (RpcConfig.RingBufferConfig.RequestBlockBufferProvider != nullptr))//ringbuffer模式
+		|| ((RpcConfig.UseRingBufferWhenReceiving == true) && (RpcConfig.RingBufferConfig.RequestMessageBlockBufferProvider != nullptr))//ringbuffer模式
 		)
 	{
 		RequestProcessServiceThreadHandle = El_CreateThread("RequestProcessServiceThread", RpcConfig.ServerThreadPriority, RequestProcessServiceThread, this, 2048);
 		El_ThreadStart(RequestProcessServiceThreadHandle);
 	}
 	SuspendTimer = El_CreateTimer("SuspendTimer", El_WAIT_FOREVER, SuspendTimerCallBack, this);
-	}
+}
 void EmbedXrpcObject::DeInit()
 {
 	DeInitFlag = true;
-	if (RequestBuffer.MutexHandle != nullptr)
+	if (DataLinkBufferForRequest.MutexHandle != nullptr)
 	{
-		El_DeleteMutex(RequestBuffer.MutexHandle);
+		El_DeleteMutex(DataLinkBufferForRequest.MutexHandle);
 	}
-	if (ResponseBuffer.MutexHandle != nullptr)
+	if (DataLinkBufferForResponse.MutexHandle != nullptr)
 	{
-		El_DeleteMutex(ResponseBuffer.MutexHandle);
+		El_DeleteMutex(DataLinkBufferForResponse.MutexHandle);
 	}
-	if (DelegateBuffer.MutexHandle != nullptr)
+	if (DataLinkBufferForDelegate.MutexHandle != nullptr)
 	{
-		El_DeleteMutex(DelegateBuffer.MutexHandle);
+		El_DeleteMutex(DataLinkBufferForDelegate.MutexHandle);
 	}
-	if (SuspendTimerBuffer.MutexHandle != nullptr)
-	{
-		El_DeleteMutex(SuspendTimerBuffer.MutexHandle);
-}
+
 
 
 	if (DelegateServiceThreadHandle != nullptr)
 	{
 		El_DeleteThread(DelegateServiceThreadHandle);
-}
+	}
 	else
 	{
 		DelegateServiceThreadExitState = true;
@@ -71,13 +68,13 @@ void EmbedXrpcObject::DeInit()
 
 	if (RpcConfig.UseRingBufferWhenReceiving == 1)
 	{
-		delete DelegateBlockBufferProvider;
-		delete ResponseBlockBufferProvider;
+		delete DelegateMessageBlockBufferProvider;
+		delete ResponseMessageBlockBufferProvider;
 	}
 	else
 	{
-		El_DeleteQueue(DelegateBlockQueue);
-		El_DeleteQueue(ResponseBlockQueue);
+		El_DeleteQueue(DelegateMessageQueue);
+		El_DeleteQueue(ResponseMessageQueue);
 	}
 
 	if (RequestProcessServiceThreadHandle != nullptr)
@@ -91,11 +88,11 @@ void EmbedXrpcObject::DeInit()
 
 	if (RpcConfig.UseRingBufferWhenReceiving == true)
 	{
-		delete RequestBlockBufferProvider;
+		delete RequestMessageBlockBufferProvider;
 	}
 	else
 	{
-		El_DeleteQueue(RequestBlockQueue);//server接受到的request队列数据
+		El_DeleteQueue(RequestMessageQueue);//server接受到的request队列数据
 	}
 
 	El_DeleteTimer(SuspendTimer);
@@ -122,12 +119,12 @@ void EmbedXrpcObject::DelegateServiceExecute(EmbedXrpcObject* obj, ReceiveItemIn
 			rsm.BufferLen = recData.DataLen;
 			if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
 			{
-				rsm.BlockBufferProvider = obj->DelegateBlockBufferProvider;
+				rsm.BlockBufferProvider = obj->DelegateMessageBlockBufferProvider;
 			}
 			else
 			{
 				rsm.Buf = recData.Data;
-		}
+			}
 
 			if (obj->RpcConfig.CheckSumValid == true)
 			{
@@ -143,14 +140,14 @@ void EmbedXrpcObject::DelegateServiceExecute(EmbedXrpcObject* obj, ReceiveItemIn
 			}
 
 			goto _break;
-			}
+		}
 	}
 _break:
 	if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
 	{
 		if (isContain == false)
 		{
-			BlockRingBufferProvider_PopChars(obj->DelegateBlockBufferProvider,nullptr, recData.DataLen);
+			BlockRingBufferProvider_PopChars(obj->DelegateMessageBlockBufferProvider, nullptr, recData.DataLen);
 		}
 	}
 	else
@@ -188,7 +185,7 @@ void EmbedXrpcObject::ResponseServiceExecute(EmbedXrpcObject* obj, ReceiveItemIn
 			rsm.BufferLen = recData.DataLen;
 			if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
 			{
-				rsm.BlockBufferProvider = obj->RequestBlockBufferProvider;
+				rsm.BlockBufferProvider = obj->RequestMessageBlockBufferProvider;
 			}
 			else
 			{
@@ -197,17 +194,17 @@ void EmbedXrpcObject::ResponseServiceExecute(EmbedXrpcObject* obj, ReceiveItemIn
 
 			if (obj->RpcConfig.CheckSumValid == true)
 			{
-				SerializationManager_SetCalculateSum(&rsm,0);
+				SerializationManager_SetCalculateSum(&rsm, 0);
 				SerializationManager_SetReferenceSum(&rsm, recData.CheckSum);
 			}
-			if (obj->ResponseBuffer.MutexHandle != nullptr)
+			if (obj->DataLinkBufferForResponse.MutexHandle != nullptr)
 			{
-				El_TakeMutex(obj->ResponseBuffer.MutexHandle, El_WAIT_FOREVER);//由于使用ResponseBuffer，所以添加锁
+				El_TakeMutex(obj->DataLinkBufferForResponse.MutexHandle, El_WAIT_FOREVER);//由于使用DataLinkBufferForResponse，所以添加锁
 			}
 			//sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
 			SerializationManager_Reset(&sendsm);
-			sendsm.Buf = &obj->ResponseBuffer.Buffer[4];
-			sendsm.BufferLen = obj->ResponseBuffer.BufferLen - 4;
+			sendsm.Buf = &obj->DataLinkBufferForResponse.Buffer[4];
+			sendsm.BufferLen = obj->DataLinkBufferForResponse.BufferLen - 4;
 
 			//EmbedXrpc_TimerReset(obj->SuspendTimer);
 			//EmbedXrpc_TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
@@ -220,16 +217,16 @@ void EmbedXrpcObject::ResponseServiceExecute(EmbedXrpcObject* obj, ReceiveItemIn
 
 			if (sendsm.Index > 0)//
 			{
-				obj->ResponseBuffer.Buffer[0] = (uint8_t)(recData.Sid >> 0 & 0xff);
-				obj->ResponseBuffer.Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
-				obj->ResponseBuffer.Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
-				obj->ResponseBuffer.Buffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
-				obj->ResponseBuffer.Buffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-				obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, sendsm.Index + 4, obj->ResponseBuffer.Buffer);
+				obj->DataLinkBufferForResponse.Buffer[0] = (uint8_t)(recData.Sid >> 0 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[1] = (uint8_t)(recData.Sid >> 8 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
+				obj->DataLinkBufferForResponse.Buffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
+				obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, sendsm.Index + 4, obj->DataLinkBufferForResponse.Buffer);
 			}
-			if (obj->ResponseBuffer.MutexHandle != nullptr)
+			if (obj->DataLinkBufferForResponse.MutexHandle != nullptr)
 			{
-				El_ReleaseMutex(obj->ResponseBuffer.MutexHandle);
+				El_ReleaseMutex(obj->DataLinkBufferForResponse.MutexHandle);
 			}
 
 			if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
@@ -244,7 +241,7 @@ _break:
 	{
 		if (isContain == false)
 		{
-			BlockRingBufferProvider_PopChars(obj->RequestBlockBufferProvider,nullptr, recData.DataLen);
+			BlockRingBufferProvider_PopChars(obj->RequestMessageBlockBufferProvider, nullptr, recData.DataLen);
 		}
 	}
 	else
@@ -309,14 +306,14 @@ bool EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allData, Use
 		{
 			if (RpcConfig.UseRingBufferWhenReceiving == true)
 			{
-				El_SendQueueResult = BlockRingBufferProvider_Send(ResponseBlockBufferProvider,&raw, nullptr) == True ? QueueState_OK : QueueState_Full;
+				El_SendQueueResult = BlockRingBufferProvider_Send(ResponseMessageBlockBufferProvider, &raw, nullptr) == True ? QueueState_OK : QueueState_Full;
 			}
 			else
 			{
 				raw.Data = nullptr;
-				if (El_QueueSpacesAvailable(ResponseBlockQueue) > 0)
+				if (El_QueueSpacesAvailable(ResponseMessageQueue) > 0)
 				{
-					El_SendQueueResult = El_SendQueue(ResponseBlockQueue, &raw, sizeof(ReceiveItemInfo));
+					El_SendQueueResult = El_SendQueue(ResponseMessageQueue, &raw, sizeof(ReceiveItemInfo));
 				}
 				else
 				{
@@ -324,27 +321,27 @@ bool EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allData, Use
 				}
 			}
 			goto sqr;
-				}
+		}
 
 		if (RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			El_SendQueueResult = BlockRingBufferProvider_Send(ResponseBlockBufferProvider ,&raw, data) == True ? QueueState_OK : QueueState_Full;
+			El_SendQueueResult = BlockRingBufferProvider_Send(ResponseMessageBlockBufferProvider, &raw, data) == True ? QueueState_OK : QueueState_Full;
 		}
 		else
 		{
-			TrySendDataToQueue(ResponseBlockQueue, dataLen, data, raw, sqr, ReceiveItemInfo, El_SendQueueResult);
+			TrySendDataToQueue(ResponseMessageQueue, dataLen, data, raw, sqr, ReceiveItemInfo, El_SendQueueResult);
 		}
 
-			}
+	}
 	else if (rt == ReceiveType_Delegate)
 	{
 		if (RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			El_SendQueueResult = BlockRingBufferProvider_Send(DelegateBlockBufferProvider,&raw, data) == True ? QueueState_OK : QueueState_Full;
+			El_SendQueueResult = BlockRingBufferProvider_Send(DelegateMessageBlockBufferProvider, &raw, data) == True ? QueueState_OK : QueueState_Full;
 		}
 		else if (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true)
 		{
-			TrySendDataToQueue(DelegateBlockQueue, dataLen, data, raw, sqr, ReceiveItemInfo, El_SendQueueResult);
+			TrySendDataToQueue(DelegateMessageQueue, dataLen, data, raw, sqr, ReceiveItemInfo, El_SendQueueResult);
 		}
 		else
 		{
@@ -358,11 +355,11 @@ bool EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allData, Use
 		//EmbedSerializationShowMessage("EmbedXrpcObject","Server ReceivedMessage  El_Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 		if (RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			El_SendQueueResult = BlockRingBufferProvider_Send(RequestBlockBufferProvider ,&raw, data) == True ? QueueState_OK : QueueState_Full;
+			El_SendQueueResult = BlockRingBufferProvider_Send(RequestMessageBlockBufferProvider, &raw, data) == True ? QueueState_OK : QueueState_Full;
 		}
 		else if (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true)
 		{
-			TrySendDataToQueue(RequestBlockQueue, dataLen, data, raw, sqr, ReceiveItemInfo, El_SendQueueResult);
+			TrySendDataToQueue(RequestMessageQueue, dataLen, data, raw, sqr, ReceiveItemInfo, El_SendQueueResult);
 		}
 		else
 		{
@@ -379,10 +376,10 @@ sqr:
 void EmbedXrpcObject::SuspendTimerCallBack(void* arg)
 {
 	EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
-	if (obj->SuspendTimerBuffer.MutexHandle != nullptr)
+	/*if (obj->DataLinkBufferForSuspendTimer.MutexHandle != nullptr)
 	{
-		El_TakeMutex(obj->SuspendTimerBuffer.MutexHandle, El_WAIT_FOREVER);
-	}
+		El_TakeMutex(obj->DataLinkBufferForSuspendTimer.MutexHandle, El_WAIT_FOREVER);
+	}*/
 	uint8_t sb[4];
 	sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 	sb[1] = (uint8_t)(EmbedXrpcSuspendSid >> 8 & 0xff);
@@ -390,10 +387,10 @@ void EmbedXrpcObject::SuspendTimerCallBack(void* arg)
 	sb[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
 	sb[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
 	obj->Send(&obj->UserDataOfTransportLayerOfSuspendTimerUsed, obj, 4, sb);
-	if (obj->SuspendTimerBuffer.MutexHandle != nullptr)
+	/*if (obj->DataLinkBufferForSuspendTimer.MutexHandle != nullptr)
 	{
-		El_ReleaseMutex(obj->SuspendTimerBuffer.MutexHandle);
-	}
+		El_ReleaseMutex(obj->DataLinkBufferForSuspendTimer.MutexHandle);
+	}*/
 }
 
 
@@ -407,11 +404,11 @@ void EmbedXrpcObject::DelegateServiceThread(void* arg)
 	{
 		if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			waitResult = BlockRingBufferProvider_Receive(obj->DelegateBlockBufferProvider ,&recData, 1);
+			waitResult = BlockRingBufferProvider_Receive(obj->DelegateMessageBlockBufferProvider, &recData, 1);
 		}
 		else
 		{
-			waitResult = El_ReceiveQueue(obj->DelegateBlockQueue, &recData, sizeof(ReceiveItemInfo), 1) == QueueState_OK ? true : false;
+			waitResult = El_ReceiveQueue(obj->DelegateMessageQueue, &recData, sizeof(ReceiveItemInfo), 1) == QueueState_OK ? true : false;
 		}
 		if (waitResult == true)
 		{
@@ -435,11 +432,11 @@ void EmbedXrpcObject::RequestProcessServiceThread(void* arg)
 
 		if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			waitResult = BlockRingBufferProvider_Receive(obj->RequestBlockBufferProvider ,&recData, 1);
+			waitResult = BlockRingBufferProvider_Receive(obj->RequestMessageBlockBufferProvider, &recData, 1);
 		}
 		else
 		{
-			waitResult = El_ReceiveQueue(obj->RequestBlockQueue, &recData, sizeof(ReceiveItemInfo), 1) == QueueState_OK ? true : false;
+			waitResult = El_ReceiveQueue(obj->RequestMessageQueue, &recData, sizeof(ReceiveItemInfo), 1) == QueueState_OK ? true : false;
 		}
 
 		if (waitResult == true)
@@ -464,11 +461,11 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo* recDat
 	{
 		if (RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			waitResult = BlockRingBufferProvider_Receive(ResponseBlockBufferProvider,recData, TimeOut);
+			waitResult = BlockRingBufferProvider_Receive(ResponseMessageBlockBufferProvider, recData, TimeOut);
 		}
 		else
 		{
-			auto wr = El_ReceiveQueue(ResponseBlockQueue, recData, sizeof(ReceiveItemInfo), TimeOut);
+			auto wr = El_ReceiveQueue(ResponseMessageQueue, recData, sizeof(ReceiveItemInfo), TimeOut);
 			if (wr != QueueState_OK)
 			{
 				return ResponseState_Timeout;
@@ -492,7 +489,7 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo* recDat
 			ret = ResponseState_Ok;
 		}
 		break;
-}
+	}
 	return ret;
 }
 

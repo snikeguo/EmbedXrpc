@@ -38,12 +38,12 @@ public:
 		Response.ReturnValue.Sum4 = 1;
 		Response.ReturnValue.Sum5 = 2;
 		Response.ReturnValue.Sum6 = 3;
-		Response.ReturnValue.Sum7 = 0x66661111;
+		Response.ReturnValue.Sum7 = a+b;
 
 		Response.ReturnValue.dataLen = 0;
 		Response.ReturnValue.data = NULL;
-		printf("模拟耗时操作  延时2秒\n");
-		//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		printf("server: addservice 模拟耗时操作  延时2秒\n");
+		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 		//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 		//printf("len:%d\n", dataLen);
 	}
@@ -95,12 +95,12 @@ RequestDescribe Requests[] = //定义请求集合
 	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
 	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
 };
-ServerNodeQuicklyInitConfig InitConfig =
+static ServerNodeQuicklyInitConfig InitConfig =
 {
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},
-	{nullptr,0,nullptr},
-	 { ServerSend },
+	"Server",
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},// DataLinkBufferForResponse
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForDelegate
+	ServerSend,
 	500,
 	Requests,
 	4,
@@ -108,7 +108,7 @@ ServerNodeQuicklyInitConfig InitConfig =
 		true,//CheckSumValid
 		6,//ServerThreadPriority
 		6,//ClientThreadPriority
-		true,//UseRingBufferWhenReceiving
+		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
 			10,//DelegateBlockQueue_MaxItemNumber
@@ -118,7 +118,7 @@ ServerNodeQuicklyInitConfig InitConfig =
 		{
 			nullptr,//DelegateBlockBufferProvider
 			nullptr,//ResponseBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestBlockBufferProvider
+			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestMessageBlockBufferProvider
 		},
 	},
 	nullptr,
@@ -132,7 +132,7 @@ void ServerThread()
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;
-	int testcount = 10;
+	uint32_t testcount = 0xffffffff;
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "192.168.1.101");
 	win32UserDataOfTransportLayerTest.Port = 7777;
@@ -149,7 +149,7 @@ void ServerThread()
 		t.Year = localti->tm_year + 1900;
 		t.Sex = t.Sec % 2 == 0 ? Sex::Man : Sex::WoMan;
 		memset(t.DateString, 0x0, 128);
-		sprintf((char*)t.DateString, "%d-%d-%d %d:%d:%d!server\r\n", t.Year, t.Month, t.Day, t.Hour, t.Min, t.Sec);
+		sprintf((char*)t.DateString, "server:%d-%d-%d %d:%d:%d!server\r\n", t.Year, t.Month, t.Day, t.Hour, t.Min, t.Sec);
 		t.DateStringLen = (UInt8)strlen((const char*)t.DateString) + 1;
 
 		t.David.a = 1;

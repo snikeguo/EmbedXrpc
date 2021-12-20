@@ -23,7 +23,7 @@ class CServer_GetSumProvider :public Inter_GetSum_Service
 public:
 	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, Int32 a, Int32 b)
 	{
-		
+		printf("C:start suppendtimer and sleep 2s.\n");
 		El_TimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
 		this->Response.ReturnValue.IsSuccess = 1;
 		this->Response.ReturnValue.Value = a + b;
@@ -40,9 +40,8 @@ static RequestDescribe Requests[] = //定义请求集合
 static ServerNodeQuicklyInitConfig InitConfig =
 {
 	"C",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//ResponseBuffer
-	{nullptr,0,nullptr},//DelegateBuffer
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//SuspendTimerBuffer
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,nullptr},//DataLinkBufferForResponse
+	{nullptr,0,nullptr},//DataLinkBufferForDelegate
 	 { Send },
 	500,
 	Requests,
@@ -51,17 +50,17 @@ static ServerNodeQuicklyInitConfig InitConfig =
 		true,//CheckSumValid
 		6,//ServerThreadPriority
 		6,//ClientThreadPriority
-		true,//UseRingBufferWhenReceiving
+		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//DelegateBlockQueue_MaxItemNumber
-			10,//ResponseBlockQueue_MaxItemNumber
-			10,//RequestBlockQueue_MaxItemNumber
+			10,//DelegateMessageQueue_MaxItemNumber
+			10,//ResponseMessageQueue_MaxItemNumber
+			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			nullptr,//DelegateBlockBufferProvider
-			nullptr,//ResponseBlockBufferProvider
-			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestBlockBufferProvider
+			nullptr,//DelegateMessageBlockBufferProvider
+			nullptr,//ResponseMessageBlockBufferProvider
+			new BlockRingBufferProvider(new UInt8[AllTypeBufferLen],AllTypeBufferLen,10),//RequestMessageBlockBufferProvider
 		},
 	},
 	nullptr,

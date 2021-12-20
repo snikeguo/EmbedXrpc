@@ -16,6 +16,34 @@ class EmbedXrpcObject;
      ResponseState_SidError=5,
      ResponseState_UnsupportedSid = 6,
  };
+ struct EmbedXrpcConfig
+ {
+     bool CheckSumValid;
+     uint32_t ServerThreadPriority;
+     uint32_t ClientThreadPriority;
+     bool UseRingBufferWhenReceiving;//如果为1，则使用RingBufferConfig 否则使用DynamicMemoryConfig
+     struct
+     {
+         bool IsSendToQueue;
+
+         //client部分:
+         uint32_t DelegateMessageQueue_MaxItemNumber;
+         uint32_t ResponseMessageQueue_MaxItemNumber;
+
+         //server部分:
+         uint32_t RequestMessageQueue_MaxItemNumber;
+     }DynamicMemoryConfig;
+     struct
+     {
+         //client
+         BlockRingBufferProvider* DelegateMessageBlockBufferProvider = nullptr;
+         BlockRingBufferProvider* ResponseMessageBlockBufferProvider = nullptr;
+
+         //server
+         BlockRingBufferProvider* RequestMessageBlockBufferProvider = nullptr;
+     }RingBufferConfig;
+
+ };
  enum ReceiveType_t
  {
      ReceiveType_Request=0x1,
@@ -27,17 +55,17 @@ class EmbedXrpcObject;
  public:
      void* UserData;
      virtual uint16_t GetSid() = 0;
-	 virtual void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,
+	 virtual void Invoke(EmbedXrpcConfig* rpcConfig, UserDataOfTransportLayer_t* userDataOfTransportLayer,
          SerializationManager* recManager) = 0;
  };
 
  class ServiceInvokeParameter
  {
  public:
-     UserDataOfTransportLayer_t* request_UserDataOfTransportLayer;
-     UserDataOfTransportLayer_t response_UserDataOfTransportLayer;
-     EmbedXrpcObject* rpcObject;
-     uint16_t targetTimeOut;
+     UserDataOfTransportLayer_t* Request_UserDataOfTransportLayer;
+     UserDataOfTransportLayer_t Response_UserDataOfTransportLayer;
+     EmbedXrpcObject* RpcObject;
+     uint16_t TargetTimeOut;
  };
 
  class IService

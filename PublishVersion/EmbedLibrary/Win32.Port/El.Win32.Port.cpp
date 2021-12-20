@@ -213,13 +213,13 @@ extern "C"
 	void* El_Malloc(uint32_t size)
 	{
 		auto x = malloc(size);
-		printf("malloc ptr:0x%8x,size:%4d\n", x, size);
+		//printf("malloc ptr:0x%p,size:%4d\n", x, size);
 		return x;
 	}
 	void El_Free(void* ptr)
 	{
 		free(ptr);
-		printf("free ptr:0x%8x\n", ptr);
+		//printf("free ptr:0x%p\n", ptr);
 	}
 	void El_Memcpy(void* d, const void* s, uint32_t size)
 	{

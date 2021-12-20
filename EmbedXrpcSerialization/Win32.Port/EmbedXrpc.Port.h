@@ -10,7 +10,7 @@ extern "C" {
 		int Port;
 	};
 	typedef struct Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
-
+#define EmbedXrpc_NameMaxLen	32
 
 #ifdef __cplusplus
 }

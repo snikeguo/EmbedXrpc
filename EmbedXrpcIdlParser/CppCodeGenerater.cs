@@ -431,13 +431,13 @@ namespace EmbedXrpcIdlParser
                 ServerCsw.WriteLine($"SerializationManager sm;");
                 ServerCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
                 //ServerCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
-				ServerCsw.WriteLine("if(RpcObject->DelegateBuffer.MutexHandle!=nullptr)");
+				ServerCsw.WriteLine("if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)");
                 ServerCsw.WriteLine("{");
-                ServerCsw.WriteLine("El_TakeMutex(RpcObject->DelegateBuffer.MutexHandle, El_WAIT_FOREVER);");
+                ServerCsw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle, El_WAIT_FOREVER);");
                 ServerCsw.WriteLine("}");
                 ServerCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
-                        "sm.Buf = &RpcObject->DelegateBuffer.Buffer[4];\n" +
-                        "sm.BufferLen = RpcObject->DelegateBuffer.BufferLen-4;");
+                        "sm.Buf = &RpcObject->DataLinkBufferForDelegate.Buffer[4];\n" +
+                        "sm.BufferLen = RpcObject->DataLinkBufferForDelegate.BufferLen-4;");
 
                 if(targetDelegate.ExternalParameter.IsExternal==false)//Copy to SendData
                 {
@@ -481,16 +481,16 @@ namespace EmbedXrpcIdlParser
                 //ServerCsw.WriteLine($"sm.Serialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&SendData,0);");
                 ServerCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_Serialize(&sm,&SendData);");
 
-                ServerCsw.WriteLine($"RpcObject->DelegateBuffer.Buffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
-                ServerCsw.WriteLine($"RpcObject->DelegateBuffer.Buffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
-                ServerCsw.WriteLine($"RpcObject->DelegateBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
-                ServerCsw.WriteLine($"RpcObject->DelegateBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
-                ServerCsw.WriteLine($"RpcObject->DelegateBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);");
-                ServerCsw.WriteLine($"RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DelegateBuffer.Buffer);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
+                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);");
+                ServerCsw.WriteLine($"RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForDelegate.Buffer);");
                 ServerCsw.WriteLine("SerializationManager_Reset(&sm);");
-                ServerCsw.WriteLine("if(RpcObject->DelegateBuffer.MutexHandle!=nullptr)");
+                ServerCsw.WriteLine("if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)");
                 ServerCsw.WriteLine("{");
-                ServerCsw.WriteLine("El_ReleaseMutex(RpcObject->DelegateBuffer.MutexHandle);");
+                ServerCsw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle);");
                 ServerCsw.WriteLine("}");
 				ServerCsw.WriteLine("}");//function end
                 MacroControlWriteEnd(ServerCsw, targetDelegate.MacroControlAttribute);
@@ -613,21 +613,21 @@ namespace EmbedXrpcIdlParser
                     {
                         ClientCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
                     }
-                    ClientCsw.WriteLine("if(RpcObject->RequestBuffer.MutexHandle!=nullptr)");
+                    ClientCsw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
                     ClientCsw.WriteLine("{");
-                    ClientCsw.WriteLine("El_TakeMutex(RpcObject->RequestBuffer.MutexHandle, El_WAIT_FOREVER);");
+                    ClientCsw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);");
                     ClientCsw.WriteLine("}");
 
                     //ClientCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
                     ClientCsw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-                    ClientCsw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->ResponseBlockBufferProvider);");
+                    ClientCsw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);");
                     ClientCsw.WriteLine("}\r\nelse\r\n{");
-                    ClientCsw.WriteLine("El_ResetQueue(RpcObject->ResponseBlockQueue);");
+                    ClientCsw.WriteLine("El_ResetQueue(RpcObject->ResponseMessageQueue);");
                     ClientCsw.WriteLine("}\r\n");
                     //ClientCsw.WriteLine("ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
                     ClientCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
-                        "sm.Buf = &RpcObject->RequestBuffer.Buffer[4];\n" +
-                        "sm.BufferLen = RpcObject->RequestBuffer.BufferLen-4;");
+                        "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];\n" +
+                        "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;");
 
                     if(service.ExternalParameter.IsExternal==false)
                     {
@@ -682,12 +682,12 @@ namespace EmbedXrpcIdlParser
                     //ClientCsw.WriteLine($"sm.Serialize(&{service.ParameterStructType.TypeName}_TypeInstance,&SendData,0);");
                     ClientCsw.WriteLine($"{service.ParameterStructType.TypeName}_Serialize(&sm,&{service.ServiceName}_SendData);");
 
-                    ClientCsw.WriteLine($"RpcObject->RequestBuffer.Buffer[0]=(uint8_t)({service.FullName}_ServiceId&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->RequestBuffer.Buffer[1]=(uint8_t)({service.FullName}_ServiceId>>8&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->RequestBuffer.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->RequestBuffer.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
-                    ClientCsw.WriteLine($"RpcObject->RequestBuffer.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);");
-                    ClientCsw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->RequestBuffer.Buffer);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)({service.FullName}_ServiceId&0xff);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.FullName}_ServiceId>>8&0xff);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
+                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);");
+                    ClientCsw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);");
                     ClientCsw.WriteLine("SerializationManager_Reset(&sm);");
                     ClientCsw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\ngoto exi;\n}}");
                     ClientCsw.WriteLine($"else\n{{\n{service.ServiceName}_reqresp.State=RequestState_Ok;\n}}");
@@ -700,7 +700,7 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine("{");
                         //ClientCsw.WriteLine("#if  EmbedXrpc_UseRingBufferWhenReceiving==1");
                         ClientCsw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-                        ClientCsw.WriteLine("sm.BlockBufferProvider = RpcObject->ResponseBlockBufferProvider;");
+                        ClientCsw.WriteLine("sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;");
                         ClientCsw.WriteLine("}\r\nelse\r\n{");
                         //ClieCtCsw.WriteLine("sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;");
                         ClientCsw.WriteLine("SerializationManager_Reset(&sm);");
@@ -735,9 +735,9 @@ namespace EmbedXrpcIdlParser
                         ClientCsw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");
                     }
                     ClientCsw.WriteLine("exi:");
-                    ClientCsw.WriteLine("if(RpcObject->RequestBuffer.MutexHandle!=nullptr)");
+                    ClientCsw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
                     ClientCsw.WriteLine("{");
-                    ClientCsw.WriteLine("El_ReleaseMutex(RpcObject->RequestBuffer.MutexHandle);");
+                    ClientCsw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);");
                     ClientCsw.WriteLine("}");
                     ClientCsw.WriteLine($"return {service.ServiceName}_reqresp;");
                     ClientCsw.WriteLine("}");
