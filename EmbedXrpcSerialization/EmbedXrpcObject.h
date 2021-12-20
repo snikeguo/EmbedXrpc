@@ -3,36 +3,101 @@
 #define EmbedXrpcObject_H
 #include "EmbedLibrary.h"
 #include "EmbedXrpcCommon.h"
-#if EmbedXrpc_UseRingBufferWhenReceiving==1
 #include "BlockBufferProvider.h"
+#define EmbedXrpcObjectVersion	"2.1.0"
 
-#if EmbedXrpc_IsSendToQueue==0
-#error "EmbedXrpc_UseRingBufferWhenReceiving=1的前置条件必须是EmbedXrpc_IsSendToQueue=1"
-#endif
 
-#endif
-#define EmbedXrpcObjectVersion	"2.0.6"
+struct EmbedXrpcBuffer
+{
+	uint8_t* Buffer;
+	uint32_t BufferLen;
+	El_Mutex_t MutexHandle;
+};
+
+
+struct ClientNodeQuicklyInitConfig
+{
+	char Name[EmbedXrpc_NameMaxLen];
+	EmbedXrpcBuffer RequestBuffer;
+
+	SendPack_t Sender;
+	uint32_t TimeOut;
+
+	ResponseDescribe* Responses;
+	uint32_t ResponsesCount;
+
+	DelegateDescribe* Delegates;
+	uint32_t DelegatesCount;
+
+	EmbedXrpcConfig RpcConfig;
+
+	void* UserData;
+};
+
+
+struct ServerNodeQuicklyInitConfig
+{
+	char Name[EmbedXrpc_NameMaxLen];
+	EmbedXrpcBuffer ResponseBuffer;
+	EmbedXrpcBuffer DelegateBuffer;
+	EmbedXrpcBuffer SuspendTimerBuffer;
+	SendPack_t Sender;
+	uint32_t TimeOut;
+
+	RequestDescribe* Requests;//server 请求的services
+	uint32_t RequestsCount;//server
+
+	EmbedXrpcConfig RpcConfig;
+	void* UserData;
+};
+
+
+struct InitConfig
+{
+	char Name[EmbedXrpc_NameMaxLen];
+
+	EmbedXrpcBuffer RequestBuffer;
+
+	EmbedXrpcBuffer ResponseBuffer;
+	EmbedXrpcBuffer DelegateBuffer;
+	EmbedXrpcBuffer SuspendTimerBuffer;
+
+	SendPack_t Sender;
+	uint32_t TimeOut;
+
+	ResponseDescribe* Responses;
+	uint32_t ResponsesCount;
+
+	DelegateDescribe* Delegates;//代理的services
+	uint32_t DelegatesCount;
+
+	RequestDescribe* Requests;//server 请求的services
+	uint32_t RequestsCount;//server
+
+	EmbedXrpcConfig RpcConfig;
+	void* UserData;
+};
+
 class EmbedXrpcObject
 {
 public:
 
-	uint8_t *DataLinkLayoutBuffer;
-	uint32_t DataLinkLayoutBufferLen;
+	char Name[EmbedXrpc_NameMaxLen];
+
+	EmbedXrpcBuffer RequestBuffer;
+	EmbedXrpcBuffer ResponseBuffer;
+	EmbedXrpcBuffer DelegateBuffer;
+	EmbedXrpcBuffer SuspendTimerBuffer;
 
 	uint32_t TimeOut;
 	SendPack_t Send;
-	El_Mutex_t ObjectMutexHandle;
 
-#if EmbedXrpc_UseRingBufferWhenReceiving==1
-	uint8_t DelegateRingBuffer[EmbedXrpc_DelegateRingBufferSize];
+
 	BlockRingBufferProvider* DelegateBlockBufferProvider = nullptr;
-
-	uint8_t ResponseRingBuffer[EmbedXrpc_ResponseRingBufferSize];
 	BlockRingBufferProvider* ResponseBlockBufferProvider = nullptr;
-#else
+	//#else
 	El_Queue_t DelegateBlockQueue = nullptr;
 	El_Queue_t ResponseBlockQueue = nullptr;
-#endif
 
 
 	El_Thread_t DelegateServiceThreadHandle;
@@ -48,133 +113,92 @@ public:
 	volatile bool DeInitFlag;
 	volatile bool DelegateServiceThreadExitState;
 	volatile bool RequestProcessServiceThreadExitState;
-	//bool IsEnableMataDataEncode;
+	EmbedXrpcConfig RpcConfig;
 
 	//server:
 	El_Thread_t RequestProcessServiceThreadHandle; 
 	//El_Mutex_t ObjectMutexHandle;
-#if EmbedXrpc_UseRingBufferWhenReceiving==1
-	uint8_t RequestRingBuffer[EmbedXrpc_RequestRingBufferSize];
 	BlockRingBufferProvider* RequestBlockBufferProvider;
-#else
 	El_Queue_t	RequestBlockQueue;
-#endif
 	El_Timer_t SuspendTimer;
 	UserDataOfTransportLayer_t UserDataOfTransportLayerOfSuspendTimerUsed;
 
 	uint32_t RequestsCount;
 	RequestDescribe* Requests;
-
-	EmbedXrpcObject(
-		uint8_t* dataLinkLayoutBuffer,
-		uint32_t dataLinkLayoutBufferLen,
-		SendPack_t send,
-		uint32_t timeOut,
-
-		ResponseDescribe* responses,
-		uint32_t responsesCount,
-
-		DelegateDescribe* delegates,//代理的services
-		uint32_t delegatesCount,
-
-		RequestDescribe* requests,//server 请求的services
-		uint32_t requestsCount,//server
-
-		//bool isEnableMataDataEncode,
-		void* ud = nullptr) :
-
-		DataLinkLayoutBuffer(dataLinkLayoutBuffer),
-		DataLinkLayoutBufferLen(dataLinkLayoutBufferLen),
-
-		TimeOut(timeOut),
-		Send(send),
-		ObjectMutexHandle(nullptr),
-		DelegateServiceThreadHandle(nullptr),
-
-		DelegatesCount(delegatesCount),
-		Delegates(delegates),
-
-		ResponsesCount(responsesCount),
-		Responses(responses),
-
-		UserData(ud),
-		DeInitFlag(false),
-		//IsEnableMataDataEncode(isEnableMataDataEncode),
-
-		RequestProcessServiceThreadHandle(nullptr),
-		SuspendTimer(nullptr),
-
-		RequestsCount(requestsCount),
-		Requests(requests)
+private:
+	void ClassInit(InitConfig* cfg)
 	{
+		El_Strncpy(Name, cfg->Name, EmbedXrpc_NameMaxLen);
+		RequestBuffer = cfg->RequestBuffer;
+		ResponseBuffer = cfg->ResponseBuffer;
+		DelegateBuffer = cfg->DelegateBuffer;
+		SuspendTimerBuffer = cfg->SuspendTimerBuffer;
 
+		TimeOut = cfg->TimeOut;
+		Send = cfg->Sender;
+		//ObjectMutexHandle(nullptr;
+		DelegateServiceThreadHandle = nullptr;
+
+		DelegatesCount = cfg->DelegatesCount;
+		Delegates = cfg->Delegates;
+
+		ResponsesCount = cfg->ResponsesCount;
+		Responses = cfg->Responses;
+
+		UserData = cfg->UserData;
+		DeInitFlag = false;
+
+		DelegateBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.DelegateBlockBufferProvider;
+		ResponseBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.ResponseBlockBufferProvider;
+		RequestBlockBufferProvider = cfg->RpcConfig.RingBufferConfig.RequestBlockBufferProvider;
+
+		RequestProcessServiceThreadHandle = nullptr;
+		SuspendTimer = nullptr;
+
+		RequestsCount = cfg->RequestsCount;
+		Requests = cfg->Requests;
+		RpcConfig = cfg->RpcConfig;
+	}
+public:
+	EmbedXrpcObject(
+		InitConfig* cfg)
+	{
+		ClassInit(cfg);
 	}
 	//client节点构造函数
 	EmbedXrpcObject(
-		uint8_t* dataLinkLayoutBuffer,
-		uint32_t dataLinkLayoutBufferLen,
-		SendPack_t send,
-		uint32_t timeOut,
-
-		ResponseDescribe* responses,
-		uint32_t responsesCount,
-
-		DelegateDescribe* delegates,
-		uint32_t delegatesCount,
-
-		//bool isEnableMataDataEncode,
-		void* ud = nullptr) :EmbedXrpcObject(dataLinkLayoutBuffer, 
-			dataLinkLayoutBufferLen,
-
-			send,
-			timeOut,
-
-			responses,
-			responsesCount,
-
-			delegates,
-			delegatesCount,
-
-			nullptr,
-			0,
-
-			//isEnableMataDataEncode,
-			ud
-		)
+		ClientNodeQuicklyInitConfig* client)
 	{
-
+		InitConfig cfg;
+		El_Memset(&cfg, 0, sizeof(InitConfig));
+		El_Strncpy(cfg.Name, client->Name, EmbedXrpc_NameMaxLen);
+		cfg.RequestBuffer = client->RequestBuffer;
+		cfg.Sender = client->Sender;
+		cfg.TimeOut = client->TimeOut;
+		cfg.Responses = client->Responses;
+		cfg.ResponsesCount = client->ResponsesCount;
+		cfg.Delegates = client->Delegates;
+		cfg.DelegatesCount = client->DelegatesCount;
+		cfg.RpcConfig = client->RpcConfig;
+		cfg.UserData = client->UserData;
+		ClassInit(&cfg);
 	}
 	//server节点的构造函数
 	EmbedXrpcObject(
-		uint8_t* dataLinkLayoutBuffer,
-		uint32_t dataLinkLayoutBufferLen,
-		SendPack_t send,
-		uint32_t timeOut,
-
-		RequestDescribe* requests,//server 请求的services
-		uint32_t requestsCount,//server
-
-		//bool isEnableMataDataEncode,
-		void* ud = nullptr) :EmbedXrpcObject(dataLinkLayoutBuffer, 
-			dataLinkLayoutBufferLen,
-
-			send,
-			timeOut,
-
-			nullptr,
-			0,
-
-			nullptr,
-			0,
-
-			requests,
-			requestsCount,
-
-			//isEnableMataDataEncode,
-			ud
-		)
+		ServerNodeQuicklyInitConfig* server) 
 	{
-
+		InitConfig cfg;
+		El_Memset(&cfg, 0, sizeof(InitConfig));
+		El_Strncpy(cfg.Name, server->Name, EmbedXrpc_NameMaxLen);
+		cfg.ResponseBuffer = server->ResponseBuffer;
+		cfg.DelegateBuffer = server->DelegateBuffer;
+		cfg.Sender = server->Sender;
+		cfg.TimeOut = server->TimeOut;
+		cfg.Requests = server->Requests;
+		cfg.RequestsCount = server->RequestsCount;
+		cfg.RpcConfig = server->RpcConfig;
+		cfg.UserData = server->UserData;
+		ClassInit(&cfg);
 	}
 
 	void Init();
@@ -184,17 +208,13 @@ public:
 	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
 	static void SuspendTimerCallBack(void* arg);
 
-#if EmbedXrpc_DelegateBlockQueue_MaxItemNumber>0 &&EmbedXrpc_IsSendToQueue==1
+
 	static void DelegateServiceThread(void* arg);
-#endif
 
-#if EmbedXrpc_RequestBlockQueue_MaxItemNumber>0 && EmbedXrpc_IsSendToQueue==1
 	static void RequestProcessServiceThread(void* arg);
-#endif
 
-#if EmbedXrpc_ResponseBlockQueue_MaxItemNumber>0
 	RequestResponseState Wait(uint32_t sid, ReceiveItemInfo* recData);
-#endif	
+	
 };
 
 #endif

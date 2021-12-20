@@ -88,12 +88,12 @@ namespace EmbedXrpcIdlParser
                     {
                         s.AppendLine(ss);
                     }
-                    s.AppendLine();
+                    //s.AppendLine();
                     foreach (var ds in DeserializeCodeString)
                     {
                         d.AppendLine(ds);
                     }
-                    d.AppendLine();
+                    //d.AppendLine();
                     if (BitFieldCppTypeString!=string.Empty)
                     {
                         BitFieldTempValueCount++;
@@ -109,20 +109,20 @@ namespace EmbedXrpcIdlParser
             StringBuilder DeserializeCodeSb = new StringBuilder();
             StringBuilder FreeCodeSb = new StringBuilder();
 
-            StringBuilder SerializeExternSb = new StringBuilder();
-            StringBuilder DeserializeExternSb = new StringBuilder();
-            StringBuilder FreeExternSb = new StringBuilder();
+            StringBuilder SerializeHeaderSb = new StringBuilder();
+            StringBuilder DeserializeHeaderSb = new StringBuilder();
+            StringBuilder FreeHeaderSb = new StringBuilder();
 
 
-            SerializeExternSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj);");
+            SerializeHeaderSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj);");
             SerializeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj)");
             SerializeCodeSb.AppendLine("{");
 
-            DeserializeExternSb.AppendLine($"void {targetStructUnion.TypeName}_Deserialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj);");
+            DeserializeHeaderSb.AppendLine($"void {targetStructUnion.TypeName}_Deserialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj);");
             DeserializeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_Deserialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj)");
             DeserializeCodeSb.AppendLine("{");
 
-            FreeExternSb.AppendLine($"void {targetStructUnion.TypeName}_FreeData({targetStructUnion.TypeName} *obj);");
+            FreeHeaderSb.AppendLine($"void {targetStructUnion.TypeName}_FreeData({targetStructUnion.TypeName} *obj);");
             FreeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_FreeData({targetStructUnion.TypeName} *obj)");
             FreeCodeSb.AppendLine("{");
 
@@ -195,11 +195,11 @@ namespace EmbedXrpcIdlParser
                         DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}));");
                         
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
-                        //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
+                        //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);"); 
                     }
+                    SerializeCodeSb.AppendLine();
+                    DeserializeCodeSb.AppendLine();
 
-                    SerializeCodeSb.AppendLine("\r\n");
-                    DeserializeCodeSb.AppendLine("\r\n");
 
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
@@ -217,8 +217,8 @@ namespace EmbedXrpcIdlParser
                     SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                     //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
 
-                    SerializeCodeSb.AppendLine("\r\n");
-                    DeserializeCodeSb.AppendLine("\r\n");
+                    SerializeCodeSb.AppendLine("");
+                    DeserializeCodeSb.AppendLine("");
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
@@ -310,9 +310,9 @@ namespace EmbedXrpcIdlParser
                         FreeCodeSb.AppendLine($"El_Free(obj->{field.FieldName});");
                         //FreeCodeSb.AppendLine($"delete[] obj->{field.FieldName};");
                     }
-                    SerializeCodeSb.AppendLine("\r\n");
-                    DeserializeCodeSb.AppendLine("\r\n");
-                    FreeCodeSb.AppendLine("\r\n");
+                    SerializeCodeSb.AppendLine("");
+                    DeserializeCodeSb.AppendLine("");
+                    FreeCodeSb.AppendLine("");
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
                 {
@@ -336,17 +336,17 @@ namespace EmbedXrpcIdlParser
             DeserializeCodeSb.AppendLine("}");
             FreeCodeSb.AppendLine("}");
 
-            SerializeCodeSb.AppendLine("\r\n");
-            DeserializeCodeSb.AppendLine("\r\n");
-            FreeCodeSb.AppendLine("\r\n");
+            //SerializeCodeSb.AppendLine("\r\n");
+            //DeserializeCodeSb.AppendLine("\r\n");
+            //FreeCodeSb.AppendLine("\r\n");
 
             cfilewriter.WriteLine(SerializeCodeSb.ToString());
             cfilewriter.WriteLine(DeserializeCodeSb.ToString());
             cfilewriter.WriteLine(FreeCodeSb.ToString());
 
-            hfilewriter.WriteLine(SerializeExternSb.ToString());
-            hfilewriter.WriteLine(DeserializeExternSb.ToString());
-            hfilewriter.WriteLine(FreeExternSb.ToString());
+            hfilewriter.WriteLine(SerializeHeaderSb.ToString());
+            hfilewriter.WriteLine(DeserializeHeaderSb.ToString());
+            hfilewriter.WriteLine(FreeHeaderSb.ToString());
         }
     }
 

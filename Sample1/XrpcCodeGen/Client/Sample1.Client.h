@@ -2,31 +2,31 @@
 #define Sample1_Client_H
 #include"EmbedXrpcObject.h"
 #include"Sample1.EmbedXrpcSerialization.h"
-class DateTimeChangeClientImpl:public IDelegate
+class DateTimeChange_DelegateReceiver:public IDelegate
 {
 public:
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
-void DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]);
+virtual void DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]){}
 DateTimeChange_Parameter request;
-void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager);
+void Invoke(EmbedXrpcConfig *rpcConfig,UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager);
 };
 
 
-class TestDelegateClientImpl:public IDelegate
+class TestDelegate_DelegateReceiver:public IDelegate
 {
 public:
 uint16_t GetSid(){return TestDelegate_ServiceId;}
-void TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]);
+virtual void TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]){}
 TestDelegate_Parameter request;
-void Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager);
+void Invoke(EmbedXrpcConfig *rpcConfig,UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager);
 };
 
 
-class InterClientImpl
+class Inter_Requester
 {
 public:
 EmbedXrpcObject *RpcObject=nullptr;
-InterClientImpl(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
+Inter_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 {}
 Inter_Add_Parameter Add_SendData;
 Inter_Add_Return Add_reqresp;

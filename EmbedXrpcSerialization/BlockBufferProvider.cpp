@@ -1,5 +1,5 @@
 #include "BlockBufferProvider.h"
-void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, uint16_t size, uint32_t queue_item_size)
+void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, uint16_t size, uint32_t queue_item_max_number)
 {
 	if (size == 0 || pool == NULL)
 		return;
@@ -11,8 +11,12 @@ void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, u
 	obj->Size = size;
 
 	rt_ringbuffer_init(&obj->RingBuffer, pool, size);
-	obj->Queue = El_CreateQueue("ringbufqueue", sizeof(ReceiveItemInfo), queue_item_size);
+	obj->Queue = El_CreateQueue("ringbufqueue", sizeof(ReceiveItemInfo), queue_item_max_number);
 	obj->Mutex = El_CreateMutex("ringbufmutex");
+}
+BlockRingBufferProvider::BlockRingBufferProvider(uint8_t* pool, uint16_t size, uint32_t queue_item_max_number)
+{
+	BlockRingBufferProvider_Init(this, pool, size, queue_item_max_number);
 }
 void BlockRingBufferProvider_DeInit(BlockRingBufferProvider* obj)
 {
@@ -103,7 +107,7 @@ uint32_t BlockRingBufferProvider_CalculateSum( uint8_t* d, uint16_t len)
 	}
 	return sum;
 }
-Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo* item,uint8_t* buf, uint16_t bufLen)
+Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo* header,uint8_t* buf)
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
 		return False;
@@ -113,18 +117,18 @@ Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo
 	Bool result = False;
 
 	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
-	if (rt_ringbuffer_space_len(&obj->RingBuffer) >= bufLen && El_QueueSpacesAvailable(obj->Queue)>0)
+	if (rt_ringbuffer_space_len(&obj->RingBuffer) >= (header->DataLen) && El_QueueSpacesAvailable(obj->Queue)>0)
 	{
 		//insert_flag = True;
-		putlen = rt_ringbuffer_put(&obj->RingBuffer, buf, bufLen);
-		if (putlen != bufLen)
+		putlen = rt_ringbuffer_put(&obj->RingBuffer, buf, header->DataLen);
+		if (putlen != header->DataLen)
 		{
 			result=False;
 			goto _unlock;
 		}
 		//item->DataLen = bufLen;
 		//item->CheckSum = CalculateSum(buf, bufLen);
-		if (El_SendQueue(obj->Queue, item, sizeof(ReceiveItemInfo)) == QueueState_OK)
+		if (El_SendQueue(obj->Queue, header, sizeof(ReceiveItemInfo)) == QueueState_OK)
 		{
 			result = True;
 			goto _unlock;

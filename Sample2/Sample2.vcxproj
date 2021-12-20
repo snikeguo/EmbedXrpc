@@ -25,13 +25,14 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c" />
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="A.cpp" />
+    <ClCompile Include="C.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Server.cpp" />
-    <ClCompile Include="XrpcCodeGen\Client\Sample1.Client.cpp" />
-    <ClCompile Include="XrpcCodeGen\Sample1.cpp" />
-    <ClCompile Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.cpp" />
-    <ClCompile Include="XrpcCodeGen\Server\Sample1.Server.cpp" />
+    <ClCompile Include="B.cpp" />
+    <ClCompile Include="XrpcCodeGen\Client\Sample2.Client.cpp" />
+    <ClCompile Include="XrpcCodeGen\Sample2.cpp" />
+    <ClCompile Include="XrpcCodeGen\Sample2.EmbedXrpcSerialization.cpp" />
+    <ClCompile Include="XrpcCodeGen\Server\Sample2.Server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h" />
@@ -40,22 +41,23 @@
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcObject.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h" />
-    <ClInclude Include="XrpcCodeGen\Client\Sample1.Client.h" />
+    <ClInclude Include="EmbedXrpc.Port.h" />
+    <ClInclude Include="XrpcCodeGen\Client\Sample2.Client.h" />
     <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h" />
-    <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h" />
-    <ClInclude Include="XrpcCodeGen\Sample1.h" />
-    <ClInclude Include="XrpcCodeGen\Server\Sample1.Server.h" />
+    <ClInclude Include="XrpcCodeGen\Sample2.EmbedXrpcSerialization.h" />
+    <ClInclude Include="XrpcCodeGen\Sample2.h" />
+    <ClInclude Include="XrpcCodeGen\Server\Sample2.Server.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cmd.bat" />
     <None Include="readme.md" />
-    <None Include="sample1.cs" />
+    <None Include="Sample2.cs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b5e03e5b-7b5d-41fa-ada8-871dc37e2c07}</ProjectGuid>
-    <RootNamespace>Sample1</RootNamespace>
+    <ProjectGuid>{37C0B806-A526-4B66-97B0-209B28844FE1}</ProjectGuid>
+    <RootNamespace>Sample2</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -105,11 +107,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;.;$(IncludePath)</IncludePath>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;.;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

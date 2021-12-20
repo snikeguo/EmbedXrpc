@@ -48,24 +48,20 @@ typedef struct _SerializationManager
 	uint32_t BufferLen;
 	BlockRingBufferProvider* BlockBufferProvider;
 
-#if EmbedXrpc_CheckSumValid==1
+
 	uint32_t ReferenceSum ;
 	uint32_t CalculateSum ;
-#endif
+
 }SerializationManager;
-#if EmbedXrpc_CheckSumValid==1
-#define SerializationManagerAppendDataSum(sm,sum)    SerializationManager_SetCalculateSum(sm,SerializationManager_GetCalculateSum(sm)+sum)
-#else
-#define SerializationManagerAppendDataSum(sm,sum)
-#endif
+
 void  SerializationManager_Reset(SerializationManager* sm);
-#if EmbedXrpc_CheckSumValid==1
+
 void SerializationManager_SetReferenceSum(SerializationManager* sm, uint32_t sum);
 void SerializationManager_SetCalculateSum(SerializationManager* sm, uint32_t sum);
 uint32_t SerializationManager_GetReferenceSum(SerializationManager* sm);
 uint32_t SerializationManager_GetCalculateSum(SerializationManager* sm);
 void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum);//只有ringbuffer mode 为0的情况下使用。
-#endif
+
 void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width);
 
 #ifdef __cplusplus

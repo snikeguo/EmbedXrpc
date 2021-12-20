@@ -1,21 +1,23 @@
 #if 1
 #include <thread>
-#include "Sample1.Client.h"
-#include "Sample1.Server.h"
-extern EmbedXrpcObject ClientRpc;
-extern EmbedXrpcObject ServerRpc;
+#include "Sample2.Client.h"
+#include "Sample2.Server.h"
+extern EmbedXrpcObject A_RpcObject;
+extern EmbedXrpcObject B_RpcObject;
+extern EmbedXrpcObject C_RpcObject;
 extern void ClientThread();
 extern void ServerThread();
 int main(int argc, char *argv[])
 {
 
-	ClientRpc.Init();
+	A_RpcObject.Init();
+	B_RpcObject.Init();
+	C_RpcObject.Init();
+
 	std::thread c = std::thread(ClientThread);
 	c.detach();
 
-	ServerRpc.Init();
-	std::thread s = std::thread(ServerThread);
-	s.detach();
+	
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 }
