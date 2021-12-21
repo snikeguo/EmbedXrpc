@@ -82,11 +82,11 @@ namespace EmbedXrpc
 
             Task.Run(() =>
             {
-                DateTimeChange_Requester<Win32UserDataOfTransportLayer> broadcastDataTimeDelegate = new DateTimeChange_Requester<Win32UserDataOfTransportLayer>(server);
+                DateTimeChange_Requester<Win32UserDataOfTransportLayer> broadcastDataTime = new DateTimeChange_Requester<Win32UserDataOfTransportLayer>(server);
                 while (true)
                 {
                     Thread.Sleep(1000);
-                    broadcastDataTimeDelegate.Invoke(new Win32UserDataOfTransportLayer() { Ip = "123", Port = 11 }, new DateTime_t[1] {
+                    broadcastDataTime.Invoke(new Win32UserDataOfTransportLayer() { Ip = "123", Port = 11 }, new DateTime_t[1] {
                     new DateTime_t()
                     {
                         Year = DateTime.Now.Year,

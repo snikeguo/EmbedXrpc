@@ -269,7 +269,7 @@ namespace EmbedXrpcIdlParser
             {
                 csStreamWriter.WriteLine($"using {userNs};");
             }
-            csStreamWriter.WriteLine($"// auto code gen ! DO NOT modify this file! create time {DateTime.Now.ToString("yyyy - MM - dd HH: mm:ss.fff")};");
+            csStreamWriter.WriteLine($"// auto code gen ! DO NOT modify this file!");
             csStreamWriter.WriteLine($"//C# Code Generater Version:{Assembly.GetExecutingAssembly().GetName().Version.ToString()}");
             csStreamWriter.WriteLine($"namespace {idlInfo.GenerationOption.CSharpNameSpace}");
             csStreamWriter.WriteLine("{");//namespace begin

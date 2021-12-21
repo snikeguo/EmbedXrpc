@@ -44,7 +44,7 @@ namespace EmbedXrpcIdlParser
         }
 
     }
-    [AttributeUsage(AttributeTargets.Method|AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
     public class ServiceIdAttribute : Attribute
     {
         public ServiceIdAttribute(int serviceId)
@@ -53,7 +53,7 @@ namespace EmbedXrpcIdlParser
         }
         public int ServiceId { get; set; }
     }
-    [AttributeUsage(AttributeTargets.Method|AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
     public sealed class ExternalParameterAttribute : Attribute
     {
         public ExternalParameterAttribute(bool isExternal)
@@ -132,7 +132,7 @@ namespace EmbedXrpcIdlParser
         public Int32 Number { get; set; }
     }
 
-    [AttributeUsage(AttributeTargets.Delegate|AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
     public class MacroControlAttribute : Attribute
     {
 

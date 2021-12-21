@@ -208,37 +208,6 @@ namespace EmbedXrpcIdlParser
         public MacroControlAttribute MacroControlAttribute { get; internal set; }
 
     }
-    /*[Serializable]
-    public class TargetInterface
-    {
-        public string Name { get; set; }
-        public List<TargetService> Services { get; set; } = new List<TargetService>();
-
-        
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(String.Format($"Interface: Name:{Name}\n"));
-            foreach (var service in Services)
-            {
-                sb.Append(service.ToString());
-            }
-            return sb.ToString();
-        }
-    }*/
-    /*[Serializable]
-    public class TargetDelegate
-    {
-        public int ServiceId { get; internal set; }
-        public string MethodName { get; set; }
-        //public List<TargetField> TargetFields { get; set; } = new List<TargetField>();
-        public StructType_TargetType ParameterStructType { get; set; } = new StructType_TargetType();
-
-        public ExternalParameterAttribute ExternalParameter { get; internal set; }
-
-        public MacroControlAttribute MacroControlAttribute { get; internal set; }
-
-    }*/
     /// <summary>
     /// 本文件中所有的资源
     /// </summary>
@@ -248,9 +217,6 @@ namespace EmbedXrpcIdlParser
         public List<EnumType_TargetType> TargetEnums { get; set; } = new List<EnumType_TargetType>();
         public List<ArrayType_TargetType> TargetArrayTypes { get; set; } = new List<ArrayType_TargetType>();
         public List<StructType_TargetType> TargetStructs { get; set; } = new List<StructType_TargetType>();
-        //public List<UnionType_TargetType> TargetUnions { get; set; } = new List<UnionType_TargetType>();
-        //public List<TargetInterface> TargetInterfaces { get; set; } = new List<TargetInterface>();
-        //public List<TargetDelegate> TargetDelegates { get; set; } = new List<TargetDelegate>();
         public List<TargetService> TargetServices { get; set; } = new List<TargetService>();
         public GenerationOption GenerationOption = null;
         public int ServiceId { get; set; }
