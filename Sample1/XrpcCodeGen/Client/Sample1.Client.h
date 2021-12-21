@@ -57,8 +57,8 @@ Inter_NoArgAndReturn_Return& NoArgAndReturn(UserDataOfTransportLayer_t* userData
 The Delegates Of Inter:
 name                   type
 
-"DateTimeChange"        DateTimeChangeClientImpl,
-"TestDelegate"        TestDelegateClientImpl,
+"DateTimeChange"        DateTimeChange_DelegateReceiver,// U need to inherit this class and override the method!
+"TestDelegate"        TestDelegate_DelegateReceiver,// U need to inherit this class and override the method!
 
 DelegatesCount:2
 

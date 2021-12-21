@@ -870,7 +870,7 @@ namespace EmbedXrpcIdlParser
                     if (message.ReceiveType == ReceiveType_t.ReceiveType_Request)
                     {
                         RequestsCount++;
-                        ServerHsw.WriteLine("\"{0:-64}\",           {1:-64}Service", message.Name, message.Name);
+                        ServerHsw.WriteLine("\"{0:-64}\",           {1:-64}_Service,// U need to inherit this class and override the method!", message.Name, message.Name);
                     }
 
                 }
@@ -889,7 +889,7 @@ namespace EmbedXrpcIdlParser
                     if (message.ReceiveType == ReceiveType_t.ReceiveType_Delegate)
                     {
                         DelegatesCount++;
-                        ClientHsw.WriteLine("\"{0:-64}\"        {1:-64}ClientImpl,", message.Name,message.Name);
+                        ClientHsw.WriteLine("\"{0:-64}\"        {1:-64}_DelegateReceiver,// U need to inherit this class and override the method!", message.Name,message.Name);
                     }
                 }
                 ClientHsw.WriteLine($"\r\nDelegatesCount:{DelegatesCount}\r\n\r\n\r\n");

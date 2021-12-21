@@ -71,10 +71,10 @@ void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager
 The Requests Of Inter:
 name                   type
 
-"Inter_Add",           Inter_AddService
-"Inter_NoArg",           Inter_NoArgService
-"Inter_NoReturn",           Inter_NoReturnService
-"Inter_NoArgAndReturn",           Inter_NoArgAndReturnService
+"Inter_Add",           Inter_Add_Service,// U need to inherit this class and override the method!
+"Inter_NoArg",           Inter_NoArg_Service,// U need to inherit this class and override the method!
+"Inter_NoReturn",           Inter_NoReturn_Service,// U need to inherit this class and override the method!
+"Inter_NoArgAndReturn",           Inter_NoArgAndReturn_Service,// U need to inherit this class and override the method!
 
 RequestsCount: 4
 */
