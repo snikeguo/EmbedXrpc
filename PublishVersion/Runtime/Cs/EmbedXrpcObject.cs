@@ -13,9 +13,8 @@ namespace EmbedXrpc
     {
         public UInt32 TimeOut { get; set; }
         public object ObjectMutex { get; private set; } = new object();
-        public Win32Queue<EmbeXrpcRawData<DTL>> DelegateMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData<DTL>>();
+        
         public Win32Queue<EmbeXrpcRawData<DTL>> ResponseMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData<DTL>>();
-        private List<DelegateDescribe<DTL>> Delegates { get; set; } = new List<DelegateDescribe<DTL>>();
         private List<ResponseDescribe> Responses { get; set; } = new List<ResponseDescribe>();
         private List<RequestDescribe<DTL>> Requests { get; set; } = new List<RequestDescribe<DTL>>();
 
@@ -35,7 +34,6 @@ namespace EmbedXrpc
         }
 
         private Thread RequestServiceThreadHandle;
-        private Thread DelegateServiceThreadHandle;
         private Win32Queue<EmbeXrpcRawData<DTL>> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData<DTL>>();
         
         //public bool IsEnableMataDataEncode { get; set; }
@@ -55,17 +53,6 @@ namespace EmbedXrpc
                     Responses.Add(response);
                 }
 
-                var DelAttr = oldtype.GetCustomAttribute<DelegateInfoAttribute>();
-                if(DelAttr!=null)
-                {
-                    var dtlType = typeof(DTL);
-                    var genericType = oldtype.MakeGenericType(dtlType);
-                    DelegateDescribe<DTL> delegateDescribe = new DelegateDescribe<DTL>();
-                    delegateDescribe.Name = DelAttr.Name;
-                    var v = assembly.CreateInstance(genericType.FullName);
-                    delegateDescribe.Delegate = (IDelegate<DTL>)assembly.CreateInstance(genericType.FullName);
-                    Delegates.Add(delegateDescribe);
-                }
 
                 var responseServiceInfoAttr = oldtype.GetCustomAttribute<ResponseServiceInfoAttribute>();
                 if (responseServiceInfoAttr != null)
@@ -81,10 +68,6 @@ namespace EmbedXrpc
 
             TimeOut = timeout;
             Send = send;
-
-            DelegateServiceThreadHandle = new Thread(DelegateServiceThread);
-            DelegateServiceThreadHandle.IsBackground = true;
-
 
             RequestServiceThreadHandle = new Thread(RequestServiceThread);
             RequestServiceThreadHandle.IsBackground = true;
@@ -106,12 +89,10 @@ namespace EmbedXrpc
         
         public void Start()
         {
-            DelegateServiceThreadHandle.Start();
             RequestServiceThreadHandle.Start();
         }
         public void Stop()
         {
-            DelegateServiceThreadHandle.Abort();
             RequestServiceThreadHandle.Abort();
         }
         public RequestResponseState Wait<T>(UInt32 sid,out T response)
@@ -185,19 +166,6 @@ namespace EmbedXrpc
                 queueStatus = ResponseMessageQueueHandle.Send(raw);
                 goto sqs;
             }
-            else if (rt == ReceiveType.Delegate)
-            {
-                raw.Sid = serviceId;
-                if (dataLen > 0)
-                {
-                    raw.Data = new byte[dataLen];
-                    Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
-                }
-                raw.DataLen = dataLen;
-                raw.TargetTimeOut = targettimeout;
-                queueStatus = DelegateMessageQueueHandle.Send(raw);
-                goto sqs;
-            }
             else if(rt == ReceiveType.Request)
             {
                 raw.Sid = serviceId;
@@ -217,34 +185,6 @@ namespace EmbedXrpc
                 throw new Exception("queueStatus!= QueueStatus.OK");
             }
 
-        }
-        private void DelegateServiceThread()
-        {
-            EmbeXrpcRawData<DTL> recData;
-            //try
-            {
-                while (true)
-                {
-                    if(DelegateMessageQueueHandle.Receive(out recData, Win32BinarySignal.MAX_Delay)!= QueueStatus.OK)
-                    {
-                        continue;
-                    }
-                    for (int i = 0; i < Delegates.Count; i++)
-                    {
-                        if (Delegates[i].Delegate.GetSid() == recData.Sid)
-                        {
-                            SerializationManager rsm = new SerializationManager(Assembly,  new List<byte>(recData.Data));
-                            //Console.WriteLine($"get server timeout value{recData.TargetTimeOut}");
-                            Delegates[i].Delegate.Invoke(recData.UserDataOfTransportLayer,rsm);
-                            break;
-                        }
-                    }
-                }
-            }
-            //catch (Exception e)
-            {
-            //    Console.WriteLine($"{e.Message}");
-            }
         }
         private void RequestServiceThread()
         {

@@ -106,10 +106,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(IncludePath)</IncludePath>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

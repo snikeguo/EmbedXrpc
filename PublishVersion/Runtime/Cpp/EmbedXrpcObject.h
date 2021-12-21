@@ -32,9 +32,6 @@ struct ClientNodeQuicklyInitConfig
 	ResponseDescribe* Responses;
 	uint32_t ResponsesCount;
 
-	DelegateDescribe* Delegates;
-	uint32_t DelegatesCount;
-
 	EmbedXrpcConfig RpcConfig;
 
 	void* UserData;
@@ -45,7 +42,7 @@ struct ServerNodeQuicklyInitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
 	EmbedXrpcBufferConfig DataLinkBufferConfigForResponse;
-	EmbedXrpcBufferConfig DataLinkBufferConfigForDelegate;
+
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
@@ -63,10 +60,7 @@ struct InitConfig
 	char Name[EmbedXrpc_NameMaxLen];
 
 	EmbedXrpcBufferConfig DataLinkBufferConfigForRequest;
-
 	EmbedXrpcBufferConfig DataLinkBufferConfigForResponse;
-	EmbedXrpcBufferConfig DataLinkBufferConfigForDelegate;
-
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
@@ -74,8 +68,6 @@ struct InitConfig
 	ResponseDescribe* Responses;
 	uint32_t ResponsesCount;
 
-	DelegateDescribe* Delegates;//代理的services
-	uint32_t DelegatesCount;
 
 	RequestDescribe* Requests;//server 请求的services
 	uint32_t RequestsCount;//server
@@ -92,24 +84,16 @@ public:
 
 	EmbedXrpcBuffer DataLinkBufferForRequest;
 	EmbedXrpcBuffer DataLinkBufferForResponse;
-	EmbedXrpcBuffer DataLinkBufferForDelegate;
 	
 
 	uint32_t TimeOut;
 	SendPack_t Send;
 
 
-	BlockRingBufferProvider* DelegateMessageBlockBufferProvider = nullptr;
 	BlockRingBufferProvider* ResponseMessageBlockBufferProvider = nullptr;
 	
-	El_Queue_t DelegateMessageQueue = nullptr;
 	El_Queue_t ResponseMessageQueue = nullptr;
 
-
-	El_Thread_t DelegateServiceThreadHandle;
-
-	uint32_t DelegatesCount;
-	DelegateDescribe* Delegates;
 
 	uint32_t ResponsesCount;
 	ResponseDescribe* Responses;
@@ -117,7 +101,6 @@ public:
 	void* UserData;
 
 	volatile bool DeInitFlag;
-	volatile bool DelegateServiceThreadExitState;
 	volatile bool RequestProcessServiceThreadExitState;
 	EmbedXrpcConfig RpcConfig;
 
@@ -144,8 +127,6 @@ public:
 		cfg.TimeOut = client->TimeOut;
 		cfg.Responses = client->Responses;
 		cfg.ResponsesCount = client->ResponsesCount;
-		cfg.Delegates = client->Delegates;
-		cfg.DelegatesCount = client->DelegatesCount;
 		cfg.RpcConfig = client->RpcConfig;
 		cfg.UserData = client->UserData;
 		Init(&cfg);
@@ -156,8 +137,6 @@ public:
 		InitConfig cfg;
 		El_Memset(&cfg, 0, sizeof(InitConfig));
 		El_Strncpy(cfg.Name, server->Name, EmbedXrpc_NameMaxLen);
-		cfg.DataLinkBufferConfigForResponse = server->DataLinkBufferConfigForResponse;
-		cfg.DataLinkBufferConfigForDelegate = server->DataLinkBufferConfigForDelegate;
 		cfg.Sender = server->Sender;
 		cfg.TimeOut = server->TimeOut;
 		cfg.Requests = server->Requests;
@@ -169,13 +148,10 @@ public:
 
 	void Init(InitConfig* cfg);
 	void DeInit();
-	static void DelegateServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
 	static void ResponseServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
 	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
 	static void SuspendTimerCallBack(void* arg);
 
-
-	static void DelegateServiceThread(void* arg);
 
 	static void RequestProcessServiceThread(void* arg);
 

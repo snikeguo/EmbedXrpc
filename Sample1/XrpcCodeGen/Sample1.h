@@ -84,6 +84,13 @@ Student David;   //FieldNumber:9
 #define DateTime_t_David_FieldNumber  9
 
 
+struct DateTimeChange_Return
+{
+RequestResponseState State;   //FieldNumber:1     
+};
+#define DateTimeChange_Return_State_FieldNumber  1
+
+
 struct DateTimeChange_Parameter
 {
 DateTime_t now[1];   //FieldNumber:1     
@@ -91,73 +98,80 @@ DateTime_t now[1];   //FieldNumber:1
 #define DateTimeChange_Parameter_now_FieldNumber  1
 
 
-struct TestDelegate_Parameter
+struct Test2_Return
+{
+RequestResponseState State;   //FieldNumber:1     
+};
+#define Test2_Return_State_FieldNumber  1
+
+
+struct Test2_Parameter
 {
 DateTime_t now[1];   //FieldNumber:1     
 };
-#define TestDelegate_Parameter_now_FieldNumber  1
+#define Test2_Parameter_now_FieldNumber  1
 
 
-struct Inter_Add_Parameter
+struct Add_Return
+{
+RequestResponseState State;   //FieldNumber:1     
+AddResult ReturnValue;   //FieldNumber:2     
+};
+#define Add_Return_State_FieldNumber  1
+#define Add_Return_ReturnValue_FieldNumber  2
+
+
+struct Add_Parameter
 {
 Int32 a;   //FieldNumber:1     
 Int32 b;   //FieldNumber:2     
 Int32 dataLen;   //FieldNumber:3     
 UInt8* data;   //FieldNumber:4     
 };
-#define Inter_Add_Parameter_a_FieldNumber  1
-#define Inter_Add_Parameter_b_FieldNumber  2
-#define Inter_Add_Parameter_dataLen_FieldNumber  3
-#define Inter_Add_Parameter_data_FieldNumber  4
+#define Add_Parameter_a_FieldNumber  1
+#define Add_Parameter_b_FieldNumber  2
+#define Add_Parameter_dataLen_FieldNumber  3
+#define Add_Parameter_data_FieldNumber  4
 
 
-struct Inter_Add_Return
-{
-RequestResponseState State;   //FieldNumber:1     
-AddResult ReturnValue;   //FieldNumber:2     
-};
-#define Inter_Add_Return_State_FieldNumber  1
-#define Inter_Add_Return_ReturnValue_FieldNumber  2
-
-
-struct Inter_NoArg_Parameter
-{
-};
-
-
-struct Inter_NoArg_Return
+struct NoArg_Return
 {
 RequestResponseState State;   //FieldNumber:1     
 UInt8 ReturnValue;   //FieldNumber:2     
 };
-#define Inter_NoArg_Return_State_FieldNumber  1
-#define Inter_NoArg_Return_ReturnValue_FieldNumber  2
+#define NoArg_Return_State_FieldNumber  1
+#define NoArg_Return_ReturnValue_FieldNumber  2
 
 
-struct Inter_NoReturn_Parameter
+struct NoArg_Parameter
+{
+};
+
+
+struct NoReturn_Return
+{
+RequestResponseState State;   //FieldNumber:1     
+};
+#define NoReturn_Return_State_FieldNumber  1
+
+
+struct NoReturn_Parameter
 {
 Int32 a;   //FieldNumber:1     
 };
-#define Inter_NoReturn_Parameter_a_FieldNumber  1
+#define NoReturn_Parameter_a_FieldNumber  1
 
 
-struct Inter_NoReturn_Return
+struct NoArgAndReturn_Return
 {
 RequestResponseState State;   //FieldNumber:1     
 };
-#define Inter_NoReturn_Return_State_FieldNumber  1
+#define NoArgAndReturn_Return_State_FieldNumber  1
 
 
-struct Inter_NoArgAndReturn_Parameter
+struct NoArgAndReturn_Parameter
 {
 };
-
-
-struct Inter_NoArgAndReturn_Return
-{
-RequestResponseState State;   //FieldNumber:1     
-};
-#define Inter_NoArgAndReturn_Return_State_FieldNumber  1
 
 
 

@@ -129,23 +129,7 @@ namespace EmbedXrpcIdlParser
 
         public List<CppCustomMethodSignatureAttribute> CppCustomMethodSignatures { get; set; }
     }
-    /*public class UnionType_TargetType:ITargetType
-    {
-        public TargetType_t TargetType { get; private set; } = TargetType_t.TYPE_UNION;
-        public string TypeName { get; set; }
-        public List<ITargetField> TargetFields { get; set; } = new List<ITargetField>();
-        //public int TypeValueCounter = 1;
-        public Base_TargetField GetUnionTargetTypeField()
-        {
-            if (TargetFields[0].TargetType.TargetType < TargetType_t.TYPE_FLOAT)
-            {
-                var v = TargetFields[0] as Base_TargetField;
-                //v.IsUnionTargetTypeField = true;//
-                return v;
-            }
-            throw new Exception("the first field of UnionType  must be an  UnionTargetType! ");
-        }
-    }*/
+
 
     public interface ITargetField
     {
@@ -213,12 +197,10 @@ namespace EmbedXrpcIdlParser
     [Serializable]
     public class TargetService
     {
-        //public TargetField ReturnValue { get; set; }
         public StructType_TargetType ReturnStructType { get; set; } = new StructType_TargetType();
         public string ServiceName { get; set; }
-
-        public string FullName { get; set; }
-        //public List<TargetField> TargetFields { get; set; } = new List<TargetField>();//参数
+        
+        public RoleAttribute RoleAttribute { get; internal set; }
         public StructType_TargetType ParameterStructType { get; set; } = new StructType_TargetType();
         public int ServiceId { get; internal set; }
 
@@ -226,7 +208,7 @@ namespace EmbedXrpcIdlParser
         public MacroControlAttribute MacroControlAttribute { get; internal set; }
 
     }
-    [Serializable]
+    /*[Serializable]
     public class TargetInterface
     {
         public string Name { get; set; }
@@ -243,8 +225,8 @@ namespace EmbedXrpcIdlParser
             }
             return sb.ToString();
         }
-    }
-    [Serializable]
+    }*/
+    /*[Serializable]
     public class TargetDelegate
     {
         public int ServiceId { get; internal set; }
@@ -256,7 +238,7 @@ namespace EmbedXrpcIdlParser
 
         public MacroControlAttribute MacroControlAttribute { get; internal set; }
 
-    }
+    }*/
     /// <summary>
     /// 本文件中所有的资源
     /// </summary>
@@ -267,9 +249,9 @@ namespace EmbedXrpcIdlParser
         public List<ArrayType_TargetType> TargetArrayTypes { get; set; } = new List<ArrayType_TargetType>();
         public List<StructType_TargetType> TargetStructs { get; set; } = new List<StructType_TargetType>();
         //public List<UnionType_TargetType> TargetUnions { get; set; } = new List<UnionType_TargetType>();
-        public List<TargetInterface> TargetInterfaces { get; set; } = new List<TargetInterface>();
-        public List<TargetDelegate> TargetDelegates { get; set; } = new List<TargetDelegate>();
- 
+        //public List<TargetInterface> TargetInterfaces { get; set; } = new List<TargetInterface>();
+        //public List<TargetDelegate> TargetDelegates { get; set; } = new List<TargetDelegate>();
+        public List<TargetService> TargetServices { get; set; } = new List<TargetService>();
         public GenerationOption GenerationOption = null;
         public int ServiceId { get; set; }
     }
@@ -719,94 +701,8 @@ namespace EmbedXrpcIdlParser
 
                 }
                 else if (type.IsInterface == true)
-                {
-                    TargetInterface targetInterface = new TargetInterface();
-                    targetInterface.Name = type.Name;
-
-                    var services = type.GetMembers();
-                    foreach (var service in services)
-                    {
-                        TargetService targetService = new TargetService();
-                        var serviceIdAttr = service.GetCustomAttribute<ServiceIdAttribute>();
-                        targetService.ServiceId = serviceIdAttr == null ? fileIdlInfo.ServiceId : serviceIdAttr.ServiceId;
-                        fileIdlInfo.ServiceId++;
-                        var externalParameterAttribute = service.GetCustomAttribute<ExternalParameterAttribute>();
-                        targetService.ExternalParameter = externalParameterAttribute == null ? new ExternalParameterAttribute(false) : externalParameterAttribute;
-
-                        var MacroControlAttribute = service.GetCustomAttribute<MacroControlAttribute>();
-                        targetService.MacroControlAttribute = MacroControlAttribute;
-
-                        var mt = (service as MethodInfo);
-                        Type rt = mt.ReturnType;
-                        targetService.ServiceName = mt.Name;
-                        targetService.FullName = type.Name + "_" + targetService.ServiceName;
-
-                        StructType_TargetType returnStructType = new StructType_TargetType();
-                        returnStructType.TypeName = type.Name + "_" + targetService.ServiceName + "_Return";
-
-                        Enum_TargetField RequestResponseStatefield = new Enum_TargetField();
-                        var ettt = new EnumType_TargetType();
-                        ettt.TypeName = "RequestResponseState";
-                        ettt.NumberType = TargetType_t.TYPE_UINT8;
-                        //ettt.KeyValue这里在runtime中定义,不需要加
-                        RequestResponseStatefield.TargetType = ettt;
-                        RequestResponseStatefield.FieldName = "State";
-                        RequestResponseStatefield.FieldNumberAttr = new FieldNumberAttribute(1);//state 的Field Number为1
-                        returnStructType.TargetFields.Add(RequestResponseStatefield);
-
-                        if (rt.Name != "Void")
-                        {
-                            //返回值有可能是枚举、基本数据、结构体
-                            //根据返回值判断
-                            //EnumType_TargetType rt_ettt = fileIdlInfo.GetTargetEnum(rt.Name);
-                            //ObjectType_TargetType rt_ottt = fileIdlInfo.GetTargetStruct(rt.Name);
-                            if (rt.IsEnum == true)
-                            {
-                                //说明返回值是枚举
-                                //new 一个enum 类型
-                                var vs = rt.GetEnumValues();
-                                EnumType_TargetType te = new EnumType_TargetType();
-                                te.TypeName = rt.Name;//类型名称
-                                te.NumberType = ClrBaseValueTypeToTargetType_t(rt.GetEnumUnderlyingType());
-                                foreach (var vsv in vs)
-                                {
-                                    te.KeyValue.Add(rt.GetEnumName(vsv), Convert.ToInt32(vsv));
-                                }
-                                Enum_TargetField retunValueFiled = new Enum_TargetField();
-                                retunValueFiled.TargetType = te;
-                                retunValueFiled.FieldName = "ReturnValue";
-                                retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
-                                returnStructType.TargetFields.Add(retunValueFiled);
-                            }
-                            else if (IsNumberType(rt) == true)
-                            {
-                                Base_TargetField retunValueFiled = new Base_TargetField();
-                                retunValueFiled.TargetType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(rt));
-                                retunValueFiled.FieldName = "ReturnValue";
-                                retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
-                                returnStructType.TargetFields.Add(retunValueFiled);
-                            }
-                            else//一定是struct 不可能是数组，因为不支持返回值是数组的。
-                            {
-                                Struct_TargetField objectFiled = new Struct_TargetField();
-                                objectFiled.TargetType = StructTypeParse(rt);
-                                objectFiled.FieldName = "ReturnValue";
-                                objectFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
-                                returnStructType.TargetFields.Add(objectFiled);
-                            }                            
-                        }
-
-                        //处理函数参数
-                        StructType_TargetType ParameterStructType = new StructType_TargetType();
-                        ParameterStructType.TypeName = type.Name + "_" + targetService.ServiceName + "_Parameter";
-                        var pars = mt.GetParameters();
-                        ParameterTypeParse(pars, ParameterStructType);
-                        targetService.ReturnStructType = returnStructType;
-                        targetService.ParameterStructType = ParameterStructType;
-                        targetInterface.Services.Add(targetService);
-                    }
-                    //Console.WriteLine(targetInterface.ToString());
-                    fileIdlInfo.TargetInterfaces.Add(targetInterface);
+                { 
+                
                 }
                 else if (type.BaseType.Name == "MulticastDelegate")//如果这个类型是委托。
                 {
@@ -824,48 +720,109 @@ namespace EmbedXrpcIdlParser
                     {
                         throw new NullReferenceException($"{type.Name}:invokemi is null");
                     }
+                    TargetService targetService = new TargetService();
                     var serviceIdAttr = type.GetCustomAttribute<ServiceIdAttribute>();
-                    TargetDelegate targetDelegate = new TargetDelegate();
-                    targetDelegate.ServiceId = serviceIdAttr == null ?fileIdlInfo.ServiceId : serviceIdAttr.ServiceId;
+                    targetService.ServiceId = serviceIdAttr == null ? fileIdlInfo.ServiceId : serviceIdAttr.ServiceId;
                     fileIdlInfo.ServiceId++;
                     var externalParameterAttribute = type.GetCustomAttribute<ExternalParameterAttribute>();
-                    targetDelegate.ExternalParameter = externalParameterAttribute == null ? new ExternalParameterAttribute(false) : externalParameterAttribute;
-                    targetDelegate.MethodName = type.Name;
+                    targetService.ExternalParameter = externalParameterAttribute == null ? new ExternalParameterAttribute(false) : externalParameterAttribute;
 
                     var MacroControlAttribute = type.GetCustomAttribute<MacroControlAttribute>();
-                    targetDelegate.MacroControlAttribute = MacroControlAttribute;
+                    targetService.MacroControlAttribute = MacroControlAttribute;
+
+                    targetService.RoleAttribute = type.GetCustomAttribute<RoleAttribute>();
+                    if(targetService.RoleAttribute==null)
+                    {
+                        throw new Exception($"the {type.Name} service NO have RoleAttribute！");
+                    }
+
+                    var mt = invokemi;
+                    Type rt = mt.ReturnType;
+                    targetService.ServiceName = type.Name;
+                    //targetService.FullName = type.Name + "_" + targetService.ServiceName;
+
+                    StructType_TargetType returnStructType = new StructType_TargetType();
+                    returnStructType.TypeName = type.Name + "_Return";
+
+                    Enum_TargetField RequestResponseStatefield = new Enum_TargetField();
+                    var ettt = new EnumType_TargetType();
+                    ettt.TypeName = "RequestResponseState";
+                    ettt.NumberType = TargetType_t.TYPE_UINT8;
+                    //ettt.KeyValue这里在runtime中定义,不需要加
+                    RequestResponseStatefield.TargetType = ettt;
+                    RequestResponseStatefield.FieldName = "State";
+                    RequestResponseStatefield.FieldNumberAttr = new FieldNumberAttribute(1);//state 的Field Number为1
+                    returnStructType.TargetFields.Add(RequestResponseStatefield);
+
+                    if (rt.Name != "Void")
+                    {
+                        //返回值有可能是枚举、基本数据、结构体
+                        //根据返回值判断
+                        //EnumType_TargetType rt_ettt = fileIdlInfo.GetTargetEnum(rt.Name);
+                        //ObjectType_TargetType rt_ottt = fileIdlInfo.GetTargetStruct(rt.Name);
+                        if (rt.IsEnum == true)
+                        {
+                            //说明返回值是枚举
+                            //new 一个enum 类型
+                            var vs = rt.GetEnumValues();
+                            EnumType_TargetType te = new EnumType_TargetType();
+                            te.TypeName = rt.Name;//类型名称
+                            te.NumberType = ClrBaseValueTypeToTargetType_t(rt.GetEnumUnderlyingType());
+                            foreach (var vsv in vs)
+                            {
+                                te.KeyValue.Add(rt.GetEnumName(vsv), Convert.ToInt32(vsv));
+                            }
+                            Enum_TargetField retunValueFiled = new Enum_TargetField();
+                            retunValueFiled.TargetType = te;
+                            retunValueFiled.FieldName = "ReturnValue";
+                            retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
+                            returnStructType.TargetFields.Add(retunValueFiled);
+                        }
+                        else if (IsNumberType(rt) == true)
+                        {
+                            Base_TargetField retunValueFiled = new Base_TargetField();
+                            retunValueFiled.TargetType = new BaseType_TargetType(ClrBaseValueTypeToTargetType_t(rt));
+                            retunValueFiled.FieldName = "ReturnValue";
+                            retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
+                            returnStructType.TargetFields.Add(retunValueFiled);
+                        }
+                        else//一定是struct 不可能是数组，因为不支持返回值是数组的。
+                        {
+                            Struct_TargetField objectFiled = new Struct_TargetField();
+                            objectFiled.TargetType = StructTypeParse(rt);
+                            objectFiled.FieldName = "ReturnValue";
+                            objectFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
+                            returnStructType.TargetFields.Add(objectFiled);
+                        }
+                    }
+
                     //处理函数参数
                     StructType_TargetType ParameterStructType = new StructType_TargetType();
-                    ParameterStructType.TypeName = targetDelegate.MethodName + "_Parameter";
-
-                    var pars = invokemi.GetParameters();
+                    ParameterStructType.TypeName = type.Name + "_Parameter";
+                    var pars = mt.GetParameters();
                     ParameterTypeParse(pars, ParameterStructType);
-                    targetDelegate.ParameterStructType = ParameterStructType;
-                    fileIdlInfo.TargetDelegates.Add(targetDelegate);
+                    targetService.ReturnStructType = returnStructType;
+                    targetService.ParameterStructType = ParameterStructType;
+                    fileIdlInfo.TargetServices.Add(targetService);
                 }
             }
             
         }
     }
 
-    public enum GenType
-    {
-        Client,
-        Server,
-        All
-    }
+   
     //FileIdlInfo fileIdlInfo, GenType genType,string outputpath
     public class CSharpCodeGenParameter
     {
         public FileIdlInfo FileIdlInfo { get; set; }
-        public GenType GenType { get; set; }
+        public RoleType RoleType { get; set; }
         public string OutPutPath { get; set; }
         
     }
     public class CppCodeGenParameter
     {
         public FileIdlInfo FileIdlInfo { get; set; }
-        public GenType GenType { get; set; }
+        public RoleType RoleType { get; set; }
         public string OutPutPath { get; set; }
 
         

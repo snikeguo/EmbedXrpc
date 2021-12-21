@@ -33,7 +33,6 @@ class EmbedXrpcObject;
          bool IsSendToQueue;
 
          //client部分:
-         uint32_t DelegateMessageQueue_MaxItemNumber;
          uint32_t ResponseMessageQueue_MaxItemNumber;
 
          //server部分:
@@ -42,7 +41,6 @@ class EmbedXrpcObject;
      struct
      {
          //client
-         BlockBufferProviderConfig DelegateMessageBlockBufferConfig;
          BlockBufferProviderConfig ResponseMessageBlockBufferConfig;
 
          //server
@@ -54,16 +52,8 @@ class EmbedXrpcObject;
  {
      ReceiveType_Request=0x1,
 	 ReceiveType_Response=0x2,
-	 ReceiveType_Delegate=0x3,
  };
- class IDelegate
- {
- public:
-     void* UserData;
-     virtual uint16_t GetSid() = 0;
-	 virtual void Invoke(EmbedXrpcConfig* rpcConfig, UserDataOfTransportLayer_t* userDataOfTransportLayer,
-         SerializationManager* recManager) = 0;
- };
+
 
  class ServiceInvokeParameter
  {
@@ -96,11 +86,7 @@ class EmbedXrpcObject;
      const char* Name;
      IService* Service;
  };
- struct DelegateDescribe
- {
-     const char* Name;
-     IDelegate* Delegate;
- };
+
  struct ResponseDescribe
  {
      const char* Name;

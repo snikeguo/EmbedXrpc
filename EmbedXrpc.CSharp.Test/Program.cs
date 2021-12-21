@@ -13,22 +13,15 @@ using System.Threading.Tasks;
 
 namespace Sample1
 {
-    public partial class DateTimeChangeClientImpl<DTL> : IDelegate<DTL>
+    public partial class DateTimeChange_Service<DTL> : IService<DTL>
     {
-        public void DateTimeChange(DTL request_UserDataOfTransportLayer,  DateTime_t[] now)
+        public void DateTimeChange(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, DateTime_t[] now)
         {
             var t = now[0];
             Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
         }
     }
-    public partial class TestDelegateClientImpl<DTL> : IDelegate<DTL>
-    {
-        public void TestDelegate(DTL request_UserDataOfTransportLayer, DateTime_t[] now)
-        {
-
-        }
-    }
-    public partial class Inter_AddService<DTL> : IService<DTL>
+    public partial class Add_Service<DTL> : IService<DTL>
     {
         public void Add(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
         {
@@ -39,27 +32,7 @@ namespace Sample1
             serviceInvokeParameter.rpcObject.Stop_SuspendTimer();
         }
     }
-    public partial class Inter_NoArgService<DTL> : IService<DTL>
-    {
-        public void NoArg(ref ServiceInvokeParameter<DTL> serviceInvokeParameter)
-        {
-
-        }
-    }
-    public partial class Inter_NoReturnService<DTL> : IService<DTL>
-    {
-        public void NoReturn(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, int a)
-        {
-
-        }
-    }
-    public partial class Inter_NoArgAndReturnService<DTL> : IService<DTL>
-    {
-        public void NoArgAndReturn(ref ServiceInvokeParameter<DTL> serviceInvokeParameter)
-        {
-
-        }
-    }
+  
 }
 namespace EmbedXrpc
 {
@@ -81,7 +54,7 @@ namespace EmbedXrpc
             server.Start();
             Task.Run(() =>
             {
-                Inter_Add<Win32UserDataOfTransportLayer> inter_Add = new Inter_Add<Win32UserDataOfTransportLayer>(client);
+                Add_Requester<Win32UserDataOfTransportLayer> inter_Add = new Add_Requester<Win32UserDataOfTransportLayer>(client);
                 while (true)
                 {
                     Thread.Sleep(1000);
@@ -109,7 +82,7 @@ namespace EmbedXrpc
 
             Task.Run(() =>
             {
-                DateTimeChangeDelegate<Win32UserDataOfTransportLayer> broadcastDataTimeDelegate = new DateTimeChangeDelegate<Win32UserDataOfTransportLayer>(server);
+                DateTimeChange_Requester<Win32UserDataOfTransportLayer> broadcastDataTimeDelegate = new DateTimeChange_Requester<Win32UserDataOfTransportLayer>(server);
                 while (true)
                 {
                     Thread.Sleep(1000);

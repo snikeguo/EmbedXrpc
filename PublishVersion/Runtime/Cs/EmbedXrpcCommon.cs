@@ -19,13 +19,7 @@ namespace EmbedXrpc
     {
         Request = 0x1,
         Response = 0x2,
-        Delegate = 0x3,
     };
-    public interface IDelegate<DTL> where DTL : struct
-    {
-        UInt16 GetSid();
-        void Invoke(DTL userDataOfTransportLayer, SerializationManager recManager);
-    }
     public static class EmbedXrpcCommon
     {
         public static readonly UInt16 EmbedXrpcSuspendSid = 0x1;
@@ -54,15 +48,10 @@ namespace EmbedXrpc
         public string Name { get; set; }
         public IService<DTL> Service { get; set; }
     }
-    public class DelegateDescribe<DTL> where DTL : struct
-    {
-        public string Name { get; set; }
-        public IDelegate<DTL> Delegate { get; set; }
-    };
     public class ResponseDescribe
     {
         public string Name { get; set; }
-        public UInt16 Sid { get; set; }//有可能是Response/Delegate
+        public UInt16 Sid { get; set; }//有可能是Response
     };
     public delegate bool Send<DTL>(DTL userDataOfTransportLayer, int dataLen, int offset, byte[] data);
     public struct EmbeXrpcRawData<DTL> where DTL : struct
@@ -73,14 +62,7 @@ namespace EmbedXrpc
         public UInt32 DataLen { get; set; }
         public DTL UserDataOfTransportLayer { get; set; }
     }
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    public sealed class DelegateInfoAttribute : Attribute
-    {
-        public DelegateInfoAttribute()
-        {
-        }
-        public string Name { get; set; }
-    }
+    
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public sealed class ResponseServiceInfoAttribute : Attribute

@@ -8,19 +8,12 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpcIdlParser
 {
-    public enum ReceiveType_t
-    {
-        ReceiveType_Request,
-        ReceiveType_Response,
-        ReceiveType_Delegate,
-    };
+
     public class MessageMap
     {
         public string Name { get; set; }
         public string ServiceId { get; set; }
-        public ReceiveType_t ReceiveType { get; set; }
 
-        //public string IType { get; set; }
 
     }
     public class CppCodeGenerater 
@@ -30,12 +23,11 @@ namespace EmbedXrpcIdlParser
         private List<MessageMap> messageMaps = new List<MessageMap>();
         //int ServiceId = 0x10;
 
-        public void AddMessageMap(string fullname, ReceiveType_t receiveType)
+        public void AddMessageMap(string fullname)
         {
             MessageMap m = new MessageMap();
             m.Name = fullname;
             m.ServiceId = $"{fullname}_ServiceId";
-            m.ReceiveType = receiveType;
             //m.IType = "&" + fullname + "_Type";
             messageMaps.Add(m);
         }
@@ -70,7 +62,7 @@ namespace EmbedXrpcIdlParser
             CommonHsw.WriteLine($"#define {outputattr.OutPutFileName.Replace(".", "_")}_H");
             //CommonHsw.WriteLine("#include\"EmbedSerializationBaseType.h\"");
             CommonHsw.WriteLine("#include\"EmbedSerialization.h\"");
-            if(cppCodeGenParameter.FileIdlInfo.TargetDelegates.Count>0|| cppCodeGenParameter.FileIdlInfo.TargetInterfaces.Count>0)
+            if(cppCodeGenParameter.FileIdlInfo.TargetServices.Count>0)
                 CommonHsw.WriteLine("#include\"EmbedXrpcCommon.h\"");
 
             foreach (var userInc in outputattr.UserIncludes)
@@ -132,7 +124,7 @@ namespace EmbedXrpcIdlParser
 
             
 
-            if(cppCodeGenParameter.GenType== GenType.Client|| cppCodeGenParameter.GenType == GenType.All)
+            if(cppCodeGenParameter.RoleType== RoleType.Client|| cppCodeGenParameter.RoleType == RoleType.All)
             {
                 if (Directory.Exists(cppCodeGenParameter.OutPutPath + "Client") == false)
                     Directory.CreateDirectory(cppCodeGenParameter.OutPutPath + "Client");
@@ -148,7 +140,7 @@ namespace EmbedXrpcIdlParser
             }
 
 
-            if (cppCodeGenParameter.GenType == GenType.Server || cppCodeGenParameter.GenType == GenType.All)
+            if (cppCodeGenParameter.RoleType == RoleType.Server || cppCodeGenParameter.RoleType == RoleType.All)
             {
                 if (Directory.Exists(cppCodeGenParameter.OutPutPath + "Server") == false)
                     Directory.CreateDirectory(cppCodeGenParameter.OutPutPath + "Server");
@@ -179,27 +171,14 @@ namespace EmbedXrpcIdlParser
                     SerializeHsw);*/
                 EmitStruct(stru, cppCodeGenParameter);
             }
-            foreach (var del in cppCodeGenParameter.FileIdlInfo.TargetDelegates)
+            foreach (var service in cppCodeGenParameter.FileIdlInfo.TargetServices)
             {
-                //fbsStreamWriter.WriteLine(del.ToFbs().ToString());
-                /*TargetStruct targetStruct = new TargetStruct();
-                targetStruct.Name = del.MethodName+"Struct";
-                targetStruct.TargetFields = del.TargetFields;*/
-                EmitStruct(del.ParameterStructType, cppCodeGenParameter);
-                EmitDelegate(del);
-                /*embedXrpcSerializationGenerator.EmitStruct(del.ParameterStructType,
-                    SerializeCsw,
-                    SerializeHsw);*/
-                AddMessageMap(del.MethodName, ReceiveType_t.ReceiveType_Delegate);
-                EmitServiceIdCode(SerializeHsw, del.MethodName, del.ServiceId);//生成 ServiceID 宏定义
+                EmitStruct(service.ReturnStructType, cppCodeGenParameter);
+                EmitStruct(service.ParameterStructType, cppCodeGenParameter);
+                EmitService(service, cppCodeGenParameter);
+                AddMessageMap(service.ServiceName);
+                EmitServiceIdCode(SerializeHsw, service.ServiceName, service.ServiceId);//生成 ServiceID 宏定义
 
-            }
-
-            foreach (var ifs in cppCodeGenParameter.FileIdlInfo.TargetInterfaces)
-            {
-                //fbsStreamWriter.WriteLine(ifs.ToFbs().ToString());
-                EmitClientInterface(ifs,cppCodeGenParameter);
-                
             }
 
             //fbsStreamWriter.WriteLine(FbsHelper.EmitPackageTable().ToString());
@@ -226,7 +205,7 @@ namespace EmbedXrpcIdlParser
 
             SerializeHsw.Flush();
             SerializeHsw.Close();
-            if (cppCodeGenParameter.GenType == GenType.Client || cppCodeGenParameter.GenType == GenType.All)
+            if (cppCodeGenParameter.RoleType == RoleType.Client || cppCodeGenParameter.RoleType == RoleType.All)
             {
                 ClientHsw.WriteLine("\n#endif");
                 ClientHsw.Flush();
@@ -236,7 +215,7 @@ namespace EmbedXrpcIdlParser
                 ClientCsw.Close();
             }
 
-            if (cppCodeGenParameter.GenType == GenType.Server || cppCodeGenParameter.GenType == GenType.All)
+            if (cppCodeGenParameter.RoleType == RoleType.Server || cppCodeGenParameter.RoleType == RoleType.All)
             {
                 ServerHsw.WriteLine("\n#endif");
                 ServerHsw.Flush();
@@ -292,624 +271,294 @@ namespace EmbedXrpcIdlParser
                     sw.WriteLine($"#endif // #ifdef {MacroControlAttribute.MacroName}");
             }
         }
-        public void EmitDelegate(TargetDelegate targetDelegate)
+        private void EmitCaller(TargetService service, StreamWriter hsw, StreamWriter csw)
         {
-            /*
-            CommonHsw.Write("typedef void (*" + targetDelegate.MethodName + ")(");
-            for (int i = 0; i < targetDelegate.TargetFields.Count; i++)
+            //生成客户端代码
+            MacroControlWriteBegin(hsw, service.MacroControlAttribute);
+            MacroControlWriteBegin(csw, service.MacroControlAttribute);
+            hsw.WriteLine("class " + service.ServiceName + "_Requester");
+            hsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
+            hsw.WriteLine(service.ServiceName + "_Requester" + "(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)");
+            hsw.WriteLine("{}");
+            hsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
+            string temp_fileds = string.Empty;
+
+
+            hsw.WriteLine($"{service.ParameterStructType.TypeName} {service.ServiceName}_SendData;");
+            hsw.WriteLine($"{service.ReturnStructType.TypeName} {service.ServiceName}_reqresp;");
+            //string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
+            if (service.ExternalParameter.IsExternal == false)
             {
-                var field = targetDelegate.TargetFields[i];
-                string cppType = IdlType2CppType(field);
-                string name = field.Name;
-                if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
+                var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
+                csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
+                temp_fileds = string.Empty;
+                for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
                 {
-                    name += "[" + field.MaxCountAttribute.MaxCount.ToString() + "]";
-                }
-
-                CommonHsw.Write(cppType + " " + name);
-                if (i + 1 < targetDelegate.TargetFields.Count)
-                {
-                    CommonHsw.Write(",");
-                }
-            }
-            CommonHsw.WriteLine(");");
-            */
-            var temp_fileds = string.Empty;
-            //生成客户端 delegate代码
-            if (codeGenParameter.GenType == GenType.Client || codeGenParameter.GenType == GenType.All)
-            {
-                MacroControlWriteBegin(ClientHsw, targetDelegate.MacroControlAttribute);
-                ClientHsw.WriteLine($"class {targetDelegate.MethodName}_DelegateReceiver:public IDelegate");
-                ClientHsw.WriteLine("{\npublic:");
-                ClientHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
-
-                var dh = targetDelegate.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-                ClientHsw.Write($"virtual void {targetDelegate.MethodName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
-
-                
-                for (int i = 0; i < targetDelegate.ParameterStructType.TargetFields.Count; i++)
-                {
-                    var field = targetDelegate.ParameterStructType.TargetFields[i];
+                    var field = service.ParameterStructType.TargetFields[i];
                     string name = field.FieldName;
                     temp_fileds += name + ",";
 
-                    ClientHsw.Write($"{CppSerializableCommon.EmitField(field)}");
-                    if (i + 1 < targetDelegate.ParameterStructType.TargetFields.Count)
+                    hsw.Write($"{CppSerializableCommon.EmitField(field)}");
+                    csw.Write($"{CppSerializableCommon.EmitField(field)}");
+
+                    if (i + 1 < service.ParameterStructType.TargetFields.Count)
                     {
-                        ClientHsw.Write(",");
+                        hsw.Write(",");
+                        csw.Write(",");
                     }
                 }
-                ClientHsw.WriteLine("){}");
-
-                //code gen invoke
-                ClientHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName} request;");
-                ClientHsw.WriteLine("void Invoke(EmbedXrpcConfig *rpcConfig,UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager);");//声明
-
-                MacroControlWriteBegin(ClientCsw, targetDelegate.MacroControlAttribute);
-                ClientCsw.WriteLine($"void {targetDelegate.MethodName}_DelegateReceiver::Invoke(EmbedXrpcConfig *rpcConfig,UserDataOfTransportLayer_t* userDataOfTransportLayer,SerializationManager *recManager)");
-                ClientCsw.WriteLine("{");
-                //ClientCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} request;");
-
-                //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Deserialize(recManager,&request);");
-                //ClientCsw.WriteLine($"recManager.Deserialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
-                ClientCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
-                ClientCsw.WriteLine($"if(rpcConfig->CheckSumValid==true)\r\n{{");
-                ClientCsw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
-                ClientCsw.WriteLine("}//if(rpcConfig->CheckSumValid==true)");
-                dh = targetDelegate.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-                ClientCsw.Write($"{targetDelegate.MethodName}(userDataOfTransportLayer{dh}");
-                for (int i = 0; i < targetDelegate.ParameterStructType.TargetFields.Count; i++)
-                {
-                    var par = targetDelegate.ParameterStructType.TargetFields[i];
-                    ClientCsw.Write($"request.{par.FieldName}");
-                    if (i + 1 < targetDelegate.ParameterStructType.TargetFields.Count)
-                    {
-                        ClientCsw.Write(",");
-                    }
-                }
-                ClientCsw.WriteLine(");");//生成调用目标函数。
-                //ClientCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Free(&request);");//free
-                //ClientCsw.WriteLine($"SerializationManager::FreeData(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&request);");
-                ClientCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_FreeData(&request);");//free掉request
-
-                ClientCsw.WriteLine("}");//函数生成完毕
-                MacroControlWriteEnd(ClientCsw, targetDelegate.MacroControlAttribute);
-
-                ClientHsw.WriteLine("};");//end class
-
-                MacroControlWriteEnd(ClientHsw, targetDelegate.MacroControlAttribute);
-
-                ClientHsw.WriteLine(Environment.NewLine);
-                ClientCsw.WriteLine(Environment.NewLine);
-                //ClientCsw.WriteLine($"{targetDelegate.MethodName}ClientImpl {targetDelegate.MethodName}ClientImplc");//创建一个委托实例
+                hsw.WriteLine(");");
+                csw.WriteLine(")\n{");
             }
-            if (codeGenParameter.GenType == GenType.Server || codeGenParameter.GenType == GenType.All)
+            else
             {
-                //生成服务端代码
-                MacroControlWriteBegin(ServerHsw, targetDelegate.MacroControlAttribute);
-                MacroControlWriteBegin(ServerCsw, targetDelegate.MacroControlAttribute);
-                ServerHsw.WriteLine("class " + targetDelegate.MethodName + "_DelegateSender");
-                ServerHsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
-                ServerHsw.WriteLine(targetDelegate.MethodName + "_DelegateSender" + "(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)");
-                ServerHsw.WriteLine("{}");
-                ServerHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", targetDelegate.MethodName);
+                hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer);");
+                csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer)\n{{");
+            }
 
-                ServerHsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName} SendData;");
-                if (targetDelegate.ExternalParameter.IsExternal==false)
+
+
+            csw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
+            csw.WriteLine($"SerializationManager sm;");
+            csw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
+            csw.WriteLine($"auto result=false;");
+
+            if (service.ReturnStructType.TargetFields.Count > 1)//index 0 is state. 1 is returnfield
+            {
+                csw.WriteLine($"auto waitstate=ResponseState_Timeout;");
+            }
+            csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
+            csw.WriteLine("{");
+            csw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);");
+            csw.WriteLine("}");
+            csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
+            csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);");
+            csw.WriteLine("}\r\nelse\r\n{");
+            csw.WriteLine("El_ResetQueue(RpcObject->ResponseMessageQueue);");
+            csw.WriteLine("}\r\n");
+            csw.WriteLine("SerializationManager_Reset(&sm);\n" +
+                "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];\n" +
+                "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;");
+
+            if (service.ExternalParameter.IsExternal == false)
+            {
+                foreach (var field in service.ParameterStructType.TargetFields)
                 {
-                    var dh = targetDelegate.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-                    ServerHsw.Write($"void  Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
-                    ServerCsw.Write($"void  {targetDelegate.MethodName }_DelegateSender::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
-                    temp_fileds = string.Empty;
-                    for (int i = 0; i < targetDelegate.ParameterStructType.TargetFields.Count; i++)
+                    if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                     {
-                        var field = targetDelegate.ParameterStructType.TargetFields[i];
-                        string name = field.FieldName;
-                        temp_fileds += name + ",";
-
-                        ServerHsw.Write($"{CppSerializableCommon.EmitField(field)}");
-                        ServerCsw.Write($"{CppSerializableCommon.EmitField(field)}");
-
-                        if (i + 1 < targetDelegate.ParameterStructType.TargetFields.Count)
+                        Array_TargetField array_TargetField = field as Array_TargetField;
+                        var lenField = array_TargetField.ArrayLenField;
+                        if (lenField != null)
                         {
-                            ServerHsw.Write(",");
-                            ServerCsw.Write(",");
-                        }
-                    }
-                    ServerHsw.WriteLine(");");//函数名
-                    ServerCsw.WriteLine(")\n{");//函数名
-                }
-                else
-                {
-                    ServerHsw.Write($"void  Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer);");
-                    ServerCsw.Write($"void  {targetDelegate.MethodName }_DelegateSender::Invoke(UserDataOfTransportLayer_t* userDataOfTransportLayer)\n{{");
-                }
-
-                //函数实现
-                ServerCsw.WriteLine("//write serialization code:{0}({1})", targetDelegate.MethodName, temp_fileds);
-                //ServerCsw.WriteLine($"static {targetDelegate.ParameterStructType.TypeName} SendData;");
-                ServerCsw.WriteLine($"SerializationManager sm;");
-                ServerCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
-                //ServerCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
-				ServerCsw.WriteLine("if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)");
-                ServerCsw.WriteLine("{");
-                ServerCsw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle, El_WAIT_FOREVER);");
-                ServerCsw.WriteLine("}");
-                ServerCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
-                        "sm.Buf = &RpcObject->DataLinkBufferForDelegate.Buffer[4];\n" +
-                        "sm.BufferLen = RpcObject->DataLinkBufferForDelegate.BufferLen-4;");
-
-                if(targetDelegate.ExternalParameter.IsExternal==false)//Copy to SendData
-                {
-                    foreach (var field in targetDelegate.ParameterStructType.TargetFields)
-                    {
-                        //if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
-                        if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
-                        {
-                            Array_TargetField array_TargetField = field as Array_TargetField;
-                            var lenField = array_TargetField.ArrayLenField;
-                            if (lenField != null)
+                            if (array_TargetField.MaxCountAttribute.IsFixed == true)
                             {
-                                if (array_TargetField.MaxCountAttribute.IsFixed == true)
-                                {
-                                    ServerCsw.WriteLine($"for({lenField.TargetType.TypeName} index=0;index<{lenField.FieldName};index++)");
-                                    ServerCsw.WriteLine("{");
-                                    ServerCsw.WriteLine($"  SendData.{field.FieldName}[index]={field.FieldName}[index];");
-                                    ServerCsw.WriteLine("}");
-                                }
-                                else
-                                {
-                                    ServerCsw.WriteLine($"SendData.{field.FieldName}={field.FieldName};");
-                                }
+                                csw.WriteLine($"for({lenField.TargetType.TypeName} index=0;index<{lenField.FieldName};index++)");
+                                csw.WriteLine("{");
+                                csw.WriteLine($"  {service.ServiceName}_SendData.{field.FieldName}[index]={field.FieldName}[index];");
+                                csw.WriteLine("}");
                             }
                             else
                             {
-                                ServerCsw.WriteLine($"SendData.{field.FieldName}[0]={field.FieldName}[0];");
+                                csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
                             }
-                            //ServerHsw.WriteLine($"memcpy(SendData.{field.Name},{field.Name},sizeof(SendData.{field.Name})/sizeof({arrayelementtype}));");
-
                         }
                         else
                         {
-                            //ServerHsw.WriteLine($"memcpy(&SendData.{field.Name},&{field.Name},sizeof(SendData.{field.Name}));");
-                            ServerCsw.WriteLine($"SendData.{field.FieldName}={field.FieldName};");
+                            csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}[0]={field.FieldName}[0];");
                         }
-                    }
-                }
-                
-                //ServerCsw.WriteLine($"{targetDelegate.MethodName}Struct_Type.Serialize(sm,0,&SendData);");
-                //ServerCsw.WriteLine($"sm.Serialize(&{targetDelegate.ParameterStructType.TypeName}_TypeInstance,&SendData,0);");
-                ServerCsw.WriteLine($"{targetDelegate.ParameterStructType.TypeName}_Serialize(&sm,&SendData);");
-
-                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[0]=(uint8_t)({targetDelegate.MethodName}_ServiceId&0xff);");
-                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[1]=(uint8_t)({targetDelegate.MethodName}_ServiceId>>8&0xff);");
-                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
-                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
-                ServerCsw.WriteLine($"RpcObject->DataLinkBufferForDelegate.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Delegate)<<6);");
-                ServerCsw.WriteLine($"RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForDelegate.Buffer);");
-                ServerCsw.WriteLine("SerializationManager_Reset(&sm);");
-                ServerCsw.WriteLine("if(RpcObject->DataLinkBufferForDelegate.MutexHandle!=nullptr)");
-                ServerCsw.WriteLine("{");
-                ServerCsw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForDelegate.MutexHandle);");
-                ServerCsw.WriteLine("}");
-				ServerCsw.WriteLine("}");//function end
-                MacroControlWriteEnd(ServerCsw, targetDelegate.MacroControlAttribute);
-
-                ServerHsw.WriteLine("};");//class end
-
-                MacroControlWriteEnd(ServerHsw, targetDelegate.MacroControlAttribute);
-
-                ServerHsw.WriteLine(Environment.NewLine);
-                ServerCsw.WriteLine(Environment.NewLine);
-            }
-
-                
-        }
-        public void EmitClientInterface(TargetInterface targetInterface, CppCodeGenParameter cppCodeGenParameter)
-        {
-            foreach (var service in targetInterface.Services)
-            {
-                //string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
-                /*TargetStruct targetStructRequest = new TargetStruct();
-                targetStructRequest.Name = GeneratServiceName + "_Request";
-                targetStructRequest.TargetFields.AddRange(service.TargetFields);*/
-                /*embedXrpcSerializationGenerator.EmitStruct(service.ParameterStructType,
-                    SerializeCsw,
-                    SerializeHsw);*/
-                EmitStruct(service.ParameterStructType, cppCodeGenParameter);
-                AddMessageMap(service.FullName, ReceiveType_t.ReceiveType_Request);
-                EmitServiceIdCode(SerializeHsw, service.FullName, service.ServiceId);//生成 ServiceID 宏定义
-
-                /*TargetStruct targetStructResponse = new TargetStruct();
-                targetStructResponse.Name = GeneratServiceName + "_RequestResponseContent";
-
-                TargetField ts = new TargetField();
-                ts.Name = "State";
-                ts.SourceCodeType = "RequestResponseState";
-                ts.IsArray = false;
-                ts.Enum = new TargetEnum() { SourceCodeType = "byte", Name = "RequestResponseState" };
-                ts.MaxCountAttribute = null;
-                ts.FieldNumberAttr = new FieldNumberAttribute(1);//state 的Field Number为1
-                targetStructResponse.TargetFields.Add(ts);
-
-                if (service.ReturnValue!=null)//添加返回值
-                {                               
-                    TargetField returnValue = new TargetField();
-                    returnValue.Name = "ReturnValue";
-                    returnValue.SourceCodeType = service.ReturnValue.SourceCodeType;
-                    returnValue.IsArray = false;
-                    returnValue.MaxCountAttribute = null;
-                    returnValue.FieldNumberAttr = new FieldNumberAttribute(2);
-                    targetStructResponse.TargetFields.Add(returnValue);
-                }*/
-
-                /*embedXrpcSerializationGenerator.EmitStruct(service.ReturnStructType,
-                    SerializeCsw,
-                    SerializeHsw);*/
-
-                EmitStruct(service.ReturnStructType,cppCodeGenParameter);
-
-                AddMessageMap(service.FullName, ReceiveType_t.ReceiveType_Response);
-                //EmitServiceIdCode(SerializeHsw, targetStructResponse.Name, ReceiveType_t.ReceiveType_Response, targetStructResponse.Name);//生成 ServiceID 宏定义
-
-            }
-            if (codeGenParameter.GenType == GenType.Client || codeGenParameter.GenType == GenType.All)
-            {
-                //这里生产client 部分代码
-                ClientHsw.WriteLine("class " + targetInterface.Name + "_Requester");
-                ClientHsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
-                ClientHsw.WriteLine(targetInterface.Name + "_Requester" + "(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)");
-                ClientHsw.WriteLine("{}");
-                string temp_fileds = string.Empty;
-                foreach (var service in targetInterface.Services)
-                {
-                    MacroControlWriteBegin(ClientHsw, service.MacroControlAttribute);
-                    MacroControlWriteBegin(ClientCsw, service.MacroControlAttribute);
-                    ClientHsw.WriteLine($"{service.ParameterStructType.TypeName} {service.ServiceName}_SendData;");
-                    ClientHsw.WriteLine($"{service.ReturnStructType.TypeName} {service.ServiceName}_reqresp;");
-                    //string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
-                    if (service.ExternalParameter.IsExternal ==false)
-                    {
-                        var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-                        ClientHsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
-                        ClientCsw.Write($"{service.ReturnStructType.TypeName}& {targetInterface.Name}_Requester::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
-                        temp_fileds = string.Empty;
-                        for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
-                        {
-                            var field = service.ParameterStructType.TargetFields[i];
-                            string name = field.FieldName;
-                            temp_fileds += name + ",";
-
-                            ClientHsw.Write($"{CppSerializableCommon.EmitField(field)}");
-                            ClientCsw.Write($"{CppSerializableCommon.EmitField(field)}");
-
-                            if (i + 1 < service.ParameterStructType.TargetFields.Count)
-                            {
-                                ClientHsw.Write(",");
-                                ClientCsw.Write(",");
-                            }
-                        }
-                        ClientHsw.WriteLine(");");
-                        ClientCsw.WriteLine(")\n{");
                     }
                     else
                     {
-                        ClientHsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer);");
-                        ClientCsw.Write($"{service.ReturnStructType.TypeName}& {targetInterface.Name}_Requester::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer)\n{{");
+                        csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
                     }
 
-                    
-
-                    ClientCsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
-
-                    //ClientCsw.WriteLine($"static {service.ParameterStructType.TypeName} SendData;");
-                    ClientCsw.WriteLine($"SerializationManager sm;");
-                    ClientCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
-                    //ClientCsw.WriteLine($"sm.IsEnableMataDataEncode=RpcObject->IsEnableMataDataEncode;");
-                    //ClientCsw.WriteLine($"static {service.ReturnStructType.TypeName} reqresp;");
-                    ClientCsw.WriteLine($"auto result=false;");
-
-                    if (service.ReturnStructType.TargetFields.Count>1)//index 0 is state. 1 is returnfield
-                    {
-                        ClientCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
-                    }
-                    ClientCsw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
-                    ClientCsw.WriteLine("{");
-                    ClientCsw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);");
-                    ClientCsw.WriteLine("}");
-
-                    //ClientCsw.WriteLine("#if EmbedXrpc_UseRingBufferWhenReceiving==1");
-                    ClientCsw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-                    ClientCsw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);");
-                    ClientCsw.WriteLine("}\r\nelse\r\n{");
-                    ClientCsw.WriteLine("El_ResetQueue(RpcObject->ResponseMessageQueue);");
-                    ClientCsw.WriteLine("}\r\n");
-                    //ClientCsw.WriteLine("ResetSemaphore(RpcObject->ResponseMessageSemaphoreHandle);");
-                    ClientCsw.WriteLine("SerializationManager_Reset(&sm);\n" +
-                        "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];\n" +
-                        "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;");
-
-                    if(service.ExternalParameter.IsExternal==false)
-                    {
-                        foreach (var field in service.ParameterStructType.TargetFields)
-                        {
-                            /*if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
-                            {
-                                string arrayelementtype = field.IdlType.Replace("[", "").Replace("]", "");
-                                ClientHsw.WriteLine($"memcpy(SendData.{field.Name},{field.Name},sizeof(SendData.{field.Name})/sizeof({arrayelementtype}));");
-                            }
-                            else
-                            {
-                                ClientHsw.WriteLine($"memcpy(&SendData.{field.Name},&{field.Name},sizeof(SendData.{field.Name}));");
-                            }*/
-
-                            //if (field.IsArray == true && field.MaxCountAttribute.IsFixed == true)
-                            if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
-                            {
-                                Array_TargetField array_TargetField = field as Array_TargetField;
-                                var lenField = array_TargetField.ArrayLenField;
-                                if (lenField != null)
-                                {
-                                    if (array_TargetField.MaxCountAttribute.IsFixed == true)
-                                    {
-                                        ClientCsw.WriteLine($"for({lenField.TargetType.TypeName} index=0;index<{lenField.FieldName};index++)");
-                                        ClientCsw.WriteLine("{");
-                                        ClientCsw.WriteLine($"  {service.ServiceName}_SendData.{field.FieldName}[index]={field.FieldName}[index];");
-                                        ClientCsw.WriteLine("}");
-                                    }
-                                    else
-                                    {
-                                        ClientCsw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
-                                    }
-                                }
-                                else
-                                {
-                                    ClientCsw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}[0]={field.FieldName}[0];");
-                                }
-                                //ServerHsw.WriteLine($"memcpy(SendData.{field.Name},{field.Name},sizeof(SendData.{field.Name})/sizeof({arrayelementtype}));");
-
-                            }
-                            else
-                            {
-                                //ServerHsw.WriteLine($"memcpy(&SendData.{field.Name},&{field.Name},sizeof(SendData.{field.Name}));");
-                                ClientCsw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
-                            }
-
-                        }
-                    }
-                    
-                    //ClientCsw.WriteLine($"{GeneratServiceName}_Request_Type.Serialize(sm,0,&SendData);");
-                    //ClientCsw.WriteLine($"sm.Serialize(&{service.ParameterStructType.TypeName}_TypeInstance,&SendData,0);");
-                    ClientCsw.WriteLine($"{service.ParameterStructType.TypeName}_Serialize(&sm,&{service.ServiceName}_SendData);");
-
-                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)({service.FullName}_ServiceId&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.FullName}_ServiceId>>8&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
-                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
-                    ClientCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);");
-                    ClientCsw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);");
-                    ClientCsw.WriteLine("SerializationManager_Reset(&sm);");
-                    ClientCsw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\ngoto exi;\n}}");
-                    ClientCsw.WriteLine($"else\n{{\n{service.ServiceName}_reqresp.State=RequestState_Ok;\n}}");
-                    if (service.ReturnStructType.TargetFields.Count>1)
-                    {
-                        //ClientCsw.WriteLine($"waitstate=RpcObject->Wait({service.FullName}_ServiceId,&{service.ReturnStructType.TypeName}_TypeInstance,&reqresp);");
-                        ClientCsw.WriteLine("ReceiveItemInfo recData;");
-                        ClientCsw.WriteLine($"waitstate=RpcObject->Wait({service.FullName}_ServiceId,&recData);");
-                        ClientCsw.WriteLine("if(waitstate == RequestResponseState::ResponseState_Ok)");
-                        ClientCsw.WriteLine("{");
-                        //ClientCsw.WriteLine("#if  EmbedXrpc_UseRingBufferWhenReceiving==1");
-                        ClientCsw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-                        ClientCsw.WriteLine("sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;");
-                        ClientCsw.WriteLine("}\r\nelse\r\n{");
-                        //ClieCtCsw.WriteLine("sm.IsEnableMataDataEncode = RpcObject->IsEnableMataDataEncode;");
-                        ClientCsw.WriteLine("SerializationManager_Reset(&sm);");
-                        ClientCsw.WriteLine("sm.BufferLen = recData.DataLen;");
-                        ClientCsw.WriteLine("sm.Buf = recData.Data;");
-                        ClientCsw.WriteLine("}");
-                        //ClientCsw.WriteLine("#if  EmbedXrpc_CheckSumValid==1");
-                        ClientCsw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
-                        ClientCsw.WriteLine("SerializationManager_SetCalculateSum(&sm,0);");
-                        ClientCsw.WriteLine("SerializationManager_SetReferenceSum(&sm,recData.CheckSum);");
-                        ClientCsw.WriteLine("}");
-                        ClientCsw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp);");
-                        //ClientCsw.WriteLine("#if  EmbedXrpc_CheckSumValid==1");
-                        ClientCsw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
-                        ClientCsw.WriteLine("El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
-                        ClientCsw.WriteLine("}");
-                        ClientCsw.WriteLine("}");
-
-                        //ClientCsw.WriteLine("#if  EmbedXrpc_UseRingBufferWhenReceiving==0");
-                        ClientCsw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)\r\n{");
-                        ClientCsw.WriteLine("if(waitstate != RequestResponseState::ResponseState_Timeout)");
-                        ClientCsw.WriteLine("{");
-
-                        ClientCsw.WriteLine("if (recData.DataLen > 0)");
-                        ClientCsw.WriteLine("{");
-                        ClientCsw.WriteLine("El_Free(recData.Data);");
-                        ClientCsw.WriteLine("}");
-
-                        ClientCsw.WriteLine("}");
-                        ClientCsw.WriteLine("}//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)");
-
-                        ClientCsw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");
-                    }
-                    ClientCsw.WriteLine("exi:");
-                    ClientCsw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
-                    ClientCsw.WriteLine("{");
-                    ClientCsw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);");
-                    ClientCsw.WriteLine("}");
-                    ClientCsw.WriteLine($"return {service.ServiceName}_reqresp;");
-                    ClientCsw.WriteLine("}");
-
-                    if (service.ReturnStructType.TargetFields.Count > 1)
-                    {
-                        ClientHsw.WriteLine($"void Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response);\n");
-                        ClientCsw.WriteLine($"void {targetInterface.Name}_Requester::Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response)");
-                        ClientCsw.WriteLine("{\nif(response->State==ResponseState_Ok)\n{");
-                        //ClientCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(response);");
-                        //ClientCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,response);");
-                        ClientCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(response);");
-                        ClientCsw.WriteLine("}\n}");
-                    }
-                    ClientCsw.WriteLine("\n"); //client interface end class
-
-                    MacroControlWriteEnd(ClientCsw, service.MacroControlAttribute);
-                    MacroControlWriteEnd(ClientHsw, service.MacroControlAttribute);
-
-                    ClientCsw.WriteLine(Environment.NewLine);
-                    ClientHsw.WriteLine(Environment.NewLine);
                 }
-                ClientHsw.WriteLine("};\n"); //client interface end class
-
-                
             }
-            foreach (var service in targetInterface.Services)
+            csw.WriteLine($"{service.ParameterStructType.TypeName}_Serialize(&sm,&{service.ServiceName}_SendData);");
+
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);");
+            csw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);");
+            csw.WriteLine("SerializationManager_Reset(&sm);");
+            csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\ngoto exi;\n}}");
+            csw.WriteLine($"else\n{{\n{service.ServiceName}_reqresp.State=RequestState_Ok;\n}}");
+            if (service.ReturnStructType.TargetFields.Count > 1)
             {
-                //string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
-                //生成Server端代码
-                if (codeGenParameter.GenType == GenType.Server || codeGenParameter.GenType == GenType.All)
-                {
-                    MacroControlWriteBegin(ServerHsw, service.MacroControlAttribute);
-                    MacroControlWriteBegin(ServerCsw, service.MacroControlAttribute);
-                    ServerHsw.WriteLine($"class {service.FullName}_Service:public IService");
-                    ServerHsw.WriteLine("{\npublic:");
-                    ServerHsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", service.FullName);
 
-                    //string returnType= service.ReturnValue==null?"void":$"{service.ServiceName}_Response& ";
-                    if (service.ReturnStructType.TargetFields.Count>1)
-                    {
-                        ServerHsw.WriteLine($"{service.ReturnStructType.TypeName} Response;");
-                    }
- 
-                    string returnType = "void";
-                    var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-                    ServerHsw.Write($"virtual {returnType} {service.ServiceName}(ServiceInvokeParameter * serviceInvokeParameter{dh}");
+                csw.WriteLine("ReceiveItemInfo recData;");
+                csw.WriteLine($"waitstate=RpcObject->Wait({service.ServiceName}_ServiceId,&recData);");
+                csw.WriteLine("if(waitstate == RequestResponseState::ResponseState_Ok)");
+                csw.WriteLine("{");
 
-                    var temp_fileds = string.Empty;
-                    for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
-                    {
-                        var field = service.ParameterStructType.TargetFields[i];
-                        string name = field.FieldName;
-                        temp_fileds += name + ",";
+                csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
+                csw.WriteLine("sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;");
+                csw.WriteLine("}\r\nelse\r\n{");
+                csw.WriteLine("SerializationManager_Reset(&sm);");
+                csw.WriteLine("sm.BufferLen = recData.DataLen;");
+                csw.WriteLine("sm.Buf = recData.Data;");
+                csw.WriteLine("}");
+                csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
+                csw.WriteLine("SerializationManager_SetCalculateSum(&sm,0);");
+                csw.WriteLine("SerializationManager_SetReferenceSum(&sm,recData.CheckSum);");
+                csw.WriteLine("}");
+                csw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp);");
+                csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
+                csw.WriteLine("El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
+                csw.WriteLine("}");
+                csw.WriteLine("}");
+                csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)\r\n{");
+                csw.WriteLine("if(waitstate != RequestResponseState::ResponseState_Timeout)");
+                csw.WriteLine("{");
 
-                        ServerHsw.Write($"{CppSerializableCommon.EmitField(field)}");
+                csw.WriteLine("if (recData.DataLen > 0)");
+                csw.WriteLine("{");
+                csw.WriteLine("El_Free(recData.Data);");
+                csw.WriteLine("}");
 
-                        if (i + 1 < service.ParameterStructType.TargetFields.Count)
-                        {
-                            ServerHsw.Write(",");
-                        }
-                    }
-                    ServerHsw.WriteLine("){}");
+                csw.WriteLine("}");
+                csw.WriteLine("}//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)");
 
-                    //code gen invoke
-                    ServerHsw.WriteLine($"{service.ParameterStructType.TypeName} request;");
-                    ServerHsw.WriteLine("void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager);");
-                    ServerCsw.WriteLine($"void {service.FullName}_Service::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)");
-                    ServerCsw.WriteLine("{");
-                    //ServerCsw.WriteLine($"static {service.ParameterStructType.TypeName} request;");
-                    //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Deserialize(recManager,&request);");
-                    //ServerCsw.WriteLine($"recManager.Deserialize(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");
-                    ServerCsw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
-                    //ServerCsw.WriteLine("#if EmbedXrpc_CheckSumValid==1");
-                    ServerCsw.WriteLine($"if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
-                    ServerCsw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
-                    ServerCsw.WriteLine("}");
-                    //if (service.ReturnValue != null)
-                    //    ServerHsw.Write($"{service.ServiceName}_Response& returnValue=");
-                    dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-                    ServerCsw.Write($"{service.ServiceName}(serviceInvokeParameter{dh}");
-                    for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
-                    {
-                        var par = service.ParameterStructType.TargetFields[i];
-                        ServerCsw.Write($"request.{par.FieldName}");
-                        if (i + 1 < service.ParameterStructType.TargetFields.Count)
-                        {
-                            ServerCsw.Write(",");
-                        }
-                    }
-                    ServerCsw.WriteLine(");");//生成调用目标函数。
-
-                    //ServerCsw.WriteLine($"{GeneratServiceName}_Request_Type.Free(&request);");//free
-                    //ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ParameterStructType.TypeName}_TypeInstance,&request);");//free
-                    ServerCsw.WriteLine($"{service.ParameterStructType.TypeName}_FreeData(&request);");//free
-                    if (service.ReturnStructType.TargetFields.Count>1)
-                    {
-                        //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Serialize(sendManager,0,&Response);");//生成返回值序列化
-                        //ServerCsw.WriteLine($"sendManager.Serialize(&{service.ReturnStructType.TypeName}_TypeInstance,&Response,0);");//生成返回值序列化
-                        ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_Serialize(sendManager,&Response);");
-                        //ServerCsw.WriteLine($"{GeneratServiceName}_RequestResponseContent_Type.Free(&Response);");//生成返回值序列化
-                        //ServerCsw.WriteLine($"SerializationManager::FreeData(&{service.ReturnStructType.TypeName}_TypeInstance,&Response);");//生成返回值序列化
-
-                        //ServerCsw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 让用户去 free,所以注释了这条语句
-                        ServerCsw.WriteLine($"if(IsFreeResponse==true) {service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 可以选择free,有用户控制所以有了这条语句
-                    }
-
-                    ServerCsw.WriteLine("}");//end function
-
-
-                    ServerHsw.WriteLine("};");//end class
-
-                    MacroControlWriteEnd(ServerCsw, service.MacroControlAttribute);
-                    MacroControlWriteEnd(ServerHsw, service.MacroControlAttribute);
-
-                    ServerCsw.WriteLine(Environment.NewLine);
-                    ServerHsw.WriteLine(Environment.NewLine);
-                    //ServerCsw.WriteLine($"{service.FullName}Service {service.FullName}ServiceInstance;");//创建一个service实例
-                }
-
+                csw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");
             }
-            if (codeGenParameter.GenType == GenType.Server || codeGenParameter.GenType == GenType.All)
+            csw.WriteLine("exi:");
+            csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
+            csw.WriteLine("{");
+            csw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);");
+            csw.WriteLine("}");
+            csw.WriteLine($"return {service.ServiceName}_reqresp;");
+            csw.WriteLine("}");
+
+            if (service.ReturnStructType.TargetFields.Count > 1)
             {
-                //生成request Service 数组
-                ServerHsw.WriteLine($"/*\r\nThe Requests Of {targetInterface.Name}:");
-                int RequestsCount = 0;
-                ServerHsw.WriteLine("name                   type\r\n");
-                foreach (var message in messageMaps)
-                {
-                    if (message.ReceiveType == ReceiveType_t.ReceiveType_Request)
-                    {
-                        RequestsCount++;
-                        ServerHsw.WriteLine("\"{0:-64}\",           {1:-64}_Service,// U need to inherit this class and override the method!", message.Name, message.Name);
-                    }
-
-                }
-                ServerHsw.WriteLine($"\r\nRequestsCount: {RequestsCount}");
-                ServerHsw.WriteLine("*/\n");
+                hsw.WriteLine($"void Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response);\n");
+                csw.WriteLine($"void {service.ServiceName}_Requester::Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response)");
+                csw.WriteLine("{\nif(response->State==ResponseState_Ok)\n{");
+                csw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(response);");
+                csw.WriteLine("}\n}");
             }
-            if (codeGenParameter.GenType == GenType.Client || codeGenParameter.GenType == GenType.All)
-            {
-                //生成Response\Delegate service 数组
-                ClientHsw.WriteLine($"/*\r\nThe Delegates Of {targetInterface.Name}:");
-                int DelegatesCount = 0;
-                int ResponsesCount = 0;
-                ClientHsw.WriteLine("name                   type\r\n");
-                foreach (var message in messageMaps)
-                {
-                    if (message.ReceiveType == ReceiveType_t.ReceiveType_Delegate)
-                    {
-                        DelegatesCount++;
-                        ClientHsw.WriteLine("\"{0:-64}\"        {1:-64}_DelegateReceiver,// U need to inherit this class and override the method!", message.Name,message.Name);
-                    }
-                }
-                ClientHsw.WriteLine($"\r\nDelegatesCount:{DelegatesCount}\r\n\r\n\r\n");
 
 
-                ClientHsw.WriteLine($"The Responses Of {targetInterface.Name}:");
-                ClientHsw.WriteLine("name                   sid\r\n");
-                foreach (var message in messageMaps)
-                {
-                    if (message.ReceiveType == ReceiveType_t.ReceiveType_Response)
-                    {
-                        ResponsesCount++;
-                        ClientHsw.WriteLine("\"{0:-64}\"        {1:16}", message.Name, message.ServiceId);
-                    }
-                }
-                ClientHsw.WriteLine($"\r\nResponsesCount:{ResponsesCount}");
+            csw.WriteLine();
+            hsw.WriteLine("};\n");//class end
 
-                ClientHsw.WriteLine("*/\n");
-            }
+            MacroControlWriteEnd(csw, service.MacroControlAttribute);
+            MacroControlWriteEnd(hsw, service.MacroControlAttribute);
         }
 
+        private void EmitCallee(TargetService service, StreamWriter hsw, StreamWriter csw)
+        {
+            MacroControlWriteBegin(hsw, service.MacroControlAttribute);
+            MacroControlWriteBegin(csw, service.MacroControlAttribute);
+            hsw.WriteLine($"class {service.ServiceName}_Service:public IService");
+            hsw.WriteLine("{\npublic:");
+            hsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
+            if (service.ReturnStructType.TargetFields.Count > 1)
+            {
+                hsw.WriteLine($"{service.ReturnStructType.TypeName} Response;");
+            }
+
+            string returnType = "void";
+            var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+            hsw.Write($"virtual {returnType} {service.ServiceName}(ServiceInvokeParameter * serviceInvokeParameter{dh}");
+
+            var temp_fileds = string.Empty;
+            for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
+            {
+                var field = service.ParameterStructType.TargetFields[i];
+                string name = field.FieldName;
+                temp_fileds += name + ",";
+
+                hsw.Write($"{CppSerializableCommon.EmitField(field)}");
+
+                if (i + 1 < service.ParameterStructType.TargetFields.Count)
+                {
+                    hsw.Write(",");
+                }
+            }
+            hsw.WriteLine("){}");
+
+            //code gen invoke
+            hsw.WriteLine($"{service.ParameterStructType.TypeName} request;");
+            hsw.WriteLine("void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager);");
+            csw.WriteLine($"void {service.ServiceName}_Service::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)");
+            csw.WriteLine("{");
+
+            csw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
+
+            csw.WriteLine($"if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
+            csw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
+            csw.WriteLine("}");
+
+            dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+            csw.Write($"{service.ServiceName}(serviceInvokeParameter{dh}");
+            for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
+            {
+                var par = service.ParameterStructType.TargetFields[i];
+                csw.Write($"request.{par.FieldName}");
+                if (i + 1 < service.ParameterStructType.TargetFields.Count)
+                {
+                    csw.Write(",");
+                }
+            }
+            csw.WriteLine(");");//生成调用目标函数。
+
+
+            csw.WriteLine($"{service.ParameterStructType.TypeName}_FreeData(&request);");//free
+            if (service.ReturnStructType.TargetFields.Count > 1)
+            {
+                csw.WriteLine($"{service.ReturnStructType.TypeName}_Serialize(sendManager,&Response);");
+                csw.WriteLine($"if(IsFreeResponse==true) {service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 可以选择free,有用户控制所以有了这条语句
+            }
+
+            csw.WriteLine("}");//end function
+            hsw.WriteLine("};");//end class
+
+            MacroControlWriteEnd(csw, service.MacroControlAttribute);
+            MacroControlWriteEnd(hsw, service.MacroControlAttribute);
+
+            csw.WriteLine(Environment.NewLine);
+            hsw.WriteLine(Environment.NewLine);
+        }
+        public void EmitService(TargetService service, CppCodeGenParameter cppCodeGenParameter)
+        {
+            if (service.RoleAttribute.Role == RoleType.Client)
+            { 
+                if(cppCodeGenParameter.RoleType== RoleType.Client)
+                {
+                    EmitCaller(service, ClientHsw, ClientCsw);
+                }
+                else if(cppCodeGenParameter.RoleType == RoleType.Server)
+                {
+                    EmitCallee(service, ServerHsw, ServerCsw);
+                }
+                else
+                {
+                    EmitCaller(service, ClientHsw, ClientCsw);
+                    EmitCallee(service, ServerHsw, ServerCsw);
+                }
+
+            }
+
+            if (service.RoleAttribute.Role == RoleType.Server)
+            {
+                if (cppCodeGenParameter.RoleType == RoleType.Client)
+                {
+                    EmitCallee(service, ClientHsw, ClientCsw);
+                }
+                else if (cppCodeGenParameter.RoleType == RoleType.Server)
+                {
+                    EmitCaller(service, ServerHsw, ServerCsw);
+                }
+                else
+                {
+                    EmitCaller(service, ServerHsw, ServerCsw);
+                    EmitCallee(service, ClientHsw, ClientCsw);
+                }
+            }
+        }
     }
 }

@@ -35,18 +35,18 @@ namespace EmbedXrpcIdlParser
             IdlInfo idlInfo = new IdlInfo();
             FileInfo fi = new FileInfo(generater.InputFile);
             idlInfo.Parse(fi.Name);//这里不写generater.InputFile是因为 generater.InputFile有可能是这样的 .\\myidl.cs 而我们内部需要的是myidl.cs 所以在外面通过fileinfo做下处理
-            GenType gt = EmbedXrpcIdlParser.GenType.All;
+            RoleType gt = EmbedXrpcIdlParser.RoleType.All;
             if (generater.GenType.ToLower() == "client")
             {
-                gt = EmbedXrpcIdlParser.GenType.Client;
+                gt = EmbedXrpcIdlParser.RoleType.Client;
             }
             else if (generater.GenType.ToLower() == "server")
             {
-                gt = EmbedXrpcIdlParser.GenType.Server;
+                gt = EmbedXrpcIdlParser.RoleType.Server;
             }
             else if (generater.GenType.ToLower() == "all")
             {
-                gt = EmbedXrpcIdlParser.GenType.All;
+                gt = EmbedXrpcIdlParser.RoleType.All;
             }
             else
             {
@@ -87,7 +87,7 @@ namespace EmbedXrpcIdlParser
                     CppCodeGenParameter parameter = new CppCodeGenParameter()
                     {
                         FileIdlInfo = idlInfo.ParsedFiles[i],
-                        GenType = gt,
+                        RoleType = gt,
                         OutPutPath = generater.OutputPath,
                     };
                     cpp.CodeGen(parameter);
@@ -102,7 +102,7 @@ namespace EmbedXrpcIdlParser
                     CSharpCodeGenParameter parameter = new CSharpCodeGenParameter()
                     {
                         FileIdlInfo = idlInfo.ParsedFiles[i],
-                        GenType = gt,
+                        RoleType = gt,
                         OutPutPath = generater.OutputPath,
                         //IsEnableMataDataEncode = generater.IsEnableMataDataEncode
                     };

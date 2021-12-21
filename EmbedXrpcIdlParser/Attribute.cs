@@ -183,4 +183,27 @@ namespace EmbedXrpcIdlParser
         }
 
     }
+    public enum RoleType
+    {
+        Client,
+        Server,
+        All
+    }
+
+
+    [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
+    public class RoleAttribute : Attribute
+    {
+
+        public RoleAttribute(RoleType role)
+        {
+            Role = role;
+        }
+
+        public RoleType Role
+        {
+            get;
+            private set;
+        }     
+    }
 }

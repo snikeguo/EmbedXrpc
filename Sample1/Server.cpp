@@ -20,7 +20,7 @@ bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	return true;
 }
 //特化子类继承
-class Inter_AddServiceProvider :public Inter_Add_Service
+class Inter_AddServiceProvider :public Add_Service
 {
 public:
 	void Add(ServiceInvokeParameter* serviceInvokeParameter,
@@ -50,7 +50,7 @@ public:
 };
 
 //特化子类继承
-class Inter_NoArgServiceProvider :public Inter_NoArg_Service
+class Inter_NoArgServiceProvider :public NoArg_Service
 {
 public:
 	void NoArg(ServiceInvokeParameter* serviceInvokeParameter)
@@ -62,7 +62,7 @@ public:
 
 
 //特化子类继承
-class Inter_NoReturnServiceProvider :public Inter_NoReturn_Service
+class Inter_NoReturnServiceProvider :public NoReturn_Service
 {
 public:
 	void NoReturn(ServiceInvokeParameter* serviceInvokeParameter,
@@ -74,7 +74,7 @@ public:
 };
 
 //特化子类继承
-class Inter_NoArgAndReturnServiceProvider :public Inter_NoArgAndReturn_Service
+class Inter_NoArgAndReturnServiceProvider :public NoArgAndReturn_Service
 {
 public:
 	void NoArgAndReturn(ServiceInvokeParameter* serviceInvokeParameter)
@@ -95,13 +95,21 @@ RequestDescribe Requests[] = //定义请求集合
 	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
 	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
 };
-static ServerNodeQuicklyInitConfig InitCfg =
+ResponseDescribe AllResponses[] =
+{
+	{"DataTimeChange",DateTimeChange_ServiceId},
+	{"Test2",Test2_ServiceId},
+};
+
+static InitConfig InitCfg =
 {
 	"Server",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},// DataLinkBufferForResponse
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForDelegate
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},// DataLinkBufferConfigForRequest
+	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferConfigForResponse
 	ServerSend,
 	500,
+	AllResponses,
+	2,
 	Requests,
 	4,
 	{
@@ -111,12 +119,10 @@ static ServerNodeQuicklyInitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//DelegateBlockQueue_MaxItemNumber
 			10,//ResponseBlockQueue_MaxItemNumber
 			10,//RequestBlockQueue_MaxItemNumber
 		},
 		{
-			{nullptr,0,0},//DelegateBlockBufferProvider
 			{nullptr,0,0},//ResponseBlockBufferProvider
 			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
 		},
@@ -129,7 +135,7 @@ void Server_Init()
 {
 	ServerRpc.Init(&InitCfg);
 }
-DateTimeChange_DelegateSender DateTimeChanger(&ServerRpc);//实例化委托对象
+DateTimeChange_Requester DateTimeChanger(&ServerRpc);//实例化委托对象
 void ServerThread()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
@@ -162,7 +168,7 @@ void ServerThread()
 		t.David.u2 = 0x66778899;
 		t.David.uend1 = 1;
 		t.David.uend2 = 2;
-		DateTimeChanger.Invoke(&win32UserDataOfTransportLayerTest, &t);//调用委托
+		DateTimeChanger.DateTimeChange(&win32UserDataOfTransportLayerTest, &t);//调用委托
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(10000));//等待RPC调用全部完毕

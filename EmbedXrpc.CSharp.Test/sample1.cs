@@ -134,24 +134,16 @@ struct DateTime_t
 
 }
 [FileName("sample1.cs")]
+[Role(RoleType.Server)]
 delegate void DateTimeChange(DateTime_t[] now);
+
 
 [FileName("sample1.cs")]
 [ExternalParameter(true)]
-delegate void TestDelegate(DateTime_t[] now);
-
-[FileName("sample1.cs")]
-interface Inter
-{
-    [ExternalParameter(true)]
-    AddResult Add(Int32 a, Int32 b, Int32 dataLen,
+[Role(RoleType.Client)]
+delegate AddResult Add(Int32 a, Int32 b, Int32 dataLen,
         [MaxCount(LenFieldName="dataLen",IsFixed=false)]
         byte[]data);
-
-    bool NoArg();
-    void NoReturn(int a);
-    void NoArgAndReturn();
-}
 
 [FileName("sample1.cs")]
 public class OptionProcess : IOptionProcess

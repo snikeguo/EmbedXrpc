@@ -15,53 +15,54 @@ bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	return true;
 }
 //特化子类继承
-class DateTimeChangeDelegateReceiver :public DateTimeChange_DelegateReceiver
+class DateTimeChange_ServiceReceiver :public DateTimeChange_Service
 {
 public:
-	void DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
+	void DateTimeChange(ServiceInvokeParameter* serviceInvokeParameter, DateTime_t now[1])//server广播后，client接受到的
 	{
 		printf("client:%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 		//printf("%s", now[0].DateString);
 	}
 };
 //特化子类继承
-class TestDelegateDelegateReceiver :public TestDelegate_DelegateReceiver
+class Test2_ServiceReceiver :public Test2_Service
 {
 public:
-	void TestDelegate(UserDataOfTransportLayer_t* userDataOfTransportLayer, DateTime_t now[1])//server广播后，client接受到的
+	void Test2(ServiceInvokeParameter* serviceInvokeParameter, DateTime_t now[1])//server广播后，client接受到的
 	{
 		printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 		//printf("%s", now[0].DateString);
 	}
 };
-//定义委托对象
-DateTimeChangeDelegateReceiver DateTimeChange;
-TestDelegateDelegateReceiver Test;
 
-DelegateDescribe AllDelegates[2] =//定义委托对象集合
+DateTimeChange_ServiceReceiver DateTimeChange;
+Test2_ServiceReceiver Test2;
+
+RequestDescribe AllRequests[2] =//定义委托对象集合
 {
 	{"DateTimeChange"  ,&DateTimeChange},
-	{"TestDelegate"  ,&Test},
-};//client可以处理的Delegate集合
+	{"Test2"  ,&Test2},
+};//client可以处理的Request集合
 
 ResponseDescribe Responses[4] =//定义回复 ID 集合
 {
-	{"Inter_Add"   ,     Inter_Add_ServiceId},
-	{"Inter_NoArg"     ,   Inter_NoArg_ServiceId},
-	{"Inter_NoReturn"   ,     Inter_NoReturn_ServiceId},
-	{"Inter_NoArgAndReturn"    ,    Inter_NoArgAndReturn_ServiceId},
+	{"Inter_Add"   ,     Add_ServiceId},
+	{"Inter_NoArg"     ,   NoArg_ServiceId},
+	{"Inter_NoReturn"   ,     NoReturn_ServiceId},
+	{"Inter_NoArgAndReturn"    ,    NoArgAndReturn_ServiceId},
 };
 
 
-static ClientNodeQuicklyInitConfig InitCfg =
+static InitConfig InitCfg =
 {
 	"Client",
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
+	{nullptr,0,false},
 	ClientSend,
 	1000,
 	Responses,
 	1,
-	AllDelegates,
+	AllRequests,
 	2,
 	{
 		true,//CheckSumValid
@@ -70,12 +71,10 @@ static ClientNodeQuicklyInitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			true,//IsSendToQueue
-			10,//DelegateBlockQueue_MaxItemNumber
 			10,//ResponseBlockQueue_MaxItemNumber
 			10,//RequestBlockQueue_MaxItemNumber
 		},
 		{
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//DelegateBlockBufferProvider
 			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseBlockBufferProvider
 			{nullptr,0,0},//RequestBlockBufferProvider
 		},
@@ -90,7 +89,7 @@ void Client_Init()
 	ClientRpc.Init(&InitCfg);
 }
 
-Inter_Requester Client(&ClientRpc);//定义request对象
+Add_Requester Client(&ClientRpc);//定义request对象
 void ClientThread()
 {
 	//std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
