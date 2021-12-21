@@ -1,5 +1,5 @@
 ﻿#include"Sample2.Client.h"
-Inter_GetSum_Return& Inter_Requester::GetSum(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a,Int32 b)
+GetSum_Return& GetSum_Requester::GetSum(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a,Int32 b)
 {
 //write serialization code:GetSum(a,b,)
 SerializationManager sm;
@@ -24,9 +24,9 @@ sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
 sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 GetSum_SendData.a=a;
 GetSum_SendData.b=b;
-Inter_GetSum_Parameter_Serialize(&sm,&GetSum_SendData);
-RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(Inter_GetSum_ServiceId&0xff);
-RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(Inter_GetSum_ServiceId>>8&0xff);
+GetSum_Parameter_Serialize(&sm,&GetSum_SendData);
+RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(GetSum_ServiceId&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(GetSum_ServiceId>>8&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
@@ -42,7 +42,7 @@ else
 GetSum_reqresp.State=RequestState_Ok;
 }
 ReceiveItemInfo recData;
-waitstate=RpcObject->Wait(Inter_GetSum_ServiceId,&recData);
+waitstate=RpcObject->Wait(GetSum_ServiceId,&recData);
 if(waitstate == RequestResponseState::ResponseState_Ok)
 {
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
@@ -60,7 +60,7 @@ if(RpcObject->RpcConfig.CheckSumValid==true)
 SerializationManager_SetCalculateSum(&sm,0);
 SerializationManager_SetReferenceSum(&sm,recData.CheckSum);
 }
-Inter_GetSum_Return_Deserialize(&sm,&GetSum_reqresp);
+GetSum_Return_Deserialize(&sm,&GetSum_reqresp);
 if(RpcObject->RpcConfig.CheckSumValid==true)
 {
 El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));
@@ -84,14 +84,11 @@ El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return GetSum_reqresp;
 }
-void Inter_Requester::Free_GetSum(Inter_GetSum_Return *response)
+void GetSum_Requester::Free_GetSum(GetSum_Return *response)
 {
 if(response->State==ResponseState_Ok)
 {
-Inter_GetSum_Return_FreeData(response);
+GetSum_Return_FreeData(response);
 }
 }
-
-
-
 

@@ -18,7 +18,7 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer);
 	return true;
 }
-class CServer_GetSumProvider :public Inter_GetSum_Service
+class CServer_GetSumProvider :public GetSum_Service
 {
 public:
 	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, Int32 a, Int32 b)
@@ -41,7 +41,6 @@ static ServerNodeQuicklyInitConfig InitCfg =
 {
 	"C",
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
-	{nullptr,0,false},//DataLinkBufferForDelegate
 	 { Send },
 	500,
 	Requests,
@@ -53,12 +52,10 @@ static ServerNodeQuicklyInitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//DelegateMessageQueue_MaxItemNumber
 			10,//ResponseMessageQueue_MaxItemNumber
 			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			{nullptr,0,0},//DelegateMessageBlockBufferProvider
 			{nullptr,0,0},//ResponseMessageBlockBufferProvider
 			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
 		},

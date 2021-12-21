@@ -137,6 +137,7 @@ public:
 		InitConfig cfg;
 		El_Memset(&cfg, 0, sizeof(InitConfig));
 		El_Strncpy(cfg.Name, server->Name, EmbedXrpc_NameMaxLen);
+		cfg.DataLinkBufferConfigForResponse = server->DataLinkBufferConfigForResponse;
 		cfg.Sender = server->Sender;
 		cfg.TimeOut = server->TimeOut;
 		cfg.Requests = server->Requests;

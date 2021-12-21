@@ -13,7 +13,7 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 
 static ResponseDescribe Responses[1] =//定义回复 ID 集合
 {
-	{"Inter_Add"   ,     Inter_GetSum_ServiceId},
+	{"Inter_Add"   ,     GetSum_ServiceId},
 };
 static ClientNodeQuicklyInitConfig InitCfg =
 {
@@ -23,8 +23,6 @@ static ClientNodeQuicklyInitConfig InitCfg =
 	1000,
 	Responses,
 	1,
-	nullptr,
-	0,
 	{
 		true,//CheckSumValid
 		6,//ServerThreadPriority
@@ -32,12 +30,10 @@ static ClientNodeQuicklyInitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//DelegateMessageQueue_MaxItemNumber
 			10,//ResponseMessageQueue_MaxItemNumber
 			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			{nullptr,0,0},//DelegateMessageBlockBufferProvider
 			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseMessageBlockBufferProvider
 			{nullptr,0,0},//RequestMessageBlockBufferProvider
 		},
@@ -50,7 +46,7 @@ void A_Init()
 {
 	A_RpcObject.Init(&InitCfg);
 }
-Inter_Requester A_Requester(&A_RpcObject);//定义request对象
+GetSum_Requester A_Requester(&A_RpcObject);//定义request对象
 void ClientThread()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));

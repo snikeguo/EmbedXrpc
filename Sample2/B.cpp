@@ -5,7 +5,7 @@
 
 extern EmbedXrpcObject A_RpcObject;
 extern EmbedXrpcObject C_RpcObject;
-extern Inter_Requester B_Requester;
+extern GetSum_Requester B_Requester;
 #define AllTypeBufferLen	4096
 
 static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
@@ -27,7 +27,7 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	return true;
 }
 
-class BServer_GetSumProvider :public Inter_GetSum_Service
+class BServer_GetSumProvider :public GetSum_Service
 {
 public:
 	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, Int32 a, Int32 b)
@@ -65,20 +65,17 @@ static RequestDescribe Requests[] = //定义请求集合
 
 static ResponseDescribe Responses[1] =//定义回复 ID 集合
 {
-	{"Inter_Add"   ,     Inter_GetSum_ServiceId},
+	{"Inter_Add"   ,     GetSum_ServiceId},
 };
 static InitConfig InitCfg =
 {
 	"B",
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},// buffer for request
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
-	{nullptr,0,false},//DataLinkBufferForDelegate
 	Send,
 	500,
 	Responses,//Responses
 	1,
-	nullptr,//Delegate
-	0,
 	Requests,//Request
 	1,
 	{
@@ -88,12 +85,10 @@ static InitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//DelegateMessageQueue_MaxItemNumber
 			10,//ResponseMessageQueue_MaxItemNumber
 			10,//RequestMessageQueue_MaxItemNumber
 		},
 		{
-			{nullptr,0,0},//DelegateMessageBlockBufferProvider
 			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseMessageBlockBufferProvider
 			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
 		},
@@ -106,4 +101,4 @@ void B_Init()
 {
 	B_RpcObject.Init(&InitCfg);
 }
-Inter_Requester B_Requester(&B_RpcObject);
+GetSum_Requester B_Requester(&B_RpcObject);

@@ -14,18 +14,18 @@ void GetSumResult_Deserialize(SerializationManager *sm,GetSumResult *obj);
 
 void GetSumResult_FreeData(GetSumResult *obj);
 
-void Inter_GetSum_Parameter_Serialize(SerializationManager *sm,Inter_GetSum_Parameter *obj);
+void GetSum_Return_Serialize(SerializationManager *sm,GetSum_Return *obj);
 
-void Inter_GetSum_Parameter_Deserialize(SerializationManager *sm,Inter_GetSum_Parameter *obj);
+void GetSum_Return_Deserialize(SerializationManager *sm,GetSum_Return *obj);
 
-void Inter_GetSum_Parameter_FreeData(Inter_GetSum_Parameter *obj);
+void GetSum_Return_FreeData(GetSum_Return *obj);
 
-#define Inter_GetSum_ServiceId 16   //0x10
-void Inter_GetSum_Return_Serialize(SerializationManager *sm,Inter_GetSum_Return *obj);
+void GetSum_Parameter_Serialize(SerializationManager *sm,GetSum_Parameter *obj);
 
-void Inter_GetSum_Return_Deserialize(SerializationManager *sm,Inter_GetSum_Return *obj);
+void GetSum_Parameter_Deserialize(SerializationManager *sm,GetSum_Parameter *obj);
 
-void Inter_GetSum_Return_FreeData(Inter_GetSum_Return *obj);
+void GetSum_Parameter_FreeData(GetSum_Parameter *obj);
 
+#define GetSum_ServiceId 16   //0x10
 
 #endif
