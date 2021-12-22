@@ -16,7 +16,7 @@ Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcObject.h -Destination Publish
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcPortInterface.h -Destination PublishVersion\Runtime\Cpp\EmbedXrpcPortInterface.h
 Copy-Item -Path  .\EmbedXrpcSerialization\ringbuffer.c -Destination PublishVersion\Runtime\Cpp\ringbuffer.c
 Copy-Item -Path  .\EmbedXrpcSerialization\ringbuffer.h -Destination PublishVersion\Runtime\Cpp\ringbuffer.h
-Copy-Item -Path  .\Sample1\sample1.cs -Destination PublishVersion\CodeGenTool\sample1.cs
+
 
 # EmbedLibrary
 Copy-Item -Path .\EmbedLibrary\EmbedLibrary.h -Destination PublishVersion\EmbedLibrary\EmbedLibrary.h
@@ -27,6 +27,18 @@ Copy-Item -Path .\EmbedLibrary\Win32.Port\El.Win32.Port.cpp  -Destination Publis
 
 Copy-Item -Path .\EmbedXrpcSerialization\FreeRTOS.Port\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\FreeRTOS.Port\EmbedXrpc.Port.h
 Copy-Item -Path .\EmbedXrpcSerialization\Win32.Port\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\Win32.Port\EmbedXrpc.Port.h
+
+# copy Sample
+if(Test-Path .\PublishVersion\Sample1)
+{
+    Remove-Item .\PublishVersion\Sample1 -Recurse
+}
+if(Test-Path .\PublishVersion\Sample2)
+{
+    Remove-Item .\PublishVersion\Sample2 -Recurse
+}
+Copy-Item .\Sample1 .\PublishVersion\Sample1 -Recurse
+Copy-Item .\Sample2 .\PublishVersion\Sample2 -Recurse
 
 if(Test-Path .\EmbedXrpc.Master.$version.zip)
 {
