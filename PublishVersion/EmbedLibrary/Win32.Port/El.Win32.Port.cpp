@@ -210,16 +210,20 @@ extern "C"
 	{
 		return -1;
 	}
+	int32_t allsize = 0;
 	void* El_Malloc(uint32_t size)
 	{
 		auto x = malloc(size);
-		printf("malloc ptr:0x%p,size:%4d\n", x, size);
+		allsize += size;
+		printf("	memory malloc!allsize:%4d\n",allsize);
 		return x;
 	}
 	void El_Free(void* ptr)
 	{
+		size_t sz= _msize(ptr);
 		free(ptr);
-		printf("free ptr:0x%p\n", ptr);
+		allsize -= sz;
+		printf("	memory free!allsize:%d\n", allsize);
 	}
 	void El_Memcpy(void* d, const void* s, uint32_t size)
 	{

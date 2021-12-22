@@ -140,7 +140,7 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine($"{service.ReturnStructType.TypeName} reqresp=new {service.ReturnStructType.TypeName}();");
             sw.WriteLine("lock(XrpcObject.ObjectMutex) ");
             sw.WriteLine("{");//lock begin
-            sw.WriteLine("XrpcObject.ResponseMessageQueueHandle.Reset();");
+            sw.WriteLine("XrpcObject.MessageQueueOfRequestServiceHandle.Reset();");
             sw.WriteLine($"{service.ParameterStructType.TypeName} request =new {service.ParameterStructType.TypeName}();");
             for (int pi = 0; pi < service.ParameterStructType.TargetFields.Count; pi++)
             {

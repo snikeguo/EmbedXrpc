@@ -33,18 +33,18 @@ class EmbedXrpcObject;
          bool IsSendToQueue;
 
          //client部分:
-         uint32_t ResponseMessageQueue_MaxItemNumber;
+         uint32_t MessageQueueOfRequestService_MaxItemNumber;
 
          //server部分:
-         uint32_t RequestMessageQueue_MaxItemNumber;
+         uint32_t ServiceMessageQueue_MaxItemNumber;
      }DynamicMemoryConfig;
      struct
      {
          //client
-         BlockBufferProviderConfig ResponseMessageBlockBufferConfig;
+         BlockBufferProviderConfig BlockBufferOfRequestService_Config;
 
          //server
-         BlockBufferProviderConfig RequestMessageBlockBufferConfig;
+         BlockBufferProviderConfig ServiceBlockBufferConfig;
      }RingBufferConfig;
 
  };
@@ -81,13 +81,13 @@ class EmbedXrpcObject;
          SerializationManager* recManager, 
          SerializationManager* sendManager) = 0;
  };
- struct RequestDescribe
+ struct ServiceDescribe
  {
      const char* Name;
      IService* Service;
  };
 
- struct ResponseDescribe
+ struct RequestServiceDescribe
  {
      const char* Name;
      uint16_t Sid;

@@ -88,14 +88,14 @@ Inter_AddServiceProvider Inter_AddService_Instance;
 Inter_NoArgServiceProvider Inter_NoArgService_Instance;
 Inter_NoReturnServiceProvider Inter_NoReturnService_Instance;
 Inter_NoArgAndReturnServiceProvider Inter_NoArgAndReturnService_Instance;
-RequestDescribe Requests[] = //定义请求集合
+static ServiceDescribe Services[] = //定义请求集合
 {
 	{"Inter_Add",					&Inter_AddService_Instance},
 	{"Inter_NoArg",					&Inter_NoArgService_Instance},
 	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
 	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
 };
-ResponseDescribe AllResponses[] =
+static RequestServiceDescribe AllRequests[] =
 {
 	{"DataTimeChange",DateTimeChange_ServiceId},
 	{"Test2",Test2_ServiceId},
@@ -108,9 +108,9 @@ static InitConfig InitCfg =
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferConfigForResponse
 	ServerSend,
 	500,
-	AllResponses,
+	AllRequests,
 	2,
-	Requests,
+	Services,
 	4,
 	{
 		true,//CheckSumValid
@@ -119,12 +119,12 @@ static InitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//ResponseBlockQueue_MaxItemNumber
-			10,//RequestBlockQueue_MaxItemNumber
+			10,//MessageQueueOfRequestService_MaxItemNumber
+			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{nullptr,0,0},//ResponseBlockBufferProvider
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
+			{nullptr,0,0},//BlockBufferOfRequestService_Config
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
 		},
 	},
 	nullptr,

@@ -333,9 +333,9 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);");
             csw.WriteLine("}");
             csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-            csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);");
+            csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);");
             csw.WriteLine("}\r\nelse\r\n{");
-            csw.WriteLine("El_ResetQueue(RpcObject->ResponseMessageQueue);");
+            csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService);");
             csw.WriteLine("}\r\n");
             csw.WriteLine("SerializationManager_Reset(&sm);\n" +
                 "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];\n" +
@@ -395,7 +395,7 @@ namespace EmbedXrpcIdlParser
                 csw.WriteLine("{");
 
                 csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-                csw.WriteLine("sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;");
+                csw.WriteLine("sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;");
                 csw.WriteLine("}\r\nelse\r\n{");
                 csw.WriteLine("SerializationManager_Reset(&sm);");
                 csw.WriteLine("sm.BufferLen = recData.DataLen;");

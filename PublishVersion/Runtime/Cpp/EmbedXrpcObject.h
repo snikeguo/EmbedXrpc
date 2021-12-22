@@ -4,7 +4,7 @@
 #include "EmbedLibrary.h"
 #include "EmbedXrpcCommon.h"
 #include "BlockBufferProvider.h"
-#define EmbedXrpcObjectVersion	"2.2.0"
+#define EmbedXrpcObjectVersion	"2.3.0"
 
 struct EmbedXrpcBufferConfig
 {
@@ -29,8 +29,8 @@ struct ClientNodeQuicklyInitConfig
 	SendPack_t Sender;
 	uint32_t TimeOut;
 
-	ResponseDescribe* Responses;
-	uint32_t ResponsesCount;
+	RequestServiceDescribe* RequestServices;
+	uint32_t RequestServicesCount;
 
 	EmbedXrpcConfig RpcConfig;
 
@@ -47,8 +47,8 @@ struct ServerNodeQuicklyInitConfig
 	SendPack_t Sender;
 	uint32_t TimeOut;
 
-	RequestDescribe* Requests;//server 请求的services
-	uint32_t RequestsCount;//server
+	ServiceDescribe* Services;//server 请求的services
+	uint32_t ServicesCount;//server
 
 	EmbedXrpcConfig RpcConfig;
 	void* UserData;
@@ -65,12 +65,12 @@ struct InitConfig
 	SendPack_t Sender;
 	uint32_t TimeOut;
 
-	ResponseDescribe* Responses;
-	uint32_t ResponsesCount;
+	RequestServiceDescribe* RequestServices;
+	uint32_t RequestServicesCount;
 
 
-	RequestDescribe* Requests;//server 请求的services
-	uint32_t RequestsCount;//server
+	ServiceDescribe* Services;//server 请求的services
+	uint32_t ServicesCount;//server
 
 	EmbedXrpcConfig RpcConfig;
 	void* UserData;
@@ -90,30 +90,30 @@ public:
 	SendPack_t Send;
 
 
-	BlockRingBufferProvider* ResponseMessageBlockBufferProvider = nullptr;
+	BlockRingBufferProvider* BlockBufferProviderOfRequestService = nullptr;
 	
-	El_Queue_t ResponseMessageQueue = nullptr;
+	El_Queue_t MessageQueueOfRequestService = nullptr;
 
 
-	uint32_t ResponsesCount;
-	ResponseDescribe* Responses;
+	uint32_t RequestServicesCount;
+	RequestServiceDescribe* RequestServices;
 
 	void* UserData;
 
 	volatile bool DeInitFlag;
-	volatile bool RequestProcessServiceThreadExitState;
+	volatile bool ServiceThreadExitState;
 	EmbedXrpcConfig RpcConfig;
 
 	//server:
-	El_Thread_t RequestProcessServiceThreadHandle; 
+	El_Thread_t ServiceThreadHandle; 
 	
-	BlockRingBufferProvider* RequestMessageBlockBufferProvider;
-	El_Queue_t	RequestMessageQueue;
+	BlockRingBufferProvider* ServiceBlockBufferProvider;
+	El_Queue_t	ServiceMessageQueue;
 	El_Timer_t SuspendTimer;
 	UserDataOfTransportLayer_t UserDataOfTransportLayerOfSuspendTimerUsed;
 
-	uint32_t RequestsCount;
-	RequestDescribe* Requests;
+	uint32_t ServicesCount;
+	ServiceDescribe* Services;
 
 public:
 	//client节点构造函数
@@ -125,8 +125,8 @@ public:
 		cfg.DataLinkBufferConfigForRequest = client->DataLinkBufferConfigForRequest;
 		cfg.Sender = client->Sender;
 		cfg.TimeOut = client->TimeOut;
-		cfg.Responses = client->Responses;
-		cfg.ResponsesCount = client->ResponsesCount;
+		cfg.RequestServices = client->RequestServices;
+		cfg.RequestServicesCount = client->RequestServicesCount;
 		cfg.RpcConfig = client->RpcConfig;
 		cfg.UserData = client->UserData;
 		Init(&cfg);
@@ -140,8 +140,8 @@ public:
 		cfg.DataLinkBufferConfigForResponse = server->DataLinkBufferConfigForResponse;
 		cfg.Sender = server->Sender;
 		cfg.TimeOut = server->TimeOut;
-		cfg.Requests = server->Requests;
-		cfg.RequestsCount = server->RequestsCount;
+		cfg.Services = server->Services;
+		cfg.ServicesCount = server->ServicesCount;
 		cfg.RpcConfig = server->RpcConfig;
 		cfg.UserData = server->UserData;
 		Init(&cfg);
@@ -149,12 +149,12 @@ public:
 
 	void Init(InitConfig* cfg);
 	void DeInit();
-	static void ResponseServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
+	static void ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
 	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
 	static void SuspendTimerCallBack(void* arg);
 
 
-	static void RequestProcessServiceThread(void* arg);
+	static void ServiceThread(void* arg);
 
 	RequestResponseState Wait(uint32_t sid, ReceiveItemInfo* recData);
 	

@@ -27,10 +27,10 @@ namespace EmbedXrpc
 
     public class ServiceInvokeParameter<DTL> where DTL : struct
     {
-        public DTL request_UserDataOfTransportLayer;
-        public DTL response_UserDataOfTransportLayer;
-        public EmbedXrpcObject<DTL> rpcObject;
-        public UInt16 targetTimeOut;
+        public DTL Request_UserDataOfTransportLayer;
+        public DTL Response_UserDataOfTransportLayer;
+        public EmbedXrpcObject<DTL> RpcObject;
+        public UInt16 TargetTimeOut;
     };
 
 
@@ -43,12 +43,12 @@ namespace EmbedXrpc
     {
         UInt16 GetSid();
     }
-    public class RequestDescribe<DTL> where DTL : struct
+    public class ServiceDescribe<DTL> where DTL : struct
     {
         public string Name { get; set; }
         public IService<DTL> Service { get; set; }
     }
-    public class ResponseDescribe
+    public class RequestServiceDescribe
     {
         public string Name { get; set; }
         public UInt16 Sid { get; set; }//有可能是Response

@@ -31,7 +31,7 @@ public:
 	}
 };
 CServer_GetSumProvider CServerGetSumProvider;
-static RequestDescribe Requests[] = //定义请求集合
+static ServiceDescribe AllServices[] = //定义请求集合
 {
 	{"Inter_Add",					&CServerGetSumProvider},
 };
@@ -43,8 +43,8 @@ static ServerNodeQuicklyInitConfig InitCfg =
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
 	 { Send },
 	500,
-	Requests,
-	4,
+	AllServices,
+	1,
 	{
 		true,//CheckSumValid
 		6,//ServerThreadPriority
@@ -52,12 +52,12 @@ static ServerNodeQuicklyInitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//ResponseMessageQueue_MaxItemNumber
-			10,//RequestMessageQueue_MaxItemNumber
+			10,//MessageQueueOfRequestService_MaxItemNumber
+			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{nullptr,0,0},//ResponseMessageBlockBufferProvider
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
+			{nullptr,0,0},//BlockBufferProviderOfRequestService
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
 		},
 	},
 	nullptr,

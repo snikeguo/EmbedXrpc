@@ -35,11 +35,11 @@ El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseMessageQueue);
+El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
 SerializationManager_Reset(&sm);
@@ -68,7 +68,7 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 {
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;
+sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;
 }
 else
 {
@@ -126,11 +126,11 @@ El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseMessageQueue);
+El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
 SerializationManager_Reset(&sm);
@@ -159,7 +159,7 @@ if(waitstate == RequestResponseState::ResponseState_Ok)
 {
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-sm.BlockBufferProvider = RpcObject->ResponseMessageBlockBufferProvider;
+sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;
 }
 else
 {
@@ -216,11 +216,11 @@ El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseMessageQueue);
+El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
 SerializationManager_Reset(&sm);
@@ -264,11 +264,11 @@ El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
-BlockRingBufferProvider_Reset(RpcObject->ResponseMessageBlockBufferProvider);
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->ResponseMessageQueue);
+El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
 SerializationManager_Reset(&sm);

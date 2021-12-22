@@ -58,12 +58,12 @@ public:
 	}
 };
 BServer_GetSumProvider BServerGetSumProvider;
-static RequestDescribe Requests[] = //定义请求集合
+static ServiceDescribe AllServices[] = //定义请求集合
 {
 	{"Inter_Add",					&BServerGetSumProvider},
 };
 
-static ResponseDescribe Responses[1] =//定义回复 ID 集合
+static RequestServiceDescribe AllRequests[1] =//定义回复 ID 集合
 {
 	{"Inter_Add"   ,     GetSum_ServiceId},
 };
@@ -74,9 +74,9 @@ static InitConfig InitCfg =
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
 	Send,
 	500,
-	Responses,//Responses
+	AllRequests,//Responses
 	1,
-	Requests,//Request
+	AllServices,//Request
 	1,
 	{
 		true,//CheckSumValid
@@ -85,12 +85,12 @@ static InitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//ResponseMessageQueue_MaxItemNumber
-			10,//RequestMessageQueue_MaxItemNumber
+			10,//MessageQueueOfRequestService_MaxItemNumber
+			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseMessageBlockBufferProvider
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//RequestMessageBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferProviderOfRequestService
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
 		},
 	},
 	nullptr,

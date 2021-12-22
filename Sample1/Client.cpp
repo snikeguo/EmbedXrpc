@@ -38,13 +38,13 @@ public:
 DateTimeChange_ServiceReceiver DateTimeChange;
 Test2_ServiceReceiver Test2;
 
-RequestDescribe AllRequests[2] =//定义委托对象集合
+static ServiceDescribe AllServices[2] =//定义委托对象集合
 {
 	{"DateTimeChange"  ,&DateTimeChange},
 	{"Test2"  ,&Test2},
 };//client可以处理的Request集合
 
-ResponseDescribe Responses[4] =//定义回复 ID 集合
+static RequestServiceDescribe AllRequests[4] =//定义回复 ID 集合
 {
 	{"Inter_Add"   ,     Add_ServiceId},
 	{"Inter_NoArg"     ,   NoArg_ServiceId},
@@ -60,9 +60,9 @@ static InitConfig InitCfg =
 	{nullptr,0,false},
 	ClientSend,
 	1000,
-	Responses,
-	1,
 	AllRequests,
+	4,
+	AllServices,
 	2,
 	{
 		true,//CheckSumValid
@@ -71,12 +71,12 @@ static InitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			true,//IsSendToQueue
-			10,//ResponseBlockQueue_MaxItemNumber
-			10,//RequestBlockQueue_MaxItemNumber
+			10,//MessageQueueOfRequestService_MaxItemNumber
+			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseBlockBufferProvider
-			{nullptr,0,0},//RequestBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
+			{nullptr,0,0},//ServiceBlockBufferConfig
 		},
 
 	},

@@ -11,7 +11,7 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 }
 
 
-static ResponseDescribe Responses[1] =//定义回复 ID 集合
+static RequestServiceDescribe AllRequests[1] =//定义回复 ID 集合
 {
 	{"Inter_Add"   ,     GetSum_ServiceId},
 };
@@ -21,7 +21,7 @@ static ClientNodeQuicklyInitConfig InitCfg =
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForRequest
 	{ Send },
 	1000,
-	Responses,
+	AllRequests,
 	1,
 	{
 		true,//CheckSumValid
@@ -30,12 +30,12 @@ static ClientNodeQuicklyInitConfig InitCfg =
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
-			10,//ResponseMessageQueue_MaxItemNumber
-			10,//RequestMessageQueue_MaxItemNumber
+			10,//MessageQueueOfRequestService_MaxItemNumber
+			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ResponseMessageBlockBufferProvider
-			{nullptr,0,0},//RequestMessageBlockBufferProvider
+			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferProviderOfRequestService
+			{nullptr,0,0},//ServiceBlockBufferProvider
 		},
 		
 	},

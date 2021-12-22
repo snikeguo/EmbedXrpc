@@ -14,9 +14,9 @@ namespace EmbedXrpc
         public UInt32 TimeOut { get; set; }
         public object ObjectMutex { get; private set; } = new object();
         
-        public Win32Queue<EmbeXrpcRawData<DTL>> ResponseMessageQueueHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData<DTL>>();
-        private List<ResponseDescribe> Responses { get; set; } = new List<ResponseDescribe>();
-        private List<RequestDescribe<DTL>> Requests { get; set; } = new List<RequestDescribe<DTL>>();
+        public Win32Queue<EmbeXrpcRawData<DTL>> MessageQueueOfRequestServiceHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData<DTL>>();
+        private List<RequestServiceDescribe> AllRequestServices { get; set; } = new List<RequestServiceDescribe>();
+        private List<ServiceDescribe<DTL>> AllServices { get; set; } = new List<ServiceDescribe<DTL>>();
 
         public Send<DTL> Send;
         private Assembly Assembly;
@@ -33,8 +33,8 @@ namespace EmbedXrpc
             SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
-        private Thread RequestServiceThreadHandle;
-        private Win32Queue<EmbeXrpcRawData<DTL>> RequestQueueHandle = new Win32Queue<EmbeXrpcRawData<DTL>>();
+        private Thread ServiceThreadHandle;
+        private Win32Queue<EmbeXrpcRawData<DTL>> ServiceQueueHandle = new Win32Queue<EmbeXrpcRawData<DTL>>();
         
         //public bool IsEnableMataDataEncode { get; set; }
         public EmbedXrpcObject(UInt32 timeout, Send<DTL> send, Assembly assembly)
@@ -47,10 +47,10 @@ namespace EmbedXrpc
                 var requestInfoAttr = oldtype.GetCustomAttribute<RequestServiceInfoAttribute>();
                 if (requestInfoAttr != null)
                 {
-                    ResponseDescribe response = new ResponseDescribe();
-                    response.Name = requestInfoAttr.Name;
-                    response.Sid = requestInfoAttr.ServiceId;
-                    Responses.Add(response);
+                    RequestServiceDescribe request = new RequestServiceDescribe();
+                    request.Name = requestInfoAttr.Name;
+                    request.Sid = requestInfoAttr.ServiceId;
+                    AllRequestServices.Add(request);
                 }
 
 
@@ -59,18 +59,18 @@ namespace EmbedXrpc
                 {
                     var dtlType = typeof(DTL);
                     var genericType = oldtype.MakeGenericType(dtlType);
-                    RequestDescribe<DTL> request = new RequestDescribe<DTL>();
-                    request.Name = responseServiceInfoAttr.Name;
-                    request.Service = (IService<DTL>)assembly.CreateInstance(genericType.FullName);
-                    Requests.Add(request);
+                    ServiceDescribe<DTL> service = new ServiceDescribe<DTL>();
+                    service.Name = responseServiceInfoAttr.Name;
+                    service.Service = (IService<DTL>)assembly.CreateInstance(genericType.FullName);
+                    AllServices.Add(service);
                 }
             }
 
             TimeOut = timeout;
             Send = send;
 
-            RequestServiceThreadHandle = new Thread(RequestServiceThread);
-            RequestServiceThreadHandle.IsBackground = true;
+            ServiceThreadHandle = new Thread(ServiceThread);
+            ServiceThreadHandle.IsBackground = true;
 
             SuspendTimer = new Timer(SuspendTimerCallback, this, Timeout.Infinite, Timeout.Infinite);
         }
@@ -89,11 +89,11 @@ namespace EmbedXrpc
         
         public void Start()
         {
-            RequestServiceThreadHandle.Start();
+            ServiceThreadHandle.Start();
         }
         public void Stop()
         {
-            RequestServiceThreadHandle.Abort();
+            ServiceThreadHandle.Abort();
         }
         public RequestResponseState Wait<T>(UInt32 sid,out T response)
         {
@@ -103,7 +103,7 @@ namespace EmbedXrpc
             RequestResponseState ret = RequestResponseState.ResponseState_Ok;
             while (true)
             {
-                if (ResponseMessageQueueHandle.Receive(out recData, TimeOut) != QueueStatus.OK)
+                if (MessageQueueOfRequestServiceHandle.Receive(out recData, TimeOut) != QueueStatus.OK)
                 {
                     return RequestResponseState.ResponseState_Timeout;
                 }
@@ -151,7 +151,7 @@ namespace EmbedXrpc
 
                     raw.DataLen = dataLen;
                     raw.TargetTimeOut = targettimeout;
-                    queueStatus =ResponseMessageQueueHandle.Send(raw);
+                    queueStatus =MessageQueueOfRequestServiceHandle.Send(raw);
                     goto sqs;
                 }
 
@@ -163,7 +163,7 @@ namespace EmbedXrpc
                 }
                 raw.DataLen = dataLen;
                 raw.TargetTimeOut = targettimeout;
-                queueStatus = ResponseMessageQueueHandle.Send(raw);
+                queueStatus = MessageQueueOfRequestServiceHandle.Send(raw);
                 goto sqs;
             }
             else if(rt == ReceiveType.Request)
@@ -173,7 +173,7 @@ namespace EmbedXrpc
                 Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
                 raw.DataLen = dataLen;
                 raw.TargetTimeOut = targettimeout;
-                queueStatus=RequestQueueHandle.Send(raw);
+                queueStatus=ServiceQueueHandle.Send(raw);
             }
             else
             {
@@ -186,7 +186,7 @@ namespace EmbedXrpc
             }
 
         }
-        private void RequestServiceThread()
+        private void ServiceThread()
         {
             EmbeXrpcRawData<DTL> recData;
             ServiceInvokeParameter < DTL > serviceInvokeParameter =new ServiceInvokeParameter<DTL>();
@@ -194,24 +194,24 @@ namespace EmbedXrpc
             {
                 while (true)
                 {
-                    if (RequestQueueHandle.Receive(out recData, Win32BinarySignal.MAX_Delay) != QueueStatus.OK)
+                    if (ServiceQueueHandle.Receive(out recData, Win32BinarySignal.MAX_Delay) != QueueStatus.OK)
                     {
                         continue;
                     }
-                    for (int i = 0; i < Requests.Count; i++)
+                    for (int i = 0; i < AllServices.Count; i++)
                     {
-                        if (Requests[i].Service.GetSid() == recData.Sid)
+                        if (AllServices[i].Service.GetSid() == recData.Sid)
                         {
                             SerializationManager rsm = new SerializationManager(Assembly, new List<byte>(recData.Data));
                             SerializationManager sendsm = new SerializationManager(Assembly,new List<byte>());
 
                             //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
                             //SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);.
-                            serviceInvokeParameter.request_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
-                            serviceInvokeParameter.response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
-                            serviceInvokeParameter.rpcObject = this;
-                            serviceInvokeParameter.targetTimeOut = recData.TargetTimeOut;
-                            Requests[i].Service.Invoke(ref serviceInvokeParameter,
+                            serviceInvokeParameter.Request_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
+                            serviceInvokeParameter.Response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
+                            serviceInvokeParameter.RpcObject = this;
+                            serviceInvokeParameter.TargetTimeOut = recData.TargetTimeOut;
+                            AllServices[i].Service.Invoke(ref serviceInvokeParameter,
                                 rsm, 
                                 sendsm);
                             SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);//手动关闭 怕用户忘了
@@ -227,7 +227,7 @@ namespace EmbedXrpc
                                     sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff)&(0x3F));
                                     sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
                                     Array.Copy(sendsm.Data.ToArray(), 0, sendBytes, 4, sendsm.Index);
-                                    Send(serviceInvokeParameter.response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
+                                    Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
                                 }
                             }
                             break;
