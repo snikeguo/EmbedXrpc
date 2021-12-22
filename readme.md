@@ -9,67 +9,62 @@
 ![](简单示意图.jpg)
 ![](网图1.jpg)
 #### 一个简单的例子(教程请看WIKI)
-1.编写idl文件：demo.cs
+1.编写idl文件：sample1.cs
 ```
 using System;
 using EmbedXrpcIdlParser;
 
-[FileName("demo.cs")]
-interface Inter
-{
-    UInt16 GetValue();
-}
-[FileName("demo.cs")]
-public class OptionProcess:IOptionProcess
-{
-    public GenerationOption Process()
-    {
-        GenerationOption option = new GenerationOption();
-        option.OutPutFileName = "Demo";
-        option.CSharpNameSpace = "Demo";
-        return option;
-    }
-}
+
+[FileName("sample1.cs")]
+[Role(RoleType.Client)]
+delegate int Add(Int32 a, Int32 b);
 ```
 2.执行命令,生成客户端(电脑端)的代码和服务端代码(这里假定执行命令中,-g参数你写的是all,而不是单独的client和server),接口所示：
 ```
-EmbedXrpcIdlParser.exe -i demo.cs -g all -l cpp-nano -o MyCodeFolder
+EmbedXrpcIdlParser.exe -i sample1.cs -g all -l cpp-nano -o MyCodeFolder
 ```
-
+生成的代码如下：
 ```
-//客户端
-class InterClientImpl
+//----------客户端-----------
+class Add_Requester
 {
 public:
-    EmbedXrpcClientObject *RpcClientObject = nullptr;
-    InterClientImpl(EmbedXrpcClientObject *rpcobj)
+    EmbedXrpcObject *RpcObject = nullptr;
+    Add_Requester(EmbedXrpcObject *rpcobj) : RpcObject(rpcobj)
     {
-        this->RpcClientObject = rpcobj;
     }
-    Inter_GetValue_Response &GetValue();
-    void Free_GetValue(Inter_GetValue_Response *response);
+    uint16_t GetSid() { return Add_ServiceId; }
+    Add_Parameter Add_SendData;
+    Add_Return Add_reqresp;
+    Add_Return &Add(UserDataOfTransportLayer_t *userDataOfTransportLayer,int a,int b);
+    void Free_Add(Add_Return *response);
 };
 
 
 //----------服务端-----------
-class Inter_GetValueService : public IService
+class Add_Service : public IService
 {
 public:
-    uint16_t GetSid() { return Inter_GetValue_ServiceId; }
-    Inter_GetValue_Response Response;
-    void GetValue();
-    void Invoke(SerializationManager &recManager, SerializationManager &sendManager);
+    uint16_t GetSid() { return Add_ServiceId; }
+    Add_Return Response;
+    virtual void Add(ServiceInvokeParameter *serviceInvokeParameter, Int32 a, Int32 b) {}
+    Add_Parameter request;
+    void Invoke(ServiceInvokeParameter *serviceInvokeParameter, SerializationManager *recManager, SerializationManager *sendManager);
 };
 ```
 
 **3.服务端(单片机)这边,你需要编写代码：**
 ```
-EmbedXrpcObject ServerRpcObject(.....);//参数我这里省略了
+EmbedXrpcObject ServerRpcObject;//参数我这里省略了
 
-void Inter_GetValueService::GetValue()
+class Inter_AddServiceProvider :public Add_Service
 {
-    Response.ReturnValue=188;
-}
+public:
+    void Add(ServiceInvokeParameter* serviceInvokeParameter,Int32 a, Int32 b)
+	{
+        Response.ReturnValue= a+b;
+	}
+};
 
 ```
 
@@ -77,15 +72,15 @@ void Inter_GetValueService::GetValue()
 **4.客户端(电脑)这边,你需要编写代码：**
 
 ```
-EmbedXrpcObject ClientRpcObject(....Args...);//参数我这里省略了
-InterClientImpl Client(&ClientRpcObject);
-auto val=Client.GetValue();//这个函数将会把数据发送到服务器(比如单片机)上
+EmbedXrpcObject ClientRpcObject;//参数我这里省略了
+Add_Requester Client(&ClientRpcObject);//定义request对象
+auto val=Client.Add(1,2);//这个函数将会把数据发送到服务器(比如单片机)上
 if(val.State==ResponseState_Ok)
 {
-    UInt16 value=val.ReturnValue;//如果不出意外的话，value的值是188
+    UInt16 value=val.ReturnValue;//如果不出意外的话，value的值是3
     //你的代码
 }
-Client.Free_GetValue(&val);//最后用完val,记得调用接口对应的释放函数,形如： Free_你的接口()
+Client.Free_Add(&val);//最后用完val,记得调用接口对应的释放函数,形如： Free_你的接口()
 ```
 
 至此一个完整的RPC调用就完成了
