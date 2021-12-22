@@ -18,6 +18,19 @@ using EmbedXrpcIdlParser;
 [FileName("sample1.cs")]
 [Role(RoleType.Client)]
 delegate int Add(Int32 a, Int32 b);
+
+[FileName("sample1.cs")]
+public class OptionProcess : IOptionProcess
+{
+    public GenerationOption Process()
+    {
+        GenerationOption option = new GenerationOption();
+        option.OutPutFileName = "Sample1";
+        option.CSharpNameSpace = "Sample1";
+        return option;
+    }
+}
+
 ```
 2.执行命令,生成客户端(电脑端)的代码和服务端代码(这里假定执行命令中,-g参数你写的是all,而不是单独的client和server),接口所示：
 ```
