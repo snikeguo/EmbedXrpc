@@ -52,7 +52,6 @@ extern "C" {
 	typedef void* El_Timer_t;
 	#define El_Assert assert
 #define El_Debug	printf
-#define El_Sprintf     sprintf//??????sprintf
 #define El_Delay(x)    Sleep(x)
 #elif SupportedOs==FreeRtos
 	#include "FreeRTOS.h"
@@ -66,7 +65,6 @@ extern "C" {
 	typedef QueueHandle_t El_Queue_t;
 #define El_Debug	rt_kprintf
 #define El_Assert configASSERT
-#define El_Sprintf     rt_sprintf//2?¨°a¨º1¨®?sprintf
 #define El_Delay(x)    vTaskDelay(x)
 #endif
 #define El_Strncpy strncpy

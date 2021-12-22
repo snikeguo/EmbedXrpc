@@ -12,6 +12,7 @@ Copy-Item -Path  .\EmbedXrpcSerialization\BlockBufferProvider.h -Destination Pub
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedSerialization.c -Destination PublishVersion\Runtime\Cpp\EmbedSerialization.c
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedSerialization.h -Destination PublishVersion\Runtime\Cpp\EmbedSerialization.h
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcCommon.h -Destination PublishVersion\Runtime\Cpp\EmbedXrpcCommon.h
+Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcObject.cpp -Destination PublishVersion\Runtime\Cpp\EmbedXrpcObject.cpp
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcObject.h -Destination PublishVersion\Runtime\Cpp\EmbedXrpcObject.h
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcPortInterface.h -Destination PublishVersion\Runtime\Cpp\EmbedXrpcPortInterface.h
 Copy-Item -Path  .\EmbedXrpcSerialization\ringbuffer.c -Destination PublishVersion\Runtime\Cpp\ringbuffer.c
