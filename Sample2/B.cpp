@@ -80,8 +80,7 @@ static InitConfig InitCfg =
 	1,
 	{
 		true,//CheckSumValid
-		6,//ServerThreadPriority
-		6,//ClientThreadPriority
+		6,//ServiceThreadPriority
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
