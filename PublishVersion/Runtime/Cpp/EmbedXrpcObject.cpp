@@ -76,7 +76,7 @@ void EmbedXrpcObject::Init(InitConfig* cfg)
 		|| (RpcConfig.UseRingBufferWhenReceiving == true)//ringbuffer模式
 		)
 	{
-		ServiceThreadHandle = El_CreateThread("ServiceThread", RpcConfig.ServerThreadPriority, ServiceThread, this, 2048);
+		ServiceThreadHandle = El_CreateThread("ServiceThread", RpcConfig.ServiceThreadPriority, ServiceThread, this, 2048);
 		El_ThreadStart(ServiceThreadHandle);
 	}
 	SuspendTimer = El_CreateTimer("SuspendTimer", El_WAIT_FOREVER, SuspendTimerCallBack, this);

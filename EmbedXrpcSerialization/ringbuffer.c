@@ -1,4 +1,4 @@
-﻿#include "ringbuffer.h"
+#include "ringbuffer.h"
 
 enum rt_ringbuffer_state rt_ringbuffer_status(struct rt_ringbuffer* rb)
 {
