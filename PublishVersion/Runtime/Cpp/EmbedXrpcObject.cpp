@@ -387,13 +387,12 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo* recDat
 		else
 		{
 			auto wr = El_ReceiveQueue(MessageQueueOfRequestService, recData, sizeof(ReceiveItemInfo), TimeOut);
-			if (wr != QueueState_OK)
-			{
-				return ResponseState_Timeout;
-			}
-			waitResult = true;
+			waitResult = (wr == QueueState_OK)?true:false;
 		}
-
+		if (waitResult != true)
+		{
+			return ResponseState_Timeout;
+		}
 
 		if (recData->Sid == EmbedXrpcSuspendSid)
 		{
