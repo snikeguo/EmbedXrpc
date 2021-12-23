@@ -27,15 +27,15 @@ class EmbedXrpcObject;
      bool CheckSumValid;
      uint32_t ServiceThreadPriority;
      uint32_t ServiceThreadStackSize;
-     bool UseRingBufferWhenReceiving;//Èç¹ûÎª1£¬ÔòÊ¹ÓÃRingBufferConfig ·ñÔòÊ¹ÓÃDynamicMemoryConfig
+     bool UseRingBufferWhenReceiving;//å¦‚æœä¸º1ï¼Œåˆ™ä½¿ç”¨RingBufferConfig å¦åˆ™ä½¿ç”¨DynamicMemoryConfig
      struct
      {
          bool IsSendToQueue;
 
-         //client²¿·Ö:
+         //clientéƒ¨åˆ†:
          uint32_t MessageQueueOfRequestService_MaxItemNumber;
 
-         //server²¿·Ö:
+         //serveréƒ¨åˆ†:
          uint32_t ServiceMessageQueue_MaxItemNumber;
      }DynamicMemoryConfig;
      struct
@@ -69,10 +69,10 @@ class EmbedXrpcObject;
  public:
      void* UserData;
      /*
-        IsFreeResponse×Ö¶Î·Ç³£ÖØÒª,×÷ÓÃÈçÏÂ:
-        µ±Server½ÓÊÕµ½Ò»¸öServiceÇëÇó,²¢Ö´ĞĞÁËÓÃ»§µÄÒµÎñÂß¼­´úÂëºó£¬ÓĞÊ±ºò»áĞèÒª¸øClient·µ»ØÊı¾İ(Ïàµ±ÓÚÓĞ·µ»ØÖµµÄServiceÇëÇó,ÎŞ·µ»ØÖµµÄÕâÀï²»¿¼ÂÇ)
-        Èç¹û·µ»Ø½á¹¹ÌåÓĞ¶¯Ì¬ÄÚ´æµÄ»°£¬ÊÆ±ØÔÚÓÃ»§µÄÒµÎñÂß¼­Àï»ámalloc»òÕßÖ¸¶¨Ä³¸ö¹Ì¶¨ÄÚ´æ¡£ÄÇÃ´Õâ¿éÄÚ´æ¿ÉÒÔÑ¡ÔñÈÃÉú³ÉµÄ´úÂëÈ¥free£¬»òÕß²»free
-        Èç¹û²»ÏëfreeµÄ»°£¬¾Í°ÑÕâ¸öÉèÖÃÎªfalse ·ñÔòÎªtrue.Ä¬ÈÏÊÇtrue
+        IsFreeResponseå­—æ®µéå¸¸é‡è¦,ä½œç”¨å¦‚ä¸‹:
+        å½“Serveræ¥æ”¶åˆ°ä¸€ä¸ªServiceè¯·æ±‚,å¹¶æ‰§è¡Œäº†ç”¨æˆ·çš„ä¸šåŠ¡é€»è¾‘ä»£ç åï¼Œæœ‰æ—¶å€™ä¼šéœ€è¦ç»™Clientè¿”å›æ•°æ®(ç›¸å½“äºæœ‰è¿”å›å€¼çš„Serviceè¯·æ±‚,æ— è¿”å›å€¼çš„è¿™é‡Œä¸è€ƒè™‘)
+        å¦‚æœè¿”å›ç»“æ„ä½“æœ‰åŠ¨æ€å†…å­˜çš„è¯ï¼ŒåŠ¿å¿…åœ¨ç”¨æˆ·çš„ä¸šåŠ¡é€»è¾‘é‡Œä¼šmallocæˆ–è€…æŒ‡å®šæŸä¸ªå›ºå®šå†…å­˜ã€‚é‚£ä¹ˆè¿™å—å†…å­˜å¯ä»¥é€‰æ‹©è®©ç”Ÿæˆçš„ä»£ç å»freeï¼Œæˆ–è€…ä¸free
+        å¦‚æœä¸æƒ³freeçš„è¯ï¼Œå°±æŠŠè¿™ä¸ªè®¾ç½®ä¸ºfalse å¦åˆ™ä¸ºtrue.é»˜è®¤æ˜¯true
      */
      bool IsFreeResponse = true;
      virtual uint16_t GetSid() = 0;
