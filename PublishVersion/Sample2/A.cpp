@@ -26,6 +26,7 @@ static ClientNodeQuicklyInitConfig InitCfg =
 	{
 		true,//CheckSumValid
 		6,//ServiceThreadPriority
+		2048,
 		false,//UseRingBufferWhenReceiving
 		{
 			false,//IsSendToQueue
