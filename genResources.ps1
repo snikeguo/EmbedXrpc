@@ -1,7 +1,7 @@
 param($version)
 
 
-Copy-Item -Path  .\EmbedXrpcIdlParser\bin\x86\Debug\EmbedXrpcIdlParser.exe -Destination PublishVersion\CodeGenTool\EmbedXrpcIdlParser.exe
+Copy-Item -Path  .\EmbedXrpcIdlParser\bin\x86\Debug\EmbedXrpcIdlParser.exe -Destination PublishVersion\EmbedXrpcIdlParser.exe
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\EmbedXrpcCommon.cs -Destination PublishVersion\Runtime\Cs\EmbedXrpcCommon.cs
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\EmbedXrpcObject.cs -Destination PublishVersion\Runtime\Cs\EmbedXrpcObject.cs
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\Serialization.cs -Destination PublishVersion\Runtime\Cs\Serialization.cs
