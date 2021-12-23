@@ -1,4 +1,4 @@
-﻿
+
 #include "EmbedXrpcObject.h"
 
 void EmbedXrpcObject::Init(InitConfig* cfg)

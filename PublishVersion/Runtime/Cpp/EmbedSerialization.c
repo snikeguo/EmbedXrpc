@@ -63,7 +63,7 @@ uint32_t SerializationManager_GetCalculateSum(SerializationManager* sm)
 	}
 }
 
-void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum)//Ö»ÓÐringbuffer mode Îª0µÄÇé¿öÏÂÊ¹ÓÃ¡£
+void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum)//åªæœ‰ringbuffer mode ä¸º0çš„æƒ…å†µä¸‹ä½¿ç”¨ã€‚
 {
 	(void)sum;
 	sm->CalculateSum += sum;
