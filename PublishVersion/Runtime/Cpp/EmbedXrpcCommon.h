@@ -26,6 +26,7 @@ class EmbedXrpcObject;
  {
      bool CheckSumValid;
      uint32_t ServiceThreadPriority;
+     uint32_t ServiceThreadStackSize;
      bool UseRingBufferWhenReceiving;//如果为1，则使用RingBufferConfig 否则使用DynamicMemoryConfig
      struct
      {
