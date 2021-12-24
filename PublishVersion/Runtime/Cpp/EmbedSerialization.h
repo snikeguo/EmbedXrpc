@@ -54,7 +54,6 @@ typedef struct _SerializationManager
 
 }SerializationManager;
 
-void  SerializationManager_Reset(SerializationManager* sm);
 
 void SerializationManager_SetReferenceSum(SerializationManager* sm, uint32_t sum);
 void SerializationManager_SetCalculateSum(SerializationManager* sm, uint32_t sum);

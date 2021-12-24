@@ -12,12 +12,6 @@ uint32_t GetSum(uint8_t* d, uint32_t len)
 	return sum;
 }
 
-
-void  SerializationManager_Reset(SerializationManager* sm)
-{
-	sm->Index = 0;
-}
-
 void SerializationManager_SetReferenceSum(SerializationManager* sm, uint32_t sum)
 {
 	if (sm->BlockBufferProvider != NULL)
