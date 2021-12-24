@@ -42,7 +42,7 @@ else
 El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
-SerializationManager_Reset(&sm);
+sm.Index=0;
 sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
 sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 Add_Parameter_Serialize(&sm,&Add_SendData);
@@ -52,7 +52,7 @@ RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0x
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
 result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
-SerializationManager_Reset(&sm);
+sm.Index=0;
 if(result==false)
 {
 Add_reqresp.State=RequestState_Failed;
@@ -72,7 +72,7 @@ sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;
 }
 else
 {
-SerializationManager_Reset(&sm);
+sm.Index=0;
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
 }
@@ -133,7 +133,7 @@ else
 El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
-SerializationManager_Reset(&sm);
+sm.Index=0;
 sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
 sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 NoArg_Parameter_Serialize(&sm,&NoArg_SendData);
@@ -143,7 +143,7 @@ RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0x
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
 result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
-SerializationManager_Reset(&sm);
+sm.Index=0;
 if(result==false)
 {
 NoArg_reqresp.State=RequestState_Failed;
@@ -163,7 +163,7 @@ sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;
 }
 else
 {
-SerializationManager_Reset(&sm);
+sm.Index=0;
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
 }
@@ -223,7 +223,7 @@ else
 El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
-SerializationManager_Reset(&sm);
+sm.Index=0;
 sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
 sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 NoReturn_SendData.a=a;
@@ -234,7 +234,7 @@ RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0x
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
 result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
-SerializationManager_Reset(&sm);
+sm.Index=0;
 if(result==false)
 {
 NoReturn_reqresp.State=RequestState_Failed;
@@ -271,7 +271,7 @@ else
 El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
-SerializationManager_Reset(&sm);
+sm.Index=0;
 sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
 sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
 NoArgAndReturn_Parameter_Serialize(&sm,&NoArgAndReturn_SendData);
@@ -281,7 +281,7 @@ RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0x
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
 result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
-SerializationManager_Reset(&sm);
+sm.Index=0;
 if(result==false)
 {
 NoArgAndReturn_reqresp.State=RequestState_Failed;

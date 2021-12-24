@@ -38,8 +38,14 @@ if(Test-Path .\PublishVersion\Sample2)
 {
     Remove-Item .\PublishVersion\Sample2 -Recurse
 }
+if(Test-Path .\PublishVersion\Sample3)
+{
+    Remove-Item .\PublishVersion\Sample3 -Recurse
+}
+
 Copy-Item .\Sample1 .\PublishVersion\Sample1 -Recurse
 Copy-Item .\Sample2 .\PublishVersion\Sample2 -Recurse
+Copy-Item .\Sample2 .\PublishVersion\Sample3 -Recurse
 
 if(Test-Path .\EmbedXrpc.Master.$version.zip)
 {

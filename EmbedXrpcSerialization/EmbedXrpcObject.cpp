@@ -147,7 +147,6 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 			El_Memset(&rsm, 0, sizeof(SerializationManager));
 			El_Memset(&sendsm, 0, sizeof(SerializationManager));
 			//rsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
-			SerializationManager_Reset(&rsm);
 			rsm.BufferLen = recData.DataLen;
 			if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
 			{
@@ -168,7 +167,6 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 				El_TakeMutex(obj->DataLinkBufferForResponse.MutexHandle, El_WAIT_FOREVER);//由于使用DataLinkBufferForResponse，所以添加锁
 			}
 			//sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
-			SerializationManager_Reset(&sendsm);
 			sendsm.Buf = &obj->DataLinkBufferForResponse.Buffer[4];
 			sendsm.BufferLen = obj->DataLinkBufferForResponse.BufferLen - 4;
 

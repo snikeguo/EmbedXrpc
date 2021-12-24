@@ -337,7 +337,7 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("}\r\nelse\r\n{");
             csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService);");
             csw.WriteLine("}\r\n");
-            csw.WriteLine("SerializationManager_Reset(&sm);\n" +
+            csw.WriteLine("sm.Index=0;\n" +
                 "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];\n" +
                 "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;");
 
@@ -383,7 +383,7 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);");
             csw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);");
-            csw.WriteLine("SerializationManager_Reset(&sm);");
+            csw.WriteLine("sm.Index=0;");
             csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\ngoto exi;\n}}");
             csw.WriteLine($"else\n{{\n{service.ServiceName}_reqresp.State=RequestState_Ok;\n}}");
             if (service.ReturnStructType.TargetFields.Count > 1)
@@ -397,7 +397,7 @@ namespace EmbedXrpcIdlParser
                 csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
                 csw.WriteLine("sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;");
                 csw.WriteLine("}\r\nelse\r\n{");
-                csw.WriteLine("SerializationManager_Reset(&sm);");
+                csw.WriteLine("sm.Index=0;");
                 csw.WriteLine("sm.BufferLen = recData.DataLen;");
                 csw.WriteLine("sm.Buf = recData.Data;");
                 csw.WriteLine("}");
