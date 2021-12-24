@@ -1,59 +1,43 @@
-#if 1
-#include <thread>
-#include "Sample2.Client.h"
-#include "Sample2.Server.h"
-extern EmbedXrpcObject A_RpcObject;
-extern EmbedXrpcObject B_RpcObject;
-extern EmbedXrpcObject C_RpcObject;
-extern void ClientThread();
-extern void ServerThread();
-extern void A_Init();
-extern void B_Init();
-extern void C_Init();
+#include <stdio.h>
+#include <Sample3.EmbedXrpcSerialization.h>
 int main(int argc, char *argv[])
 {
+	Student stu;
 
-	A_Init();
-	B_Init();
-	C_Init();
+	stu.a = 1;
+	stu.b = 2;
+	stu.c = 3;
+	stu.d = 4;
+	stu.e = 0xABCD1234;
 
-	std::thread c = std::thread(ClientThread);
-	c.detach();
+	uint8_t buf[32];
+	SerializationManager sm;
+	memset(&sm, 0, sizeof(sm));
 
-	
+	sm.Buf = buf;
+	sm.BufferLen = 32;
+	Student_Serialize(&sm, &stu);
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
-}
-
-/*
-运行提示QObject::startTimer: Timers cannot be started from another thread  
-是因为QT不允许其他线程操作QT的定时器，你可以临时把Win32EmbedXrpcPort.cpp的
-t->Start(interval);、t->Reset();、t->Stop();注释掉  这样就没有这个问题了。
-*/
-
-#else
-
-template<class T>
-class IClass
-{
-public:
-	virtual T Test()=0;
-};
-class MyClass :public IClass<int>
-{
-public:
-	int Test()
+	printf("student 序列化后的数据是:\n");
+	for (size_t i = 0; i < sm.Index; i++)
 	{
-		return 5;
+		printf("%x,", sm.Buf[i]);
+		if ((i + 1) % 10 == 0)
+		{
+			printf("\n");
+		}
 	}
-};
-int main()
-{
-	MyClass Tester;
-	auto v = Tester.Test();
-
-	IClass<int>* base = &Tester;
-	auto v2=base->Test();
-
+	printf("\n");
+	Student dest;
+	sm.Index = 0;
+	Student_Deserialize(&sm, &dest);
+	printf("反序列化化后:\n");
+	printf("a:0x%x\n", dest.a);
+	printf("b:0x%x\n", dest.b);
+	printf("c:0x%x\n", dest.c);
+	printf("d:0x%x\n", dest.d);
+	printf("e:0x%x\n", dest.e);
+	getchar();
 }
-#endif
+
+
