@@ -45,7 +45,7 @@ if(Test-Path .\PublishVersion\Sample3)
 
 Copy-Item .\Sample1 .\PublishVersion\Sample1 -Recurse
 Copy-Item .\Sample2 .\PublishVersion\Sample2 -Recurse
-Copy-Item .\Sample2 .\PublishVersion\Sample3 -Recurse
+Copy-Item .\Sample3 .\PublishVersion\Sample3 -Recurse
 
 if(Test-Path .\EmbedXrpc.Master.$version.zip)
 {
