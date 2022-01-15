@@ -29,7 +29,7 @@ public:
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
 		RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
-		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		osTimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
 		this->IsFreeResponse = true;
 		Response.ReturnValue.Sum = 1;
 		Response.ReturnValue.Sum2 = 2;
@@ -114,7 +114,7 @@ static InitConfig InitCfg =
 	4,
 	{
 		true,//CheckSumValid
-		6,//ServiceThreadPriority
+		osPriorityAboveNormal,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

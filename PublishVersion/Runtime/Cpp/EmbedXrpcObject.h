@@ -17,7 +17,7 @@ struct EmbedXrpcBuffer
 {
 	uint8_t* Buffer;
 	uint32_t BufferLen;
-	El_Mutex_t MutexHandle;
+	osMutexId_t MutexHandle;
 };
 
 
@@ -92,7 +92,7 @@ public:
 
 	BlockRingBufferProvider* BlockBufferProviderOfRequestService = nullptr;
 	
-	El_Queue_t MessageQueueOfRequestService = nullptr;
+	osMessageQueueId_t MessageQueueOfRequestService = nullptr;
 
 
 	uint32_t RequestServicesCount;
@@ -105,11 +105,11 @@ public:
 	EmbedXrpcConfig RpcConfig;
 
 	//server:
-	El_Thread_t ServiceThreadHandle; 
+	osThreadId_t ServiceThreadHandle; 
 	
 	BlockRingBufferProvider* ServiceBlockBufferProvider;
-	El_Queue_t	ServiceMessageQueue;
-	El_Timer_t SuspendTimer;
+	osMessageQueueId_t	ServiceMessageQueue;
+	osTimerId_t SuspendTimer;
 	UserDataOfTransportLayer_t UserDataOfTransportLayerOfSuspendTimerUsed;
 
 	uint32_t ServicesCount;
@@ -150,7 +150,7 @@ public:
 	void Init(InitConfig* cfg);
 	void DeInit();
 	static void ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
-	bool ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
+	osStatus_t ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
 	static void SuspendTimerCallBack(void* arg);
 
 

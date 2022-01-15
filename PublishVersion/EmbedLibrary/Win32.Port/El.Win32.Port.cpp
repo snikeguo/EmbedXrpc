@@ -9,25 +9,24 @@ using Semaphore = BlockingQueue<int>;
 extern "C"
 {
 
-	El_Thread_t El_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg, uint16_t stack_size)
+	osThreadId_t osThreadNew(osThreadFunc_t 	func,void* argument,const osThreadAttr_t* attr)
 	{
-		std::thread* ServiceThread = new std::thread(Thread, Arg);
+		std::thread* ServiceThread = new std::thread(func, argument);
 		return  ServiceThread;
 	}
 
-	El_Mutex_t El_CreateMutex(const char* mutexName)
+	osMutexId_t osMutexNew(const osMutexAttr_t* attr)
 	{
 		//QMutex* mutex = new QMutex();
 		std::timed_mutex* mutex = new std::timed_mutex();
 		return  mutex;
 	}
-	El_Queue_t El_CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen)
+	osMessageQueueId_t 	osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, const osMessageQueueAttr_t* attr)
 	{
-		//这里创建队列，由于我只实现了C++泛型的队列，而底层RTOS一般要求提供的是queueItemSize，所以这里硬编码直接创建EmbeXrpcRawData;
-		NoGenericBlockingQueue* q = new NoGenericBlockingQueue(queueItemSize);
+		NoGenericBlockingQueue* q = new NoGenericBlockingQueue(msg_size);
 		return q;
 	}
-	El_Semaphore_t  El_CreateSemaphore(const char* SemaphoreName)
+	osSemaphoreId_t 	osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const osSemaphoreAttr_t* attr)
 	{
 		Semaphore* sem = new Semaphore();
 		return sem;
@@ -91,122 +90,124 @@ extern "C"
 		void (*timercb)(void* arg);
 		void* arg;
 	};
-	El_Timer_t El_CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
+	osTimerId_t osTimerNew(osTimerFunc_t 	func,osTimerType_t 	type,void* argument,const osTimerAttr_t* attr)
 	{
-		Win32Timer* timer = new Win32Timer(timerName, timeout, timercb, Arg);
+		Win32Timer* timer = new Win32Timer(attr->name, 0, func, argument);
 		return timer;
 	}
-	void El_DeleteThread(El_Thread_t thread)
+	osStatus_t osThreadTerminate(osThreadId_t 	thread_id)
 	{
 		//auto qtThread = static_cast<QThread*>(thread);
-		auto qtThread = static_cast<std::thread*>(thread);
+		auto qtThread = static_cast<std::thread*>(thread_id);
 		delete qtThread;
+		return osOK;
 	}
-	void El_DeleteMutex(El_Mutex_t mutex)
+
+	osStatus_t osMutexDelete(osMutexId_t 	mutex_id)
 	{
-		auto qtMutex = static_cast<std::mutex*>(mutex);
+		auto qtMutex = static_cast<std::mutex*>(mutex_id);
 		delete qtMutex;
+		return osOK;
 	}
-	void El_DeleteQueue(El_Queue_t queue)
+	osStatus_t osMessageQueueDelete(osMessageQueueId_t 	mq_id)
 	{
-		auto qtQueue = static_cast<NoGenericBlockingQueue*>(queue);
+		auto qtQueue = static_cast<NoGenericBlockingQueue*>(mq_id);
 		qtQueue->Reset();
 		delete qtQueue;
+		return osOK;
 	}
-	void El_DeleteSemaphore(El_Semaphore_t sem)
+	osStatus_t osSemaphoreDelete(osSemaphoreId_t 	semaphore_id)
 	{
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
+		Semaphore* qtsem = static_cast<Semaphore*>(semaphore_id);
 		qtsem->Reset();
-		delete sem;
+		delete qtsem;
+		return osOK;
 	}
-	void El_DeleteTimer(El_Timer_t timer)
+	osStatus_t osTimerDelete(osTimerId_t 	timer_id)
 	{
-		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
+		Win32Timer* win32timer = static_cast<Win32Timer*>(timer_id);
 		win32timer->Stop();
 		delete win32timer;
+		return osOK;
 	}
-	void El_ThreadStart(El_Thread_t thread)
+	osStatus_t osThreadResume(osThreadId_t 	thread_id)
 	{
-		std::thread* x = static_cast<std::thread*>(thread);
+		std::thread* x = static_cast<std::thread*>(thread_id);
 		x->detach();
+		return osOK;
 	}
-	void  El_TimerStart(El_Timer_t timer, uint16_t interval)
+	osStatus_t 	osTimerStart(osTimerId_t timer_id, uint32_t ticks)
 	{
-		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
-		win32timer->timerout = interval;
+		Win32Timer* win32timer = static_cast<Win32Timer*>(timer_id);
+		win32timer->timerout = ticks;
 		win32timer->Start();
+		return osOK;
 	}
-	void El_TimerReset(El_Timer_t timer)
+	
+	osStatus_t 	osTimerStop(osTimerId_t timer_id)
 	{
-		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
+		Win32Timer* win32timer = static_cast<Win32Timer*>(timer_id);
 		win32timer->Stop();
-	}
-	void El_TimerStop(El_Timer_t timer)
-	{
-		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
-		win32timer->Stop();
+		return osOK;
 	}
 
-	Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout)
+	osStatus_t 	osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout)
 	{
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
+		Semaphore* qtsem = static_cast<Semaphore*>(semaphore_id);
 		int recItem = 0;
-		auto r = qtsem->Receive(recItem, timeout);
+		return qtsem->Receive(recItem, timeout)==Ok?osOK:osError;
 		//assert(r == true);
-		return r;
 
 	}
-	void El_ReleaseSemaphore(El_Semaphore_t sem)
+	osStatus_t 	osSemaphoreRelease(osSemaphoreId_t semaphore_id)
 	{
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
+		Semaphore* qtsem = static_cast<Semaphore*>(semaphore_id);
 		int recItem = 0;
 		qtsem->Send(recItem);
+		return osOK;
 	}
-	void El_ResetSemaphore(El_Semaphore_t sem)
-	{
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
-		qtsem->Reset();
-	}
+	
 
-	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout)
+	osStatus_t 	osMutexAcquire(osMutexId_t mutex_id, uint32_t timeout)
 	{
-		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
+		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex_id);
 		std::chrono::milliseconds to(timeout);
-		return m->try_lock_for(to);
+		return m->try_lock_for(to)==true?osOK:osError;
 	}
-	Bool El_ReleaseMutex(El_Mutex_t mutex)
+	osStatus_t 	osMutexRelease(osMutexId_t mutex_id)
 	{
-		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
+		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex_id);
 		m->unlock();
-		return true;
+		return osOK;
 	}
 
-	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout)
+	osStatus_t 	osMessageQueueGet(osMessageQueueId_t mq_id, void* msg_ptr, uint8_t* msg_prio, uint32_t timeout)
 	{
-		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
-		auto r = q->Receive(item, timeout);
+		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(mq_id);
+		auto r = q->Receive(msg_ptr, timeout);
 		if (r == QueueStatus::Ok)
 		{
-			return QueueState_OK;
+			return osOK;
 		}
 		else
 		{
-			return QueueState_Timeout;
+			return osErrorTimeout;
 		}
 
 	}
-	QueueState El_SendQueue(El_Queue_t queue, void* item, uint32_t itemSize)
+	osStatus_t 	osMessageQueuePut(osMessageQueueId_t mq_id, const void* msg_ptr, uint8_t msg_prio, uint32_t timeout)
 	{
-		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
-		q->Send(item);
-		return QueueState_OK;
+		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(mq_id);
+		q->Send((void *)msg_ptr);
+		return osOK;
 	}
-	void El_ResetQueue(El_Queue_t queue)
+	osStatus_t 	osMessageQueueReset(osMessageQueueId_t mq_id)
 	{
-		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
+		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(mq_id);
 		q->Reset();
+		return osOK;
 	}
-	uint32_t El_QueueSpacesAvailable(El_Queue_t queue)
+	uint32_t osMessageQueueGetSpace(osMessageQueueId_t mq_id)
 	{
 		return -1;
 	}

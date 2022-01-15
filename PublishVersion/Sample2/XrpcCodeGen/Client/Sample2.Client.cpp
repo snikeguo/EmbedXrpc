@@ -8,7 +8,7 @@ auto result=false;
 auto waitstate=ResponseState_Timeout;
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
+osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
@@ -16,7 +16,7 @@ BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->MessageQueueOfRequestService);
+osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
@@ -80,7 +80,7 @@ GetSum_reqresp.State=waitstate;
 exi:
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
+osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return GetSum_reqresp;
 }

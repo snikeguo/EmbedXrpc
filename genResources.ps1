@@ -25,6 +25,7 @@ Copy-Item -Path .\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp  -Destination 
 Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.cpp  -Destination PublishVersion\EmbedLibrary\Win32.Port\BlockQueue.cpp
 Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.h  -Destination PublishVersion\EmbedLibrary\Win32.Port\BlockQueue.h
 Copy-Item -Path .\EmbedLibrary\Win32.Port\El.Win32.Port.cpp  -Destination PublishVersion\EmbedLibrary\Win32.Port\El.Win32.Port.cpp
+Copy-Item -Path .\EmbedLibrary\cmsis_os2.h -Destination PublishVersion\EmbedLibrary\cmsis_os2.h
 
 Copy-Item -Path .\EmbedXrpcSerialization\FreeRTOS.Port\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\FreeRTOS.Port\EmbedXrpc.Port.h
 Copy-Item -Path .\EmbedXrpcSerialization\Win32.Port\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\Win32.Port\EmbedXrpc.Port.h

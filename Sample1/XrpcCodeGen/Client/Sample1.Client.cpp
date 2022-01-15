@@ -31,7 +31,7 @@ auto result=false;
 auto waitstate=ResponseState_Timeout;
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
+osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
@@ -39,7 +39,7 @@ BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->MessageQueueOfRequestService);
+osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
@@ -101,7 +101,7 @@ Add_reqresp.State=waitstate;
 exi:
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
+osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return Add_reqresp;
 }
@@ -122,7 +122,7 @@ auto result=false;
 auto waitstate=ResponseState_Timeout;
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
+osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
@@ -130,7 +130,7 @@ BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->MessageQueueOfRequestService);
+osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
@@ -192,7 +192,7 @@ NoArg_reqresp.State=waitstate;
 exi:
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
+osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return NoArg_reqresp;
 }
@@ -212,7 +212,7 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
+osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
@@ -220,7 +220,7 @@ BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->MessageQueueOfRequestService);
+osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
@@ -247,7 +247,7 @@ NoReturn_reqresp.State=RequestState_Ok;
 exi:
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
+osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return NoReturn_reqresp;
 }
@@ -260,7 +260,7 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
+osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
@@ -268,7 +268,7 @@ BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-El_ResetQueue(RpcObject->MessageQueueOfRequestService);
+osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
@@ -294,7 +294,7 @@ NoArgAndReturn_reqresp.State=RequestState_Ok;
 exi:
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
+osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return NoArgAndReturn_reqresp;
 }
