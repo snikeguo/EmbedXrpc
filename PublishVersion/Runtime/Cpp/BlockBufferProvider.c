@@ -11,8 +11,15 @@ void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, u
 	obj->Size = size;
 
 	rt_ringbuffer_init(&obj->RingBuffer, pool, size);
-	obj->Queue = El_CreateQueue("ringbufqueue", sizeof(ReceiveItemInfo), queue_item_max_number);
-	obj->Mutex = El_CreateMutex("ringbufmutex");
+
+	osMessageQueueAttr_t queueAttr;
+	memset(&queueAttr, 0, sizeof(osMessageQueueAttr_t));
+	queueAttr.name = "ringbufqueue";
+	obj->Queue = osMessageQueueNew(queue_item_max_number, sizeof(ReceiveItemInfo), &queueAttr);
+
+	osMutexAttr_t mutexAttr;
+	memset(&mutexAttr, 0, sizeof(osMutexAttr_t));
+	obj->Mutex = osMutexNew(&mutexAttr);
 }
 
 void BlockRingBufferProvider_DeInit(BlockRingBufferProvider* obj)
@@ -20,45 +27,45 @@ void BlockRingBufferProvider_DeInit(BlockRingBufferProvider* obj)
 	if (obj->Size == 0 || obj->Pool == NULL)
 		return;
 	rt_ringbuffer_reset(&obj->RingBuffer);
-	El_DeleteMutex(obj->Mutex);
-	El_DeleteQueue(obj->Queue);
+	osMutexDelete(obj->Mutex);
+	osMessageQueueDelete(obj->Queue);
 }
-Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch)
+osStatus_t BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch)
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
-		return False;
+		return osError;
 	uint8_t tch = 0;
 	uint32_t size = 0;
-	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
+	osMutexAcquire(obj->Mutex, El_WAIT_FOREVER);
 	size = rt_ringbuffer_getchar(&obj->RingBuffer, &tch);
-	El_ReleaseMutex(obj->Mutex);
+	osMutexRelease(obj->Mutex);
 	if (size == 0)
 	{
-		return False;
+		return osError;
 	}
 	if(ch!=NULL)
 		*ch = tch;
 	obj->CalculateSumValue += tch;
-	return  True;
+	return  osOK;
 }
-Bool BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj,  uint8_t* ch,uint16_t offset)
+osStatus_t BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj,  uint8_t* ch,uint16_t offset)
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
-		return False;
+		return osError;
 	uint8_t tch = 0;
 	uint32_t size = 0;
-	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
+	osMutexAcquire(obj->Mutex, El_WAIT_FOREVER);
 	size = rt_ringbuffer_viewchar(&obj->RingBuffer, &tch,offset);
-	El_ReleaseMutex(obj->Mutex);
+	osMutexRelease(obj->Mutex);
 	if (size == 0)
 	{
-		return False;
+		return osError;
 	}
 	if (ch != NULL)
 		*ch = tch;
-	return  True;
+	return  osOK;
 }
-Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj,  uint8_t* ch, uint16_t len)
+osStatus_t BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj,  uint8_t* ch, uint16_t len)
 {
 	/*for (uint16_t i = 0; i < len; i++)
 	{
@@ -74,7 +81,7 @@ Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj,  uint8_t* ch
 		}
 	}*/
 	uint8_t tch=0;
-	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
+	osMutexAcquire(obj->Mutex, El_WAIT_FOREVER);
 	for (uint16_t i = 0; i < len; i++)
 	{
 		rt_ringbuffer_getchar(&obj->RingBuffer, &tch);
@@ -84,15 +91,15 @@ Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj,  uint8_t* ch
 			ch[i] = tch;
 		}
 	}
-	El_ReleaseMutex(obj->Mutex);
-	return True;
+	osMutexRelease(obj->Mutex);
+	return osOK;
 }
-Bool BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj,  ReceiveItemInfo* item, uint32_t timeout)
+osStatus_t BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj,  ReceiveItemInfo* item, uint32_t timeout)
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
-		return False;
-	Bool r = El_ReceiveQueue(obj->Queue, item, sizeof(ReceiveItemInfo), timeout) == QueueState_OK ? True : False;
-	return r;
+		return osError;
+	
+	return osMessageQueueGet(obj->Queue, item,0, timeout);
 }
 uint32_t BlockRingBufferProvider_CalculateSum( uint8_t* d, uint16_t len)
 {
@@ -104,40 +111,31 @@ uint32_t BlockRingBufferProvider_CalculateSum( uint8_t* d, uint16_t len)
 	}
 	return sum;
 }
-Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo* header,uint8_t* buf)
+osStatus_t BlockRingBufferProvider_Send(BlockRingBufferProvider* obj,  ReceiveItemInfo* header,uint8_t* buf)
 {
 	if (obj->Size == 0 || obj->Pool == NULL)
-		return False;
+		return osError;
 
 	int16_t putlen = 0;
 	//bool insert_flag = False;
-	Bool result = False;
+	osStatus_t result = osError;
 
-	El_TakeMutex(obj->Mutex, El_WAIT_FOREVER);
-	if (rt_ringbuffer_space_len(&obj->RingBuffer) >= (header->DataLen) && El_QueueSpacesAvailable(obj->Queue)>0)
+	osMutexAcquire(obj->Mutex, El_WAIT_FOREVER);
+	if (rt_ringbuffer_space_len(&obj->RingBuffer) >= (header->DataLen) && osMessageQueueGetSpace(obj->Queue)>0)
 	{
 		//insert_flag = True;
 		putlen = rt_ringbuffer_put(&obj->RingBuffer, buf, header->DataLen);
 		if (putlen != header->DataLen)
 		{
-			result=False;
+			result= osError;
 			goto _unlock;
 		}
 		//item->DataLen = bufLen;
 		//item->CheckSum = CalculateSum(buf, bufLen);
-		if (El_SendQueue(obj->Queue, header, sizeof(ReceiveItemInfo)) == QueueState_OK)
-		{
-			result = True;
-			goto _unlock;
-		}
-		else
-		{
-			result = False;
-			goto _unlock;
-		}
+		result = osMessageQueuePut(obj->Queue, header, 0, 0);
 	}
 _unlock:
-	El_ReleaseMutex(obj->Mutex);
+	osMutexRelease(obj->Mutex);
 	return result;
 }
 void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj)
@@ -145,5 +143,5 @@ void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj)
 	if (obj->Size == 0 || obj->Pool == NULL)
 		return ;
 	rt_ringbuffer_reset(&obj->RingBuffer);
-	El_ResetQueue(obj->Queue);
+	osMessageQueueReset(obj->Queue);
 }

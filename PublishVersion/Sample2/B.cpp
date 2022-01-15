@@ -1,5 +1,5 @@
 #include <thread>
-
+#include "EmbedLibrary.h"
 #include "Sample2.Server.h"
 #include "Sample2.Client.h"
 
@@ -37,7 +37,7 @@ public:
 
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.SourceAddress = 'B';
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.DestAddress = 'A';
-		El_TimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		osTimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
 
 		DTL bcdtl;
 		bcdtl.SourceAddress = 'B';
@@ -80,7 +80,7 @@ static InitConfig InitCfg =
 	1,
 	{
 		true,//CheckSumValid
-		6,//ServiceThreadPriority
+		osPriorityAboveNormal,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

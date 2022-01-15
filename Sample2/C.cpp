@@ -1,5 +1,5 @@
 #include <thread>
-
+#include "EmbedLibrary.h"
 #include "Sample2.Server.h"
 
 
@@ -24,7 +24,7 @@ public:
 	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, Int32 a, Int32 b)
 	{
 		printf("C:start suppendtimer and sleep 2s.\n");
-		El_TimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		osTimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
 		this->Response.ReturnValue.IsSuccess = 1;
 		this->Response.ReturnValue.Value = a + b;
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
@@ -47,7 +47,7 @@ static ServerNodeQuicklyInitConfig InitCfg =
 	1,
 	{
 		true,//CheckSumValid
-		6,//ServiceThreadPriority
+		osPriorityAboveNormal,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

@@ -1,4 +1,5 @@
 #include <thread>
+#include "EmbedLibrary.h"
 #include "Sample2.Client.h"
 extern EmbedXrpcObject B_RpcObject;
 #define AllTypeBufferLen	4096
@@ -6,7 +7,7 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == true);
+	assert(B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == osOK);
 	return true;
 }
 
@@ -25,7 +26,7 @@ static ClientNodeQuicklyInitConfig InitCfg =
 	1,
 	{
 		true,//CheckSumValid
-		6,//ServiceThreadPriority
+		osPriorityAboveNormal,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{
