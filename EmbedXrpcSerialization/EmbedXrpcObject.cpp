@@ -101,6 +101,7 @@ void EmbedXrpcObject::Init(InitConfig* cfg)
 		_threadAttr.stack_size = RpcConfig.ServiceThreadStackSize;
 
 		ServiceThreadHandle = osThreadNew(ServiceThread, this,&_threadAttr);
+		osThreadResume(ServiceThreadHandle);
 	}
 	//todo
 	osTimerAttr_t _timerAttr;
@@ -133,11 +134,8 @@ void EmbedXrpcObject::DeInit()
 
 	if (ServiceThreadHandle != nullptr)
 	{
+		while (ServiceThreadExitState == false);
 		osThreadTerminate(ServiceThreadHandle);
-	}
-	else
-	{
-		ServiceThreadExitState = true;
 	}
 
 	if (RpcConfig.UseRingBufferWhenReceiving == true)
