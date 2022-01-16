@@ -101,7 +101,6 @@ void EmbedXrpcObject::Init(InitConfig* cfg)
 		_threadAttr.stack_size = RpcConfig.ServiceThreadStackSize;
 
 		ServiceThreadHandle = osThreadNew(ServiceThread, this,&_threadAttr);
-		osThreadResume(ServiceThreadHandle);
 	}
 	//todo
 	osTimerAttr_t _timerAttr;
