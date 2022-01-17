@@ -156,16 +156,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlockBufferProvider.h" />
+    <ClInclude Include="EmbedXrpc.Port.h" />
     <ClInclude Include="EmbedXrpcPortInterface.h" />
     <ClInclude Include="EmbedXrpcCommon.h" />
     <ClInclude Include="EmbedXrpcObject.h" />
     <ClInclude Include="EmbedSerialization.h" />
-    <ClInclude Include="FreeRTOS.Port\EmbedXrpc.Port.h" />
     <ClInclude Include="ringbuffer.h" />
-    <ClInclude Include="Win32.Port\EmbedXrpc.Port.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="FreeRTOS.Port\readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
