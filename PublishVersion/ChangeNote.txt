@@ -1,7 +1,7 @@
 Sample开头的文件夹是例子(为了方便，后续将叫SampleX)，在WIN32上跑的，已经编译OK的。
 如果你没装VS，可以直接运行SampleX\Debug目录下的EXE文件。可以看看代码，了解RPC过程原理。
-
-
+2.4.0：
+将El OS的接口更改为CMSIS OS
 2.2.0:
 去掉delegate,因为delegate是request的特例，此举极大减少了资源占用：减少了一个线程，一个队列或Ringbuffer
 2.0.4:
