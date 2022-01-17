@@ -105,13 +105,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>../EmbedXrpcSerialization;../EmbedXrpcSerialization/Win32.Port;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(IncludePath)</IncludePath>
+    <IncludePath>../EmbedXrpcSerialization;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>
