@@ -129,7 +129,7 @@ namespace EmbedXrpcIdlParser
             List<ITargetField> TargetFields= targetStructUnion.TargetFields;
             ITargetField field = null;
 
-            bool unionIfFirstFlag = true;
+            //bool unionIfFirstFlag = true;
             /*if (isEncodeTlv == true)
             {
                 SerializeCodeSb.AppendLine($"SerializeKey(0,{TargetTypeString[(int)field.TargetType.TargetType]});");
@@ -146,18 +146,31 @@ namespace EmbedXrpcIdlParser
                     FreeCodeSb.AppendLine($"//{field.FieldName} :NoSerialization ");
                     continue;
                 }
+                
                 if (field.UnionFieldAttr != null)
                 {
-                    string elsestring = (unionIfFirstFlag == true ? "" : "else");
-                    SerializeCodeSb.AppendLine($"{elsestring} if(obj->{targetStructUnion.UnionTargetTypeField.FieldName}=={targetStructUnion.TypeName}_{field.FieldName}_FieldNumber)");
-                    SerializeCodeSb.AppendLine("{");
-
-                    DeserializeCodeSb.AppendLine($"{elsestring} if(obj->{targetStructUnion.UnionTargetTypeField.FieldName}=={targetStructUnion.TypeName}_{field.FieldName}_FieldNumber)");
-                    DeserializeCodeSb.AppendLine("{");
-
-                    FreeCodeSb.AppendLine($"{elsestring} if(obj->{targetStructUnion.UnionTargetTypeField.FieldName}=={targetStructUnion.TypeName}_{field.FieldName}_FieldNumber)");
-                    FreeCodeSb.AppendLine("{");
-                    unionIfFirstFlag = false;
+                    //string elsestring = (unionIfFirstFlag == true ? "" : "else");
+                    if (field.UnionFieldAttr.UnionIndex== UnionIndex.Start)
+                    {
+                        SerializeCodeSb.AppendLine($"switch(obj->{targetStructUnion.UnionTargetTypeField.FieldName})");
+                        SerializeCodeSb.AppendLine("{");
+                        
+                        DeserializeCodeSb.AppendLine($"switch(obj->{targetStructUnion.UnionTargetTypeField.FieldName})");
+                        DeserializeCodeSb.AppendLine("{");
+                        
+                        FreeCodeSb.AppendLine($"switch(obj->{targetStructUnion.UnionTargetTypeField.FieldName})");
+                        FreeCodeSb.AppendLine("{");
+                        
+                    }
+                    if (field.MacroControlAttr != null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                    }
+                    SerializeCodeSb.AppendLine($"case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
+                    DeserializeCodeSb.AppendLine($"case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
+                    FreeCodeSb.AppendLine($"case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
                 }
                 //FieldsDesc.Add($"{targetStruct.Name}_Field_{field.Name}");
                 if (field.TargetType.TargetType < TargetType_t.TYPE_ENUM)
@@ -166,6 +179,12 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
                     //}
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr==null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                    }
                     Base_TargetField base_TargetField = field as Base_TargetField;
                     if (base_TargetField == null)
                     {
@@ -197,9 +216,14 @@ namespace EmbedXrpcIdlParser
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                         //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);"); 
                     }
-                    SerializeCodeSb.AppendLine();
-                    DeserializeCodeSb.AppendLine();
-
+                    //SerializeCodeSb.AppendLine();
+                    //DeserializeCodeSb.AppendLine();
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                    }
 
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
@@ -209,6 +233,12 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[ettt.NumberType]});");
                     //}
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                    }
                     SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
                     SerializeCodeSb.AppendLine($"sm->Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});");
 
@@ -217,8 +247,12 @@ namespace EmbedXrpcIdlParser
                     SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                     //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
 
-                    SerializeCodeSb.AppendLine("");
-                    DeserializeCodeSb.AppendLine("");
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                    }
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
@@ -226,6 +260,12 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
                     //}
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                    }
                     Array_TargetField array_TargetField = field as Array_TargetField;
                     var arrayLenField = array_TargetField.ArrayLenField;
                     ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
@@ -310,9 +350,12 @@ namespace EmbedXrpcIdlParser
                         FreeCodeSb.AppendLine($"El_Free(obj->{field.FieldName});");
                         //FreeCodeSb.AppendLine($"delete[] obj->{field.FieldName};");
                     }
-                    SerializeCodeSb.AppendLine("");
-                    DeserializeCodeSb.AppendLine("");
-                    FreeCodeSb.AppendLine("");
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                    }
                 }
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
                 {
@@ -320,15 +363,39 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
                     //}
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
+                    }
                     SerializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Serialize(sm,&obj->{field.FieldName});");
                     DeserializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Deserialize(sm,&obj->{field.FieldName});");
                     FreeCodeSb.AppendLine($"{field.TargetType.TypeName}_FreeData(&obj->{field.FieldName});");
+                    if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                    }
                 }
                 if (field.UnionFieldAttr != null)
                 {
-                    SerializeCodeSb.AppendLine("}");
-                    DeserializeCodeSb.AppendLine("}");
-                    FreeCodeSb.AppendLine("}");
+                    SerializeCodeSb.AppendLine("break;");
+                    DeserializeCodeSb.AppendLine("break;");
+                    FreeCodeSb.AppendLine("break;");
+                    if (field.MacroControlAttr != null)
+                    {
+                        SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        DeserializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                        FreeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
+                    }
+                    if (field.UnionFieldAttr.UnionIndex == UnionIndex.End)
+                    {
+                        SerializeCodeSb.AppendLine("}");
+                        DeserializeCodeSb.AppendLine("}");
+                        FreeCodeSb.AppendLine("}");
+                    }
                 }
             }
             //SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");

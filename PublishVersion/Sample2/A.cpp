@@ -1,4 +1,5 @@
 #include <thread>
+#include "EmbedXrpc.Port.h"
 #include "EmbedLibrary.h"
 #include "Sample2.Client.h"
 extern EmbedXrpcObject B_RpcObject;

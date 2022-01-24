@@ -32,8 +32,10 @@ struct AddResult
     UInt64 Sum5;
 
     [BitField(2)]
+    
     UInt64 Sum6;
 
+    
     UInt32 Sum7;
 }
 
@@ -41,6 +43,7 @@ struct AddResult
 struct Student
 {
     [FieldNumber(1)]
+    [MacroControl("MyMacro", "TRUE")]
     int a;
     [FieldNumber(2)]
     int b;
@@ -51,25 +54,31 @@ struct Student
 
     [FieldNumber(4)]
     [UnionField]
+    [MacroControl("MyMacro", "TRUE")]
     byte u1;
 
 
     [FieldNumber(5)]
     [UnionField]
+    [MacroControl("MyMacro", "TRUE")]
     UInt64 u2;
 
     [FieldNumber(6)]
     [UnionField]
+    [MacroControl("MyMacro", "TRUE")]
     Sex u3;
 
     [FieldNumber(7)]
     [UnionField]
+    [MacroControl("MyMacro", "TRUE")]
     AddResult u4;
 
 
     [FieldNumber(100)]
+    [MacroControl("MyMacro", "TRUE")]
     byte uend1;
     //[FieldNumber(101)]
+    [MacroControl("MyMacro", "TRUE")]
     byte uend2;
 }
 [FileName("sample1.cs")]
@@ -100,6 +109,7 @@ struct DateTime_t
     byte DateStringLen;
 
     [MaxCount(LenFieldName = "DateStringLen", IsFixed = false)]
+    [MacroControl("MyMacro", "TRUE")]
     byte[] DateString;
 
     [FieldNumber(7)]
@@ -142,7 +152,9 @@ public class OptionProcess : IOptionProcess
     {
         GenerationOption option = new GenerationOption();
         option.OutPutFileName = "Sample1";
+        option.UserIncludes.Add("MyInclude.h");
         option.CSharpNameSpace = "Sample1";
+        option.UserNote = "这是一个注释!";
         return option;
     }
 }

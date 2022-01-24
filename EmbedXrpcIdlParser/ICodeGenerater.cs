@@ -138,6 +138,7 @@ namespace EmbedXrpcIdlParser
         FieldNumberAttribute FieldNumberAttr { get; set; }
         UnionFieldAttribute UnionFieldAttr { get; set; }
         NoSerializationAttribute NoSerializationAttr { get; set; }
+        MacroControlAttribute MacroControlAttr { get; set; }
     }
 
     public class Base_TargetField : ITargetField
@@ -153,7 +154,7 @@ namespace EmbedXrpcIdlParser
         public UnionFieldAttribute UnionFieldAttr { get; set; }
         public NoSerializationAttribute NoSerializationAttr { get; set; }
         public BitFieldAttribute BitFieldAttribute { get; set; }
-
+        public MacroControlAttribute MacroControlAttr { get; set; }
     }
     public class Enum_TargetField: Base_TargetField
     {
@@ -172,6 +173,7 @@ namespace EmbedXrpcIdlParser
         public Base_TargetField ArrayLenField { get; set; }
         public UnionFieldAttribute UnionFieldAttr { get; set; }
         public NoSerializationAttribute NoSerializationAttr { get; set; }
+        public MacroControlAttribute MacroControlAttr { get; set; }
     }
     public class Struct_TargetField : ITargetField
     {
@@ -182,6 +184,7 @@ namespace EmbedXrpcIdlParser
         public FieldNumberAttribute FieldNumberAttr { get; set; }
         public UnionFieldAttribute UnionFieldAttr { get; set; }
         public NoSerializationAttribute NoSerializationAttr { get; set; }
+        public MacroControlAttribute MacroControlAttr { get; set; }
     }
     /*public class Union_TargetField:ITargetField
     {
@@ -357,6 +360,10 @@ namespace EmbedXrpcIdlParser
             BitFieldStateMachine bitFieldStateMachine = new BitFieldStateMachine();
             List<CppCustomMethodSignatureAttribute> cppCustomMethodSignatures = new List<CppCustomMethodSignatureAttribute>(object_type.GetCustomAttributes<CppCustomMethodSignatureAttribute>());
             targetStructType.CppCustomMethodSignatures = cppCustomMethodSignatures;
+
+            bool isWriteUnion = false;
+            //bool IsUnionComplete = false;
+
             for (int field_index=0; field_index<fields.Length;field_index++)
             {
                 var field = fields[field_index];
@@ -387,6 +394,7 @@ namespace EmbedXrpcIdlParser
                     var unionTargetTypeAtt = field.GetCustomAttribute<UnionTargetTypeAttribute>();
                     targetfield.UnionFieldAttr= field.GetCustomAttribute<UnionFieldAttribute>();
                     targetfield.NoSerializationAttr= field.GetCustomAttribute<NoSerializationAttribute>();
+                    targetfield.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     targetfield.BitFieldAttribute = field.GetCustomAttribute<BitFieldAttribute>();
                     if(targetfield.BitFieldAttribute!=null)
                     {
@@ -417,6 +425,8 @@ namespace EmbedXrpcIdlParser
                             throw new Exception("不支持BitField&NoSerialization组合");
                         if(targetfield.UnionFieldAttr!=null)
                             throw new Exception("不支持BitField&UnionField组合");
+                        if (targetfield.MacroControlAttr != null)
+                            throw new Exception("不支持BitField&MacroControl的组合");
                     }
                     else
                     {
@@ -427,6 +437,10 @@ namespace EmbedXrpcIdlParser
                     {
                         targetfield.IsUnionTargetTypeField = true;
                         targetStructType.UnionTargetTypeField = targetfield;
+                        if (targetfield.MacroControlAttr != null)
+                        {
+                            throw new Exception("union的Type标识不支持MacroControl");
+                        }
                     }
                     needAddField = targetfield;
                     //targetStruct.TargetFields.Add(targetfield);
@@ -449,9 +463,8 @@ namespace EmbedXrpcIdlParser
                     enumField.TargetType = te;
                     enumField.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
                     enumField.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
+                    enumField.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     needAddField = enumField;
-                    //targetStruct.TargetFields.Add(enumField);
-
                 }
                 else if (field.FieldType.IsArray == true)
                 {
@@ -478,6 +491,7 @@ namespace EmbedXrpcIdlParser
                     arrayField.ArrayLenField = targetStructType.GetArrayLenField(arrayField);
                     arrayField.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
                     arrayField.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
+                    arrayField.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     needAddField = arrayField;
                     if(arrayField.UnionFieldAttr!=null)
                     {
@@ -494,6 +508,7 @@ namespace EmbedXrpcIdlParser
                     objectFiled.FieldNumberAttr = FieldNumberAttr;
                     objectFiled.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
                     objectFiled.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
+                    objectFiled.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     needAddField = objectFiled;
                     //targetStruct.TargetFields.Add(objectFiled);
                 }
@@ -501,6 +516,26 @@ namespace EmbedXrpcIdlParser
                 {
                     throw new NotSupportedException();
                 }
+                if (needAddField.UnionFieldAttr != null)
+                {
+                    if (isWriteUnion == false)
+                    {
+                        needAddField.UnionFieldAttr.UnionIndex = UnionIndex.Start;
+                        isWriteUnion = true;
+                    }
+                    //如果下一个是null 或者 UnionFieldAttr==null 则打end
+                    UnionFieldAttribute nextFieldUnionFieldAttr = null;
+                    if (field_index + 1 < fields.Length)
+                    {
+                        nextFieldUnionFieldAttr = fields[field_index+1].GetCustomAttribute<UnionFieldAttribute>();
+                    }
+                    if (nextFieldUnionFieldAttr== null)
+                    {
+                        needAddField.UnionFieldAttr.UnionIndex = UnionIndex.End;
+                        isWriteUnion = false;
+                    }
+                }
+
                 targetStructType.TargetFields.Add(needAddField);
                 if(needAddField.FieldNumberAttr.Number==0)
                 {

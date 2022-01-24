@@ -107,6 +107,9 @@
     <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
+    <ClInclude Include="MyInclude.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cmd.bat">

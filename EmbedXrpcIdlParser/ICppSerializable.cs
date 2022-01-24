@@ -17,6 +17,47 @@ namespace EmbedXrpcIdlParser
     }
     public static class CppSerializableCommon
     {
+        public static string MacroControlWriteBegin(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        {
+            string retstring = string.Empty;
+            if (MacroControlAttribute != null)
+            {
+                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
+                
+                if (val != string.Empty)
+                {
+                    retstring = $"#if {MacroControlAttribute.MacroName}{val}";
+                    sw?.WriteLine(retstring);
+                }
+                else
+                {
+                    retstring = $"#ifdef {MacroControlAttribute.MacroName}";
+                    sw?.WriteLine(retstring);
+                }
+                return retstring;
+            }
+            return retstring;
+        }
+        public static string MacroControlWriteEnd(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        {
+            string retstring = string.Empty;
+            if (MacroControlAttribute != null)
+            {
+                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
+                if (val != string.Empty)
+                {
+                    retstring = $"#endif // #if {MacroControlAttribute.MacroName}{val}";
+                    sw?.WriteLine(retstring);
+                }
+                else
+                {
+                    retstring = $"#endif // #ifdef {MacroControlAttribute.MacroName}";
+                    sw?.WriteLine(retstring);
+                }
+                return retstring;
+            }
+            return retstring;
+        }
         public static string EmitField(ITargetField field)
         {
             string cppType = field.TargetType.TypeName;
@@ -72,8 +113,6 @@ namespace EmbedXrpcIdlParser
             SerializeCsw、SerializeHsw用来定义序列化的操作、行为等
              */
             StringBuilder FieldNumberSb = new StringBuilder();
-            bool isWriteUnion = false;
-            bool IsUnionComplete = false;
             CommonHsw.WriteLine("struct " + structType.TypeName);
             CommonHsw.WriteLine("{");
             if(structType.CppCustomMethodSignatures!=null)
@@ -87,36 +126,38 @@ namespace EmbedXrpcIdlParser
             
             foreach (var field in structType.TargetFields)
             {
-                if(field.UnionFieldAttr!=null&& isWriteUnion==false)
+                if(field.UnionFieldAttr!=null&& field.UnionFieldAttr.UnionIndex== UnionIndex.Start)
                 {
-                    if(IsUnionComplete==true)
-                    {
-                        throw new Exception();
-                    }
                     CommonHsw.WriteLine("union{");
-                    isWriteUnion=true;
                 }
-                if(field.UnionFieldAttr == null&& isWriteUnion == true && IsUnionComplete==false)
-                {
-                    CommonHsw.WriteLine("};//union end");
-                    IsUnionComplete = true;
-                }
+                
                 var baseValueField = field as Base_TargetField;
                 string UnionTargetTypeString = string.Empty;
                 if (baseValueField != null)
                     UnionTargetTypeString = baseValueField.IsUnionTargetTypeField == true ? "Union Target Type" : string.Empty;
                 string NoSerializationString=string.Empty;
+                if(field.MacroControlAttr!=null)
+                {
+                    var macroString=MacroControlWriteBegin(CommonHsw, field.MacroControlAttr);
+                    FieldNumberSb.AppendLine(macroString);
+
+                }
                 if (field.NoSerializationAttr != null)
                 {
                     NoSerializationString= "NoSerialization";
                 }
                 CommonHsw.WriteLine($"{EmitField(field)};   //FieldNumber:{field.FieldNumberAttr.Number}    {UnionTargetTypeString} {NoSerializationString}");
-                FieldNumberSb.Append($"#define {structType.TypeName}_{field.FieldName}_FieldNumber  {field.FieldNumberAttr.Number}\r\n");
-            }
-            if (isWriteUnion == true && IsUnionComplete == false)
-            {
-                CommonHsw.WriteLine("};//union end");
-                IsUnionComplete = true;
+                FieldNumberSb.AppendLine($"#define {structType.TypeName}_{field.FieldName}_FieldNumber  {field.FieldNumberAttr.Number}");
+                if (field.MacroControlAttr != null)
+                {
+                    var macroString = MacroControlWriteEnd(CommonHsw, field.MacroControlAttr);
+                    FieldNumberSb.AppendLine(macroString);
+                }
+
+                if (field.UnionFieldAttr != null && field.UnionFieldAttr.UnionIndex == UnionIndex.End)
+                {
+                    CommonHsw.WriteLine("};//union end");
+                }
             }
             CommonHsw.WriteLine("};");
             FieldNumberSb.Append("\r\n");
