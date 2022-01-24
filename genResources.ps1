@@ -17,7 +17,7 @@ Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcObject.h -Destination Publish
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpcPortInterface.h -Destination PublishVersion\Runtime\Cpp\EmbedXrpcPortInterface.h
 Copy-Item -Path  .\EmbedXrpcSerialization\ringbuffer.c -Destination PublishVersion\Runtime\Cpp\ringbuffer.c
 Copy-Item -Path  .\EmbedXrpcSerialization\ringbuffer.h -Destination PublishVersion\Runtime\Cpp\ringbuffer.h
-Copy-Item -Path  .\EmbedXrpcSerialization\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\EmbedXrpc.Port.h
+Copy-Item -Path  .\EmbedXrpcSerialization\Port\EmbedXrpc.Port.h  -Destination PublishVersion\Runtime\Cpp\Port\EmbedXrpc.Port.h
 
 # EmbedLibrary
 Copy-Item -Path .\EmbedLibrary\EmbedLibrary.h -Destination PublishVersion\EmbedLibrary\EmbedLibrary.h

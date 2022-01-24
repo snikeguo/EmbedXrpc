@@ -115,10 +115,18 @@ namespace EmbedXrpcIdlParser
     {
 
     }
+
+    public enum UnionIndex
+    {
+        Mid,
+        Start,
+        End,
+    }
+
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
     public class UnionFieldAttribute : Attribute
     {
-
+        public UnionIndex UnionIndex { get; set; }
     }
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
     public sealed class FieldNumberAttribute : Attribute
@@ -132,7 +140,7 @@ namespace EmbedXrpcIdlParser
         public Int32 Number { get; set; }
     }
 
-    [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Delegate| AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
     public class MacroControlAttribute : Attribute
     {
 

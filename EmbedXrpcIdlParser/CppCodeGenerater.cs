@@ -67,7 +67,7 @@ namespace EmbedXrpcIdlParser
 
             foreach (var userInc in outputattr.UserIncludes)
             {
-                CommonHsw.WriteLine($"#include\"{userInc}.h\"");
+                CommonHsw.WriteLine($"#include\"{userInc}\"");
             }
             if(outputattr.UserNote!=null&& outputattr.UserNote != string.Empty)
             {
@@ -249,33 +249,12 @@ namespace EmbedXrpcIdlParser
             embedXrpcSerializationGenerator.EmitDeserializeMacro(structType, SerializeHsw);
             embedXrpcSerializationGenerator.EmitFreeDataMacro(structType, SerializeHsw);
         }
-        private void MacroControlWriteBegin(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
-        {
-            if (MacroControlAttribute != null)
-            {
-                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
-                if(val!= string.Empty)
-                    sw.WriteLine($"#if {MacroControlAttribute.MacroName}{val}");
-                else
-                    sw.WriteLine($"#ifdef {MacroControlAttribute.MacroName}");
-            }
-        }
-        private void MacroControlWriteEnd(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
-        {
-            if (MacroControlAttribute != null)
-            {
-                string val = MacroControlAttribute.EnableCondition == string.Empty ? string.Empty : $"=={MacroControlAttribute.EnableCondition}";
-                if (val != string.Empty)
-                    sw.WriteLine($"#endif // #if {MacroControlAttribute.MacroName}{val}");
-                else
-                    sw.WriteLine($"#endif // #ifdef {MacroControlAttribute.MacroName}");
-            }
-        }
+        
         private void EmitCaller(TargetService service, StreamWriter hsw, StreamWriter csw)
         {
             //生成客户端代码
-            MacroControlWriteBegin(hsw, service.MacroControlAttribute);
-            MacroControlWriteBegin(csw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteBegin(hsw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteBegin(csw, service.MacroControlAttribute);
             hsw.WriteLine("class " + service.ServiceName + "_Requester");
             hsw.WriteLine("{\npublic:\nEmbedXrpcObject *RpcObject=nullptr;");
             hsw.WriteLine(service.ServiceName + "_Requester" + "(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)");
@@ -445,14 +424,14 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine();
             hsw.WriteLine("};\n");//class end
 
-            MacroControlWriteEnd(csw, service.MacroControlAttribute);
-            MacroControlWriteEnd(hsw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteEnd(csw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteEnd(hsw, service.MacroControlAttribute);
         }
 
         private void EmitCallee(TargetService service, StreamWriter hsw, StreamWriter csw)
         {
-            MacroControlWriteBegin(hsw, service.MacroControlAttribute);
-            MacroControlWriteBegin(csw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteBegin(hsw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteBegin(csw, service.MacroControlAttribute);
             hsw.WriteLine($"class {service.ServiceName}_Service:public IService");
             hsw.WriteLine("{\npublic:");
             hsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
@@ -517,8 +496,8 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("}");//end function
             hsw.WriteLine("};");//end class
 
-            MacroControlWriteEnd(csw, service.MacroControlAttribute);
-            MacroControlWriteEnd(hsw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteEnd(csw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteEnd(hsw, service.MacroControlAttribute);
 
             csw.WriteLine(Environment.NewLine);
             hsw.WriteLine(Environment.NewLine);

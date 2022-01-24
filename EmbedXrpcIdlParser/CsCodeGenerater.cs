@@ -31,11 +31,17 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine("{");//class begin
             foreach (var field in objectType_TargetType.TargetFields)
             {
+                if (field.MacroControlAttr != null)
+                {
+                    CppSerializableCommon.MacroControlWriteBegin(sw, field.MacroControlAttr);
+                }
+
                 sw.WriteLine($"public const int {field.FieldName}_FieldNumber={field.FieldNumberAttr.Number};");
                 if (field.NoSerializationAttr != null)
                 {
                     sw.WriteLine($"[NoSerialization]");
                 }
+                
                 if (field.TargetType.TargetType <= TargetType_t.TYPE_ENUM)
                 {
                     Base_TargetField base_TargetField = field as Base_TargetField;
@@ -79,12 +85,16 @@ namespace EmbedXrpcIdlParser
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
                     sw.WriteLine($"public {field.TargetType.TypeName} {field.FieldName}{{get;set;}}=new {field.TargetType.TypeName}();");
                 }
+                if (field.MacroControlAttr != null)
+                {
+                    CppSerializableCommon.MacroControlWriteEnd(sw, field.MacroControlAttr);
+                }
                 sw.WriteLine("\r\n");
             }
             sw.WriteLine("}");//class end
 
         }
-        private void MacroControlWriteBegin(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        /*private void MacroControlWriteBegin(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
         {
             if (MacroControlAttribute != null)
             {
@@ -94,8 +104,8 @@ namespace EmbedXrpcIdlParser
                 else
                     sw.WriteLine($"#ifdef {MacroControlAttribute.MacroName}");
             }
-        }
-        private void MacroControlWriteEnd(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
+        }*/
+        /*private void MacroControlWriteEnd(StreamWriter sw, MacroControlAttribute MacroControlAttribute)
         {
             if (MacroControlAttribute != null)
             {
@@ -105,11 +115,11 @@ namespace EmbedXrpcIdlParser
                 else
                     sw.WriteLine($"#endif // #ifdef {MacroControlAttribute.MacroName}");
             }
-        }
+        }*/
 
         private void EmitCaller(TargetService service,StreamWriter sw)
         {
-            MacroControlWriteBegin(sw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
 
             sw.WriteLine($"[RequestServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
             sw.WriteLine($"public class {service.ServiceName}_Requester<DTL>:IRequestService<DTL> where DTL:struct");
@@ -172,12 +182,12 @@ namespace EmbedXrpcIdlParser
 
             sw.WriteLine("}");//class end
 
-            MacroControlWriteEnd(sw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteEnd(sw, service.MacroControlAttribute);
         }
 
         private void EmitCallee(TargetService service,StreamWriter sw)
         {
-            MacroControlWriteBegin(sw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
             sw.WriteLine($"[ResponseServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
             sw.WriteLine($"public partial class {service.ServiceName}_Service<DTL>:IService<DTL> where DTL:struct");
             sw.WriteLine("{");//class begin
@@ -213,7 +223,7 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine($"//public void {service.ServiceName}(ref serviceInvokeParameter{dh}{externstr});");
             sw.WriteLine("}");//class end
 
-            MacroControlWriteEnd(sw, service.MacroControlAttribute);
+            CppSerializableCommon.MacroControlWriteEnd(sw, service.MacroControlAttribute);
         }
         private void GenerateService(StreamWriter sw, TargetService service, RoleType genType)
         {

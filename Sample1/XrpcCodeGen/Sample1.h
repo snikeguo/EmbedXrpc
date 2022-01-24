@@ -2,6 +2,8 @@
 #define Sample1_H
 #include"EmbedSerialization.h"
 #include"EmbedXrpcCommon.h"
+#include"MyInclude.h"
+/* 这是一个注释! */
 
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
@@ -36,27 +38,55 @@ UInt32 Sum7;   //FieldNumber:9
 
 struct Student
 {
+#if MyMacro==TRUE
 Int32 a;   //FieldNumber:1     
+#endif // #if MyMacro==TRUE
 Int32 b;   //FieldNumber:2     
 Int32 AddressType;   //FieldNumber:3    Union Target Type 
 union{
+#if MyMacro==TRUE
 UInt8 u1;   //FieldNumber:4     
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 UInt64 u2;   //FieldNumber:5     
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 Sex u3;   //FieldNumber:6     
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 AddResult u4;   //FieldNumber:7     
+#endif // #if MyMacro==TRUE
 };//union end
+#if MyMacro==TRUE
 UInt8 uend1;   //FieldNumber:100     
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 UInt8 uend2;   //FieldNumber:8     
+#endif // #if MyMacro==TRUE
 };
+#if MyMacro==TRUE
 #define Student_a_FieldNumber  1
+#endif // #if MyMacro==TRUE
 #define Student_b_FieldNumber  2
 #define Student_AddressType_FieldNumber  3
+#if MyMacro==TRUE
 #define Student_u1_FieldNumber  4
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 #define Student_u2_FieldNumber  5
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 #define Student_u3_FieldNumber  6
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 #define Student_u4_FieldNumber  7
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 #define Student_uend1_FieldNumber  100
+#endif // #if MyMacro==TRUE
+#if MyMacro==TRUE
 #define Student_uend2_FieldNumber  8
+#endif // #if MyMacro==TRUE
 
 
 struct DateTime_t
@@ -69,7 +99,9 @@ Int32 Min;   //FieldNumber:5
 Int32 Sec;   //FieldNumber:6     
 Sex Sex;   //FieldNumber:8     
 UInt8 DateStringLen;   //FieldNumber:1     
+#if MyMacro==TRUE
 UInt8* DateString;   //FieldNumber:7     
+#endif // #if MyMacro==TRUE
 Student David;   //FieldNumber:9     
 };
 #define DateTime_t_Year_FieldNumber  10086
@@ -80,7 +112,9 @@ Student David;   //FieldNumber:9
 #define DateTime_t_Sec_FieldNumber  6
 #define DateTime_t_Sex_FieldNumber  8
 #define DateTime_t_DateStringLen_FieldNumber  1
+#if MyMacro==TRUE
 #define DateTime_t_DateString_FieldNumber  7
+#endif // #if MyMacro==TRUE
 #define DateTime_t_David_FieldNumber  9
 
 
