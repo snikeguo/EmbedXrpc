@@ -95,7 +95,7 @@ namespace EmbedXrpc
         {
             ServiceThreadHandle.Abort();
         }
-        public RequestResponseState Wait<T>(UInt32 sid,out T response)
+        public RequestResponseState Wait<T>(UInt32 sid,out T response) where T: IEmbedXrpcSerialization
         {
             EmbeXrpcRawData<DTL> recData;
             response = default(T);
@@ -121,7 +121,7 @@ namespace EmbedXrpc
             if(ret == RequestResponseState.ResponseState_Ok)
             {
                 SerializationManager sm = new SerializationManager(Assembly, new List<byte>(recData.Data));
-                response = (T)sm.Deserialize(res_t);
+                response.Deserialize(sm);
             }
             return ret;
         }
@@ -226,7 +226,7 @@ namespace EmbedXrpc
                                     sendBytes[2] = (byte)(this.TimeOut >> 0 & 0xff);
                                     sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff)&(0x3F));
                                     sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
-                                    Array.Copy(sendsm.Data.ToArray(), 0, sendBytes, 4, sendsm.Index);
+                                    Array.Copy(sendsm.Buf.ToArray(), 0, sendBytes, 4, sendsm.Index);
                                     Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
                                 }
                             }
