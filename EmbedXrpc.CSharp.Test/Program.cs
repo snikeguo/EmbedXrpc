@@ -95,7 +95,7 @@ namespace EmbedXrpc
                         Hour = DateTime.Now.Hour,
                         Min = DateTime.Now.Minute,
                         Sec = DateTime.Now.Second,
-                        David={ AddressType=Student.u2_FieldNumber,u2=0x778899AA , uend1=1,uend2=0x88},
+                        David={ AddressType=Student.Student_u2_FieldNumber,u2=0x778899AA , uend1=1,uend2=0x88},
                     }}); ;
                     
                 }

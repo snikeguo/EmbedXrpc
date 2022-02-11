@@ -43,7 +43,7 @@ namespace EmbedXrpcIdlParser
             codeGenParameter = cppCodeGenParameter;
             if(embedXrpcSerializationGenerator==null)
             {
-                embedXrpcSerializationGenerator = new CppNanoSerializer();
+                embedXrpcSerializationGenerator = new CppCsNanoSerializer();
             }
             Console.WriteLine($"cpp code gen:   {cppCodeGenParameter.FileIdlInfo.FileName}");
             var outputattr = cppCodeGenParameter.FileIdlInfo.GenerationOption;

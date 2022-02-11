@@ -24,10 +24,10 @@ namespace EmbedXrpcIdlParser
             NumberTypeOfEnumInCShapCodeCollection.Add(TargetType_t.TYPE_UINT64, "ulong");
             NumberTypeOfEnumInCShapCodeCollection.Add(TargetType_t.TYPE_INT64, "long");
         }
-        
+
         private void GenerateStruct(StreamWriter sw, StructType_TargetType objectType_TargetType)
         {
-            sw.WriteLine($"public class {objectType_TargetType.TypeName}");
+            sw.WriteLine($"public class {objectType_TargetType.TypeName}:IEmbedXrpcSerialization");
             sw.WriteLine("{");//class begin
             foreach (var field in objectType_TargetType.TargetFields)
             {
@@ -36,24 +36,24 @@ namespace EmbedXrpcIdlParser
                     CppSerializableCommon.MacroControlWriteBegin(sw, field.MacroControlAttr);
                 }
 
-                sw.WriteLine($"public const int {field.FieldName}_FieldNumber={field.FieldNumberAttr.Number};");
+                sw.WriteLine($"public const int {objectType_TargetType.TypeName}_{field.FieldName}_FieldNumber={field.FieldNumberAttr.Number};");
                 if (field.NoSerializationAttr != null)
                 {
                     sw.WriteLine($"[NoSerialization]");
                 }
-                
+
                 if (field.TargetType.TargetType <= TargetType_t.TYPE_ENUM)
                 {
                     Base_TargetField base_TargetField = field as Base_TargetField;
-                    if(base_TargetField.IsUnionTargetTypeField==true)
+                    if (base_TargetField.IsUnionTargetTypeField == true)
                     {
                         sw.WriteLine($"[UnionTargetType]");
                     }
-                    if(base_TargetField.UnionFieldAttr!=null)
+                    if (base_TargetField.UnionFieldAttr != null)
                     {
                         sw.WriteLine($"[UnionField]");
                     }
-                    if(base_TargetField.BitFieldAttribute!=null)
+                    if (base_TargetField.BitFieldAttribute != null)
                     {
                         sw.WriteLine($"[BitField({base_TargetField.BitFieldAttribute.BitWidthLength})]");
                     }
@@ -64,7 +64,7 @@ namespace EmbedXrpcIdlParser
                 else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
                     Array_TargetField array_TargetField = field as Array_TargetField;
-                    if (array_TargetField.UnionFieldAttr !=null)
+                    if (array_TargetField.UnionFieldAttr != null)
                     {
                         sw.WriteLine($"[UnionField]");
                     }
@@ -91,6 +91,7 @@ namespace EmbedXrpcIdlParser
                 }
                 sw.WriteLine("\r\n");
             }
+            new CppCsNanoSerializer().EmitStruct(objectType_TargetType, null, null, sw);
             sw.WriteLine("}");//class end
 
         }
@@ -117,7 +118,7 @@ namespace EmbedXrpcIdlParser
             }
         }*/
 
-        private void EmitCaller(TargetService service,StreamWriter sw)
+        private void EmitCaller(TargetService service, StreamWriter sw)
         {
             CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
 
@@ -158,13 +159,13 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine($"request.{par.FieldName}={par.FieldName};");
             }
             sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());");
-            sw.WriteLine("sm.Serialize(request,0);");
+            sw.WriteLine("request.Serialize(sm);");
             sw.WriteLine("List<byte> sendBytes = new List<byte>();");
             sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId&0xff));");
             sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId>>8&0xff));");
             sw.WriteLine($"sendBytes.Add((byte)(XrpcObject.TimeOut&0xff));");
             sw.WriteLine($"sendBytes.Add((byte)(((XrpcObject.TimeOut>>8&0xff)&0x3F)|((byte)ReceiveType.Request)<<6));");
-            sw.WriteLine("sendBytes.AddRange(sm.Data);");
+            sw.WriteLine("sendBytes.AddRange(sm.Buf);");
             sw.WriteLine("if( XrpcObject.Send ( userDataOfTransportLayer,sendBytes.Count,0,sendBytes.ToArray() )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
                 "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");
             if (service.ReturnStructType.TargetFields.Count > 1)
@@ -185,7 +186,7 @@ namespace EmbedXrpcIdlParser
             CppSerializableCommon.MacroControlWriteEnd(sw, service.MacroControlAttribute);
         }
 
-        private void EmitCallee(TargetService service,StreamWriter sw)
+        private void EmitCallee(TargetService service, StreamWriter sw)
         {
             CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
             sw.WriteLine($"[ResponseServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
@@ -199,7 +200,8 @@ namespace EmbedXrpcIdlParser
             }
             sw.WriteLine("public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)");
             sw.WriteLine("{");//function begin
-            sw.WriteLine($"{service.ParameterStructType.TypeName} request = recManager.Deserialize < {service.ParameterStructType.TypeName}>();");
+            sw.WriteLine($"{service.ParameterStructType.TypeName} request = new {service.ParameterStructType.TypeName}();");
+            sw.WriteLine($"request.Deserialize(recManager);");
             string pars = string.Empty;
             string externstr = string.Empty;
             for (int pi = 0; pi < service.ParameterStructType.TargetFields.Count; pi++)
@@ -217,7 +219,7 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine($"{service.ServiceName}(ref serviceInvokeParameter{dh}{pars});");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
-                sw.WriteLine($"sendManager.Serialize(Response, 0);");
+                sw.WriteLine($"Response.Serialize(sendManager);");
             }
             sw.WriteLine("}");//function end
             sw.WriteLine($"//public void {service.ServiceName}(ref serviceInvokeParameter{dh}{externstr});");
