@@ -95,10 +95,10 @@ namespace EmbedXrpc
         {
             ServiceThreadHandle.Abort();
         }
-        public RequestResponseState Wait<T>(UInt32 sid,out T response) where T: IEmbedXrpcSerialization
+        public RequestResponseState Wait<T>(UInt32 sid,ref T response) where T: IEmbedXrpcSerialization
         {
             EmbeXrpcRawData<DTL> recData;
-            response = default(T);
+            //response = default(T);
             Type res_t =typeof(T);
             RequestResponseState ret = RequestResponseState.ResponseState_Ok;
             while (true)
