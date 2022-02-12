@@ -170,7 +170,7 @@ namespace EmbedXrpcIdlParser
                 "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
-                sw.WriteLine($"var waitstate=XrpcObject.Wait<{service.ReturnStructType.TypeName}>({service.ServiceName}_ServiceId, out reqresp);");
+                sw.WriteLine($"var waitstate=XrpcObject.Wait<{service.ReturnStructType.TypeName}>({service.ServiceName}_ServiceId, ref reqresp);");
                 sw.WriteLine("if(reqresp==null)");
                 sw.WriteLine($"{{reqresp=new {service.ReturnStructType.TypeName}();}}");
                 sw.WriteLine("reqresp.State=waitstate;");

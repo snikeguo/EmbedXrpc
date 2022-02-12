@@ -139,187 +139,7 @@ namespace EmbedXrpc
             return bs;
             
         }
-        
-        
-        public static byte[] ToBytes( UInt32 d)
-        {
-            //Console.WriteLine($"u32:{d & 0xFF},{d >> 8 & 0xFF},{d >> 16 & 0xFF},{d >> 24 & 0xFF},");
-            byte[] bs = new byte[4];
-            bs[0]=(byte)(d & 0xFF);
-            bs[1] = (byte)(d >> 8 & 0xFF);
-            bs[2] = (byte)(d >> 16 & 0xFF);
-            bs[3] = (byte)(d >> 24 & 0xFF);
-            return bs;
-        }
-        public static byte[] ToBytes(Int32 d)
-        {
-            //Console.WriteLine($"i32:{d & 0xFF},{d >> 8 & 0xFF},{d >> 16 & 0xFF},{d >> 24 & 0xFF},");
-            byte[] bs = new byte[4];
-            bs[0] = (byte)(d & 0xFF);
-            bs[1] = (byte)(d >> 8 & 0xFF);
-            bs[2] = (byte)(d >> 16 & 0xFF);
-            bs[3] = (byte)(d >> 24 & 0xFF);
-            return bs;
-        }
-
-        public static byte[] ToBytes( UInt64 d)
-        {
-            //Console.WriteLine($"u64:{d & 0xFF},{d >> 8 & 0xFF},{d >> 16 & 0xFF},{d >> 24 & 0xFF},  {d>>32 & 0xFF},{d >> 40 & 0xFF},{d >> 48 & 0xFF},{d >> 56 & 0xFF},");
-            byte[] bs = new byte[8];
-            bs[0]=(byte)(d & 0xFF);
-            bs[1] = (byte)(d >> 8 & 0xFF);
-            bs[2] = (byte)(d >> 16 & 0xFF);
-            bs[3] = (byte)(d >> 24 & 0xFF);
-            bs[4] = (byte)(d >> 32 & 0xFF);
-            bs[5] = (byte)(d >> 40 & 0xFF);
-            bs[6] = (byte)(d >> 48 & 0xFF);
-            bs[7] = (byte)(d >> 56 & 0xFF);
-            return bs;
-        }
-        public static byte[] ToBytes(Int64 d)
-        {
-            //Console.WriteLine($"64:{d & 0xFF},{d >> 8 & 0xFF},{d >> 16 & 0xFF},{d >> 24 & 0xFF},  {d >> 32 & 0xFF},{d >> 40 & 0xFF},{d >> 48 & 0xFF},{d >> 56 & 0xFF},");
-            byte[] bs = new byte[8];
-            bs[0] = (byte)(d & 0xFF);
-            bs[1] = (byte)(d >> 8 & 0xFF);
-            bs[2] = (byte)(d >> 16 & 0xFF);
-            bs[3] = (byte)(d >> 24 & 0xFF);
-            bs[4] = (byte)(d >> 32 & 0xFF);
-            bs[5] = (byte)(d >> 40 & 0xFF);
-            bs[6] = (byte)(d >> 48 & 0xFF);
-            bs[7] = (byte)(d >> 56 & 0xFF);
-            return bs;
-        }
-        
-        private bool IsBaseValueType(Type vt,ref Type_t mytype)
-        {
-            if (vt.IsEnum == true)
-            {
-                vt = vt.GetEnumUnderlyingType();
-            }
-            if (vt == typeof(bool))
-            {
-
-                mytype = Type_t.TYPE_UINT8;
-                return true;
-            }
-            else if (vt == typeof(byte))
-            {
-                mytype = Type_t.TYPE_UINT8;
-                return true;
-            }
-            else if (vt == typeof(sbyte))
-            {
-                mytype = Type_t.TYPE_INT8;
-                return true;
-            }
-            else if (vt == typeof(UInt16))
-            {
-                mytype =  Type_t.TYPE_UINT16;
-                return true;
-            }
-            else if (vt == typeof(Int16))
-            {
-                mytype = Type_t.TYPE_INT16;
-                return true;
-            }
-            else if (vt == typeof(UInt32))
-            {
-                mytype = Type_t.TYPE_UINT32;
-                return true;
-            }
-            else if (vt == typeof(Int32))
-            {
-                mytype = Type_t.TYPE_INT32;
-                return true;
-            }
-            else if (vt == typeof(UInt64))
-            {
-                mytype = Type_t.TYPE_UINT64;
-                return true;
-            }
-            else if (vt == typeof(Int64))
-            {
-                mytype = Type_t.TYPE_INT64;
-                return true;
-            }
-            else if(vt.IsArray==true)
-            {
-                mytype = Type_t.TYPE_ARRAY;
-                return false;
-            }
-            else if (vt.IsClass == true)
-            {
-                mytype = Type_t.TYPE_STRUCT;
-                return false;
-            }
-            else
-            {
-                throw new InvalidDataException();
-            }
-        }
-        private void BaseValueSerialize(object v,Type vt)
-        {
-            //Type vt = v.GetType();
-            if (vt.IsEnum == true)
-            {
-                vt = vt.GetEnumUnderlyingType();
-            }
-            if (vt == typeof(bool))
-            {   
-                ToBytes(Convert.ToByte(v));
-            }
-            else if (vt == typeof(byte))
-            {
-                ToBytes(Convert.ToByte(v));
-            }
-            else if (vt == typeof(sbyte))
-            {
-                ToBytes(Convert.ToSByte(v));
-            }
-            else if (vt == typeof(UInt16))
-            {
-                ToBytes(Convert.ToUInt16(v));
-            }
-            else if (vt == typeof(Int16))
-            {
-                ToBytes(Convert.ToInt16(v));
-            }
-            else if (vt == typeof(UInt32))
-            {
-                ToBytes(Convert.ToUInt32(v));
-            }
-            else if (vt == typeof(Int32))
-            {
-                ToBytes(Convert.ToInt32(v));
-            }
-            else if (vt == typeof(UInt64))
-            {
-                ToBytes(Convert.ToUInt64(v));
-            }
-            else if (vt == typeof(Int64))
-            {
-                ToBytes(Convert.ToInt64(v));
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-        private static object[] ConvertArray(Array arr)
-        {
-            if (arr == null)
-                return null;
-            int lb = arr.GetLowerBound(0);
-            var ret = new object[arr.GetUpperBound(0) - lb + 1];
-            for (int ix = 0; ix < ret.Length; ++ix)
-            {
-                ret[ix] = arr.GetValue(ix + lb);
-            }
-            return ret;
-        }
-        
-       
+          
         internal class BitFieldStateMachine
         {
             internal int BitFieldLeftShiftAccer = 0;
@@ -341,7 +161,7 @@ namespace EmbedXrpc
                 Index++;
                 return v;
             }
-            if (vt == Type_t.TYPE_INT8)
+            else if (vt == Type_t.TYPE_INT8)
             {
                 sbyte v = Convert.ToSByte(Buf[Index]);
                 Index++;
@@ -351,6 +171,7 @@ namespace EmbedXrpc
             {
                 UInt16 v = Convert.ToUInt16((UInt16)Buf[Index + 1] << 8);
                 v |= Convert.ToUInt16((UInt16)Buf[Index]);
+                Index += 2;
                 return v;
             }
             else if (vt == Type_t.TYPE_INT16)
@@ -406,6 +227,7 @@ namespace EmbedXrpc
             }
             throw new InvalidDataException($"len is {vt},but len only support 1/2/4/8");
         }
+        
     }
     
 
