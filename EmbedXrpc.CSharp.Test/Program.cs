@@ -26,9 +26,9 @@ namespace Sample1
         public void Add(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
         {
             serviceInvokeParameter.RpcObject.Start_SuspendTimer(serviceInvokeParameter.TargetTimeOut / 2);
-            Response.ReturnValue.Sum = 1;
+            Response.ReturnValue.Sum = (uint)(a+b);
             Response.ReturnValue.dataLen = 0;
-            Thread.Sleep(5000);
+            Thread.Sleep(1000);
             serviceInvokeParameter.RpcObject.Stop_SuspendTimer();
         }
     }
