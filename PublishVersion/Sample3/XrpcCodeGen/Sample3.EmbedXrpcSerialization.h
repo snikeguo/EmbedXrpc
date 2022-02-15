@@ -12,7 +12,7 @@ void Student_Serialize(SerializationManager *sm,Student *obj);
 
 void Student_Deserialize(SerializationManager *sm,Student *obj);
 
-void Student_FreeData(Student *obj);
+//void Student_FreeData(Student *obj);
 
 
 #endif
