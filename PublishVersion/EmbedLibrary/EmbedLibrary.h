@@ -18,7 +18,7 @@ extern "C" {
 	typedef  int64_t Int64;
 	typedef  float Float;
 	typedef  double Double;
-
+	typedef  UInt8 Byte;
 #define El_WAIT_FOREVER	0xFFFFFFFF
 
 #include "cmsis_os2.h"

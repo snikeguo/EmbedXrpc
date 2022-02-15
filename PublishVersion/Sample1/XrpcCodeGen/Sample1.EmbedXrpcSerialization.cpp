@@ -43,10 +43,10 @@ obj->Sum6=bitsTempValue1>>30;
 DeserializeField((uint8_t *)&obj->Sum7,sm,sizeof(UInt32));
 }
 
-void AddResult_FreeData(AddResult *obj)
-{
-//data :NoSerialization 
-}
+//void AddResult_FreeData(AddResult *obj)
+//{
+////data :NoSerialization 
+//}
 
 void Student_Serialize(SerializationManager *sm,Student *obj)
 {
@@ -140,35 +140,35 @@ DeserializeField((uint8_t *)&obj->uend2,sm,sizeof(UInt8));
 #endif // #if MyMacro==TRUE
 }
 
-void Student_FreeData(Student *obj)
-{
-#if MyMacro==TRUE
-#endif // #if MyMacro==TRUE
-switch(obj->AddressType)
-{
-#if MyMacro==TRUE
-case Student_u1_FieldNumber:
-break;
-#endif // #if MyMacro==TRUE
-#if MyMacro==TRUE
-case Student_u2_FieldNumber:
-break;
-#endif // #if MyMacro==TRUE
-#if MyMacro==TRUE
-case Student_u3_FieldNumber:
-break;
-#endif // #if MyMacro==TRUE
-#if MyMacro==TRUE
-case Student_u4_FieldNumber:
-AddResult_FreeData(&obj->u4);
-break;
-#endif // #if MyMacro==TRUE
-}
-#if MyMacro==TRUE
-#endif // #if MyMacro==TRUE
-#if MyMacro==TRUE
-#endif // #if MyMacro==TRUE
-}
+//void Student_FreeData(Student *obj)
+//{
+//#if MyMacro==TRUE
+//#endif // #if MyMacro==TRUE
+//switch(obj->AddressType)
+//{
+//#if MyMacro==TRUE
+//case Student_u1_FieldNumber:
+//break;
+//#endif // #if MyMacro==TRUE
+//#if MyMacro==TRUE
+//case Student_u2_FieldNumber:
+//break;
+//#endif // #if MyMacro==TRUE
+//#if MyMacro==TRUE
+//case Student_u3_FieldNumber:
+//break;
+//#endif // #if MyMacro==TRUE
+//#if MyMacro==TRUE
+//case Student_u4_FieldNumber:
+////AddResult_FreeData(&obj->u4);
+//break;
+//#endif // #if MyMacro==TRUE
+//}
+//#if MyMacro==TRUE
+//#endif // #if MyMacro==TRUE
+//#if MyMacro==TRUE
+//#endif // #if MyMacro==TRUE
+//}
 
 void DateTime_t_Serialize(SerializationManager *sm,DateTime_t *obj)
 {
@@ -231,12 +231,12 @@ Student_Deserialize(sm,&obj->David);
 void DateTime_t_FreeData(DateTime_t *obj)
 {
 #if MyMacro==TRUE
-for(UInt8 DateString_index=0;DateString_index<obj->DateStringLen;DateString_index++)
-{
-}
+//for(UInt8 DateString_index=0;DateString_index<obj->DateStringLen;DateString_index++)
+//{
+//}
 El_Free(obj->DateString);
 #endif // #if MyMacro==TRUE
-Student_FreeData(&obj->David);
+//Student_FreeData(&obj->David);
 }
 
 void DateTimeChange_Return_Serialize(SerializationManager *sm,DateTimeChange_Return *obj)
@@ -251,13 +251,13 @@ void DateTimeChange_Return_Deserialize(SerializationManager *sm,DateTimeChange_R
 DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
 }
 
-void DateTimeChange_Return_FreeData(DateTimeChange_Return *obj)
-{
-}
+//void DateTimeChange_Return_FreeData(DateTimeChange_Return *obj)
+//{
+//}
 
 void DateTimeChange_Parameter_Serialize(SerializationManager *sm,DateTimeChange_Parameter *obj)
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
+for(Byte now_index=0;now_index<1;now_index++)
 {
 DateTime_t_Serialize(sm,&obj->now[now_index]);
 }
@@ -265,7 +265,7 @@ DateTime_t_Serialize(sm,&obj->now[now_index]);
 
 void DateTimeChange_Parameter_Deserialize(SerializationManager *sm,DateTimeChange_Parameter *obj)
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
+for(Byte now_index=0;now_index<1;now_index++)
 {
 DateTime_t_Deserialize(sm,&obj->now[now_index]);
 }
@@ -273,7 +273,7 @@ DateTime_t_Deserialize(sm,&obj->now[now_index]);
 
 void DateTimeChange_Parameter_FreeData(DateTimeChange_Parameter *obj)
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
+for(Byte now_index=0;now_index<1;now_index++)
 {
 DateTime_t_FreeData(&obj->now[now_index]);
 }
@@ -291,13 +291,13 @@ void Test2_Return_Deserialize(SerializationManager *sm,Test2_Return *obj)
 DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
 }
 
-void Test2_Return_FreeData(Test2_Return *obj)
-{
-}
+//void Test2_Return_FreeData(Test2_Return *obj)
+//{
+//}
 
 void Test2_Parameter_Serialize(SerializationManager *sm,Test2_Parameter *obj)
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
+for(Byte now_index=0;now_index<1;now_index++)
 {
 DateTime_t_Serialize(sm,&obj->now[now_index]);
 }
@@ -305,7 +305,7 @@ DateTime_t_Serialize(sm,&obj->now[now_index]);
 
 void Test2_Parameter_Deserialize(SerializationManager *sm,Test2_Parameter *obj)
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
+for(Byte now_index=0;now_index<1;now_index++)
 {
 DateTime_t_Deserialize(sm,&obj->now[now_index]);
 }
@@ -313,7 +313,7 @@ DateTime_t_Deserialize(sm,&obj->now[now_index]);
 
 void Test2_Parameter_FreeData(Test2_Parameter *obj)
 {
-for(uint8_t now_index=0;now_index<1;now_index++)
+for(Byte now_index=0;now_index<1;now_index++)
 {
 DateTime_t_FreeData(&obj->now[now_index]);
 }
@@ -333,10 +333,10 @@ DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
 AddResult_Deserialize(sm,&obj->ReturnValue);
 }
 
-void Add_Return_FreeData(Add_Return *obj)
-{
-AddResult_FreeData(&obj->ReturnValue);
-}
+//void Add_Return_FreeData(Add_Return *obj)
+//{
+////AddResult_FreeData(&obj->ReturnValue);
+//}
 
 void Add_Parameter_Serialize(SerializationManager *sm,Add_Parameter *obj)
 {
@@ -372,9 +372,9 @@ DeserializeField((uint8_t *)&obj->data[data_index],sm,sizeof(UInt8));
 
 void Add_Parameter_FreeData(Add_Parameter *obj)
 {
-for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
-{
-}
+//for(Int32 data_index=0;data_index<obj->dataLen;data_index++)
+//{
+//}
 El_Free(obj->data);
 }
 
@@ -394,9 +394,9 @@ DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
 DeserializeField((uint8_t *)&obj->ReturnValue,sm,sizeof(UInt8));
 }
 
-void NoArg_Return_FreeData(NoArg_Return *obj)
-{
-}
+//void NoArg_Return_FreeData(NoArg_Return *obj)
+//{
+//}
 
 void NoArg_Parameter_Serialize(SerializationManager *sm,NoArg_Parameter *obj)
 {
@@ -406,9 +406,9 @@ void NoArg_Parameter_Deserialize(SerializationManager *sm,NoArg_Parameter *obj)
 {
 }
 
-void NoArg_Parameter_FreeData(NoArg_Parameter *obj)
-{
-}
+//void NoArg_Parameter_FreeData(NoArg_Parameter *obj)
+//{
+//}
 
 void NoReturn_Return_Serialize(SerializationManager *sm,NoReturn_Return *obj)
 {
@@ -422,9 +422,9 @@ void NoReturn_Return_Deserialize(SerializationManager *sm,NoReturn_Return *obj)
 DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
 }
 
-void NoReturn_Return_FreeData(NoReturn_Return *obj)
-{
-}
+//void NoReturn_Return_FreeData(NoReturn_Return *obj)
+//{
+//}
 
 void NoReturn_Parameter_Serialize(SerializationManager *sm,NoReturn_Parameter *obj)
 {
@@ -438,9 +438,9 @@ void NoReturn_Parameter_Deserialize(SerializationManager *sm,NoReturn_Parameter 
 DeserializeField((uint8_t *)&obj->a,sm,sizeof(Int32));
 }
 
-void NoReturn_Parameter_FreeData(NoReturn_Parameter *obj)
-{
-}
+//void NoReturn_Parameter_FreeData(NoReturn_Parameter *obj)
+//{
+//}
 
 void NoArgAndReturn_Return_Serialize(SerializationManager *sm,NoArgAndReturn_Return *obj)
 {
@@ -454,9 +454,9 @@ void NoArgAndReturn_Return_Deserialize(SerializationManager *sm,NoArgAndReturn_R
 DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
 }
 
-void NoArgAndReturn_Return_FreeData(NoArgAndReturn_Return *obj)
-{
-}
+//void NoArgAndReturn_Return_FreeData(NoArgAndReturn_Return *obj)
+//{
+//}
 
 void NoArgAndReturn_Parameter_Serialize(SerializationManager *sm,NoArgAndReturn_Parameter *obj)
 {
@@ -466,7 +466,7 @@ void NoArgAndReturn_Parameter_Deserialize(SerializationManager *sm,NoArgAndRetur
 {
 }
 
-void NoArgAndReturn_Parameter_FreeData(NoArgAndReturn_Parameter *obj)
-{
-}
+//void NoArgAndReturn_Parameter_FreeData(NoArgAndReturn_Parameter *obj)
+//{
+//}
 
