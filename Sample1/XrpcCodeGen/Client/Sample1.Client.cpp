@@ -109,7 +109,7 @@ void Add_Requester::Free_Add(Add_Return *response)
 {
 if(response->State==ResponseState_Ok)
 {
-Add_Return_FreeData(response);
+//Add_Return_FreeData(response);
 }
 }
 
@@ -200,7 +200,7 @@ void NoArg_Requester::Free_NoArg(NoArg_Return *response)
 {
 if(response->State==ResponseState_Ok)
 {
-NoArg_Return_FreeData(response);
+//NoArg_Return_FreeData(response);
 }
 }
 

@@ -253,6 +253,7 @@ namespace EmbedXrpcIdlParser
         private void EmitCaller(TargetService service, StreamWriter hsw, StreamWriter csw)
         {
             //生成客户端代码
+            string ReturnStructFreeNote = service.ReturnStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
             CppSerializableCommon.MacroControlWriteBegin(hsw, service.MacroControlAttribute);
             CppSerializableCommon.MacroControlWriteBegin(csw, service.MacroControlAttribute);
             hsw.WriteLine("class " + service.ServiceName + "_Requester");
@@ -416,7 +417,7 @@ namespace EmbedXrpcIdlParser
                 hsw.WriteLine($"void Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response);\n");
                 csw.WriteLine($"void {service.ServiceName}_Requester::Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response)");
                 csw.WriteLine("{\nif(response->State==ResponseState_Ok)\n{");
-                csw.WriteLine($"{service.ReturnStructType.TypeName}_FreeData(response);");
+                csw.WriteLine($"{ReturnStructFreeNote}{service.ReturnStructType.TypeName}_FreeData(response);");
                 csw.WriteLine("}\n}");
             }
 
@@ -430,6 +431,8 @@ namespace EmbedXrpcIdlParser
 
         private void EmitCallee(TargetService service, StreamWriter hsw, StreamWriter csw)
         {
+            string ParameterStructFreeNote = service.ParameterStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
+            string ReturnStructFreeNote = service.ReturnStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
             CppSerializableCommon.MacroControlWriteBegin(hsw, service.MacroControlAttribute);
             CppSerializableCommon.MacroControlWriteBegin(csw, service.MacroControlAttribute);
             hsw.WriteLine($"class {service.ServiceName}_Service:public IService");
@@ -486,11 +489,14 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine(");");//生成调用目标函数。
 
 
-            csw.WriteLine($"{service.ParameterStructType.TypeName}_FreeData(&request);");//free
+            csw.WriteLine($"{ParameterStructFreeNote}{service.ParameterStructType.TypeName}_FreeData(&request);");//free
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
                 csw.WriteLine($"{service.ReturnStructType.TypeName}_Serialize(sendManager,&Response);");
-                csw.WriteLine($"if(IsFreeResponse==true) {service.ReturnStructType.TypeName}_FreeData(&Response);");//2021.3.10 用户malloc的空间 可以选择free,有用户控制所以有了这条语句
+                //2021.3.10 用户malloc的空间 可以选择free,有用户控制所以有了这条语句
+                csw.WriteLine($"if(IsFreeResponse==true){{");
+                csw.WriteLine($"{ReturnStructFreeNote}{service.ReturnStructType.TypeName}_FreeData(&Response);");
+                csw.WriteLine("}");
             }
 
             csw.WriteLine("}");//end function

@@ -57,6 +57,7 @@ namespace EmbedXrpcIdlParser
     {
         TargetType_t TargetType { get;  }
         string TypeName { get; set; }
+        bool IsNeedFreeMemoryForNativeLanguage { get; }
     }
     public class BaseType_TargetType:ITargetType
     {
@@ -83,6 +84,13 @@ namespace EmbedXrpcIdlParser
             TypeReplaceDic.Add(TargetType_t.TYPE_FLOAT, "Float");
             TypeReplaceDic.Add(TargetType_t.TYPE_DOUBLE, "Double");
         }
+        public bool IsNeedFreeMemoryForNativeLanguage
+        {
+            get
+            {
+                return false;
+            }
+        }
     }
     public class EnumType_TargetType: ITargetType
     {
@@ -94,6 +102,13 @@ namespace EmbedXrpcIdlParser
         public TargetType_t TargetType { get; set; } = TargetType_t.TYPE_ENUM;
 
         public string TypeName { get; set; }
+        public bool IsNeedFreeMemoryForNativeLanguage
+        {
+            get
+            {
+                return false;
+            }
+        }
 
     }
     public class ArrayType_TargetType:ITargetType
@@ -101,6 +116,13 @@ namespace EmbedXrpcIdlParser
         public TargetType_t TargetType { get;private set; } = TargetType_t.TYPE_ARRAY;
         public string TypeName { get; set; }
         public ITargetType ElementType { get; set; }
+        public bool IsNeedFreeMemoryForNativeLanguage
+        {
+            get
+            {
+                return ElementType.IsNeedFreeMemoryForNativeLanguage;
+            }
+        }
     }
 
     public class StructType_TargetType:ITargetType
@@ -128,6 +150,41 @@ namespace EmbedXrpcIdlParser
         public ITargetField UnionTargetTypeField { get; set; }
 
         public List<CppCustomMethodSignatureAttribute> CppCustomMethodSignatures { get; set; }
+
+        public bool IsNeedFreeMemoryForNativeLanguage
+        {
+            get
+            {
+                foreach (var targetField in TargetFields)
+                {
+                    if (targetField.NoSerializationAttr != null)
+                        continue;
+                    if (targetField is Array_TargetField)
+                    {
+                        Array_TargetField array_TargetField = targetField as Array_TargetField;
+                        if(array_TargetField.MaxCountAttribute.IsFixed==false)
+                        {
+                            return true;
+                        }
+                        ArrayType_TargetType arrayType_TargetType = array_TargetField.TargetType as ArrayType_TargetType;
+                        ITargetType element = arrayType_TargetType.ElementType;
+                        if(element.IsNeedFreeMemoryForNativeLanguage==true)
+                        {
+                            return true;
+                        }
+                    }
+                    if(targetField is Struct_TargetField)
+                    {
+                        Struct_TargetField struct_TargetField = targetField as Struct_TargetField;
+                        if (struct_TargetField.TargetType.IsNeedFreeMemoryForNativeLanguage == true)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
     }
 
 
@@ -139,6 +196,9 @@ namespace EmbedXrpcIdlParser
         UnionFieldAttribute UnionFieldAttr { get; set; }
         NoSerializationAttribute NoSerializationAttr { get; set; }
         MacroControlAttribute MacroControlAttr { get; set; }
+        
+
+
     }
 
     public class Base_TargetField : ITargetField
@@ -155,6 +215,8 @@ namespace EmbedXrpcIdlParser
         public NoSerializationAttribute NoSerializationAttr { get; set; }
         public BitFieldAttribute BitFieldAttribute { get; set; }
         public MacroControlAttribute MacroControlAttr { get; set; }
+        
+
     }
     public class Enum_TargetField: Base_TargetField
     {
@@ -174,6 +236,8 @@ namespace EmbedXrpcIdlParser
         public UnionFieldAttribute UnionFieldAttr { get; set; }
         public NoSerializationAttribute NoSerializationAttr { get; set; }
         public MacroControlAttribute MacroControlAttr { get; set; }
+        
+
     }
     public class Struct_TargetField : ITargetField
     {
