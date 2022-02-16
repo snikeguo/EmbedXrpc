@@ -142,7 +142,7 @@ namespace EmbedXrpcIdlParser
             StringBuilder SerializeHeaderSb = new StringBuilder();
             StringBuilder DeserializeHeaderSb = new StringBuilder();
             StringBuilder FreeHeaderSb = new StringBuilder();
-            string StructFreeNote = targetStructUnion.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
+            string StructFreeNote = targetStructUnion.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//!";
 
 
             SerializeHeaderSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj);");
@@ -361,7 +361,7 @@ namespace EmbedXrpcIdlParser
                     Array_TargetField array_TargetField = field as Array_TargetField;
                     var arrayLenField = array_TargetField.ArrayLenField;
                     ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
-                    string ElementTypeFreeNote = attt.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
+                    string ElementTypeFreeNote = attt.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//!!";
                     var lenstring = string.Empty;
                     var cslenstring = string.Empty;
 
@@ -486,7 +486,7 @@ namespace EmbedXrpcIdlParser
                     //{
                     //    SerializeCodeSb.AppendLine($"SerializeKey({field.FieldNumberAttr.Number},{TargetTypeString[field.TargetType.TargetType]});");
                     //}
-                    string StructFieldFreeNote = field.TargetType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
+                    string StructFieldFreeNote = field.TargetType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//!!!";
                     if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
                     {
                         SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));

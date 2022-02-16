@@ -104,7 +104,7 @@ Add(serviceInvokeParameter,request.a,request.b,request.dataLen,request.data);
 Add_Parameter_FreeData(&request);
 Add_Return_Serialize(sendManager,&Response);
 if(IsFreeResponse==true){
-//Add_Return_FreeData(&Response);
+//!Add_Return_FreeData(&Response);
 }
 }
 
@@ -117,10 +117,10 @@ if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)
 El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 }
 NoArg(serviceInvokeParameter);
-//NoArg_Parameter_FreeData(&request);
+//!NoArg_Parameter_FreeData(&request);
 NoArg_Return_Serialize(sendManager,&Response);
 if(IsFreeResponse==true){
-//NoArg_Return_FreeData(&Response);
+//!NoArg_Return_FreeData(&Response);
 }
 }
 
@@ -133,7 +133,7 @@ if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)
 El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 }
 NoReturn(serviceInvokeParameter,request.a);
-//NoReturn_Parameter_FreeData(&request);
+//!NoReturn_Parameter_FreeData(&request);
 }
 
 
@@ -145,7 +145,7 @@ if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)
 El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));
 }
 NoArgAndReturn(serviceInvokeParameter);
-//NoArgAndReturn_Parameter_FreeData(&request);
+//!NoArgAndReturn_Parameter_FreeData(&request);
 }
 
 

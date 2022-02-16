@@ -253,7 +253,7 @@ namespace EmbedXrpcIdlParser
         private void EmitCaller(TargetService service, StreamWriter hsw, StreamWriter csw)
         {
             //生成客户端代码
-            string ReturnStructFreeNote = service.ReturnStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
+            string ReturnStructFreeNote = service.ReturnStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//!";
             CppSerializableCommon.MacroControlWriteBegin(hsw, service.MacroControlAttribute);
             CppSerializableCommon.MacroControlWriteBegin(csw, service.MacroControlAttribute);
             hsw.WriteLine("class " + service.ServiceName + "_Requester");
@@ -431,8 +431,8 @@ namespace EmbedXrpcIdlParser
 
         private void EmitCallee(TargetService service, StreamWriter hsw, StreamWriter csw)
         {
-            string ParameterStructFreeNote = service.ParameterStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
-            string ReturnStructFreeNote = service.ReturnStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//";
+            string ParameterStructFreeNote = service.ParameterStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//!";
+            string ReturnStructFreeNote = service.ReturnStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//!";
             CppSerializableCommon.MacroControlWriteBegin(hsw, service.MacroControlAttribute);
             CppSerializableCommon.MacroControlWriteBegin(csw, service.MacroControlAttribute);
             hsw.WriteLine($"class {service.ServiceName}_Service:public IService");

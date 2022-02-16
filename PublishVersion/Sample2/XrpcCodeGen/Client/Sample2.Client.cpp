@@ -88,7 +88,7 @@ void GetSum_Requester::Free_GetSum(GetSum_Return *response)
 {
 if(response->State==ResponseState_Ok)
 {
-//GetSum_Return_FreeData(response);
+//!GetSum_Return_FreeData(response);
 }
 }
 

@@ -12,7 +12,19 @@ void Student_Serialize(SerializationManager *sm,Student *obj);
 
 void Student_Deserialize(SerializationManager *sm,Student *obj);
 
-//void Student_FreeData(Student *obj);
+//!void Student_FreeData(Student *obj);
+
+void DynamicStudentArray_Serialize(SerializationManager *sm,DynamicStudentArray *obj);
+
+void DynamicStudentArray_Deserialize(SerializationManager *sm,DynamicStudentArray *obj);
+
+void DynamicStudentArray_FreeData(DynamicStudentArray *obj);
+
+void MixedStudentArray_Serialize(SerializationManager *sm,MixedStudentArray *obj);
+
+void MixedStudentArray_Deserialize(SerializationManager *sm,MixedStudentArray *obj);
+
+void MixedStudentArray_FreeData(MixedStudentArray *obj);
 
 
 #endif
