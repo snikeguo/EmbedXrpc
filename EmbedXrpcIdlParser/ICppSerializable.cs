@@ -97,13 +97,13 @@ namespace EmbedXrpcIdlParser
 
         public static void EmitEnum(EnumType_TargetType targetEnum, StreamWriter CommonHsw)
         {
-            CommonHsw.WriteLine("typedef enum _" + targetEnum.TypeName);
+            CommonHsw.WriteLine($"typedef enum {targetEnum.TypeName}");
             CommonHsw.WriteLine("{");
             foreach (var ev in targetEnum.KeyValue)
             {
                 CommonHsw.WriteLine(ev.Key + " = " + ev.Value.ToString() + ",");
             }
-            CommonHsw.WriteLine("}" + targetEnum.TypeName + ";");
+            CommonHsw.WriteLine($"}}{targetEnum.TypeName};");
         }
 
         public static void EmitStruct(StructType_TargetType structType, StreamWriter CommonHsw)
@@ -113,7 +113,7 @@ namespace EmbedXrpcIdlParser
             SerializeCsw、SerializeHsw用来定义序列化的操作、行为等
              */
             StringBuilder FieldNumberSb = new StringBuilder();
-            CommonHsw.WriteLine("struct " + structType.TypeName);
+            CommonHsw.WriteLine($"typedef struct {structType.TypeName}");
             CommonHsw.WriteLine("{");
             if(structType.CppCustomMethodSignatures!=null)
             {
@@ -159,7 +159,7 @@ namespace EmbedXrpcIdlParser
                     CommonHsw.WriteLine("};//union end");
                 }
             }
-            CommonHsw.WriteLine("};");
+            CommonHsw.WriteLine($"}}{structType.TypeName};");
             FieldNumberSb.Append("\r\n");
             CommonHsw.WriteLine(FieldNumberSb.ToString());
 

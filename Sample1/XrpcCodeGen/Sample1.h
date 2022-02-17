@@ -8,12 +8,16 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
-typedef enum _Sex
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+typedef enum Sex
 {
 Man = 2,
 WoMan = 9,
 }Sex;
-struct AddResult
+typedef struct AddResult
 {
 UInt32 Sum:11;   //FieldNumber:1     
 UInt32 Sum2:19;   //FieldNumber:2     
@@ -24,7 +28,7 @@ UInt64 Sum4:11;   //FieldNumber:6
 UInt64 Sum5:19;   //FieldNumber:7     
 UInt64 Sum6:2;   //FieldNumber:8     
 UInt32 Sum7;   //FieldNumber:9     
-};
+}AddResult;
 #define AddResult_Sum_FieldNumber  1
 #define AddResult_Sum2_FieldNumber  2
 #define AddResult_Sum3_FieldNumber  3
@@ -36,7 +40,7 @@ UInt32 Sum7;   //FieldNumber:9
 #define AddResult_Sum7_FieldNumber  9
 
 
-struct Student
+typedef struct Student
 {
 #if MyMacro==TRUE
 Int32 a;   //FieldNumber:1     
@@ -63,7 +67,7 @@ UInt8 uend1;   //FieldNumber:100
 #if MyMacro==TRUE
 UInt8 uend2;   //FieldNumber:8     
 #endif // #if MyMacro==TRUE
-};
+}Student;
 #if MyMacro==TRUE
 #define Student_a_FieldNumber  1
 #endif // #if MyMacro==TRUE
@@ -89,7 +93,7 @@ UInt8 uend2;   //FieldNumber:8
 #endif // #if MyMacro==TRUE
 
 
-struct DateTime_t
+typedef struct DateTime_t
 {
 Int32 Year;   //FieldNumber:10086     
 Int32 Month;   //FieldNumber:2     
@@ -103,7 +107,7 @@ UInt8 DateStringLen;   //FieldNumber:1
 UInt8* DateString;   //FieldNumber:7     
 #endif // #if MyMacro==TRUE
 Student David;   //FieldNumber:9     
-};
+}DateTime_t;
 #define DateTime_t_Year_FieldNumber  10086
 #define DateTime_t_Month_FieldNumber  2
 #define DateTime_t_Day_FieldNumber  3
@@ -118,95 +122,99 @@ Student David;   //FieldNumber:9
 #define DateTime_t_David_FieldNumber  9
 
 
-struct DateTimeChange_Return
+typedef struct DateTimeChange_Return
 {
 RequestResponseState State;   //FieldNumber:1     
-};
+}DateTimeChange_Return;
 #define DateTimeChange_Return_State_FieldNumber  1
 
 
-struct DateTimeChange_Parameter
+typedef struct DateTimeChange_Parameter
 {
 DateTime_t now[1];   //FieldNumber:1     
-};
+}DateTimeChange_Parameter;
 #define DateTimeChange_Parameter_now_FieldNumber  1
 
 
-struct Test2_Return
+typedef struct Test2_Return
 {
 RequestResponseState State;   //FieldNumber:1     
-};
+}Test2_Return;
 #define Test2_Return_State_FieldNumber  1
 
 
-struct Test2_Parameter
+typedef struct Test2_Parameter
 {
 DateTime_t now[1];   //FieldNumber:1     
-};
+}Test2_Parameter;
 #define Test2_Parameter_now_FieldNumber  1
 
 
-struct Add_Return
+typedef struct Add_Return
 {
 RequestResponseState State;   //FieldNumber:1     
 AddResult ReturnValue;   //FieldNumber:2     
-};
+}Add_Return;
 #define Add_Return_State_FieldNumber  1
 #define Add_Return_ReturnValue_FieldNumber  2
 
 
-struct Add_Parameter
+typedef struct Add_Parameter
 {
 Int32 a;   //FieldNumber:1     
 Int32 b;   //FieldNumber:2     
 Int32 dataLen;   //FieldNumber:3     
 UInt8* data;   //FieldNumber:4     
-};
+}Add_Parameter;
 #define Add_Parameter_a_FieldNumber  1
 #define Add_Parameter_b_FieldNumber  2
 #define Add_Parameter_dataLen_FieldNumber  3
 #define Add_Parameter_data_FieldNumber  4
 
 
-struct NoArg_Return
+typedef struct NoArg_Return
 {
 RequestResponseState State;   //FieldNumber:1     
 UInt8 ReturnValue;   //FieldNumber:2     
-};
+}NoArg_Return;
 #define NoArg_Return_State_FieldNumber  1
 #define NoArg_Return_ReturnValue_FieldNumber  2
 
 
-struct NoArg_Parameter
+typedef struct NoArg_Parameter
 {
-};
+}NoArg_Parameter;
 
 
-struct NoReturn_Return
+typedef struct NoReturn_Return
 {
 RequestResponseState State;   //FieldNumber:1     
-};
+}NoReturn_Return;
 #define NoReturn_Return_State_FieldNumber  1
 
 
-struct NoReturn_Parameter
+typedef struct NoReturn_Parameter
 {
 Int32 a;   //FieldNumber:1     
-};
+}NoReturn_Parameter;
 #define NoReturn_Parameter_a_FieldNumber  1
 
 
-struct NoArgAndReturn_Return
+typedef struct NoArgAndReturn_Return
 {
 RequestResponseState State;   //FieldNumber:1     
-};
+}NoArgAndReturn_Return;
 #define NoArgAndReturn_Return_State_FieldNumber  1
 
 
-struct NoArgAndReturn_Parameter
+typedef struct NoArgAndReturn_Parameter
 {
-};
+}NoArgAndReturn_Parameter;
 
+
+#ifdef  __cplusplus
+}
+#endif
 
 
 #endif
