@@ -5,6 +5,10 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
@@ -27,5 +31,9 @@ void GetSum_Parameter_Deserialize(SerializationManager *sm,GetSum_Parameter *obj
 //!void GetSum_Parameter_FreeData(GetSum_Parameter *obj);
 
 #define GetSum_ServiceId 16   //0x10
+#ifdef  __cplusplus
+}
+#endif
+
 
 #endif

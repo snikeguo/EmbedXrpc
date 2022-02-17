@@ -5,6 +5,10 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
@@ -25,6 +29,10 @@ void MixedStudentArray_Serialize(SerializationManager *sm,MixedStudentArray *obj
 void MixedStudentArray_Deserialize(SerializationManager *sm,MixedStudentArray *obj);
 
 void MixedStudentArray_FreeData(MixedStudentArray *obj);
+
+#ifdef  __cplusplus
+}
+#endif
 
 
 #endif

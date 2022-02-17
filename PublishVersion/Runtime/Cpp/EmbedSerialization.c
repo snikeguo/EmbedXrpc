@@ -69,7 +69,7 @@ void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t fie
 	if (sm->BlockBufferProvider != NULL)
 	{
 		BlockRingBufferProvider_PopChars(sm->BlockBufferProvider,field_ptr, (uint16_t)field_width);
-}
+	}
 	else
 	{
 		El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width);
