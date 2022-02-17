@@ -5,6 +5,10 @@
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #ifndef offsetof
 #define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))
 #endif
@@ -104,5 +108,9 @@ void NoArgAndReturn_Parameter_Deserialize(SerializationManager *sm,NoArgAndRetur
 //!void NoArgAndReturn_Parameter_FreeData(NoArgAndReturn_Parameter *obj);
 
 #define NoArgAndReturn_ServiceId 21   //0x15
+#ifdef  __cplusplus
+}
+#endif
+
 
 #endif
