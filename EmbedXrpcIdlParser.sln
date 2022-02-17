@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbedXrpc.CSharp.NF", "Embe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmbedXrpc.CSharp.NetCore", "EmbedXrpc.CSharp.NetCore\EmbedXrpc.CSharp.NetCore.csproj", "{7E8A9B20-1682-4602-8034-3FE4F1828506}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestCodeGenSpeed", "TestCodeGenSpeed\TestCodeGenSpeed.csproj", "{8888C1B0-2766-4071-867F-EAF0F6AE1459}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +149,18 @@ Global
 		{7E8A9B20-1682-4602-8034-3FE4F1828506}.Release|x64.Build.0 = Release|Any CPU
 		{7E8A9B20-1682-4602-8034-3FE4F1828506}.Release|x86.ActiveCfg = Release|x86
 		{7E8A9B20-1682-4602-8034-3FE4F1828506}.Release|x86.Build.0 = Release|x86
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Debug|x64.Build.0 = Debug|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Debug|x86.Build.0 = Debug|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Release|x64.ActiveCfg = Release|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Release|x64.Build.0 = Release|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Release|x86.ActiveCfg = Release|Any CPU
+		{8888C1B0-2766-4071-867F-EAF0F6AE1459}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

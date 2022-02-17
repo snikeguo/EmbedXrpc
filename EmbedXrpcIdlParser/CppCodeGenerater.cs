@@ -35,6 +35,20 @@ namespace EmbedXrpcIdlParser
         {
             sw.WriteLine("#define {0}_ServiceId {1}   //0x{2:X}", defineName, ServiceId, ServiceId);
         }
+        private void EmitCPlusPlusMacroBegin(StreamWriter sw)
+        {
+            sw.WriteLine("#ifdef  __cplusplus");
+            sw.WriteLine("extern \"C\" {");
+            sw.WriteLine("#endif");
+            sw.WriteLine();
+        }
+        private void EmitCPlusPlusMacroEnd(StreamWriter sw)
+        {
+            sw.WriteLine("#ifdef  __cplusplus");
+            sw.WriteLine("}");
+            sw.WriteLine("#endif");
+            sw.WriteLine();
+        }
         public CppCodeGenParameter codeGenParameter;
         public ICppSerializable embedXrpcSerializationGenerator;
         public void CodeGen(CppCodeGenParameter cppCodeGenParameter)
@@ -77,12 +91,13 @@ namespace EmbedXrpcIdlParser
 
             CommonHsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             CommonHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
-
+            EmitCPlusPlusMacroBegin(CommonHsw);
 
             CommonCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + outputattr.OutPutFileName + ".cpp", false, encode);
             CommonCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.h\"");
             CommonCsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             CommonCsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
+            
 
             //fbsStreamWriter = new StreamWriter(outputpath+outputattr.OutPutFileName + ".fbs", false, Encoding.UTF8);
             //fbsStreamWriter.WriteLine("namespace EmbedXrpc;");
@@ -104,7 +119,7 @@ namespace EmbedXrpcIdlParser
 
             SerializeHsw.WriteLine("\n//auto code gen ! DO NOT modify this file!");
             SerializeHsw.WriteLine("//自动代码生成,请不要修改本文件!\n");
-
+            EmitCPlusPlusMacroBegin(SerializeHsw);
             //SerializeHsw.WriteLine("//EmbedXrpc Code gen");
             //SerializeHsw.WriteLine("//关于snikeguo作者:92年生人,热爱技术,底层功底扎实.深入理解C语言底层到汇编层，单片机从外设/裸机到OS均有涉猎");
             //SerializeHsw.WriteLine("//上位机专注于C# 界面库熟悉WPF.服务器专注于dotnet core");
@@ -115,7 +130,7 @@ namespace EmbedXrpcIdlParser
 
             //EmbedXrpcSerializationHFileStreamWriter.WriteLine("#include\"EmbedXrpcSerialization.h\"");
             //D:\VSProject\EmbedXrpcIdlParser\EmbedXrpcSerialization
-            
+
             SerializeHsw.WriteLine("#ifndef offsetof");
             SerializeHsw.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
             SerializeHsw.WriteLine("#endif");
@@ -183,8 +198,8 @@ namespace EmbedXrpcIdlParser
 
             //fbsStreamWriter.WriteLine(FbsHelper.EmitPackageTable().ToString());
 
-            
 
+            EmitCPlusPlusMacroEnd(CommonHsw);
             CommonHsw.WriteLine("\n#endif");
             CommonHsw.Flush();
             CommonHsw.Close();
@@ -199,8 +214,8 @@ namespace EmbedXrpcIdlParser
             SerializeCsw.Flush();
             SerializeCsw.Close();
 
-            
 
+            EmitCPlusPlusMacroEnd(SerializeHsw);
             SerializeHsw.WriteLine("\n#endif");
 
             SerializeHsw.Flush();
