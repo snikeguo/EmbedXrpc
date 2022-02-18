@@ -295,11 +295,11 @@ namespace EmbedXrpcIdlParser
     [Serializable]
     public class TargetService
     {
-        public StructType_TargetType ReturnStructType { get; set; } = new StructType_TargetType();
+        public StructType_TargetType ReturnStructType { get; set; } 
         public string ServiceName { get; set; }
         
         public RoleAttribute RoleAttribute { get; internal set; }
-        public StructType_TargetType ParameterStructType { get; set; } = new StructType_TargetType();
+        public StructType_TargetType ParameterStructType { get; set; }
         public int ServiceId { get; internal set; }
 
         public ExternalParameterAttribute ExternalParameter { get; internal set;}
