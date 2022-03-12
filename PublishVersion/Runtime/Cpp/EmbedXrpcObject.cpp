@@ -254,20 +254,20 @@ _break:
 					}\
 					El_Memcpy(raw.Data, data, dataLen);\
 				}\
-				result = osMessageQueuePut(queue, &raw,0,0);\
+				result = osMessageQueuePut(queue, &raw,0,0)!=osOK?ReceivedMessageStatus::QueueFull : ReceivedMessageStatus::Ok;\
 			}\
 			else\
 			{\
-				result = osError;\
+				result = ReceivedMessageStatus::QueueFull;\
 			}\
 		}
 
 
-osStatus_t EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer)
+ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer)
 {
 	if (allDataLen < 4)
-		return osError;
-	osStatus_t El_SendQueueResult = osError;
+		return ReceivedMessageStatus::DataLenLessThan4;
+	ReceivedMessageStatus El_SendQueueResult = ReceivedMessageStatus::QueueFull;
 
 	ReceiveItemInfo raw;
 	uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
@@ -295,19 +295,22 @@ osStatus_t EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allDat
 		{
 			if (RpcConfig.UseRingBufferWhenReceiving == true)
 			{
-				El_SendQueueResult = BlockRingBufferProvider_Send(BlockBufferProviderOfRequestService, &raw, nullptr);
+				El_SendQueueResult = BlockRingBufferProvider_Send(BlockBufferProviderOfRequestService, &raw, nullptr)!=osOK?
+					ReceivedMessageStatus::QueueFull: ReceivedMessageStatus::Ok;
 			}
 			else
 			{
 				raw.Data = nullptr;
-				El_SendQueueResult = osMessageQueuePut(MessageQueueOfRequestService, &raw, 0, 0);
+				El_SendQueueResult = osMessageQueuePut(MessageQueueOfRequestService, &raw, 0, 0) != osOK ?
+					ReceivedMessageStatus::QueueFull : ReceivedMessageStatus::Ok;
 			}
 			goto sqr;
 		}
 
 		if (RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			El_SendQueueResult = BlockRingBufferProvider_Send(BlockBufferProviderOfRequestService, &raw, data);
+			El_SendQueueResult = BlockRingBufferProvider_Send(BlockBufferProviderOfRequestService, &raw, data) != osOK ?
+				ReceivedMessageStatus::QueueFull : ReceivedMessageStatus::Ok;
 		}
 		else
 		{
@@ -320,7 +323,8 @@ osStatus_t EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allDat
 		//EmbedSerializationShowMessage("EmbedXrpcObject","Server ReceivedMessage  El_Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 		if (RpcConfig.UseRingBufferWhenReceiving == true)
 		{
-			El_SendQueueResult = BlockRingBufferProvider_Send(ServiceBlockBufferProvider, &raw, data) ;
+			El_SendQueueResult = BlockRingBufferProvider_Send(ServiceBlockBufferProvider, &raw, data) != osOK ? 
+				ReceivedMessageStatus::QueueFull : ReceivedMessageStatus::Ok;
 		}
 		else if (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true)
 		{
@@ -330,7 +334,7 @@ osStatus_t EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allDat
 		{
 			raw.Data = data;
 			ServiceExecute(this, raw, false);
-			El_SendQueueResult = osOK;
+			El_SendQueueResult = ReceivedMessageStatus::Ok;
 		}
 	}
 sqr:

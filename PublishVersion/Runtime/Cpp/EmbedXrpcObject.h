@@ -4,7 +4,7 @@
 #include "EmbedLibrary.h"
 #include "EmbedXrpcCommon.h"
 #include "BlockBufferProvider.h"
-#define EmbedXrpcObjectVersion	"2.4.0"
+#define EmbedXrpcObjectVersion	"2.5.5"
 
 struct EmbedXrpcBufferConfig
 {
@@ -75,7 +75,12 @@ struct InitConfig
 	EmbedXrpcConfig RpcConfig;
 	void* UserData;
 };
-
+enum ReceivedMessageStatus
+{
+	DataLenLessThan4,
+	QueueFull,
+	Ok,
+};
 class EmbedXrpcObject
 {
 public:
@@ -150,7 +155,7 @@ public:
 	void Init(InitConfig* cfg);
 	void DeInit();
 	static void ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
-	osStatus_t ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
+	ReceivedMessageStatus ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
 	static void SuspendTimerCallBack(void* arg);
 
 
