@@ -167,6 +167,30 @@ namespace EmbedXrpcIdlParser
             }
             return null;
         }
+        /// <summary>
+        /// 如果field字段没有NoSerializationAttr特性或者NoSerializationAttr.FieldName==string.empty 将返回null
+        /// 如果NoSerializationAttr不为null 并且NoSerializationAttr.FieldName!=string.Empty 
+        /// 并且在结构体中没有找到NoSerializationAttr.FieldName,那么将抛出异常!
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public Base_TargetField GetSerializeControlField(ITargetField field)
+        {
+            if(field.NoSerializationAttr==null)
+            {
+                return null;
+            }
+            if (field.NoSerializationAttr.FieldName == string.Empty)
+                return null;
+            foreach (var f in TargetFields)
+            {
+                if(f.FieldName==field.NoSerializationAttr.FieldName)
+                {
+                    return f as Base_TargetField;
+                }
+            }
+            throw new Exception($"没有找到{field.FieldName}的NoSerializationAttr特性的{field.NoSerializationAttr.FieldName}字段！");
+        }
         public ITargetField UnionTargetTypeField { get; set; }
 
         public List<CppCustomMethodSignatureAttribute> CppCustomMethodSignatures { get; set; }
@@ -184,7 +208,7 @@ namespace EmbedXrpcIdlParser
                 Debug.WriteLine($"{TypeName}._IsNeedFreeMemoryForNativeLanguage未缓存!");
                 foreach (var targetField in TargetFields)
                 {
-                    if (targetField.NoSerializationAttr != null)
+                    if (targetField.NoSerializationAttr != null && targetField.NoSerializationAttr.FieldName==string.Empty)
                         continue;
                     if (targetField is Array_TargetField)
                     {
@@ -507,6 +531,7 @@ namespace EmbedXrpcIdlParser
                     var unionTargetTypeAtt = field.GetCustomAttribute<UnionTargetTypeAttribute>();
                     targetfield.UnionFieldAttr= field.GetCustomAttribute<UnionFieldAttribute>();
                     targetfield.NoSerializationAttr= field.GetCustomAttribute<NoSerializationAttribute>();
+                    targetStructType.GetSerializeControlField(targetfield);
                     targetfield.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     targetfield.BitFieldAttribute = field.GetCustomAttribute<BitFieldAttribute>();
                     if(targetfield.BitFieldAttribute!=null)
@@ -586,6 +611,7 @@ namespace EmbedXrpcIdlParser
                     enumField.TargetType = te;
                     enumField.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
                     enumField.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
+                    targetStructType.GetSerializeControlField(enumField);
                     enumField.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     needAddField = enumField;
                 }
@@ -624,6 +650,7 @@ namespace EmbedXrpcIdlParser
                     arrayField.ArrayLenField = targetStructType.GetArrayLenField(arrayField);
                     arrayField.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
                     arrayField.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
+                    targetStructType.GetSerializeControlField(arrayField);
                     arrayField.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     needAddField = arrayField;
                     if(arrayField.UnionFieldAttr!=null)
@@ -641,6 +668,7 @@ namespace EmbedXrpcIdlParser
                     objectFiled.FieldNumberAttr = FieldNumberAttr;
                     objectFiled.UnionFieldAttr = field.GetCustomAttribute<UnionFieldAttribute>();
                     objectFiled.NoSerializationAttr = field.GetCustomAttribute<NoSerializationAttribute>();
+                    targetStructType.GetSerializeControlField(objectFiled);
                     objectFiled.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     needAddField = objectFiled;
                     //targetStruct.TargetFields.Add(objectFiled);

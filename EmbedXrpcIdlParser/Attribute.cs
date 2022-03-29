@@ -161,7 +161,17 @@ namespace EmbedXrpcIdlParser
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
     public class NoSerializationAttribute : Attribute
     {
-   
+        public NoSerializationAttribute()
+        {
+
+        }
+        public NoSerializationAttribute(string field,string cmpValue)
+        {
+            FieldName = field;
+            CompareValue = cmpValue;
+        }
+        public string FieldName { get; private set; } = string.Empty;
+        public string CompareValue { get; private set; }
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
