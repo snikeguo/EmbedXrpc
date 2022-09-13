@@ -1,4 +1,4 @@
-﻿#include"Sample2.EmbedXrpcSerialization.h"
+#include"Sample2.EmbedXrpcSerialization.h"
 
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
@@ -19,9 +19,9 @@ DeserializeField((uint8_t *)&obj->IsSuccess,sm,sizeof(UInt8));
 DeserializeField((uint8_t *)&obj->Value,sm,sizeof(Int32));
 }
 
-//!void GetSumResult_FreeData(GetSumResult *obj)
-//!{
-//!}
+//! void GetSumResult_FreeData(GetSumResult *obj)
+//! {
+//! }
 
 void GetSum_Return_Serialize(SerializationManager *sm,GetSum_Return *obj)
 {
@@ -37,10 +37,10 @@ DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
 GetSumResult_Deserialize(sm,&obj->ReturnValue);
 }
 
-//!void GetSum_Return_FreeData(GetSum_Return *obj)
-//!{
-//!//!!!GetSumResult_FreeData(&obj->ReturnValue);
-//!}
+//! void GetSum_Return_FreeData(GetSum_Return *obj)
+//! {
+//!  //!! GetSumResult_FreeData(&obj->ReturnValue);
+//! }
 
 void GetSum_Parameter_Serialize(SerializationManager *sm,GetSum_Parameter *obj)
 {
@@ -58,7 +58,7 @@ DeserializeField((uint8_t *)&obj->a,sm,sizeof(Int32));
 DeserializeField((uint8_t *)&obj->b,sm,sizeof(Int32));
 }
 
-//!void GetSum_Parameter_FreeData(GetSum_Parameter *obj)
-//!{
-//!}
+//! void GetSum_Parameter_FreeData(GetSum_Parameter *obj)
+//! {
+//! }
 

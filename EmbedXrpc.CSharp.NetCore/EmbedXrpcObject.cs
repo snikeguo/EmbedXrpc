@@ -35,6 +35,7 @@ namespace EmbedXrpc
         }
 
         private Thread ServiceThreadHandle;
+        private CancellationTokenSource ServiceThreadCancellationTokenSource;
         private Win32Queue<EmbeXrpcRawData<DTL>> ServiceQueueHandle = new Win32Queue<EmbeXrpcRawData<DTL>>();
         
         //public bool IsEnableMataDataEncode { get; set; }
@@ -72,6 +73,7 @@ namespace EmbedXrpc
 
             ServiceThreadHandle = new Thread(ServiceThread);
             ServiceThreadHandle.IsBackground = true;
+            ServiceThreadCancellationTokenSource = new CancellationTokenSource();
 
             SuspendTimer = new Timer(SuspendTimerCallback, this, Timeout.Infinite, Timeout.Infinite);
         }
@@ -94,7 +96,8 @@ namespace EmbedXrpc
         }
         public void Stop()
         {
-            ServiceThreadHandle.Abort();
+            ServiceThreadCancellationTokenSource.Cancel();
+            //ServiceThreadHandle.Abort();
         }
         public RequestResponseState Wait<T>(UInt32 sid,ref T response) where T: IEmbedXrpcSerialization
         {
@@ -113,7 +116,12 @@ namespace EmbedXrpc
                     Debug.WriteLine("{0}:sid== EmbedXrpcCommon.EmbedXrpcSuspendSid. this.timeout is:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),TimeOut);
                     continue;
                 }
-                if (sid != recData.Sid)
+                else if(recData.Sid== EmbedXrpcCommon.EmbedXrpcUnsupportedSid)
+                {
+                    Debug.WriteLine("{0}:sid== EmbedXrpcCommon.EmbedXrpcUnsupportedSid. this.timeout is:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),TimeOut);
+                    ret= RequestResponseState.ResponseState_UnsupportedSid;
+                }
+                else if (sid != recData.Sid)
                 {
                     ret= RequestResponseState.ResponseState_SidError;
                 }
@@ -141,21 +149,6 @@ namespace EmbedXrpc
             ReceiveType rt = (ReceiveType)(alldata[3 + offset] >> 6);
             if (rt== ReceiveType.Response)
             {
-                if (serviceId == EmbedXrpcCommon.EmbedXrpcSuspendSid)
-                {
-                    raw.Sid = serviceId;
-                    if (dataLen > 0)
-                    {
-                        raw.Data = new byte[dataLen];
-                        Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
-                    }
-
-                    raw.DataLen = dataLen;
-                    raw.TargetTimeOut = targettimeout;
-                    queueStatus =MessageQueueOfRequestServiceHandle.Send(raw);
-                    goto sqs;
-                }
-
                 raw.Sid = serviceId;
                 if (dataLen > 0)
                 {
@@ -191,48 +184,64 @@ namespace EmbedXrpc
         {
             EmbeXrpcRawData<DTL> recData;
             ServiceInvokeParameter < DTL > serviceInvokeParameter =new ServiceInvokeParameter<DTL>();
+            bool isFindService=false;
             //try
             {
                 while (true)
                 {
-                    if (ServiceQueueHandle.Receive(out recData, Win32BinarySignal.MAX_Delay) != QueueStatus.OK)
+                    if (ServiceQueueHandle.Receive(out recData, 10) == QueueStatus.OK)
                     {
-                        continue;
-                    }
-                    for (int i = 0; i < AllServices.Count; i++)
-                    {
-                        if (AllServices[i].Service.GetSid() == recData.Sid)
+                        isFindService = false;
+                        for (int i = 0; i < AllServices.Count; i++)
                         {
-                            SerializationManager rsm = new SerializationManager(Assembly, new List<byte>(recData.Data));
-                            SerializationManager sendsm = new SerializationManager(Assembly,new List<byte>());
-
-                            //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
-                            //SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);.
-                            serviceInvokeParameter.Request_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
-                            serviceInvokeParameter.Response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
-                            serviceInvokeParameter.RpcObject = this;
-                            serviceInvokeParameter.TargetTimeOut = recData.TargetTimeOut;
-                            AllServices[i].Service.Invoke(ref serviceInvokeParameter,
-                                rsm, 
-                                sendsm);
-                            SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);//手动关闭 怕用户忘了
-
-                            //lock (ObjectMutex)
+                            if (AllServices[i].Service.GetSid() == recData.Sid)
                             {
-                                if (sendsm.Index > 0)//
+                                isFindService = true;
+                                SerializationManager rsm = new SerializationManager(Assembly, new List<byte>(recData.Data));
+                                SerializationManager sendsm = new SerializationManager(Assembly, new List<byte>());
+
+                                //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
+                                //SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);.
+                                serviceInvokeParameter.Request_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
+                                serviceInvokeParameter.Response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
+                                serviceInvokeParameter.RpcObject = this;
+                                serviceInvokeParameter.TargetTimeOut = recData.TargetTimeOut;
+                                AllServices[i].Service.Invoke(ref serviceInvokeParameter,
+                                    rsm,
+                                    sendsm);
+                                SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);//手动关闭 怕用户忘了
+
+                                //lock (ObjectMutex)
                                 {
-                                    byte[] sendBytes = new byte[sendsm.Index + 4];
-                                    sendBytes[0] = (byte)(recData.Sid >> 0 & 0xff);
-                                    sendBytes[1] = (byte)(recData.Sid >> 8 & 0xff);
-                                    sendBytes[2] = (byte)(this.TimeOut >> 0 & 0xff);
-                                    sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff)&(0x3F));
-                                    sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
-                                    Array.Copy(sendsm.Buf.ToArray(), 0, sendBytes, 4, sendsm.Index);
-                                    Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
+                                    if (sendsm.Index > 0)//
+                                    {
+                                        byte[] sendBytes = new byte[sendsm.Index + 4];
+                                        sendBytes[0] = (byte)(recData.Sid >> 0 & 0xff);
+                                        sendBytes[1] = (byte)(recData.Sid >> 8 & 0xff);
+                                        sendBytes[2] = (byte)(this.TimeOut >> 0 & 0xff);
+                                        sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff) & (0x3F));
+                                        sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
+                                        Array.Copy(sendsm.Buf.ToArray(), 0, sendBytes, 4, sendsm.Index);
+                                        Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
+                                    }
                                 }
+                                break;
                             }
-                            break;
                         }
+                        if (isFindService == false)
+                        {
+                            byte[] sendBytes = new byte[4];
+                            sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcUnsupportedSid >> 0 & 0xff);
+                            sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcUnsupportedSid >> 8 & 0xff);
+                            sendBytes[2] = (byte)(this.TimeOut >> 0 & 0xff);
+                            sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff) & (0x3F));
+                            sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
+                            Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
+                        }
+                    }
+                    if(ServiceThreadCancellationTokenSource.IsCancellationRequested==true)
+                    {
+                        break;
                     }
                 }
             }

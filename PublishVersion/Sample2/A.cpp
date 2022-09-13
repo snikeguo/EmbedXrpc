@@ -8,7 +8,7 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == osOK);
+	assert(B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == ReceivedMessageStatus::Ok);
 	return true;
 }
 

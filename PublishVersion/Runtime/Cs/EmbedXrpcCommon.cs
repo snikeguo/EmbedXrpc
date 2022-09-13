@@ -23,6 +23,7 @@ namespace EmbedXrpc
     public static class EmbedXrpcCommon
     {
         public static readonly UInt16 EmbedXrpcSuspendSid = 0x1;
+        public static readonly UInt16 EmbedXrpcUnsupportedSid = 0x2;
     }
 
     public class ServiceInvokeParameter<DTL> where DTL : struct

@@ -1,4 +1,4 @@
-﻿#include"Sample2.Server.h"
+#include"Sample2.Server.h"
 void GetSum_Service::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 GetSum_Parameter_Deserialize(recManager,&request);

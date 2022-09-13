@@ -111,7 +111,7 @@ static InitConfig InitCfg =
 	AllRequests,
 	2,
 	Services,
-	4,
+	sizeof(Services)/sizeof(ServiceDescribe),
 	{
 		true,//CheckSumValid
 		osPriorityAboveNormal,//ServiceThreadPriority

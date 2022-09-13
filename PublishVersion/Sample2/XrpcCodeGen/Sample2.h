@@ -1,4 +1,4 @@
-﻿#ifndef Sample2_H
+#ifndef Sample2_H
 #define Sample2_H
 #include"EmbedSerialization.h"
 #include"EmbedXrpcCommon.h"

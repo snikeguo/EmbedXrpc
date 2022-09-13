@@ -1,4 +1,4 @@
-﻿#ifndef Sample1_Client_H
+#ifndef Sample1_Client_H
 #define Sample1_Client_H
 #include"EmbedXrpcObject.h"
 #include"Sample1.EmbedXrpcSerialization.h"

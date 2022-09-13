@@ -11,7 +11,7 @@ bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == osOK);
+	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == ReceivedMessageStatus::Ok);
 	return true;
 }
 //特化子类继承
@@ -108,8 +108,14 @@ void ClientThread()
 		Client.Add_SendData.dataLen = 4;
 		Client.Add_SendData.data = (UInt8*)"123";
 		auto sum = Client.Add(&win32UserDataOfTransportLayerTest);//request对象请求service
-		El_Assert(sum.State == ResponseState_Ok);
-		printf("client:sum7 is:%d\n", sum.ReturnValue.Sum7);
+		if (sum.State != ResponseState_Ok)
+		{
+			printf("Client was requested the \"Add\" service Faild! error code:%d\n", sum.State);
+		}
+		else
+		{
+			printf("client:sum7 is:%d\n", sum.ReturnValue.Sum7);
+		}
 		Client.Free_Add(&sum);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}

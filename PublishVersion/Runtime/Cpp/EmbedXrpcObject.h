@@ -4,7 +4,7 @@
 #include "EmbedLibrary.h"
 #include "EmbedXrpcCommon.h"
 #include "BlockBufferProvider.h"
-#define EmbedXrpcObjectVersion	"2.5.5"
+#define EmbedXrpcObjectVersion	"2.7.0"
 
 struct EmbedXrpcBufferConfig
 {

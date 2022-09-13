@@ -154,7 +154,8 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 	bool isContain;
 	isContain = false;
 	(void)isContain;
-
+	bool isFindService;
+	isFindService=false;
 	ServiceInvokeParameter serviceInvokeParameter;
 	for (uint32_t collectionIndex = 0; collectionIndex < obj->ServicesCount; collectionIndex++)
 	{
@@ -166,7 +167,7 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 		auto iter = &obj->Services[collectionIndex];
 		if (iter->Service->GetSid() == recData.Sid)
 		{
-
+			isFindService=true;
 			SerializationManager rsm;
 			SerializationManager sendsm;
 			El_Memset(&rsm, 0, sizeof(SerializationManager));
@@ -222,10 +223,11 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 			{
 				isContain = true;
 			}
-			goto _break;
+			//goto _break;
+			break;
 		}
 	}
-_break:
+//_break:
 	if (obj->RpcConfig.UseRingBufferWhenReceiving == true)
 	{
 		if (isContain == false)
@@ -237,6 +239,15 @@ _break:
 	{
 		if (recData.DataLen > 0 && isFreeData == true)
 			El_Free(recData.Data);
+	}
+	if(isFindService==false)
+	{
+		obj->DataLinkBufferForResponse.Buffer[0] = (uint8_t)(EmbedXrpcUnsupportedSid >> 0 & 0xff);
+		obj->DataLinkBufferForResponse.Buffer[1] = (uint8_t)(EmbedXrpcUnsupportedSid >> 8 & 0xff);
+		obj->DataLinkBufferForResponse.Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
+		obj->DataLinkBufferForResponse.Buffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
+		obj->DataLinkBufferForResponse.Buffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
+		obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, 4, obj->DataLinkBufferForResponse.Buffer);
 	}
 }
 
@@ -291,22 +302,6 @@ ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint
 	if (rt == ReceiveType_Response)
 	{
 		//EmbedSerializationShowMessage("EmbedXrpcObject","Client ReceivedMessage  El_Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
-		if (serviceId == EmbedXrpcSuspendSid)//挂起的SID要特殊处理
-		{
-			if (RpcConfig.UseRingBufferWhenReceiving == true)
-			{
-				El_SendQueueResult = BlockRingBufferProvider_Send(BlockBufferProviderOfRequestService, &raw, nullptr)!=osOK?
-					ReceivedMessageStatus::QueueFull: ReceivedMessageStatus::Ok;
-			}
-			else
-			{
-				raw.Data = nullptr;
-				El_SendQueueResult = osMessageQueuePut(MessageQueueOfRequestService, &raw, 0, 0) != osOK ?
-					ReceivedMessageStatus::QueueFull : ReceivedMessageStatus::Ok;
-			}
-			goto sqr;
-		}
-
 		if (RpcConfig.UseRingBufferWhenReceiving == true)
 		{
 			El_SendQueueResult = BlockRingBufferProvider_Send(BlockBufferProviderOfRequestService, &raw, data) != osOK ?
@@ -418,7 +413,12 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo* recDat
 			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcSuspendSid\n");
 			continue;
 		}
-		if (sid != recData->Sid)
+		else if (recData->Sid == EmbedXrpcUnsupportedSid)
+		{
+			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcUnsupportedSid\n");
+			ret = ResponseState_UnsupportedSid;
+		}
+		else if (sid != recData->Sid)
 		{
 			ret = ResponseState_SidError;
 		}

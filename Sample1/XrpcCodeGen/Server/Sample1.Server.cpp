@@ -1,4 +1,4 @@
-﻿#include"Sample1.Server.h"
+#include"Sample1.Server.h"
 DateTimeChange_Return& DateTimeChange_Requester::DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1])
 {
 //write serialization code:DateTimeChange(now,)

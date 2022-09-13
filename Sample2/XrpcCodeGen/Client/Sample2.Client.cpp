@@ -1,4 +1,4 @@
-﻿#include"Sample2.Client.h"
+#include"Sample2.Client.h"
 GetSum_Return& GetSum_Requester::GetSum(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a,Int32 b)
 {
 //write serialization code:GetSum(a,b,)

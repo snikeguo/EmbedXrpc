@@ -1,4 +1,4 @@
-﻿#include"Sample1.Client.h"
+#include"Sample1.Client.h"
 void DateTimeChange_Service::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 DateTimeChange_Parameter_Deserialize(recManager,&request);
