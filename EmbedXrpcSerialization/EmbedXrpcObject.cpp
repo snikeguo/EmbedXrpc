@@ -242,12 +242,13 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 	}
 	if(isFindService==false)
 	{
-		obj->DataLinkBufferForResponse.Buffer[0] = (uint8_t)(EmbedXrpcUnsupportedSid >> 0 & 0xff);
-		obj->DataLinkBufferForResponse.Buffer[1] = (uint8_t)(EmbedXrpcUnsupportedSid >> 8 & 0xff);
-		obj->DataLinkBufferForResponse.Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
-		obj->DataLinkBufferForResponse.Buffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
-		obj->DataLinkBufferForResponse.Buffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-		obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, 4, obj->DataLinkBufferForResponse.Buffer);
+		uint8_t sb[4]; 
+		sb[0] = (uint8_t)(EmbedXrpcUnsupportedSid >> 0 & 0xff);
+		sb[1] = (uint8_t)(EmbedXrpcUnsupportedSid >> 8 & 0xff);
+		sb[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
+		sb[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
+		sb[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
+		obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, 4, sb);
 	}
 }
 
