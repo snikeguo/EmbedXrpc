@@ -153,6 +153,7 @@
     <ClCompile Include="EmbedSerialization.c" />
     <ClCompile Include="EmbedXrpcObject.cpp" />
     <ClCompile Include="ringbuffer.c" />
+    <ClCompile Include="SoftCrc32.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlockBufferProvider.h" />

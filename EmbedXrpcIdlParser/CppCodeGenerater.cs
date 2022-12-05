@@ -333,8 +333,8 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("osMessageQueueReset(RpcObject->MessageQueueOfRequestService);");
             csw.WriteLine("}\r\n");
             csw.WriteLine("sm.Index=0;\n" +
-                "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];\n" +
-                "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;");
+                "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];\n" +
+                "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;");
 
             if (service.ExternalParameter.IsExternal == false)
             {
@@ -376,8 +376,20 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);");
-            csw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);\n");
+
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);\n");
+
+            csw.WriteLine($"uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
+            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
+
+            csw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
             csw.WriteLine("sm.Index=0;");
             csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\ngoto exi;\n}}");
             csw.WriteLine($"else\n{{\n{service.ServiceName}_reqresp.State=RequestState_Ok;\n}}");

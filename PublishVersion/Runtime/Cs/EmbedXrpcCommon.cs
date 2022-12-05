@@ -49,11 +49,11 @@ namespace EmbedXrpc
         public string Name { get; set; }
         public IService<DTL> Service { get; set; }
     }
-    public class RequestServiceDescribe
+    /*public class RequestServiceDescribe
     {
         public string Name { get; set; }
         public UInt16 Sid { get; set; }//有可能是Response
-    };
+    };*/
     public delegate bool Send<DTL>(DTL userDataOfTransportLayer, int dataLen, int offset, byte[] data);
     public struct EmbeXrpcRawData<DTL> where DTL : struct
     {
@@ -75,18 +75,4 @@ namespace EmbedXrpc
         public string Name { get; set; }
         public UInt16 ServiceId { get; set; }
     }
-
-    [System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-    public sealed class RequestServiceInfoAttribute : Attribute
-    {
-
-        public RequestServiceInfoAttribute()
-        {
-
-        }
-        // This is a named argument
-        public string Name { get; set; }
-        public UInt16 ServiceId { get; set; }
-    }
-
 }

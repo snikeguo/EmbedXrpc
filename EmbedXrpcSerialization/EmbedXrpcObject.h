@@ -4,7 +4,7 @@
 #include "EmbedLibrary.h"
 #include "EmbedXrpcCommon.h"
 #include "BlockBufferProvider.h"
-#define EmbedXrpcObjectVersion	"2.7.0"
+#define EmbedXrpcObjectVersion	"2.8.0"
 
 struct EmbedXrpcBufferConfig
 {
@@ -28,9 +28,6 @@ struct ClientNodeQuicklyInitConfig
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
-
-	RequestServiceDescribe* RequestServices;
-	uint32_t RequestServicesCount;
 
 	EmbedXrpcConfig RpcConfig;
 
@@ -65,10 +62,6 @@ struct InitConfig
 	SendPack_t Sender;
 	uint32_t TimeOut;
 
-	RequestServiceDescribe* RequestServices;
-	uint32_t RequestServicesCount;
-
-
 	ServiceDescribe* Services;//server 请求的services
 	uint32_t ServicesCount;//server
 
@@ -77,10 +70,11 @@ struct InitConfig
 };
 enum ReceivedMessageStatus
 {
-	DataLenLessThan4,
+	InvalidData,
 	QueueFull,
 	Ok,
 };
+uint32_t GetBufferCrc(uint32_t len, uint8_t* Buf);
 class EmbedXrpcObject
 {
 public:
@@ -99,9 +93,6 @@ public:
 	
 	osMessageQueueId_t MessageQueueOfRequestService = nullptr;
 
-
-	uint32_t RequestServicesCount;
-	RequestServiceDescribe* RequestServices;
 
 	void* UserData;
 
@@ -130,8 +121,6 @@ public:
 		cfg.DataLinkBufferConfigForRequest = client->DataLinkBufferConfigForRequest;
 		cfg.Sender = client->Sender;
 		cfg.TimeOut = client->TimeOut;
-		cfg.RequestServices = client->RequestServices;
-		cfg.RequestServicesCount = client->RequestServicesCount;
 		cfg.RpcConfig = client->RpcConfig;
 		cfg.UserData = client->UserData;
 		Init(&cfg);

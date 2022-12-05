@@ -62,6 +62,9 @@
     <Compile Include="..\EmbedXrpc.CSharp.NetCore\EmbedXrpcCommon.cs">
       <Link>EmbedXrpcCommon.cs</Link>
     </Compile>
+	  <Compile Include="..\EmbedXrpc.CSharp.NetCore\Crc.cs">
+		  <Link>Crc.cs</Link>
+	  </Compile>
     <Compile Include="..\EmbedXrpc.CSharp.NetCore\EmbedXrpcObject.cs">
       <Link>EmbedXrpcObject.cs</Link>
     </Compile>

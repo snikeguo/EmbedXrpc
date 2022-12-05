@@ -44,13 +44,7 @@ static ServiceDescribe AllServices[2] =//定义委托对象集合
 	{"Test2"  ,&Test2},
 };//client可以处理的Request集合
 
-static RequestServiceDescribe AllRequests[4] =//定义回复 ID 集合
-{
-	{"Inter_Add"   ,     Add_ServiceId},
-	{"Inter_NoArg"     ,   NoArg_ServiceId},
-	{"Inter_NoReturn"   ,     NoReturn_ServiceId},
-	{"Inter_NoArgAndReturn"    ,    NoArgAndReturn_ServiceId},
-};
+
 
 
 static InitConfig InitCfg =
@@ -60,8 +54,6 @@ static InitConfig InitCfg =
 	{nullptr,0,false},
 	ClientSend,
 	1000,
-	AllRequests,
-	4,
 	AllServices,
 	2,
 	{

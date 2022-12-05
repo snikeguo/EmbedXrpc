@@ -43,15 +43,27 @@ osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
-sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
-sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;
 Add_Parameter_Serialize(&sm,&Add_SendData);
 RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(Add_ServiceId&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(Add_ServiceId>>8&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
+
+RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);
+
+uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);
+RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);
+
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);
 sm.Index=0;
 if(result==false)
 {
@@ -134,15 +146,27 @@ osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
-sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
-sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;
 NoArg_Parameter_Serialize(&sm,&NoArg_SendData);
 RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(NoArg_ServiceId&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(NoArg_ServiceId>>8&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
+
+RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);
+
+uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);
+RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);
+
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);
 sm.Index=0;
 if(result==false)
 {
@@ -224,8 +248,8 @@ osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
-sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
-sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;
 NoReturn_SendData.a=a;
 NoReturn_Parameter_Serialize(&sm,&NoReturn_SendData);
 RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(NoReturn_ServiceId&0xff);
@@ -233,7 +257,19 @@ RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(NoReturn_ServiceId>>8&0x
 RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
+
+RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);
+
+uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);
+RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);
+
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);
 sm.Index=0;
 if(result==false)
 {
@@ -272,15 +308,27 @@ osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
-sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4];
-sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4;
+sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];
+sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;
 NoArgAndReturn_Parameter_Serialize(&sm,&NoArgAndReturn_SendData);
 RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)(NoArgAndReturn_ServiceId&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)(NoArgAndReturn_ServiceId>>8&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);
 RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);
 RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);
-result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4,RpcObject->DataLinkBufferForRequest.Buffer);
+
+RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);
+
+uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);
+RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);
+RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);
+
+result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);
 sm.Index=0;
 if(result==false)
 {

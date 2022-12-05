@@ -59,8 +59,15 @@ namespace EmbedXrpc
                 {
                     Thread.Sleep(1000);
                     var reAdd = inter_Add.Invoke(new Win32UserDataOfTransportLayer() {  Ip="123",Port=11},1,2,0,null);
-                    //Debug.Assert(reAdd.State == RequestResponseState.ResponseState_Ok);
-                    Console.WriteLine($"{1}+{2}={reAdd.ReturnValue.Sum}");
+                    if(reAdd.State != RequestResponseState.ResponseState_Ok)
+                    {
+                        Console.WriteLine("request failed! error code:{0}", reAdd.State);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{1}+{2}={reAdd.ReturnValue.Sum}");
+                    }
+                    
                     /*var reNoArg = inter.NoArg();
                     if (reNoArg.State == RequestResponseState.RequestState_Failed)
                     {

@@ -122,7 +122,7 @@ namespace EmbedXrpcIdlParser
         {
             CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
 
-            sw.WriteLine($"[RequestServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
+            //sw.WriteLine($"[RequestServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
             sw.WriteLine($"public class {service.ServiceName}_Requester<DTL>:IRequestService<DTL> where DTL:struct");
             sw.WriteLine("{");//class begin
 
@@ -164,7 +164,19 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId&0xff));");
             sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId>>8&0xff));");
             sw.WriteLine($"sendBytes.Add((byte)(XrpcObject.TimeOut&0xff));");
-            sw.WriteLine($"sendBytes.Add((byte)(((XrpcObject.TimeOut>>8&0xff)&0x3F)|((byte)ReceiveType.Request)<<6));");
+            sw.WriteLine($"sendBytes.Add((byte)(((XrpcObject.TimeOut>>8&0xff)&0x3F)|((byte)ReceiveType.Request)<<6));\n");
+
+            sw.WriteLine("sendBytes.Add((byte)(sm.Index&0xff));");
+            sw.WriteLine("sendBytes.Add((byte)(sm.Index>>8&0xff));");
+            sw.WriteLine("sendBytes.Add((byte)(sm.Index>>16&0xff));");
+            sw.WriteLine("sendBytes.Add((byte)(sm.Index>>24&0xff));\n");
+
+            sw.WriteLine("UInt32 bufcrc=XrpcObject.GetBufferCrc(sm.Buf.ToArray(),0,sm.Index);");
+            sw.WriteLine("sendBytes.Add((byte)(bufcrc&0xff));");
+            sw.WriteLine("sendBytes.Add((byte)(bufcrc>>8&0xff));");
+            sw.WriteLine("sendBytes.Add((byte)(bufcrc>>16&0xff));");
+            sw.WriteLine("sendBytes.Add((byte)(bufcrc>>24&0xff));");
+
             sw.WriteLine("sendBytes.AddRange(sm.Buf);");
             sw.WriteLine("if( XrpcObject.Send ( userDataOfTransportLayer,sendBytes.Count,0,sendBytes.ToArray() )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
                 "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");

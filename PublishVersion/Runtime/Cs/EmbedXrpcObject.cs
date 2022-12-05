@@ -16,7 +16,6 @@ namespace EmbedXrpc
         public object ObjectMutex { get; private set; } = new object();
         
         public Win32Queue<EmbeXrpcRawData<DTL>> MessageQueueOfRequestServiceHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData<DTL>>();
-        private List<RequestServiceDescribe> AllRequestServices { get; set; } = new List<RequestServiceDescribe>();
         private List<ServiceDescribe<DTL>> AllServices { get; set; } = new List<ServiceDescribe<DTL>>();
 
         public Send<DTL> Send;
@@ -46,16 +45,6 @@ namespace EmbedXrpc
             Assembly = assembly;
             foreach (var oldtype in types)
             {
-                var requestInfoAttr = oldtype.GetCustomAttribute<RequestServiceInfoAttribute>();
-                if (requestInfoAttr != null)
-                {
-                    RequestServiceDescribe request = new RequestServiceDescribe();
-                    request.Name = requestInfoAttr.Name;
-                    request.Sid = requestInfoAttr.ServiceId;
-                    AllRequestServices.Add(request);
-                }
-
-
                 var responseServiceInfoAttr = oldtype.GetCustomAttribute<ResponseServiceInfoAttribute>();
                 if (responseServiceInfoAttr != null)
                 {
@@ -77,15 +66,34 @@ namespace EmbedXrpc
 
             SuspendTimer = new Timer(SuspendTimerCallback, this, Timeout.Infinite, Timeout.Infinite);
         }
+        public UInt32 GetBufferCrc(byte[]buf,int start,int len)
+        {
+            CrcCalculate crcer=new CrcCalculate();
+            crcer.Init();
+            crcer.Compute(buf, start, len);
+            crcer.Finish();
+            return crcer.CurrentValue;
+        }
         private void SuspendTimerCallback(object s)
         {
             EmbedXrpcObject<DTL> server = s as EmbedXrpcObject<DTL>;
-            byte[] sendBytes = new byte[4];
+            byte[] sendBytes = new byte[12];
             sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 0 & 0xff);
             sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 8 & 0xff);
             sendBytes[2] = (byte)(server.TimeOut >> 0 & 0xff);
             sendBytes[3] = (byte)((server.TimeOut >> 8 & 0xff) & (0x3F));
             sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
+
+            sendBytes[4] = (byte)(0);
+            sendBytes[5] = (byte)(0);
+            sendBytes[6] = (byte)(0);
+            sendBytes[7] = (byte)(0);
+
+            UInt32 bufCrc = GetBufferCrc(null, 8, 0);
+            sendBytes[8] = (byte)(bufCrc >> 0 & 0xff);
+            sendBytes[9] = (byte)(bufCrc >> 8 & 0xff);
+            sendBytes[10] = (byte)(bufCrc >> 16 & 0xff);
+            sendBytes[11] = (byte)(bufCrc >> 32 & 0xff);
             Send(UserDataOfTransportLayerOfSuspendTimerUsed,sendBytes.Length, 0, sendBytes);
         }
 
@@ -143,7 +151,21 @@ namespace EmbedXrpc
             }
             UInt16 serviceId = (UInt16)(alldata[0 + offset] << 0 | alldata[1 + offset] << 8);
             UInt16 targettimeout = (UInt16)((alldata[2 + offset] << 0) | ((alldata[3 + offset])&0x3F)<<8);
-            UInt32 dataLen = validdataLen - 4;
+            UInt32 dataLen = validdataLen - 12;
+
+            UInt32 wantedDataLen = (UInt32)(alldata[4 + offset] << 0 | alldata[5 + offset] << 8 | alldata[6 + offset] << 16 | alldata[7 + offset] << 24);
+            UInt32 wantedBufCrc = (UInt32)(alldata[8 + offset] << 0 | alldata[9 + offset] << 8 | alldata[10 + offset] << 16 | alldata[11 + offset] << 24);
+
+            if(wantedDataLen!=dataLen)
+            {
+                goto sqs;
+            }
+            UInt32 calcrc = GetBufferCrc(alldata, 12, (int)dataLen);
+            if(wantedBufCrc!=calcrc)
+            {
+                goto sqs;
+            }
+
             EmbeXrpcRawData<DTL> raw = new EmbeXrpcRawData<DTL>();
             raw.UserDataOfTransportLayer = userDataOfTransportLayer;
             ReceiveType rt = (ReceiveType)(alldata[3 + offset] >> 6);
@@ -153,7 +175,7 @@ namespace EmbedXrpc
                 if (dataLen > 0)
                 {
                     raw.Data = new byte[dataLen];
-                    Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
+                    Array.Copy(alldata, offset + 12, raw.Data, 0, dataLen);
                 }
                 raw.DataLen = dataLen;
                 raw.TargetTimeOut = targettimeout;
@@ -164,7 +186,7 @@ namespace EmbedXrpc
             {
                 raw.Sid = serviceId;
                 raw.Data = new byte[dataLen];
-                Array.Copy(alldata, offset + 4, raw.Data, 0, dataLen);
+                Array.Copy(alldata, offset + 12, raw.Data, 0, dataLen);
                 raw.DataLen = dataLen;
                 raw.TargetTimeOut = targettimeout;
                 queueStatus=ServiceQueueHandle.Send(raw);
@@ -215,13 +237,26 @@ namespace EmbedXrpc
                                 {
                                     if (sendsm.Index > 0)//
                                     {
-                                        byte[] sendBytes = new byte[sendsm.Index + 4];
+                                        byte[] sendBytes = new byte[sendsm.Index + 12];
                                         sendBytes[0] = (byte)(recData.Sid >> 0 & 0xff);
                                         sendBytes[1] = (byte)(recData.Sid >> 8 & 0xff);
                                         sendBytes[2] = (byte)(this.TimeOut >> 0 & 0xff);
                                         sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff) & (0x3F));
                                         sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
-                                        Array.Copy(sendsm.Buf.ToArray(), 0, sendBytes, 4, sendsm.Index);
+
+                                        sendBytes[4]= (byte)(sendsm.Index >> 0 & 0xff);
+                                        sendBytes[5] = (byte)(sendsm.Index >> 8 & 0xff);
+                                        sendBytes[6] = (byte)(sendsm.Index >> 16 & 0xff);
+                                        sendBytes[7] = (byte)(sendsm.Index >> 24 & 0xff);
+
+                                        UInt32 bufcrc = GetBufferCrc(sendsm.Buf.ToArray(), 0, sendsm.Index);
+
+                                        sendBytes[8] = (byte)(bufcrc >> 0 & 0xff);
+                                        sendBytes[9] = (byte)(bufcrc >> 8 & 0xff);
+                                        sendBytes[10] = (byte)(bufcrc >> 16 & 0xff);
+                                        sendBytes[11] = (byte)(bufcrc >> 24 & 0xff);
+
+                                        Array.Copy(sendsm.Buf.ToArray(), 0, sendBytes, 12, sendsm.Index);
                                         Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
                                     }
                                 }
@@ -230,12 +265,26 @@ namespace EmbedXrpc
                         }
                         if (isFindService == false)
                         {
-                            byte[] sendBytes = new byte[4];
+                            byte[] sendBytes = new byte[12];
                             sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcUnsupportedSid >> 0 & 0xff);
                             sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcUnsupportedSid >> 8 & 0xff);
                             sendBytes[2] = (byte)(this.TimeOut >> 0 & 0xff);
                             sendBytes[3] = (byte)((this.TimeOut >> 8 & 0xff) & (0x3F));
                             sendBytes[3] |= ((byte)(ReceiveType.Response)) << 6;
+
+                            sendBytes[4] = (byte)(0 >> 0 & 0xff);
+                            sendBytes[5] = (byte)(0 >> 8 & 0xff);
+                            sendBytes[6] = (byte)(0 >> 16 & 0xff);
+                            sendBytes[7] = (byte)(0 >> 24 & 0xff);
+
+                            UInt32 bufcrc = GetBufferCrc(new byte[0], 0, 0);
+
+                            sendBytes[8] = (byte)(bufcrc >> 0 & 0xff);
+                            sendBytes[9] = (byte)(bufcrc >> 8 & 0xff);
+                            sendBytes[10] = (byte)(bufcrc >> 16 & 0xff);
+                            sendBytes[11] = (byte)(bufcrc >> 24 & 0xff);
+
+
                             Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
                         }
                     }

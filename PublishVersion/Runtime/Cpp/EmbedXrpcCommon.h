@@ -87,11 +87,6 @@ class EmbedXrpcObject;
      IService* Service;
  };
 
- struct RequestServiceDescribe
- {
-     const char* Name;
-     uint16_t Sid;
- };
 typedef bool (*SendPack_t)(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj,uint32_t dataLen, uint8_t* data);
 
 #endif

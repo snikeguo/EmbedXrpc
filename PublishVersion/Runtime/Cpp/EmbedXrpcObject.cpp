@@ -1,6 +1,6 @@
 
 #include "EmbedXrpcObject.h"
-
+#include "SoftCrc32.h"
 void EmbedXrpcObject::Init(InitConfig* cfg)
 {
 	ServiceThreadExitState = false;
@@ -43,9 +43,6 @@ void EmbedXrpcObject::Init(InitConfig* cfg)
 	TimeOut = cfg->TimeOut;
 	Send = cfg->Sender;
 	
-
-	RequestServicesCount = cfg->RequestServicesCount;
-	RequestServices = cfg->RequestServices;
 
 	UserData = cfg->UserData;
 
@@ -149,6 +146,15 @@ void EmbedXrpcObject::DeInit()
 	osTimerDelete(SuspendTimer);
 
 }
+uint32_t GetBufferCrc(uint32_t len, uint8_t* Buf)
+{
+	CrcCalculate_t crcer;
+	El_Memset(&crcer, 0, sizeof(crcer));
+	Crc32Init(&crcer, Crc32_InitValue);
+	Crc32Compute(&crcer, Buf, len);
+	Crc32Finish(&crcer);
+	return crcer.CurrentValue;
+}
 void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData)
 {
 	bool isContain;
@@ -193,8 +199,8 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 				osMutexAcquire(obj->DataLinkBufferForResponse.MutexHandle, El_WAIT_FOREVER);//由于使用DataLinkBufferForResponse，所以添加锁
 			}
 			//sendsm.IsEnableMataDataEncode = obj->IsEnableMataDataEncode;
-			sendsm.Buf = &obj->DataLinkBufferForResponse.Buffer[4];
-			sendsm.BufferLen = obj->DataLinkBufferForResponse.BufferLen - 4;
+			sendsm.Buf = &obj->DataLinkBufferForResponse.Buffer[12];
+			sendsm.BufferLen = obj->DataLinkBufferForResponse.BufferLen - 12;
 
 			//EmbedXrpc_TimerReset(obj->SuspendTimer);
 			//EmbedXrpc_TimerStart(obj->SuspendTimer, recData.TargetTimeout / 2);
@@ -212,7 +218,19 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 				obj->DataLinkBufferForResponse.Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
 				obj->DataLinkBufferForResponse.Buffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
 				obj->DataLinkBufferForResponse.Buffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-				obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, sendsm.Index + 4, obj->DataLinkBufferForResponse.Buffer);
+
+				obj->DataLinkBufferForResponse.Buffer[4] = (uint8_t)(sendsm.Index >> 0 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[5] = (uint8_t)(sendsm.Index >> 8 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[6] = (uint8_t)(sendsm.Index >> 16 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[7] = (uint8_t)(sendsm.Index >> 24 & 0xff);
+
+				uint32_t bufcrc = GetBufferCrc(sendsm.Index, sendsm.Buf);
+				obj->DataLinkBufferForResponse.Buffer[8] = (uint8_t)(bufcrc >> 0 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[9] = (uint8_t)(bufcrc >> 8 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[10] = (uint8_t)(bufcrc >> 16 & 0xff);
+				obj->DataLinkBufferForResponse.Buffer[11] = (uint8_t)(bufcrc >> 24 & 0xff);
+
+				obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, sendsm.Index + 12, obj->DataLinkBufferForResponse.Buffer);
 			}
 			if (obj->DataLinkBufferForResponse.MutexHandle != nullptr)
 			{
@@ -242,12 +260,24 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 	}
 	if(isFindService==false)
 	{
-		obj->DataLinkBufferForResponse.Buffer[0] = (uint8_t)(EmbedXrpcUnsupportedSid >> 0 & 0xff);
-		obj->DataLinkBufferForResponse.Buffer[1] = (uint8_t)(EmbedXrpcUnsupportedSid >> 8 & 0xff);
-		obj->DataLinkBufferForResponse.Buffer[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
-		obj->DataLinkBufferForResponse.Buffer[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
-		obj->DataLinkBufferForResponse.Buffer[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-		obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, 4, obj->DataLinkBufferForResponse.Buffer);
+		uint8_t sb[12]; 
+		sb[0] = (uint8_t)(EmbedXrpcUnsupportedSid >> 0 & 0xff);
+		sb[1] = (uint8_t)(EmbedXrpcUnsupportedSid >> 8 & 0xff);
+		sb[2] = (uint8_t)(obj->TimeOut >> 0 & 0xff);
+		sb[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
+		sb[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
+
+		sb[4] = (uint8_t)(0>> 0 & 0xff);
+		sb[5] = (uint8_t)(0 >> 8 & 0xff);
+		sb[6] = (uint8_t)(0 >> 16 & 0xff);
+		sb[7] = (uint8_t)(0 >> 24 & 0xff);
+
+		uint32_t bufcrc = GetBufferCrc(0, nullptr);
+		sb[8] = (uint8_t)(bufcrc >> 0 & 0xff);
+		sb[9] = (uint8_t)(bufcrc >> 8 & 0xff);
+		sb[10] = (uint8_t)(bufcrc >> 16 & 0xff);
+		sb[11] = (uint8_t)(bufcrc >> 24 & 0xff);
+		obj->Send(&serviceInvokeParameter.Response_UserDataOfTransportLayer, obj, 12, sb);
 	}
 }
 
@@ -276,16 +306,30 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 
 ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer)
 {
-	if (allDataLen < 4)
-		return ReceivedMessageStatus::DataLenLessThan4;
+	if (allDataLen < 12)
+		return ReceivedMessageStatus::InvalidData;
 	ReceivedMessageStatus El_SendQueueResult = ReceivedMessageStatus::QueueFull;
 
 	ReceiveItemInfo raw;
 	uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
 	uint16_t targettimeout = (uint16_t)(allData[2] | ((allData[3] & 0x3f) << 8));
-	uint32_t dataLen = allDataLen - 4;
-	uint8_t* data = &allData[4];
+	uint32_t dataLen = allDataLen - 12;
+	uint8_t* data = &allData[12];
 	ReceiveType_t rt = (ReceiveType_t)(allData[3] >> 6);
+
+	
+	uint32_t wantedDataLen= (uint32_t)(allData[4] | allData[5] << 8 | allData[6] << 16 | allData[7] << 24);
+	uint32_t wantedBufCrc= (uint32_t)(allData[8] | allData[9] << 8 | allData[10] << 16 | allData[11] << 24);
+	if (wantedDataLen != dataLen)
+	{
+		return ReceivedMessageStatus::InvalidData;
+	}
+	uint32_t calBufCrc = GetBufferCrc(wantedDataLen, data);
+	if (wantedBufCrc != calBufCrc)
+	{
+		return ReceivedMessageStatus::InvalidData;
+	}
+
 	El_Memset(&raw, 0, sizeof(ReceiveItemInfo));
 	raw.UserDataOfTransportLayer = userDataOfTransportLayer;
 	raw.Sid = serviceId;
@@ -344,13 +388,24 @@ void EmbedXrpcObject::SuspendTimerCallBack(void* arg)
 	{
 		El_TakeMutex(obj->DataLinkBufferForSuspendTimer.MutexHandle, El_WAIT_FOREVER);
 	}*/
-	uint8_t sb[4];
+	uint8_t sb[12];
 	sb[0] = (uint8_t)(EmbedXrpcSuspendSid & 0xff);
 	sb[1] = (uint8_t)(EmbedXrpcSuspendSid >> 8 & 0xff);
 	sb[2] = (uint8_t)(obj->TimeOut & 0xff);
 	sb[3] = (uint8_t)((obj->TimeOut >> 8 & 0xff) & 0x3FFF);
 	sb[3] |= (uint8_t)(((uint8_t)(ReceiveType_Response)) << 6);
-	obj->Send(&obj->UserDataOfTransportLayerOfSuspendTimerUsed, obj, 4, sb);
+
+	sb[4] = (uint8_t)(0);
+	sb[5] = (uint8_t)(0);
+	sb[6] = (uint8_t)(0);
+	sb[7] = (uint8_t)(0);
+
+	uint32_t bufcrc = GetBufferCrc(0, nullptr);
+	sb[8] = (uint8_t)(bufcrc & 0xff);
+	sb[9] = (uint8_t)(bufcrc >> 8 & 0xff);
+	sb[10] = (uint8_t)(bufcrc >> 16 & 0xff);
+	sb[11] = (uint8_t)(bufcrc >> 24 & 0xff);
+	obj->Send(&obj->UserDataOfTransportLayerOfSuspendTimerUsed, obj, 12, sb);
 	/*if (obj->DataLinkBufferForSuspendTimer.MutexHandle != nullptr)
 	{
 		El_ReleaseMutex(obj->DataLinkBufferForSuspendTimer.MutexHandle);

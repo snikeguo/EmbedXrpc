@@ -95,11 +95,7 @@ static ServiceDescribe Services[] = //定义请求集合
 	{"Inter_NoReturn",				&Inter_NoReturnService_Instance},
 	{"Inter_NoArgAndReturn",        &Inter_NoArgAndReturnService_Instance},
 };
-static RequestServiceDescribe AllRequests[] =
-{
-	{"DataTimeChange",DateTimeChange_ServiceId},
-	{"Test2",Test2_ServiceId},
-};
+
 
 static InitConfig InitCfg =
 {
@@ -108,8 +104,6 @@ static InitConfig InitCfg =
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferConfigForResponse
 	ServerSend,
 	500,
-	AllRequests,
-	2,
 	Services,
 	sizeof(Services)/sizeof(ServiceDescribe),
 	{
