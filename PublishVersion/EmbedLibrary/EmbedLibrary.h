@@ -28,6 +28,9 @@ extern "C" {
 #define El_Strlen      strlen
 #define El_Strcat		strcat
 #define El_Assert		assert
+#define El_Debug	rt_kprintf
+#define El_Assert(...) configASSERT(__VA_ARGS__)
+#define El_Sprintf     rt_sprintf
 #define CallFunction(Function,...) do{if (Function != NULL){Function(__VA_ARGS__);}}while(0); //using C99 Mode.
 
 	void* El_Malloc(uint32_t size);

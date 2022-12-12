@@ -2,6 +2,7 @@
 #define BlockBufferProvider_H
 #include "ringbuffer.h"
 #include "EmbedXrpcPortInterface.h"
+#include "cmsis_os2.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
