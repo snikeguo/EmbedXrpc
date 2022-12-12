@@ -391,8 +391,9 @@ namespace EmbedXrpcIdlParser
 
             csw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
             csw.WriteLine("sm.Index=0;");
-            csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\ngoto exi;\n}}");
-            csw.WriteLine($"else\n{{\n{service.ServiceName}_reqresp.State=RequestState_Ok;\n}}");
+            csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\n}}");
+            csw.WriteLine("else\n{");
+            csw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Ok;\n");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
 
@@ -431,7 +432,7 @@ namespace EmbedXrpcIdlParser
 
                 csw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");
             }
-            csw.WriteLine("exi:");
+            csw.WriteLine("}");
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
             csw.WriteLine("osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);");
