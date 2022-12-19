@@ -7,7 +7,7 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
@@ -15,7 +15,7 @@ BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
+El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
@@ -45,16 +45,15 @@ sm.Index=0;
 if(result==false)
 {
 DateTimeChange_reqresp.State=RequestState_Failed;
-goto exi;
 }
 else
 {
 DateTimeChange_reqresp.State=RequestState_Ok;
+
 }
-exi:
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return DateTimeChange_reqresp;
 }
@@ -66,7 +65,7 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
+El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)
 {
@@ -74,7 +73,7 @@ BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);
 }
 else
 {
-osMessageQueueReset(RpcObject->MessageQueueOfRequestService);
+El_ResetQueue(RpcObject->MessageQueueOfRequestService);
 }
 
 sm.Index=0;
@@ -103,16 +102,15 @@ sm.Index=0;
 if(result==false)
 {
 Test2_reqresp.State=RequestState_Failed;
-goto exi;
 }
 else
 {
 Test2_reqresp.State=RequestState_Ok;
+
 }
-exi:
 if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)
 {
-osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);
+El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);
 }
 return Test2_reqresp;
 }

@@ -130,7 +130,7 @@ namespace EmbedXrpcIdlParser
 
             //EmbedXrpcSerializationHFileStreamWriter.WriteLine("#include\"EmbedXrpcSerialization.h\"");
             //D:\VSProject\EmbedXrpcIdlParser\EmbedXrpcSerialization
-
+            
             SerializeHsw.WriteLine("#ifndef offsetof");
             SerializeHsw.WriteLine("#define offsetof(s, m) (size_t)((char*)(&((s*)0)->m))");
             SerializeHsw.WriteLine("#endif");
@@ -325,12 +325,12 @@ namespace EmbedXrpcIdlParser
             }
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
-            csw.WriteLine("osMutexAcquire(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);");
+            csw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);");
             csw.WriteLine("}");
             csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
             csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);");
             csw.WriteLine("}\r\nelse\r\n{");
-            csw.WriteLine("osMessageQueueReset(RpcObject->MessageQueueOfRequestService);");
+            csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService);");
             csw.WriteLine("}\r\n");
             csw.WriteLine("sm.Index=0;\n" +
                 "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];\n" +
@@ -435,7 +435,7 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("}");
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
-            csw.WriteLine("osMutexRelease(RpcObject->DataLinkBufferForRequest.MutexHandle);");
+            csw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);");
             csw.WriteLine("}");
             csw.WriteLine($"return {service.ServiceName}_reqresp;");
             csw.WriteLine("}");

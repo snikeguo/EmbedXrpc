@@ -2,15 +2,15 @@
 #define BlockBufferProvider_H
 #include "ringbuffer.h"
 #include "EmbedXrpcPortInterface.h"
-#include "cmsis_os2.h"
+#include "EmbedLibrary.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
     typedef struct  _BlockRingBufferProvider
     {
-        osMessageQueueId_t Queue;
+        El_Queue_t Queue;
         struct rt_ringbuffer RingBuffer;
-        osMutexId_t Mutex;
+        El_Mutex_t Mutex;
         uint8_t* Pool;
         int16_t Size;
         uint32_t CalculateSumValue;
@@ -18,11 +18,11 @@ extern "C" {
     }BlockRingBufferProvider;
     void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, uint16_t size, uint32_t queue_item_size);
     void BlockRingBufferProvider_DeInit(BlockRingBufferProvider* obj);
-    osStatus_t BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch);
-    osStatus_t BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t offset);
-    osStatus_t BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t len);
-    osStatus_t BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint32_t timeout);
-    osStatus_t BlockRingBufferProvider_Send(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint8_t* buf);
+    Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch);
+    Bool BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t offset);
+    Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t len);
+    Bool BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint32_t timeout);
+    Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint8_t* buf,int isIsr);
     void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj);
 
     static inline void BlockRingBufferProvider_SetCalculateSum(BlockRingBufferProvider* obj, uint32_t s) { obj->CalculateSumValue = s; }

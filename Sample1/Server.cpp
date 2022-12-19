@@ -16,7 +16,7 @@ bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 		printf("ServerSend:0x%.2x\n", data[i]);
 
 	}*/
-	ClientRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer);
+	ClientRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,false);
 	return true;
 }
 //特化子类继承
@@ -29,7 +29,7 @@ public:
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
 		RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
-		osTimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
 		this->IsFreeResponse = true;
 		Response.ReturnValue.Sum = 1;
 		Response.ReturnValue.Sum2 = 2;
@@ -108,7 +108,7 @@ static InitConfig InitCfg =
 	sizeof(Services)/sizeof(ServiceDescribe),
 	{
 		true,//CheckSumValid
-		osPriorityAboveNormal,//ServiceThreadPriority
+		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

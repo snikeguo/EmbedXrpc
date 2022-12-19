@@ -75,6 +75,9 @@
     <ClCompile Include="XrpcCodeGen\Server\Sample2.Server.cpp">
       <Filter>XRPCCodeGen\Server</Filter>
     </ClCompile>
+    <ClCompile Include="..\EmbedXrpcSerialization\SoftCrc32.c">
+      <Filter>EmbedXrpcLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h">

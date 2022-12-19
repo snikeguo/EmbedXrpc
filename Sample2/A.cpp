@@ -1,5 +1,6 @@
 #include <thread>
 #include "EmbedXrpc.Port.h"
+#include <EmbedXrpcObject.h>
 #include "EmbedLibrary.h"
 #include "Sample2.Client.h"
 extern EmbedXrpcObject B_RpcObject;
@@ -8,26 +9,21 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == ReceivedMessageStatus::Ok);
+	assert(B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,0) == ReceivedMessageStatus::Ok);
 	return true;
 }
 
 
-static RequestServiceDescribe AllRequests[1] =//定义回复 ID 集合
-{
-	{"Inter_Add"   ,     GetSum_ServiceId},
-};
+
 static ClientNodeQuicklyInitConfig InitCfg =
 {
 	"A",
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForRequest
 	{ Send },
 	1000,
-	AllRequests,
-	1,
 	{
 		true,//CheckSumValid
-		osPriorityAboveNormal,//ServiceThreadPriority
+		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

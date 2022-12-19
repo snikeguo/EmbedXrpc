@@ -53,5 +53,11 @@
     <ClCompile Include="SoftCrc32.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

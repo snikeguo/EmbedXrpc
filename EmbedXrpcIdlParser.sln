@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4BF9C443-A0FB-4B40-A4C8-3D56ED390846}"
 	ProjectSection(SolutionItems) = preProject
 		PublishVersion\ChangeNote.txt = PublishVersion\ChangeNote.txt
+		genResources.ps1 = genResources.ps1
 		readme.md = readme.md
 		网图1.jpg = 网图1.jpg
 	EndProjectSection

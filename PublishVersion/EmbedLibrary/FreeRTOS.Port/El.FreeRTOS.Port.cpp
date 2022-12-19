@@ -1,5 +1,4 @@
 #include "EmbedLibrary.h"
-#include "cmsis_os2.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -8,30 +7,31 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-osThreadId_t osThreadNew (osThreadFunc_t func, void *argument, const osThreadAttr_t *attr)
+El_Thread_t El_CreateThread(const char *threadName, uint8_t priority, void (*Thread)(void *), void *Arg, uint16_t stack_size)
 {
 	TaskHandle_t ServiceThread = nullptr;
-	xTaskCreate(func, attr->name, attr->stack_size/4, argument, attr->priority, &ServiceThread);
+	xTaskCreate(Thread, threadName, stack_size, Arg, priority, &ServiceThread);
 	vTaskSuspend(ServiceThread);
 	return ServiceThread;
 }
 
-osMutexId_t osMutexNew (const osMutexAttr_t *attr)
+El_Mutex_t El_CreateMutex(const char *mutexName)
 {
 	SemaphoreHandle_t  mutex = xSemaphoreCreateMutex();
 	return mutex;
 }
-osMessageQueueId_t osMessageQueueNew (uint32_t msg_count, uint32_t msg_size, const osMessageQueueAttr_t *attr)
+El_Queue_t El_CreateQueue(const char *queueName,
+										uint32_t queueItemSize,
+										uint32_t maxItemLen)
 {
 
-	QueueHandle_t queue = xQueueCreate(msg_count==0?1:msg_count, msg_size);
+	QueueHandle_t queue = xQueueCreate(maxItemLen, queueItemSize);
 	return queue;
 }
 struct FreeRtosTimer_t
 {
 	void *arg;
-	TickType_t ticks;
-	TimerHandle_t FreeRtosTimerHandle;
+	TimerHandle_t timer;
 	void (*timercb)(void *arg);
 };
 
@@ -40,15 +40,14 @@ static void FreeRtosTimerCallBack(TimerHandle_t xTimer)
 	FreeRtosTimer_t *frt = (FreeRtosTimer_t *)pvTimerGetTimerID(xTimer);
 	frt->timercb(frt->arg);
 }
-osTimerId_t osTimerNew (osTimerFunc_t func, osTimerType_t type, void *argument, const osTimerAttr_t *attr)
+El_Timer_t El_CreateTimer(const char *timerName, uint32_t timeout, void (*timercb)(void *arg), void *Arg)
 {
 	FreeRtosTimer_t *frt = (FreeRtosTimer_t *)pvPortMalloc(sizeof(FreeRtosTimer_t));
-	TimerHandle_t timer = xTimerCreate(attr->name, 0, type==osTimerPeriodic?pdTRUE:pdFALSE, frt, FreeRtosTimerCallBack);
-	frt->FreeRtosTimerHandle = timer;
-	frt->ticks=0;
-	frt->arg = argument;
-	frt->timercb = func;
-	return frt;
+	TimerHandle_t timer = xTimerCreate(timerName, timeout, pdTRUE, frt, FreeRtosTimerCallBack);
+	frt->timer = timer;
+	frt->arg = Arg;
+	frt->timercb = timercb;
+	return timer;
 }
 El_Semaphore_t El_CreateSemaphore(const char *SemaphoreName)
 {
@@ -80,80 +79,107 @@ void El_ThreadStart(El_Thread_t thread)
 	auto x = static_cast<TaskHandle_t>(thread);
 	vTaskResume(x);
 }
-osStatus_t osTimerStart(osTimerId_t timer_id, uint32_t ticks)
+void El_TimerStart(El_Timer_t timer, uint16_t interval)
 {
-	FreeRtosTimer_t * xtimer = (FreeRtosTimer_t *)timer_id;
-	xTimerChangePeriod(xtimer->FreeRtosTimerHandle,ticks,0);
-	xTimerStart(xtimer->FreeRtosTimerHandle, 0);
+	TimerHandle_t xtimer = (TimerHandle_t)timer;
+	xTimerStart(xtimer, 0);
 }
-osStatus_t osTimerStop (osTimerId_t timer_id)
+void El_TimerReset(El_Timer_t timer)
 {
-  FreeRtosTimer_t * xtimer = (FreeRtosTimer_t *)timer_id;
-	xTimerStop(xtimer->FreeRtosTimerHandle, 0);
+	TimerHandle_t xtimer = (TimerHandle_t)timer;
+	xTimerReset(xtimer, 0);
 }
-
-osStatus_t osMutexAcquire (osMutexId_t mutex_id, uint32_t timeout)
+void El_TimerStop(El_Timer_t timer)
 {
-	auto m = static_cast<SemaphoreHandle_t >(mutex_id);
+	TimerHandle_t xtimer = (TimerHandle_t)timer;
+	xTimerStop(xtimer, 0);
+}
+Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout)
+{
+	auto frsem = static_cast<QueueHandle_t>(sem);
+	return xSemaphoreTake(frsem, timeout) == pdTRUE ? True : False;
+}
+void El_ReleaseSemaphore(El_Semaphore_t sem)
+{
+	auto frsem = static_cast<QueueHandle_t>(sem);
+	xSemaphoreGive(frsem);
+}
+void El_ResetSemaphore(El_Semaphore_t sem)
+{
+	auto frsem = static_cast<QueueHandle_t>(sem);
+	xQueueReset(frsem); //
+}
+Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout)
+{
+	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreTake(m, timeout);
 	if (r == pdTRUE)
 	{
-		return osOK;
+		return True;
 	}
 	else
 	{
-		return osErrorTimeout;
+		return False;
 	}
 }
-osStatus_t osMutexRelease (osMutexId_t mutex_id)
+Bool El_ReleaseMutex(El_Mutex_t mutex)
 {
-	auto m = static_cast<SemaphoreHandle_t >(mutex_id);
+	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreGive(m);
 	if (r == pdTRUE)
 	{
-		return osOK;
+		return True;
 	}
 	else
 	{
-		return osError;
+		return False;
 	}
 }
 
-osStatus_t osMessageQueueGet (osMessageQueueId_t mq_id, void *msg_ptr, uint8_t *msg_prio, uint32_t timeout)
+QueueState El_ReceiveQueue(El_Queue_t queue, void *item, uint32_t itemlen, uint32_t timeout)
 {
-	auto q = static_cast<QueueHandle_t>(mq_id);
-	auto r = xQueueReceive(q, msg_ptr, timeout);
+	auto q = static_cast<QueueHandle_t>(queue);
+	auto r = xQueueReceive(q, item, timeout);
 	if (r == pdTRUE)
 	{
-		return osOK;
+		return QueueState_OK;
 	}
 	else
 	{
-		return osErrorTimeout;
+		return QueueState_Timeout;
 	}
 }
-osStatus_t osMessageQueuePut (osMessageQueueId_t mq_id, const void *msg_ptr, uint8_t msg_prio, uint32_t timeout)
+QueueState El_SendQueue(El_Queue_t queue, void *item, uint32_t itemlen,int isIsr)
 {
-	auto q = static_cast<QueueHandle_t>(mq_id);
-	auto r = xQueueSend(q, msg_ptr, 0);
+	auto q = static_cast<QueueHandle_t>(queue);
+	auto r = pdTRUE;
+	if (isIsr)
+	{
+		r=xQueueSendFromISR(q, item, 0);
+	}
+	else
+	{
+		r = xQueueSend(q, item, 0);
+	}
 	//configASSERT(r == pdPASS);
 	if (r == pdPASS)
 	{
-		return osOK;
+		return QueueState_OK;
 	}
-	else
+	else //(r == errQUEUE_FULL)
 	{
-		return osErrorNoMemory;
+		return QueueState_Full;
 	}
+	return QueueState_Full;
 }
 void El_ResetQueue(El_Queue_t queue)
 {
 	auto q = static_cast<QueueHandle_t>(queue);
 	xQueueReset(q);
 }
-uint32_t osMessageQueueGetSpace (osMessageQueueId_t mq_id)
+uint32_t El_QueueSpacesAvailable(El_Queue_t queue)
 {
-	auto q = static_cast<QueueHandle_t>(mq_id);
+	auto q = static_cast<QueueHandle_t>(queue);
 	return uxQueueSpacesAvailable(q);
 }
 //uint32_t MallocCount = 0;

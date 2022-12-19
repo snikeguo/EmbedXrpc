@@ -1,4 +1,4 @@
-﻿#include"Sample3.EmbedXrpcSerialization.h"
+#include"Sample3.EmbedXrpcSerialization.h"
 
 //auto code gen ! DO NOT modify this file!
 //自动代码生成,请不要修改本文件!
@@ -31,9 +31,9 @@ DeserializeField((uint8_t *)&obj->d,sm,sizeof(UInt8));
 DeserializeField((uint8_t *)&obj->e,sm,sizeof(Int32));
 }
 
-//!void Student_FreeData(Student *obj)
-//!{
-//!}
+//! void Student_FreeData(Student *obj)
+//! {
+//! }
 
 void DynamicStudentArray_Serialize(SerializationManager *sm,DynamicStudentArray *obj)
 {
@@ -48,7 +48,7 @@ for(Int32 TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixed
 {
 Student_Serialize(sm,&obj->TrueFixedStudent[TrueFixedStudent_index]);
 }
-//NoSerializationStudent :NoSerialization
+ //NoSerializationStudent:NoSerialization
 }
 
 void DynamicStudentArray_Deserialize(SerializationManager *sm,DynamicStudentArray *obj)
@@ -64,22 +64,22 @@ for(Int32 TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixed
 {
 Student_Deserialize(sm,&obj->TrueFixedStudent[TrueFixedStudent_index]);
 }
-//NoSerializationStudent :NoSerialization
+ //NoSerializationStudent:NoSerialization
 }
 
-void DynamicStudentArray_FreeData(DynamicStudentArray *obj)
-{
-//!!for(Int32 FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
-//!!{
-//!!Student_FreeData(&obj->FalseFixedStudent[FalseFixedStudent_index]);
-//!!}
-El_Free(obj->FalseFixedStudent);
-//!!for(Int32 TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
-//!!{
-//!!Student_FreeData(&obj->TrueFixedStudent[TrueFixedStudent_index]);
-//!!}
-//NoSerializationStudent :NoSerialization 
-}
+ void DynamicStudentArray_FreeData(DynamicStudentArray *obj)
+ {
+  //!!!! for(Int32 FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
+  //!!!! {
+  //!!!! Student_FreeData(&obj->FalseFixedStudent[FalseFixedStudent_index]);
+  //!!!! }
+  El_Free(obj->FalseFixedStudent);
+  //!!!! for(Int32 TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
+  //!!!! {
+  //!!!! Student_FreeData(&obj->TrueFixedStudent[TrueFixedStudent_index]);
+  //!!!! }
+ //NoSerializationStudent:NoSerialization 
+ }
 
 void MixedStudentArray_Serialize(SerializationManager *sm,MixedStudentArray *obj)
 {
@@ -93,9 +93,9 @@ DynamicStudentArray_Deserialize(sm,&obj->DynamicStudent);
 Student_Deserialize(sm,&obj->OneStudent);
 }
 
-void MixedStudentArray_FreeData(MixedStudentArray *obj)
-{
-DynamicStudentArray_FreeData(&obj->DynamicStudent);
-//!!!Student_FreeData(&obj->OneStudent);
-}
+ void MixedStudentArray_FreeData(MixedStudentArray *obj)
+ {
+   DynamicStudentArray_FreeData(&obj->DynamicStudent);
+  //!! Student_FreeData(&obj->OneStudent);
+ }
 

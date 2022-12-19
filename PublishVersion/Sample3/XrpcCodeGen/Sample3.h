@@ -1,4 +1,4 @@
-﻿#ifndef Sample3_H
+#ifndef Sample3_H
 #define Sample3_H
 #include"EmbedSerialization.h"
 

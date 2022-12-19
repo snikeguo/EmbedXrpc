@@ -11,7 +11,7 @@ bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer) == ReceivedMessageStatus::Ok);
+	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,false) == ReceivedMessageStatus::Ok);
 	return true;
 }
 //特化子类继承
@@ -58,7 +58,7 @@ static InitConfig InitCfg =
 	2,
 	{
 		true,//CheckSumValid
-		osPriorityAboveNormal,//ServiceThreadPriority
+		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

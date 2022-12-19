@@ -25,6 +25,7 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c" />
+    <ClCompile Include="..\EmbedXrpcSerialization\SoftCrc32.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="XrpcCodeGen\Sample3.cpp" />
     <ClCompile Include="XrpcCodeGen\Sample3.EmbedXrpcSerialization.cpp" />

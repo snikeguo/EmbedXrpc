@@ -1,7 +1,8 @@
 #include <thread>
 #include "EmbedLibrary.h"
+#include "EmbedXrpc.Port.h"
+#include <EmbedXrpcObject.h>
 #include "Sample2.Server.h"
-
 
 extern EmbedXrpcObject B_RpcObject;
 
@@ -15,7 +16,7 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 		printf("ServerSend:0x%.2x\n", data[i]);
 
 	}*/
-	B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer);
+	B_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,0);
 	return true;
 }
 class CServer_GetSumProvider :public GetSum_Service
@@ -24,7 +25,7 @@ public:
 	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, Int32 a, Int32 b)
 	{
 		printf("C:start suppendtimer and sleep 2s.\n");
-		osTimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		El_TimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
 		this->Response.ReturnValue.IsSuccess = 1;
 		this->Response.ReturnValue.Value = a + b;
 		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
@@ -47,7 +48,7 @@ static ServerNodeQuicklyInitConfig InitCfg =
 	1,
 	{
 		true,//CheckSumValid
-		osPriorityAboveNormal,//ServiceThreadPriority
+		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

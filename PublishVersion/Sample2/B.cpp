@@ -1,5 +1,6 @@
 #include <thread>
 #include "EmbedXrpc.Port.h"
+#include <EmbedXrpcObject.h>
 #include "EmbedLibrary.h"
 #include "Sample2.Server.h"
 #include "Sample2.Client.h"
@@ -15,11 +16,11 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 {
 	if (userDataOfTransportLayer->SourceAddress=='B'&& userDataOfTransportLayer->DestAddress == 'A')
 	{
-		A_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer);
+		A_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,0);
 	}
 	else if (userDataOfTransportLayer->SourceAddress == 'B' && userDataOfTransportLayer->DestAddress == 'C')
 	{
-		C_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer);
+		C_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer, 0);
 	}
 	else
 	{
@@ -38,7 +39,7 @@ public:
 
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.SourceAddress = 'B';
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.DestAddress = 'A';
-		osTimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		El_TimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
 
 		DTL bcdtl;
 		bcdtl.SourceAddress = 'B';
@@ -64,10 +65,6 @@ static ServiceDescribe AllServices[] = //定义请求集合
 	{"Inter_Add",					&BServerGetSumProvider},
 };
 
-static RequestServiceDescribe AllRequests[1] =//定义回复 ID 集合
-{
-	{"Inter_Add"   ,     GetSum_ServiceId},
-};
 static InitConfig InitCfg =
 {
 	"B",
@@ -75,13 +72,11 @@ static InitConfig InitCfg =
 	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
 	Send,
 	500,
-	AllRequests,//Responses
-	1,
 	AllServices,//Request
 	1,
 	{
 		true,//CheckSumValid
-		osPriorityAboveNormal,//ServiceThreadPriority
+		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{

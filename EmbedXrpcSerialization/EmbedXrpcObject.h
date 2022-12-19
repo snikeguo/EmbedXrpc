@@ -4,7 +4,7 @@
 #include "EmbedLibrary.h"
 #include "EmbedXrpcCommon.h"
 #include "BlockBufferProvider.h"
-#define EmbedXrpcObjectVersion	"2.8.2"
+#define EmbedXrpcObjectVersion	"2.9.0"
 
 struct EmbedXrpcBufferConfig
 {
@@ -17,7 +17,7 @@ struct EmbedXrpcBuffer
 {
 	uint8_t* Buffer;
 	uint32_t BufferLen;
-	osMutexId_t MutexHandle;
+	El_Mutex_t MutexHandle;
 };
 
 
@@ -91,7 +91,7 @@ public:
 
 	BlockRingBufferProvider* BlockBufferProviderOfRequestService = nullptr;
 	
-	osMessageQueueId_t MessageQueueOfRequestService = nullptr;
+	El_Queue_t MessageQueueOfRequestService = nullptr;
 
 
 	void* UserData;
@@ -101,11 +101,11 @@ public:
 	EmbedXrpcConfig RpcConfig;
 
 	//server:
-	osThreadId_t ServiceThreadHandle; 
+	El_Thread_t ServiceThreadHandle; 
 	
 	BlockRingBufferProvider* ServiceBlockBufferProvider;
-	osMessageQueueId_t	ServiceMessageQueue;
-	osTimerId_t SuspendTimer;
+	El_Queue_t	ServiceMessageQueue;
+	El_Timer_t SuspendTimer;
 	UserDataOfTransportLayer_t UserDataOfTransportLayerOfSuspendTimerUsed;
 
 	uint32_t ServicesCount;
@@ -144,7 +144,7 @@ public:
 	void Init(InitConfig* cfg);
 	void DeInit();
 	static void ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
-	ReceivedMessageStatus ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer);
+	ReceivedMessageStatus ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer,int isIsr);
 	static void SuspendTimerCallBack(void* arg);
 
 
