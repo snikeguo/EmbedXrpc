@@ -14,96 +14,96 @@ extern "C" {
 #endif
 void AddResult_Serialize(SerializationManager *sm,AddResult *obj);
 
-void AddResult_Deserialize(SerializationManager *sm,AddResult *obj);
+void AddResult_Deserialize(SerializationManager *sm,AddResult *obj,int isIsr);
 
 //! void AddResult_FreeData(AddResult *obj);
 
 void Student_Serialize(SerializationManager *sm,Student *obj);
 
-void Student_Deserialize(SerializationManager *sm,Student *obj);
+void Student_Deserialize(SerializationManager *sm,Student *obj,int isIsr);
 
 //! void Student_FreeData(Student *obj);
 
 void DateTime_t_Serialize(SerializationManager *sm,DateTime_t *obj);
 
-void DateTime_t_Deserialize(SerializationManager *sm,DateTime_t *obj);
+void DateTime_t_Deserialize(SerializationManager *sm,DateTime_t *obj,int isIsr);
 
  void DateTime_t_FreeData(DateTime_t *obj);
 
 void DateTimeChange_Return_Serialize(SerializationManager *sm,DateTimeChange_Return *obj);
 
-void DateTimeChange_Return_Deserialize(SerializationManager *sm,DateTimeChange_Return *obj);
+void DateTimeChange_Return_Deserialize(SerializationManager *sm,DateTimeChange_Return *obj,int isIsr);
 
 //! void DateTimeChange_Return_FreeData(DateTimeChange_Return *obj);
 
 void DateTimeChange_Parameter_Serialize(SerializationManager *sm,DateTimeChange_Parameter *obj);
 
-void DateTimeChange_Parameter_Deserialize(SerializationManager *sm,DateTimeChange_Parameter *obj);
+void DateTimeChange_Parameter_Deserialize(SerializationManager *sm,DateTimeChange_Parameter *obj,int isIsr);
 
  void DateTimeChange_Parameter_FreeData(DateTimeChange_Parameter *obj);
 
 #define DateTimeChange_ServiceId 16   //0x10
 void Test2_Return_Serialize(SerializationManager *sm,Test2_Return *obj);
 
-void Test2_Return_Deserialize(SerializationManager *sm,Test2_Return *obj);
+void Test2_Return_Deserialize(SerializationManager *sm,Test2_Return *obj,int isIsr);
 
 //! void Test2_Return_FreeData(Test2_Return *obj);
 
 void Test2_Parameter_Serialize(SerializationManager *sm,Test2_Parameter *obj);
 
-void Test2_Parameter_Deserialize(SerializationManager *sm,Test2_Parameter *obj);
+void Test2_Parameter_Deserialize(SerializationManager *sm,Test2_Parameter *obj,int isIsr);
 
  void Test2_Parameter_FreeData(Test2_Parameter *obj);
 
 #define Test2_ServiceId 17   //0x11
 void Add_Return_Serialize(SerializationManager *sm,Add_Return *obj);
 
-void Add_Return_Deserialize(SerializationManager *sm,Add_Return *obj);
+void Add_Return_Deserialize(SerializationManager *sm,Add_Return *obj,int isIsr);
 
 //! void Add_Return_FreeData(Add_Return *obj);
 
 void Add_Parameter_Serialize(SerializationManager *sm,Add_Parameter *obj);
 
-void Add_Parameter_Deserialize(SerializationManager *sm,Add_Parameter *obj);
+void Add_Parameter_Deserialize(SerializationManager *sm,Add_Parameter *obj,int isIsr);
 
  void Add_Parameter_FreeData(Add_Parameter *obj);
 
 #define Add_ServiceId 18   //0x12
 void NoArg_Return_Serialize(SerializationManager *sm,NoArg_Return *obj);
 
-void NoArg_Return_Deserialize(SerializationManager *sm,NoArg_Return *obj);
+void NoArg_Return_Deserialize(SerializationManager *sm,NoArg_Return *obj,int isIsr);
 
 //! void NoArg_Return_FreeData(NoArg_Return *obj);
 
 void NoArg_Parameter_Serialize(SerializationManager *sm,NoArg_Parameter *obj);
 
-void NoArg_Parameter_Deserialize(SerializationManager *sm,NoArg_Parameter *obj);
+void NoArg_Parameter_Deserialize(SerializationManager *sm,NoArg_Parameter *obj,int isIsr);
 
 //! void NoArg_Parameter_FreeData(NoArg_Parameter *obj);
 
 #define NoArg_ServiceId 19   //0x13
 void NoReturn_Return_Serialize(SerializationManager *sm,NoReturn_Return *obj);
 
-void NoReturn_Return_Deserialize(SerializationManager *sm,NoReturn_Return *obj);
+void NoReturn_Return_Deserialize(SerializationManager *sm,NoReturn_Return *obj,int isIsr);
 
 //! void NoReturn_Return_FreeData(NoReturn_Return *obj);
 
 void NoReturn_Parameter_Serialize(SerializationManager *sm,NoReturn_Parameter *obj);
 
-void NoReturn_Parameter_Deserialize(SerializationManager *sm,NoReturn_Parameter *obj);
+void NoReturn_Parameter_Deserialize(SerializationManager *sm,NoReturn_Parameter *obj,int isIsr);
 
 //! void NoReturn_Parameter_FreeData(NoReturn_Parameter *obj);
 
 #define NoReturn_ServiceId 20   //0x14
 void NoArgAndReturn_Return_Serialize(SerializationManager *sm,NoArgAndReturn_Return *obj);
 
-void NoArgAndReturn_Return_Deserialize(SerializationManager *sm,NoArgAndReturn_Return *obj);
+void NoArgAndReturn_Return_Deserialize(SerializationManager *sm,NoArgAndReturn_Return *obj,int isIsr);
 
 //! void NoArgAndReturn_Return_FreeData(NoArgAndReturn_Return *obj);
 
 void NoArgAndReturn_Parameter_Serialize(SerializationManager *sm,NoArgAndReturn_Parameter *obj);
 
-void NoArgAndReturn_Parameter_Deserialize(SerializationManager *sm,NoArgAndReturn_Parameter *obj);
+void NoArgAndReturn_Parameter_Deserialize(SerializationManager *sm,NoArgAndReturn_Parameter *obj,int isIsr);
 
 //! void NoArgAndReturn_Parameter_FreeData(NoArgAndReturn_Parameter *obj);
 

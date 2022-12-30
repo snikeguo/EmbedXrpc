@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.;.\FreeRTOS.Port\include;.\Win32.Port;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
+    <IncludePath>.;.\FreeRTOS.Port\include;.\Port;$(SolutionDir)EmbedLibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

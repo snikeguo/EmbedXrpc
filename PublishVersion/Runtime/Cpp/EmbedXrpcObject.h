@@ -143,14 +143,14 @@ public:
 
 	void Init(InitConfig* cfg);
 	void DeInit();
-	static void ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData);
+	static void ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recData, bool isFreeData, int isIsr);
 	ReceivedMessageStatus ReceivedMessage(uint32_t allDataLen, uint8_t* allData, UserDataOfTransportLayer_t userDataOfTransportLayer,int isIsr);
 	static void SuspendTimerCallBack(void* arg);
 
 
 	static void ServiceThread(void* arg);
 
-	RequestResponseState Wait(uint32_t sid, ReceiveItemInfo* recData);
+	RequestResponseState Wait(uint32_t sid, ReceiveItemInfo* recData,int IsIsr);
 	
 };
 

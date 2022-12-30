@@ -125,63 +125,44 @@ extern "C"
 		win32timer->Stop();
 		delete win32timer;
 	}
-	void El_ThreadStart(El_Thread_t thread)
+	void El_ThreadStart(El_Thread_t thread, int isIsr)
 	{
 		std::thread* x = static_cast<std::thread*>(thread);
 		x->detach();
 	}
-	void  El_TimerStart(El_Timer_t timer, uint16_t interval)
+	void  El_TimerStart(El_Timer_t timer, uint16_t interval, int isIsr)
 	{
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->timerout = interval;
 		win32timer->Start();
 	}
-	void El_TimerReset(El_Timer_t timer)
+	void El_TimerReset(El_Timer_t timer, int isIsr)
 	{
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
 	}
-	void El_TimerStop(El_Timer_t timer)
+	void El_TimerStop(El_Timer_t timer, int isIsr)
 	{
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
 	}
 
-	Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout)
-	{
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
-		int recItem = 0;
-		auto r = qtsem->Receive(recItem, timeout);
-		//assert(r == true);
-		return r;
+	
 
-	}
-	void El_ReleaseSemaphore(El_Semaphore_t sem)
-	{
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
-		int recItem = 0;
-		qtsem->Send(recItem);
-	}
-	void El_ResetSemaphore(El_Semaphore_t sem)
-	{
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
-		qtsem->Reset();
-	}
-
-	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout)
+	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr)
 	{
 		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
 		std::chrono::milliseconds to(timeout);
 		return m->try_lock_for(to);
 	}
-	Bool El_ReleaseMutex(El_Mutex_t mutex)
+	Bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr)
 	{
 		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
 		m->unlock();
 		return true;
 	}
 
-	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout)
+	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout, int isIsr)
 	{
 		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
 		auto r = q->Receive(item, timeout);
@@ -201,12 +182,12 @@ extern "C"
 		q->Send(item);
 		return QueueState_OK;
 	}
-	void El_ResetQueue(El_Queue_t queue)
+	void El_ResetQueue(El_Queue_t queue, int isIsr)
 	{
 		NoGenericBlockingQueue* q = static_cast<NoGenericBlockingQueue*>(queue);
 		q->Reset();
 	}
-	uint32_t El_QueueSpacesAvailable(El_Queue_t queue)
+	uint32_t El_QueueSpacesAvailable(El_Queue_t queue, int isIsr)
 	{
 		return -1;
 	}

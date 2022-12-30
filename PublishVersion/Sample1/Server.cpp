@@ -7,7 +7,7 @@ extern EmbedXrpcObject ClientRpc;
 
 #define AllTypeBufferLen	4096
 
-bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer, 
+bool ServerSend(RequestParameter* rp,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
@@ -16,7 +16,7 @@ bool ServerSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 		printf("ServerSend:0x%.2x\n", data[i]);
 
 	}*/
-	ClientRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,false);
+	ClientRpc.ReceivedMessage(dataLen, data, *rp->Udtl,false);
 	return true;
 }
 //特化子类继承
@@ -29,7 +29,7 @@ public:
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
 		RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
-		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2,0);
 		this->IsFreeResponse = true;
 		Response.ReturnValue.Sum = 1;
 		Response.ReturnValue.Sum2 = 2;
@@ -140,6 +140,9 @@ void ServerThread()
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "192.168.1.101");
 	win32UserDataOfTransportLayerTest.Port = 7777;
+	RequestParameter rp;
+	rp.Udtl = &win32UserDataOfTransportLayerTest;
+	rp.IsIsr = 0;
 	while (testcount-- > 0)
 	{
 
@@ -162,7 +165,7 @@ void ServerThread()
 		t.David.u2 = 0x66778899;
 		t.David.uend1 = 1;
 		t.David.uend2 = 2;
-		DateTimeChanger.DateTimeChange(&win32UserDataOfTransportLayerTest, &t);//调用委托
+		DateTimeChanger.DateTimeChange(&rp, &t);//调用委托
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(10000));//等待RPC调用全部完毕

@@ -86,25 +86,22 @@ extern "C" {
 	void El_DeleteSemaphore(El_Semaphore_t);
 	void El_DeleteTimer(El_Timer_t);
 
-	void El_ThreadStart(El_Thread_t thread);
+	void El_ThreadStart(El_Thread_t thread,int isIsr);
 
-	void El_TimerStart(El_Timer_t timer, uint16_t interval);
-	void El_TimerReset(El_Timer_t timer);
-	void El_TimerStop(El_Timer_t timer);
+	void El_TimerStart(El_Timer_t timer, uint16_t interval, int isIsr);
+	void El_TimerReset(El_Timer_t timer, int isIsr);
+	void El_TimerStop(El_Timer_t timer, int isIsr);
 
-	Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout);
-	void El_ReleaseSemaphore(El_Semaphore_t sem);
-	void El_ResetSemaphore(El_Semaphore_t sem);
 
-	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout);
-	Bool El_ReleaseMutex(El_Mutex_t mutex);
+	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr);
+	Bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr);
 
 
 
-	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout);
+	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout, int isIsr);
 	QueueState El_SendQueue(El_Queue_t queue, void* item, uint32_t itemSize,int isIsr);
-	void El_ResetQueue(El_Queue_t queue);
-	uint32_t El_QueueSpacesAvailable(El_Queue_t queue);
+	void El_ResetQueue(El_Queue_t queue, int isIsr);
+	uint32_t El_QueueSpacesAvailable(El_Queue_t queue, int isIsr);
 	void* El_Malloc(uint32_t size);
 	void El_Free(void* ptr);
 	void El_Memcpy(void* d, const void* s, uint32_t size);

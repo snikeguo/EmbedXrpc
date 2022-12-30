@@ -54,6 +54,12 @@ class EmbedXrpcObject;
 	 ReceiveType_Response=0x2,
  };
 
+ class RequestParameter
+ {
+ public:
+     UserDataOfTransportLayer_t* Udtl;
+     int IsIsr = 0;
+ };
 
  class ServiceInvokeParameter
  {
@@ -62,6 +68,7 @@ class EmbedXrpcObject;
      UserDataOfTransportLayer_t Response_UserDataOfTransportLayer;
      EmbedXrpcObject* RpcObject;
      uint16_t TargetTimeOut;
+     int IsIsr = 0;
  };
 
  class IService
@@ -87,6 +94,6 @@ class EmbedXrpcObject;
      IService* Service;
  };
 
-typedef bool (*SendPack_t)(UserDataOfTransportLayer_t* userDataOfTransportLayer, EmbedXrpcObject* rpcObj,uint32_t dataLen, uint8_t* data);
+typedef bool (*SendPack_t)(RequestParameter* rp, EmbedXrpcObject* rpcObj,uint32_t dataLen, uint8_t* data);
 
 #endif

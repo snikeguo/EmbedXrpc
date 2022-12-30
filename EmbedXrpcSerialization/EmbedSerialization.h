@@ -61,7 +61,7 @@ uint32_t SerializationManager_GetReferenceSum(SerializationManager* sm);
 uint32_t SerializationManager_GetCalculateSum(SerializationManager* sm);
 void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum);//只有ringbuffer mode 为0的情况下使用。
 
-void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width);
+void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width,int isIsr);
 
 #ifdef __cplusplus
 }

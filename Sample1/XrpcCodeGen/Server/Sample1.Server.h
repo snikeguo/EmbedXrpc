@@ -11,7 +11,7 @@ DateTimeChange_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
 DateTimeChange_Parameter DateTimeChange_SendData;
 DateTimeChange_Return DateTimeChange_reqresp;
-DateTimeChange_Return& DateTimeChange(UserDataOfTransportLayer_t* userDataOfTransportLayer,DateTime_t now[1]);
+DateTimeChange_Return& DateTimeChange(RequestParameter* rp,DateTime_t now[1]);
 };
 
 class Test2_Requester
@@ -23,7 +23,7 @@ Test2_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return Test2_ServiceId;}
 Test2_Parameter Test2_SendData;
 Test2_Return Test2_reqresp;
-Test2_Return& Test2(UserDataOfTransportLayer_t* userDataOfTransportLayer);};
+Test2_Return& Test2(RequestParameter* rp);};
 
 class Add_Service:public IService
 {

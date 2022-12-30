@@ -7,11 +7,11 @@ extern EmbedXrpcObject ServerRpc;
 
 
 
-bool ClientSend(UserDataOfTransportLayer_t* userDataOfTransportLayer,
+bool ClientSend(RequestParameter* rp,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(ServerRpc.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,false) == ReceivedMessageStatus::Ok);
+	assert(ServerRpc.ReceivedMessage(dataLen, data, *rp->Udtl,false) == ReceivedMessageStatus::Ok);
 	return true;
 }
 //特化子类继承
@@ -91,6 +91,9 @@ void ClientThread()
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
 	win32UserDataOfTransportLayerTest.Port = 6666;
+	RequestParameter rp;
+	rp.Udtl = &win32UserDataOfTransportLayerTest;
+	rp.IsIsr = 0;
 	while (testcount-- > 0)
 	{
 		a++;
@@ -99,7 +102,7 @@ void ClientThread()
 		Client.Add_SendData.b = b;
 		Client.Add_SendData.dataLen = 4;
 		Client.Add_SendData.data = (UInt8*)"123";
-		auto sum = Client.Add(&win32UserDataOfTransportLayerTest);//request对象请求service
+		auto sum = Client.Add(&rp);//request对象请求service
 		if (sum.State != ResponseState_Ok)
 		{
 			printf("Client was requested the \"Add\" service Faild! error code:%d\n", sum.State);

@@ -285,8 +285,8 @@ namespace EmbedXrpcIdlParser
             if (service.ExternalParameter.IsExternal == false)
             {
                 var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-                hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
-                csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer{dh}");
+                hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(RequestParameter* rp{dh}");
+                csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(RequestParameter* rp{dh}");
                 temp_fileds = string.Empty;
                 for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
                 {
@@ -308,8 +308,8 @@ namespace EmbedXrpcIdlParser
             }
             else
             {
-                hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer);");
-                csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(UserDataOfTransportLayer_t* userDataOfTransportLayer)\n{{");
+                hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(RequestParameter* rp);");
+                csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(RequestParameter* rp)\n{{");
             }
 
 
@@ -325,12 +325,12 @@ namespace EmbedXrpcIdlParser
             }
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
-            csw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER);");
+            csw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER,rp->IsIsr);");
             csw.WriteLine("}");
             csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-            csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService);");
+            csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);");
             csw.WriteLine("}\r\nelse\r\n{");
-            csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService);");
+            csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService,rp->IsIsr);");
             csw.WriteLine("}\r\n");
             csw.WriteLine("sm.Index=0;\n" +
                 "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];\n" +
@@ -389,7 +389,7 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
 
-            csw.WriteLine($"result=RpcObject->Send(userDataOfTransportLayer,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
+            csw.WriteLine($"result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
             csw.WriteLine("sm.Index=0;");
             csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\n}}");
             csw.WriteLine("else\n{");
@@ -398,7 +398,7 @@ namespace EmbedXrpcIdlParser
             {
 
                 csw.WriteLine("ReceiveItemInfo recData;");
-                csw.WriteLine($"waitstate=RpcObject->Wait({service.ServiceName}_ServiceId,&recData);");
+                csw.WriteLine($"waitstate=RpcObject->Wait({service.ServiceName}_ServiceId,&recData,rp->IsIsr);");
                 csw.WriteLine("if(waitstate == RequestResponseState::ResponseState_Ok)");
                 csw.WriteLine("{");
 
@@ -413,7 +413,7 @@ namespace EmbedXrpcIdlParser
                 csw.WriteLine("SerializationManager_SetCalculateSum(&sm,0);");
                 csw.WriteLine("SerializationManager_SetReferenceSum(&sm,recData.CheckSum);");
                 csw.WriteLine("}");
-                csw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp);");
+                csw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp,rp->IsIsr);");
                 csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
                 csw.WriteLine("El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
                 csw.WriteLine("}");
@@ -435,7 +435,7 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("}");
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
-            csw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle);");
+            csw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle,rp->IsIsr);");
             csw.WriteLine("}");
             csw.WriteLine($"return {service.ServiceName}_reqresp;");
             csw.WriteLine("}");
@@ -497,7 +497,7 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine($"void {service.ServiceName}_Service::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)");
             csw.WriteLine("{");
 
-            csw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request);");
+            csw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request,serviceInvokeParameter->IsIsr);");
 
             csw.WriteLine($"if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
             csw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");

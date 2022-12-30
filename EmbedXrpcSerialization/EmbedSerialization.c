@@ -64,11 +64,11 @@ void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint
 }
 
 
-void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width)
+void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width,int isIsr)
 {
 	if (sm->BlockBufferProvider != NULL)
 	{
-		BlockRingBufferProvider_PopChars(sm->BlockBufferProvider,field_ptr, (uint16_t)field_width);
+		BlockRingBufferProvider_PopChars(sm->BlockBufferProvider,field_ptr, (uint16_t)field_width,isIsr);
 	}
 	else
 	{

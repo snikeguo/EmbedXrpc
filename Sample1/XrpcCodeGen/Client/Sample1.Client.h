@@ -31,7 +31,7 @@ Add_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return Add_ServiceId;}
 Add_Parameter Add_SendData;
 Add_Return Add_reqresp;
-Add_Return& Add(UserDataOfTransportLayer_t* userDataOfTransportLayer);void Free_Add(Add_Return *response);
+Add_Return& Add(RequestParameter* rp);void Free_Add(Add_Return *response);
 
 };
 
@@ -44,7 +44,7 @@ NoArg_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return NoArg_ServiceId;}
 NoArg_Parameter NoArg_SendData;
 NoArg_Return NoArg_reqresp;
-NoArg_Return& NoArg(UserDataOfTransportLayer_t* userDataOfTransportLayer);
+NoArg_Return& NoArg(RequestParameter* rp);
 void Free_NoArg(NoArg_Return *response);
 
 };
@@ -58,7 +58,7 @@ NoReturn_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return NoReturn_ServiceId;}
 NoReturn_Parameter NoReturn_SendData;
 NoReturn_Return NoReturn_reqresp;
-NoReturn_Return& NoReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a);
+NoReturn_Return& NoReturn(RequestParameter* rp,Int32 a);
 };
 
 class NoArgAndReturn_Requester
@@ -70,7 +70,7 @@ NoArgAndReturn_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return NoArgAndReturn_ServiceId;}
 NoArgAndReturn_Parameter NoArgAndReturn_SendData;
 NoArgAndReturn_Return NoArgAndReturn_reqresp;
-NoArgAndReturn_Return& NoArgAndReturn(UserDataOfTransportLayer_t* userDataOfTransportLayer);
+NoArgAndReturn_Return& NoArgAndReturn(RequestParameter* rp);
 };
 
 

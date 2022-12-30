@@ -18,12 +18,12 @@ extern "C" {
     }BlockRingBufferProvider;
     void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, uint16_t size, uint32_t queue_item_size);
     void BlockRingBufferProvider_DeInit(BlockRingBufferProvider* obj);
-    Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch);
-    Bool BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t offset);
-    Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t len);
-    Bool BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint32_t timeout);
+    Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch,int isIsr);
+    Bool BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t offset, int isIsr);
+    Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj, uint8_t* ch, uint16_t len, int isIsr);
+    Bool BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint32_t timeout, int isIsr);
     Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint8_t* buf,int isIsr);
-    void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj);
+    void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj, int isIsr);
 
     static inline void BlockRingBufferProvider_SetCalculateSum(BlockRingBufferProvider* obj, uint32_t s) { obj->CalculateSumValue = s; }
     static inline uint32_t BlockRingBufferProvider_GetCalculateSum(BlockRingBufferProvider* obj) { return obj->CalculateSumValue; }
