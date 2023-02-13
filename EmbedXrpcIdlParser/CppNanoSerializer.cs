@@ -291,7 +291,7 @@ namespace EmbedXrpcIdlParser
                             bitFieldStateMachine.CsDeserializeCodeString.Add($"{bitFieldStateMachine.BitFieldCppTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
 
                             bitFieldStateMachine.DeserializeCodeString.Add($"DeserializeField((uint8_t *)&bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount},sm,sizeof({bitFieldStateMachine.BitFieldCppTypeString}),isIsr);");
-                            bitFieldStateMachine.CsDeserializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=({bitFieldStateMachine.BitFieldCppTypeString})sm.DeserializeField(Type_t.{base_TargetField.TargetType.TargetType},isIsr);");
+                            bitFieldStateMachine.CsDeserializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=({bitFieldStateMachine.BitFieldCppTypeString})sm.DeserializeField(Type_t.{base_TargetField.TargetType.TargetType});");
                         }
                         bitFieldStateMachine.SerializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount} |= (({bitFieldStateMachine.BitFieldCppTypeString})(obj->{field.FieldName}))<< {bitFieldStateMachine.BitFieldLeftShiftAccer} ;");
                         bitFieldStateMachine.CsSerializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount} |= (({bitFieldStateMachine.BitFieldCppTypeString})({field.FieldName}))<< {bitFieldStateMachine.BitFieldLeftShiftAccer} ;");
@@ -313,7 +313,7 @@ namespace EmbedXrpcIdlParser
                         CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]});");
 
                         DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}),isIsr);");
-                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({field.TargetType.TypeName})sm.DeserializeField(Type_t.{base_TargetField.TargetType.TargetType},isIsr);");
+                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({field.TargetType.TypeName})sm.DeserializeField(Type_t.{base_TargetField.TargetType.TargetType});");
 
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                         //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);"); 
@@ -356,7 +356,7 @@ namespace EmbedXrpcIdlParser
                     CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});");
 
                     DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}),isIsr);");
-                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({field.TargetType.TypeName})sm.DeserializeField(Type_t.{ettt.NumberType},isIsr);");
+                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({field.TargetType.TypeName})sm.DeserializeField(Type_t.{ettt.NumberType});");
 
                     SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                     //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
@@ -455,7 +455,7 @@ namespace EmbedXrpcIdlParser
                         CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({attt.ElementType.TypeName});");
 
                         DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({attt.ElementType.TypeName}),isIsr);");
-                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({attt.ElementType.TypeName})sm.DeserializeField(Type_t.{attt.ElementType.TargetType},isIsr);");
+                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({attt.ElementType.TypeName})sm.DeserializeField(Type_t.{attt.ElementType.TargetType});");
 
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                         //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
@@ -470,7 +470,7 @@ namespace EmbedXrpcIdlParser
                         CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});");
 
                         DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}),isIsr);");
-                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]})sm.DeserializeField(Type_t.{ettt.NumberType},isIsr);");
+                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]})sm.DeserializeField(Type_t.{ettt.NumberType});");
 
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                         //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
