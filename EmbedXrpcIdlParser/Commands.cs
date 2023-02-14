@@ -84,11 +84,24 @@ namespace EmbedXrpcIdlParser
                 CppCodeGenerater cpp = new CppCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
+                    var fileIdlInfo = idlInfo.ParsedFiles[i];
+                    var subendPath = generater.OutputPath+ fileIdlInfo.GenerationOption.SubOutPutPath;
+                    var subendchar = subendPath[subendPath.Length - 1];
+                    if (subendchar != '\\' && subendchar != '/')
+                    {
+                        subendPath += "\\";
+                        Console.WriteLine($"sub OutputPath:{subendPath}");
+                    }
+                    if (Directory.Exists(subendPath) == false)
+                    {
+                        Directory.CreateDirectory(subendPath);
+                    }
+
                     CppCodeGenParameter parameter = new CppCodeGenParameter()
                     {
-                        FileIdlInfo = idlInfo.ParsedFiles[i],
+                        FileIdlInfo = fileIdlInfo,
                         RoleType = gt,
-                        OutPutPath = generater.OutputPath,
+                        OutPutPath = subendPath,
                     };
                     cpp.CodeGen(parameter);
                 }
@@ -99,11 +112,24 @@ namespace EmbedXrpcIdlParser
                 CsCodeGenerater cs = new CsCodeGenerater();
                 for (int i = 0; i < idlInfo.ParsedFiles.Count; i++)
                 {
+                    var fileIdlInfo = idlInfo.ParsedFiles[i];
+                    var subendPath = generater.OutputPath + fileIdlInfo.GenerationOption.SubOutPutPath;
+                    var subendchar = subendPath[subendPath.Length - 1];
+                    if (subendchar != '\\' && subendchar != '/')
+                    {
+                        subendPath += "\\";
+                        Console.WriteLine($"sub OutputPath:{subendPath}");
+                    }
+                    if (Directory.Exists(subendPath) == false)
+                    {
+                        Directory.CreateDirectory(subendPath);
+                    }
+
                     CSharpCodeGenParameter parameter = new CSharpCodeGenParameter()
                     {
-                        FileIdlInfo = idlInfo.ParsedFiles[i],
+                        FileIdlInfo = fileIdlInfo,
                         RoleType = gt,
-                        OutPutPath = generater.OutputPath,
+                        OutPutPath = subendPath,
                         //IsEnableMataDataEncode = generater.IsEnableMataDataEncode
                     };
                     cs.CodeGen(parameter);

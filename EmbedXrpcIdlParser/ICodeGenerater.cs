@@ -340,7 +340,7 @@ namespace EmbedXrpcIdlParser
         public List<ArrayType_TargetType> TargetArrayTypes { get; set; } = new List<ArrayType_TargetType>();
         public List<StructType_TargetType> TargetStructs { get; set; } = new List<StructType_TargetType>();
         public List<TargetService> TargetServices { get; set; } = new List<TargetService>();
-        public GenerationOption GenerationOption = null;
+        public GenerationOption GenerationOption { get; set; }=null;
         public int ServiceId { get; set; }
     }
     public class IdlInfo

@@ -87,6 +87,8 @@ namespace EmbedXrpcIdlParser
 
         public int ServiceIdStartNumber { get; set; } = 0x10;
 
+        public string SubOutPutPath { get; set; } = string.Empty;
+
     }
     public enum DataType
     {
