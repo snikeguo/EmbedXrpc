@@ -3,115 +3,149 @@ using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
 // auto code gen ! DO NOT modify this file!
-//C# Code Generater Version:2.8.0.0
+//C# Code Generater Version:3.2.0.0
 namespace Sample1
 {
 using UInt8 = Byte;
 using Int8 = SByte;
-public enum Sex:ulong
+public enum Sex:UInt64
 {
 Man=2,
 WoMan=9,
 }
 public class AddResult:IEmbedXrpcSerialization
 {
-public const int AddResult_Sum_FieldNumber=1;
-[BitField(11)]
+public const int AddResult_boolTest_FieldNumber=1;
 [FieldNumber( 1) ] 
+[ArrayLenFieldFlag( false ) ]
+public bool boolTest{get;set;}
+
+
+public const int AddResult_Sum_FieldNumber=2;
+[BitField(11)]
+[FieldNumber( 2) ] 
 [ArrayLenFieldFlag( false ) ]
 public UInt32 Sum{get;set;}
 
 
-public const int AddResult_Sum2_FieldNumber=2;
+public const int AddResult_Sum2_FieldNumber=3;
 [BitField(19)]
-[FieldNumber( 2) ] 
+[FieldNumber( 3) ] 
 [ArrayLenFieldFlag( false ) ]
 public UInt32 Sum2{get;set;}
 
 
-public const int AddResult_Sum3_FieldNumber=3;
+public const int AddResult_Sum3_FieldNumber=4;
 [BitField(2)]
-[FieldNumber( 3) ] 
+[FieldNumber( 4) ] 
 [ArrayLenFieldFlag( false ) ]
 public UInt32 Sum3{get;set;}
 
 
-public const int AddResult_dataLen_FieldNumber=4;
-[FieldNumber( 4) ] 
+public const int AddResult_dataLen_FieldNumber=5;
+[FieldNumber( 5) ] 
 [ArrayLenFieldFlag( false ) ]
 public Int32 dataLen{get;set;}
 
 
-public const int AddResult_data_FieldNumber=5;
+public const int AddResult_data_FieldNumber=6;
 [NoSerialization]
 [ArrayProperty(LenFieldName = "dataLen")]
-[FieldNumber( 5) ] 
-public UInt8[] data{get;set;}=new UInt8[0];
-
-
-public const int AddResult_Sum4_FieldNumber=6;
-[BitField(11)]
 [FieldNumber( 6) ] 
+public byte[] data{get;set;}=new byte[0];
+
+
+public const int AddResult_Sum4_FieldNumber=7;
+[BitField(11)]
+[FieldNumber( 7) ] 
 [ArrayLenFieldFlag( false ) ]
 public UInt64 Sum4{get;set;}
 
 
-public const int AddResult_Sum5_FieldNumber=7;
+public const int AddResult_Sum5_FieldNumber=8;
 [BitField(19)]
-[FieldNumber( 7) ] 
+[FieldNumber( 8) ] 
 [ArrayLenFieldFlag( false ) ]
 public UInt64 Sum5{get;set;}
 
 
-public const int AddResult_Sum6_FieldNumber=8;
+public const int AddResult_Sum6_FieldNumber=9;
 [BitField(2)]
-[FieldNumber( 8) ] 
+[FieldNumber( 9) ] 
 [ArrayLenFieldFlag( false ) ]
 public UInt64 Sum6{get;set;}
 
 
-public const int AddResult_Sum7_FieldNumber=9;
-[FieldNumber( 9) ] 
+public const int AddResult_Sum7_FieldNumber=10;
+[FieldNumber( 10) ] 
 [ArrayLenFieldFlag( false ) ]
 public UInt32 Sum7{get;set;}
 
 
+public const int AddResult_PtrTest1_FieldNumber=11;
+[NoSerialization]
+[FieldNumber( 11) ] 
+[ArrayLenFieldFlag( false ) ]
+public IntPtr PtrTest1{get;set;}
+
+
+public const int AddResult_data1_FieldNumber=12;
+[ArrayProperty(LenFieldName = "")]
+[FieldNumber( 12) ] 
+public byte[] data1{get;set;}=new byte[1];
+
+
 public void Serialize(SerializationManager sm)
 {
+sm.Buf.AddRange(sm.ToBytes(boolTest,typeof(System.Boolean)));
+sm.Index+=sizeof(bool);
 UInt32 bitsTempValue0=0;
 bitsTempValue0 |= ((UInt32)(Sum))<< 0 ;
 bitsTempValue0 |= ((UInt32)(Sum2))<< 11 ;
 bitsTempValue0 |= ((UInt32)(Sum3))<< 30 ;
-sm.Buf.AddRange(SerializationManager.ToBytes(bitsTempValue0,Type_t.TYPE_UINT32));
+sm.Buf.AddRange(sm.ToBytes(bitsTempValue0,typeof(System.UInt32)));
 sm.Index+=sizeof(UInt32);
-sm.Buf.AddRange(SerializationManager.ToBytes(dataLen,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(dataLen,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
 //! //data:NoSerialization
 UInt64 bitsTempValue1=0;
 bitsTempValue1 |= ((UInt64)(Sum4))<< 0 ;
 bitsTempValue1 |= ((UInt64)(Sum5))<< 11 ;
 bitsTempValue1 |= ((UInt64)(Sum6))<< 30 ;
-sm.Buf.AddRange(SerializationManager.ToBytes(bitsTempValue1,Type_t.TYPE_UINT64));
+sm.Buf.AddRange(sm.ToBytes(bitsTempValue1,typeof(System.UInt64)));
 sm.Index+=sizeof(UInt64);
-sm.Buf.AddRange(SerializationManager.ToBytes(Sum7,Type_t.TYPE_UINT32));
+sm.Buf.AddRange(sm.ToBytes(Sum7,typeof(System.UInt32)));
 sm.Index+=sizeof(UInt32);
+//! //PtrTest1:NoSerialization
+for(UInt32 data1_index=0;data1_index<1;data1_index++)
+{
+sm.Buf.AddRange(sm.ToBytes(data1[data1_index],typeof(System.Byte)));
+sm.Index+=sizeof(byte);
+}
 }
 
 public void Deserialize(SerializationManager sm)
 {
+boolTest=(bool)sm.DeserializeField(typeof(System.Boolean));
 UInt32 bitsTempValue0=0;
-bitsTempValue0=(UInt32)sm.DeserializeField(Type_t.TYPE_UINT32);
+bitsTempValue0=(UInt32)sm.DeserializeField(typeof(System.UInt32));
 Sum=bitsTempValue0>>0;
 Sum2=bitsTempValue0>>11;
 Sum3=bitsTempValue0>>30;
-dataLen=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
+dataLen=(Int32)sm.DeserializeField(typeof(System.Int32));
 //! //data:NoSerialization
 UInt64 bitsTempValue1=0;
-bitsTempValue1=(UInt64)sm.DeserializeField(Type_t.TYPE_UINT64);
+bitsTempValue1=(UInt64)sm.DeserializeField(typeof(System.UInt64));
 Sum4=bitsTempValue1>>0;
 Sum5=bitsTempValue1>>11;
 Sum6=bitsTempValue1>>30;
-Sum7=(UInt32)sm.DeserializeField(Type_t.TYPE_UINT32);
+Sum7=(UInt32)sm.DeserializeField(typeof(System.UInt32));
+//! //PtrTest1:NoSerialization
+data1=new byte[1];
+for(UInt32 data1_index=0;data1_index<1;data1_index++)
+{
+data1[data1_index]=(byte)sm.DeserializeField(typeof(System.Byte));
+}
 }
 
 }
@@ -143,7 +177,7 @@ public const int Student_u1_FieldNumber=4;
 [UnionField]
 [FieldNumber( 4) ] 
 [ArrayLenFieldFlag( false ) ]
-public UInt8 u1{get;set;}
+public byte u1{get;set;}
 
 
 #if MyMacro==true
@@ -192,13 +226,13 @@ public UInt32 Sum3{get;set;}
 public const int Student_uend1_FieldNumber=100;
 [FieldNumber( 100) ] 
 [ArrayLenFieldFlag( false ) ]
-public UInt8 uend1{get;set;}
+public byte uend1{get;set;}
 
 
 public const int Student_uend2_FieldNumber=101;
 [FieldNumber( 101) ] 
 [ArrayLenFieldFlag( false ) ]
-public UInt8 uend2{get;set;}
+public byte uend2{get;set;}
 
 
 public const int Student_Sum4_FieldNumber=11;
@@ -231,24 +265,24 @@ public UInt32 Sum7{get;set;}
 public void Serialize(SerializationManager sm)
 {
 //! //a:NoSerialization
-sm.Buf.AddRange(SerializationManager.ToBytes(b,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(b,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(AddressType,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(AddressType,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
 switch(AddressType)
 {
 case Student_u1_FieldNumber:
-sm.Buf.AddRange(SerializationManager.ToBytes(u1,Type_t.TYPE_UINT8));
-sm.Index+=sizeof(UInt8);
+sm.Buf.AddRange(sm.ToBytes(u1,typeof(System.Byte)));
+sm.Index+=sizeof(byte);
 break;
 #if MyMacro==true
 case Student_u2_FieldNumber:
-sm.Buf.AddRange(SerializationManager.ToBytes(u2,Type_t.TYPE_UINT64));
+sm.Buf.AddRange(sm.ToBytes(u2,typeof(System.UInt64)));
 sm.Index+=sizeof(UInt64);
 break;
 #endif // #if MyMacro==true
 case Student_u3_FieldNumber:
-sm.Buf.AddRange(SerializationManager.ToBytes(u3,Type_t.TYPE_UINT64));
+sm.Buf.AddRange(sm.ToBytes(u3,typeof(System.UInt64)));
 sm.Index+=sizeof(UInt64);
 break;
 case Student_u4_FieldNumber:
@@ -259,39 +293,39 @@ UInt32 bitsTempValue0=0;
 bitsTempValue0 |= ((UInt32)(Sum))<< 0 ;
 bitsTempValue0 |= ((UInt32)(Sum2))<< 11 ;
 bitsTempValue0 |= ((UInt32)(Sum3))<< 30 ;
-sm.Buf.AddRange(SerializationManager.ToBytes(bitsTempValue0,Type_t.TYPE_UINT32));
+sm.Buf.AddRange(sm.ToBytes(bitsTempValue0,typeof(System.UInt32)));
 sm.Index+=sizeof(UInt32);
-sm.Buf.AddRange(SerializationManager.ToBytes(uend1,Type_t.TYPE_UINT8));
-sm.Index+=sizeof(UInt8);
-sm.Buf.AddRange(SerializationManager.ToBytes(uend2,Type_t.TYPE_UINT8));
-sm.Index+=sizeof(UInt8);
+sm.Buf.AddRange(sm.ToBytes(uend1,typeof(System.Byte)));
+sm.Index+=sizeof(byte);
+sm.Buf.AddRange(sm.ToBytes(uend2,typeof(System.Byte)));
+sm.Index+=sizeof(byte);
 UInt64 bitsTempValue1=0;
 bitsTempValue1 |= ((UInt64)(Sum4))<< 0 ;
 bitsTempValue1 |= ((UInt64)(Sum5))<< 11 ;
 bitsTempValue1 |= ((UInt64)(Sum6))<< 30 ;
-sm.Buf.AddRange(SerializationManager.ToBytes(bitsTempValue1,Type_t.TYPE_UINT64));
+sm.Buf.AddRange(sm.ToBytes(bitsTempValue1,typeof(System.UInt64)));
 sm.Index+=sizeof(UInt64);
-sm.Buf.AddRange(SerializationManager.ToBytes(Sum7,Type_t.TYPE_UINT32));
+sm.Buf.AddRange(sm.ToBytes(Sum7,typeof(System.UInt32)));
 sm.Index+=sizeof(UInt32);
 }
 
 public void Deserialize(SerializationManager sm)
 {
 //! //a:NoSerialization
-b=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-AddressType=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
+b=(Int32)sm.DeserializeField(typeof(System.Int32));
+AddressType=(Int32)sm.DeserializeField(typeof(System.Int32));
 switch(AddressType)
 {
 case Student_u1_FieldNumber:
-u1=(UInt8)sm.DeserializeField(Type_t.TYPE_UINT8);
+u1=(byte)sm.DeserializeField(typeof(System.Byte));
 break;
 #if MyMacro==true
 case Student_u2_FieldNumber:
-u2=(UInt64)sm.DeserializeField(Type_t.TYPE_UINT64);
+u2=(UInt64)sm.DeserializeField(typeof(System.UInt64));
 break;
 #endif // #if MyMacro==true
 case Student_u3_FieldNumber:
-u3=(Sex)sm.DeserializeField(Type_t.TYPE_UINT64);
+u3=(Sex)sm.DeserializeField(typeof(System.UInt64));
 break;
 case Student_u4_FieldNumber:
 u4=new AddResult();
@@ -299,18 +333,18 @@ u4.Deserialize(sm);
 break;
 }
 UInt32 bitsTempValue0=0;
-bitsTempValue0=(UInt32)sm.DeserializeField(Type_t.TYPE_UINT32);
+bitsTempValue0=(UInt32)sm.DeserializeField(typeof(System.UInt32));
 Sum=bitsTempValue0>>0;
 Sum2=bitsTempValue0>>11;
 Sum3=bitsTempValue0>>30;
-uend1=(UInt8)sm.DeserializeField(Type_t.TYPE_UINT8);
-uend2=(UInt8)sm.DeserializeField(Type_t.TYPE_UINT8);
+uend1=(byte)sm.DeserializeField(typeof(System.Byte));
+uend2=(byte)sm.DeserializeField(typeof(System.Byte));
 UInt64 bitsTempValue1=0;
-bitsTempValue1=(UInt64)sm.DeserializeField(Type_t.TYPE_UINT64);
+bitsTempValue1=(UInt64)sm.DeserializeField(typeof(System.UInt64));
 Sum4=bitsTempValue1>>0;
 Sum5=bitsTempValue1>>11;
 Sum6=bitsTempValue1>>30;
-Sum7=(UInt32)sm.DeserializeField(Type_t.TYPE_UINT32);
+Sum7=(UInt32)sm.DeserializeField(typeof(System.UInt32));
 }
 
 }
@@ -365,32 +399,32 @@ public Student David{get;set;}=new Student();
 
 public void Serialize(SerializationManager sm)
 {
-sm.Buf.AddRange(SerializationManager.ToBytes(Year,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(Year,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(Month,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(Month,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(Day,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(Day,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(Hour,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(Hour,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(Min,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(Min,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(Sec,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(Sec,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(Sex,Type_t.TYPE_UINT64));
+sm.Buf.AddRange(sm.ToBytes(Sex,typeof(System.UInt64)));
 sm.Index+=sizeof(UInt64);
 David.Serialize(sm);
 }
 
 public void Deserialize(SerializationManager sm)
 {
-Year=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-Month=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-Day=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-Hour=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-Min=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-Sec=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-Sex=(Sex)sm.DeserializeField(Type_t.TYPE_UINT64);
+Year=(Int32)sm.DeserializeField(typeof(System.Int32));
+Month=(Int32)sm.DeserializeField(typeof(System.Int32));
+Day=(Int32)sm.DeserializeField(typeof(System.Int32));
+Hour=(Int32)sm.DeserializeField(typeof(System.Int32));
+Min=(Int32)sm.DeserializeField(typeof(System.Int32));
+Sec=(Int32)sm.DeserializeField(typeof(System.Int32));
+Sex=(Sex)sm.DeserializeField(typeof(System.UInt64));
 David=new Student();
 David.Deserialize(sm);
 }
@@ -406,7 +440,7 @@ public DateTime_t[] now{get;set;}=new DateTime_t[1];
 
 public void Serialize(SerializationManager sm)
 {
-for(Byte now_index=0;now_index<1;now_index++)
+for(UInt32 now_index=0;now_index<1;now_index++)
 {
 now[now_index].Serialize(sm);
 }
@@ -415,7 +449,7 @@ now[now_index].Serialize(sm);
 public void Deserialize(SerializationManager sm)
 {
 now=new DateTime_t[1];
-for(Byte now_index=0;now_index<1;now_index++)
+for(UInt32 now_index=0;now_index<1;now_index++)
 {
 now[now_index]=new DateTime_t();
 now[now_index].Deserialize(sm);
@@ -433,13 +467,13 @@ public RequestResponseState State{get;set;}
 
 public void Serialize(SerializationManager sm)
 {
-sm.Buf.AddRange(SerializationManager.ToBytes(State,Type_t.TYPE_UINT8));
-sm.Index+=sizeof(UInt8);
+sm.Buf.AddRange(sm.ToBytes(State,typeof(System.Byte)));
+sm.Index+=sizeof(byte);
 }
 
 public void Deserialize(SerializationManager sm)
 {
-State=(RequestResponseState)sm.DeserializeField(Type_t.TYPE_UINT8);
+State=(RequestResponseState)sm.DeserializeField(typeof(System.Byte));
 }
 
 }
@@ -535,33 +569,33 @@ public Int32 dataLen{get;set;}
 public const int Add_Parameter_data_FieldNumber=4;
 [ArrayProperty(LenFieldName = "dataLen")]
 [FieldNumber( 4) ] 
-public UInt8[] data{get;set;}=new UInt8[0];
+public byte[] data{get;set;}=new byte[0];
 
 
 public void Serialize(SerializationManager sm)
 {
-sm.Buf.AddRange(SerializationManager.ToBytes(a,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(a,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(b,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(b,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
-sm.Buf.AddRange(SerializationManager.ToBytes(dataLen,Type_t.TYPE_INT32));
+sm.Buf.AddRange(sm.ToBytes(dataLen,typeof(System.Int32)));
 sm.Index+=sizeof(Int32);
 for(Int32 data_index=0;data_index<dataLen;data_index++)
 {
-sm.Buf.AddRange(SerializationManager.ToBytes(data[data_index],Type_t.TYPE_UINT8));
-sm.Index+=sizeof(UInt8);
+sm.Buf.AddRange(sm.ToBytes(data[data_index],typeof(System.Byte)));
+sm.Index+=sizeof(byte);
 }
 }
 
 public void Deserialize(SerializationManager sm)
 {
-a=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-b=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-dataLen=(Int32)sm.DeserializeField(Type_t.TYPE_INT32);
-data=new UInt8[dataLen];
+a=(Int32)sm.DeserializeField(typeof(System.Int32));
+b=(Int32)sm.DeserializeField(typeof(System.Int32));
+dataLen=(Int32)sm.DeserializeField(typeof(System.Int32));
+data=new byte[dataLen];
 for(Int32 data_index=0;data_index<dataLen;data_index++)
 {
-data[data_index]=(UInt8)sm.DeserializeField(Type_t.TYPE_UINT8);
+data[data_index]=(byte)sm.DeserializeField(typeof(System.Byte));
 }
 }
 
@@ -576,21 +610,22 @@ public RequestResponseState State{get;set;}
 
 public const int Add_Return_ReturnValue_FieldNumber=2;
 [FieldNumber( 2) ] 
-public AddResult ReturnValue{get;set;}=new AddResult();
+[ArrayLenFieldFlag( false ) ]
+public Int32 ReturnValue{get;set;}
 
 
 public void Serialize(SerializationManager sm)
 {
-sm.Buf.AddRange(SerializationManager.ToBytes(State,Type_t.TYPE_UINT8));
-sm.Index+=sizeof(UInt8);
-ReturnValue.Serialize(sm);
+sm.Buf.AddRange(sm.ToBytes(State,typeof(System.Byte)));
+sm.Index+=sizeof(byte);
+sm.Buf.AddRange(sm.ToBytes(ReturnValue,typeof(System.Int32)));
+sm.Index+=sizeof(Int32);
 }
 
 public void Deserialize(SerializationManager sm)
 {
-State=(RequestResponseState)sm.DeserializeField(Type_t.TYPE_UINT8);
-ReturnValue=new AddResult();
-ReturnValue.Deserialize(sm);
+State=(RequestResponseState)sm.DeserializeField(typeof(System.Byte));
+ReturnValue=(Int32)sm.DeserializeField(typeof(System.Int32));
 }
 
 }
@@ -652,7 +687,7 @@ exi:
 return reqresp;
 }
 }
-//[ResponseServiceInfo(Name="Add",ServiceId=17)]
+[ResponseServiceInfo(Name="Add",ServiceId=17)]
 public partial class Add_Service<DTL>:IService<DTL> where DTL:struct
 {
 public static readonly UInt16 Add_ServiceId=17;//0x11

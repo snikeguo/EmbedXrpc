@@ -340,7 +340,7 @@ namespace EmbedXrpcIdlParser
             {
                 foreach (var field in service.ParameterStructType.TargetFields)
                 {
-                    if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
+                    if(field.TargetType.TargetType==typeof(Array))//if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                     {
                         Array_TargetField array_TargetField = field as Array_TargetField;
                         var lenField = array_TargetField.ArrayLenField;

@@ -52,6 +52,7 @@ typedef struct _SerializationManager
 	uint32_t ReferenceSum ;
 	uint32_t CalculateSum ;
 
+
 }SerializationManager;
 
 

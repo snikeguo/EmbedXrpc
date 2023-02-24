@@ -28,72 +28,19 @@ namespace EmbedXrpcIdlParser
             return cnt;
         }
     }
-    public enum TargetType_t
-    {
-        TYPE_UINT8,
-        TYPE_INT8,
 
-        TYPE_UINT16,
-        TYPE_INT16,
-
-        TYPE_UINT32,
-        TYPE_INT32,
-
-        TYPE_UINT64,
-        TYPE_INT64,
-
-        TYPE_FLOAT,
-
-        TYPE_DOUBLE,
-
-        TYPE_ENUM,
-
-        TYPE_ARRAY,   /*array*/
-
-        TYPE_STRUCT,  /*struct*/
-        //TYPE_UNION,
-    }
     public interface ITargetType
     {
-        TargetType_t TargetType { get;  }
+        //TargetType_t TargetType { get;  }
+        Type TargetType { get; }
         string TypeName { get; set; }
         bool IsNeedFreeMemoryForNativeLanguage { get; }
     }
     public class BaseType_TargetType:ITargetType
     {
-        public TargetType_t TargetType { get; private set; }
+        //public TargetType_t TargetType { get; private set; }
+        public Type TargetType { get; internal set; }
         public string TypeName { get; set; }
-
-        public static Dictionary<TargetType_t, string> TypeReplaceDic = new Dictionary<TargetType_t, string>();
-        public static BaseType_TargetType GetInstance(Dictionary<string, ITargetType> targetTypes, TargetType_t tt)
-        {
-            BaseType_TargetType instance = null;
-            if (targetTypes.ContainsKey(TypeReplaceDic[tt])==false)
-            {
-                instance = new BaseType_TargetType();
-                instance.TargetType = tt;
-                instance.TypeName= TypeReplaceDic[tt];
-                targetTypes.Add(TypeReplaceDic[tt], instance);
-            }
-            else
-            {
-                instance = targetTypes[TypeReplaceDic[tt]] as BaseType_TargetType;
-            }
-            return instance;
-        }
-        static BaseType_TargetType()
-        {
-            TypeReplaceDic.Add(TargetType_t.TYPE_UINT8, "UInt8");
-            TypeReplaceDic.Add(TargetType_t.TYPE_INT8, "Int8");
-            TypeReplaceDic.Add(TargetType_t.TYPE_UINT16, "UInt16");
-            TypeReplaceDic.Add(TargetType_t.TYPE_INT16, "Int16");
-            TypeReplaceDic.Add(TargetType_t.TYPE_UINT32, "UInt32");
-            TypeReplaceDic.Add(TargetType_t.TYPE_INT32, "Int32");
-            TypeReplaceDic.Add(TargetType_t.TYPE_UINT64, "UInt64");
-            TypeReplaceDic.Add(TargetType_t.TYPE_INT64, "Int64");
-            TypeReplaceDic.Add(TargetType_t.TYPE_FLOAT, "Float");
-            TypeReplaceDic.Add(TargetType_t.TYPE_DOUBLE, "Double");
-        }
         public bool IsNeedFreeMemoryForNativeLanguage
         {
             get
@@ -104,14 +51,15 @@ namespace EmbedXrpcIdlParser
     }
     public class EnumType_TargetType: ITargetType
     {
-        //public string TypeName { get; set; }
-        public TargetType_t NumberType { get; set; }
+        public string TypeName { get; set; }
+        public Type NumberType { get; set; }
 
         public Dictionary< string, int> KeyValue { get; set; } = new Dictionary< string, int>();
 
-        public TargetType_t TargetType { get; set; } = TargetType_t.TYPE_ENUM;
+        public Type TargetType { get; set; } = typeof(Enum);
 
-        public string TypeName { get; set; }
+        //public string TypeName { get; set; }
+        public static List<EnumType_TargetType> AllEnumTypes = new List<EnumType_TargetType>();
         public bool IsNeedFreeMemoryForNativeLanguage
         {
             get
@@ -119,11 +67,31 @@ namespace EmbedXrpcIdlParser
                 return false;
             }
         }
+        public static EnumType_TargetType GetInstance(Type tt)
+        {
+            EnumType_TargetType rbt = null;
+            foreach (var et in AllEnumTypes)
+            {
+                if (tt == et.TargetType)
+                {
+                    rbt = et;
+                    break;
+                }
+            }
+            if (rbt == null)
+            {
+                rbt = new EnumType_TargetType();
+                rbt.TargetType = tt;
+                AllEnumTypes.Add(rbt);
+            }
+            
+            return rbt;
+        }
 
     }
     public class ArrayType_TargetType:ITargetType
     {
-        public TargetType_t TargetType { get;private set; } = TargetType_t.TYPE_ARRAY;
+        public Type TargetType { get;private set; } = typeof(Array);
         public string TypeName { get; set; }
         public ITargetType ElementType { get; set; }
         public bool? _IsNeedFreeMemoryForNativeLanguage;
@@ -147,7 +115,7 @@ namespace EmbedXrpcIdlParser
 
     public class StructType_TargetType:ITargetType
     {
-        public TargetType_t TargetType { get;private set; } = TargetType_t.TYPE_STRUCT;
+        public Type TargetType { get;private set; } = typeof(object);
         public string TypeName { get; set; }
         public List<ITargetField> TargetFields { get; set; } = new List<ITargetField>();
         public Base_TargetField GetArrayLenField(Array_TargetField arrayField)
@@ -345,54 +313,8 @@ namespace EmbedXrpcIdlParser
     }
     public class IdlInfo
     {          
-        private TargetType_t ClrBaseValueTypeToTargetType_t(Type t)
-        {
-            if (t == typeof(bool))
-            {
-                return TargetType_t.TYPE_UINT8;
-            }
-            if (t == typeof(byte))
-            {
-                return TargetType_t.TYPE_UINT8;                
-            }
-            if (t == typeof(sbyte))
-            {
-                return TargetType_t.TYPE_INT8;
-                
-            }
-            if (t == typeof(UInt16))
-            {
-                return TargetType_t.TYPE_UINT16;
-  
-            }
-            if (t == typeof(Int16))
-            {
-                return TargetType_t.TYPE_INT16;
-
-            }
-            if (t == typeof(UInt32))
-            {
-                return TargetType_t.TYPE_UINT32;
-
-            }
-            if (t == typeof(Int32))
-            {
-                return TargetType_t.TYPE_INT32;
-
-            }
-            if (t == typeof(UInt64))
-            {
-                return TargetType_t.TYPE_UINT64;
-
-            }
-            if (t == typeof(Int64))
-            {
-                return TargetType_t.TYPE_INT64;
-
-            }
-            throw new Exception();
-        }
-        private  bool IsNumberType(Type t)
+        
+        public static  bool IsBaseType(Type t)
         {
             bool r = false;
             if(t==typeof(bool))
@@ -439,6 +361,11 @@ namespace EmbedXrpcIdlParser
                 
                 r = true;
             }
+            if (t == typeof(IntPtr))
+            {
+
+                r = true;
+            }
             return r;
         }
 
@@ -451,13 +378,45 @@ namespace EmbedXrpcIdlParser
             return false;
         }
         public List< FileIdlInfo> ParsedFiles { get; private set; } = new List< FileIdlInfo>();//已经被Parse过的file
-        public Dictionary<string, ITargetType> TargetTypes = new Dictionary<string, ITargetType>();
+        public static Dictionary<string, ITargetType> TargetTypes = new Dictionary<string, ITargetType>();
+        public static List<BaseType_TargetType> AllBaseTypes = new List<BaseType_TargetType>();
+        public static BaseType_TargetType GetInstance(Type tt)
+        {
+            BaseType_TargetType rbt = null;
+            foreach (var bt in AllBaseTypes)
+            {
+                if (bt.TargetType == tt)
+                {
+                    rbt = bt;
+                }
+            }
+            if (rbt == null)
+            {
+                throw new KeyNotFoundException();
+            }
+            return rbt;
+        }
+        static IdlInfo()
+        {
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(bool) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(byte) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(sbyte) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(UInt16) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(Int16) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(UInt32) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(Int32) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(UInt64) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(Int64) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(float) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(Double) });
+            AllBaseTypes.Add(new BaseType_TargetType() { TargetType = typeof(IntPtr) });
+        }
         public  IdlInfo()
         {
             EnumType_TargetType ettt = null;
             ettt = new EnumType_TargetType();
             ettt.TypeName = "RequestResponseState";
-            ettt.NumberType = TargetType_t.TYPE_UINT8;
+            ettt.NumberType = typeof(byte); //TargetType_t.TYPE_UINT8;
             TargetTypes.Add(ettt.TypeName, ettt);
         }
         public FileIdlInfo GetFileIdlInfo(string fileName)
@@ -517,10 +476,10 @@ namespace EmbedXrpcIdlParser
                     FieldNumberAttr.Number = fieldNumber;
                 }
                 FieldNumbers.Add(FieldNumberAttr.Number);
-                if (IsNumberType(field.FieldType) == true)
+                if (IsBaseType(field.FieldType) == true)
                 {
                     Base_TargetField targetfield = new Base_TargetField();
-                    targetfield.TargetType = BaseType_TargetType.GetInstance(TargetTypes,ClrBaseValueTypeToTargetType_t(field.FieldType));
+                    targetfield.TargetType = GetInstance(field.FieldType);
                     targetfield.FieldName = field.Name;
                     targetfield.FieldNumberAttr = FieldNumberAttr;
                     var arrayLenatt = field.GetCustomAttribute<MaxCountAttribute>();
@@ -531,6 +490,10 @@ namespace EmbedXrpcIdlParser
                     var unionTargetTypeAtt = field.GetCustomAttribute<UnionTargetTypeAttribute>();
                     targetfield.UnionFieldAttr= field.GetCustomAttribute<UnionFieldAttribute>();
                     targetfield.NoSerializationAttr= field.GetCustomAttribute<NoSerializationAttribute>();
+                    if (targetfield.NoSerializationAttr == null && field.FieldType==typeof(IntPtr))
+                    { 
+                        throw new NotSupportedException("intptr not support no Serialize!");
+                    }
                     targetStructType.GetSerializeControlField(targetfield);
                     targetfield.MacroControlAttr = field.GetCustomAttribute<MacroControlAttribute>();
                     targetfield.BitFieldAttribute = field.GetCustomAttribute<BitFieldAttribute>();
@@ -552,10 +515,11 @@ namespace EmbedXrpcIdlParser
                             ;
                         }
                         bitFieldStateMachine.BitFieldBaseTargetType = targetfield.TargetType;
-                        if(bitFieldStateMachine.BitFieldBaseTargetType.TargetType!= TargetType_t.TYPE_UINT8
-                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT16
-                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT32
-                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != TargetType_t.TYPE_UINT64)
+                        if(bitFieldStateMachine.BitFieldBaseTargetType.TargetType!= typeof(byte)//TargetType_t.TYPE_UINT8
+                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != typeof(UInt16)//TargetType_t.TYPE_UINT16
+                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != typeof(UInt32)//TargetType_t.TYPE_UINT32
+                            && bitFieldStateMachine.BitFieldBaseTargetType.TargetType != typeof(UInt64)//TargetType_t.TYPE_UINT64
+                            )
                         {
                             throw new Exception($"当前位域字段类型:{bitFieldStateMachine.BitFieldBaseTargetType.TargetType},位域字段只能用UINT8/UINT16/UINT32/UINT64类型");
                         }
@@ -595,7 +559,7 @@ namespace EmbedXrpcIdlParser
                     {
                         te = new EnumType_TargetType();
                         te.TypeName = field.FieldType.Name;//类型名称
-                        te.NumberType = ClrBaseValueTypeToTargetType_t(field.FieldType.GetEnumUnderlyingType());
+                        te.NumberType = field.FieldType.GetEnumUnderlyingType();//ClrBaseValueTypeToTargetType_t(field.FieldType.GetEnumUnderlyingType());
                         foreach (var vsv in vs)
                         {
                             te.KeyValue.Add(field.FieldType.GetEnumName(vsv), Convert.ToInt32(vsv));
@@ -624,9 +588,9 @@ namespace EmbedXrpcIdlParser
                     {
                         attt = new ArrayType_TargetType();
                         attt.TypeName = field.FieldType.Name;
-                        if (IsNumberType(field.FieldType.GetElementType()) == true)
+                        if (IsBaseType(field.FieldType.GetElementType()) == true)
                         {
-                            attt.ElementType = BaseType_TargetType.GetInstance(TargetTypes, ClrBaseValueTypeToTargetType_t(field.FieldType.GetElementType()));
+                            attt.ElementType = GetInstance(field.FieldType.GetElementType());//lrBaseValueTypeToTargetType_t(field.FieldType.GetElementType())
                         }
                         else
                         {
@@ -718,10 +682,14 @@ namespace EmbedXrpcIdlParser
                                                                             //throw new NotImplementedException($"the {field.Name}'s FieldNumberAttr is null");
                 fieldNumber++;
                 ITargetField needAddField = null;
-                if (IsNumberType(parameter.ParameterType) == true)
+                if (parameter.ParameterType == typeof(IntPtr))
+                {
+                    throw new NotSupportedException("IntPtr Not Support Serialize!");
+                }
+                else if (IsBaseType(parameter.ParameterType) == true)
                 {
                     Base_TargetField targetfield = new Base_TargetField();
-                    targetfield.TargetType = BaseType_TargetType.GetInstance(TargetTypes,ClrBaseValueTypeToTargetType_t(parameter.ParameterType));
+                    targetfield.TargetType = GetInstance(parameter.ParameterType);//ClrBaseValueTypeToTargetType_t(parameter.ParameterType)
                     targetfield.FieldName = parameter.Name;
                     targetfield.FieldNumberAttr = FieldNumberAttr;
                     needAddField = targetfield;
@@ -739,7 +707,7 @@ namespace EmbedXrpcIdlParser
                     {
                         te = new EnumType_TargetType();
                         te.TypeName = parameter.ParameterType.Name;//类型名称
-                        te.NumberType = ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetEnumUnderlyingType());
+                        te.NumberType = parameter.ParameterType.GetEnumUnderlyingType();//ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetEnumUnderlyingType());
                         foreach (var vsv in vs)
                         {
                             te.KeyValue.Add(parameter.ParameterType.GetEnumName(vsv), Convert.ToInt32(vsv));
@@ -765,9 +733,9 @@ namespace EmbedXrpcIdlParser
                     {
                         attt = new ArrayType_TargetType();
                         attt.TypeName = parameter.ParameterType.Name;
-                        if (IsNumberType(parameter.ParameterType.GetElementType()) == true)
+                        if (IsBaseType(parameter.ParameterType.GetElementType()) == true)
                         {
-                            attt.ElementType = BaseType_TargetType.GetInstance(TargetTypes, ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetElementType()));
+                            attt.ElementType = GetInstance(parameter.ParameterType.GetElementType());// ClrBaseValueTypeToTargetType_t(parameter.ParameterType.GetElementType())
                         }
                         else
                         {
@@ -870,7 +838,7 @@ namespace EmbedXrpcIdlParser
                         {
                             te = new EnumType_TargetType();
                             te.TypeName = type.Name;//类型名称
-                            te.NumberType = ClrBaseValueTypeToTargetType_t(type.GetEnumUnderlyingType());
+                            te.NumberType = type.GetEnumUnderlyingType();//ClrBaseValueTypeToTargetType_t(type.GetEnumUnderlyingType());
                             foreach (var vsv in vs)
                             {
                                 te.KeyValue.Add(type.GetEnumName(vsv), Convert.ToInt32(vsv));
@@ -964,7 +932,7 @@ namespace EmbedXrpcIdlParser
                                 {
                                     te = new EnumType_TargetType();
                                     te.TypeName = rt.Name;//类型名称
-                                    te.NumberType = ClrBaseValueTypeToTargetType_t(rt.GetEnumUnderlyingType());
+                                    te.NumberType = rt.GetEnumUnderlyingType();//ClrBaseValueTypeToTargetType_t(rt.GetEnumUnderlyingType());
                                     foreach (var vsv in vs)
                                     {
                                         te.KeyValue.Add(rt.GetEnumName(vsv), Convert.ToInt32(vsv));
@@ -983,10 +951,10 @@ namespace EmbedXrpcIdlParser
                                 retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
                                 returnStructType.TargetFields.Add(retunValueFiled);
                             }
-                            else if (IsNumberType(rt) == true)
+                            else if (IsBaseType(rt) == true)
                             {
                                 Base_TargetField retunValueFiled = new Base_TargetField();
-                                retunValueFiled.TargetType = BaseType_TargetType.GetInstance(TargetTypes, ClrBaseValueTypeToTargetType_t(rt));
+                                retunValueFiled.TargetType = GetInstance(rt);//ClrBaseValueTypeToTargetType_t(rt)
                                 retunValueFiled.FieldName = "ReturnValue";
                                 retunValueFiled.FieldNumberAttr = new FieldNumberAttribute(2);//return Value 的Field Number为2
                                 returnStructType.TargetFields.Add(retunValueFiled);

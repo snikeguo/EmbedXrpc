@@ -60,13 +60,13 @@ namespace EmbedXrpcIdlParser
         }
         public static string EmitField(ITargetField field)
         {
-            string cppType = field.TargetType.TypeName;
+            string cppType = CppCsNanoSerializer.GetCppTypeName(field.TargetType);
             string valueName = string.Empty;
-            if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
+            if(field.TargetType.TargetType==typeof(Array))//if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
             {
                 Array_TargetField array_TargetField = field as Array_TargetField;
                 ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
-                cppType = attt.ElementType.TypeName;
+                cppType = CppCsNanoSerializer.GetCppTypeName(attt.ElementType);
                 if (array_TargetField.MaxCountAttribute.IsFixed == false)
                 {
                     cppType = cppType + "*";
@@ -97,13 +97,13 @@ namespace EmbedXrpcIdlParser
 
         public static void EmitEnum(EnumType_TargetType targetEnum, StreamWriter CommonHsw)
         {
-            CommonHsw.WriteLine($"typedef enum {targetEnum.TypeName}");
+            CommonHsw.WriteLine($"typedef enum {CppCsNanoSerializer.GetCppTypeName(targetEnum)}");
             CommonHsw.WriteLine("{");
             foreach (var ev in targetEnum.KeyValue)
             {
                 CommonHsw.WriteLine(ev.Key + " = " + ev.Value.ToString() + ",");
             }
-            CommonHsw.WriteLine($"}}{targetEnum.TypeName};");
+            CommonHsw.WriteLine($"}}{CppCsNanoSerializer.GetCppTypeName(targetEnum)};");
         }
 
         public static void EmitStruct(StructType_TargetType structType, StreamWriter CommonHsw)
@@ -113,7 +113,7 @@ namespace EmbedXrpcIdlParser
             SerializeCsw、SerializeHsw用来定义序列化的操作、行为等
              */
             StringBuilder FieldNumberSb = new StringBuilder();
-            CommonHsw.WriteLine($"typedef struct {structType.TypeName}");
+            CommonHsw.WriteLine($"typedef struct {CppCsNanoSerializer.GetCppTypeName(structType)}");
             CommonHsw.WriteLine("{");
             if(structType.CppCustomMethodSignatures!=null)
             {
@@ -147,7 +147,7 @@ namespace EmbedXrpcIdlParser
                     NoSerializationString= "NoSerialization";
                 }
                 CommonHsw.WriteLine($"{EmitField(field)};   //FieldNumber:{field.FieldNumberAttr.Number}    {UnionTargetTypeString} {NoSerializationString}");
-                FieldNumberSb.AppendLine($"#define {structType.TypeName}_{field.FieldName}_FieldNumber  {field.FieldNumberAttr.Number}");
+                FieldNumberSb.AppendLine($"#define {CppCsNanoSerializer.GetCppTypeName(structType)}_{field.FieldName}_FieldNumber  {field.FieldNumberAttr.Number}");
                 if (field.MacroControlAttr != null)
                 {
                     var macroString = MacroControlWriteEnd(CommonHsw, field.MacroControlAttr);
@@ -159,7 +159,7 @@ namespace EmbedXrpcIdlParser
                     CommonHsw.WriteLine("};//union end");
                 }
             }
-            CommonHsw.WriteLine($"}}{structType.TypeName};");
+            CommonHsw.WriteLine($"}}{CppCsNanoSerializer.GetCppTypeName(structType)};");
             FieldNumberSb.Append("\r\n");
             CommonHsw.WriteLine(FieldNumberSb.ToString());
 

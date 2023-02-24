@@ -23,22 +23,59 @@ namespace EmbedXrpcIdlParser
         {
             //writer.WriteLine($"#define {targetStruct.TypeName}_FreeData(objptr)    SerializationManager::FreeData(&{targetStruct.TypeName}_TypeInstance,objptr)");
         }
-        private static Dictionary<TargetType_t, string> TargetTypeString = new Dictionary<TargetType_t, string>();
+        public static Dictionary<Type, string> CppBaseTargetTypeString = new Dictionary<Type, string>();
+        public static Dictionary<Type, string> CsBaseTargetTypeString = new Dictionary<Type, string>();
         static CppCsNanoSerializer()
         {
-            TargetTypeString.Add(TargetType_t.TYPE_UINT8, "TYPE_UINT8");
-            TargetTypeString.Add(TargetType_t.TYPE_INT8, "TYPE_INT8");
-            TargetTypeString.Add(TargetType_t.TYPE_UINT16, "TYPE_UINT16");
-            TargetTypeString.Add(TargetType_t.TYPE_INT16, "TYPE_INT16");
-            TargetTypeString.Add(TargetType_t.TYPE_UINT32, "TYPE_UINT32");
-            TargetTypeString.Add(TargetType_t.TYPE_INT32, "TYPE_INT32");
-            TargetTypeString.Add(TargetType_t.TYPE_UINT64, "TYPE_UINT64");
-            TargetTypeString.Add(TargetType_t.TYPE_INT64, "TYPE_INT64");
-            TargetTypeString.Add(TargetType_t.TYPE_FLOAT, "TYPE_FLOAT");
-            TargetTypeString.Add(TargetType_t.TYPE_DOUBLE, "TYPE_DOUBLE");
-            TargetTypeString.Add(TargetType_t.TYPE_ARRAY, "TYPE_ARRAY");
-            TargetTypeString.Add(TargetType_t.TYPE_STRUCT, "TYPE_OBJECT");
+            CppBaseTargetTypeString.Add(typeof(bool), "uint8_t");
+            CppBaseTargetTypeString.Add(typeof(byte), "uint8_t");
+            CppBaseTargetTypeString.Add(typeof(sbyte), "int8_t");
+            CppBaseTargetTypeString.Add(typeof(UInt16), "uint16_t");
+            CppBaseTargetTypeString.Add(typeof(Int16), "int16_t");
+            CppBaseTargetTypeString.Add(typeof(UInt32), "uint32_t");
+            CppBaseTargetTypeString.Add(typeof(Int32), "int32_t");
+            CppBaseTargetTypeString.Add(typeof(UInt64), "uint64_t");
+            CppBaseTargetTypeString.Add(typeof(Int64), "uint64_t");
+            CppBaseTargetTypeString.Add(typeof(float), "float");
+            CppBaseTargetTypeString.Add(typeof(double), "double");
+            CppBaseTargetTypeString.Add(typeof(IntPtr), "void *");
+
+            CsBaseTargetTypeString.Add(typeof(bool), "bool");
+            CsBaseTargetTypeString.Add(typeof(byte), "byte");
+            CsBaseTargetTypeString.Add(typeof(sbyte), "sbyte");
+            CsBaseTargetTypeString.Add(typeof(UInt16), "UInt16");
+            CsBaseTargetTypeString.Add(typeof(Int16), "Int16");
+            CsBaseTargetTypeString.Add(typeof(UInt32), "UInt32");
+            CsBaseTargetTypeString.Add(typeof(Int32), "Int32");
+            CsBaseTargetTypeString.Add(typeof(UInt64), "UInt64");
+            CsBaseTargetTypeString.Add(typeof(Int64), "Int64");
+            CsBaseTargetTypeString.Add(typeof(float), "float");
+            CsBaseTargetTypeString.Add(typeof(double), "double");
+            CsBaseTargetTypeString.Add(typeof(IntPtr), "IntPtr");
         }
+        public static string GetCsTypeName(ITargetType itt)
+        {
+            if (IdlInfo.IsBaseType(itt.TargetType))
+            {
+                return CsBaseTargetTypeString[itt.TargetType];
+            }
+            else
+            {
+                return itt.TypeName;
+            }
+        }
+        public static string GetCppTypeName(ITargetType itt)
+        {
+            if (IdlInfo.IsBaseType(itt.TargetType))
+            {
+                return CppBaseTargetTypeString[itt.TargetType];
+            }
+            else
+            {
+                return itt.TypeName;
+            }
+        }
+
         internal class BitFieldStateMachine
         {
             internal List<string> SerializeCodeString = new List<string>();
@@ -50,12 +87,19 @@ namespace EmbedXrpcIdlParser
 
             internal int BitFieldLeftShiftAccer = 0;
             static internal int BitFieldTempValueCount = 0;
-            internal TargetType_t BitFieldCppType = TargetType_t.TYPE_STRUCT;
+            internal Type BitFieldType = typeof(object);//TargetType_t.TYPE_STRUCT;
             internal string BitFieldCppTypeString
             {
                 get
                 {
-                    return $"{ BaseType_TargetType.TypeReplaceDic[BitFieldCppType]}";
+                    return $"{ CppBaseTargetTypeString[BitFieldType]}";
+                }
+            }
+            internal string BitFieldCsTypeString
+            {
+                get
+                {
+                    return $"{ CsBaseTargetTypeString[BitFieldType]}";
                 }
             }
             internal void Reset()
@@ -68,7 +112,7 @@ namespace EmbedXrpcIdlParser
 
                 BitFieldLeftShiftAccer = 0;
                 //BitFieldTempValueCount++;
-                BitFieldCppType = TargetType_t.TYPE_STRUCT;
+                BitFieldType = typeof(object);//TargetType_t.TYPE_STRUCT;
             }
             internal void BitFieldProcess(StringBuilder cppSerializeString, StringBuilder cppDeserializeString,
                 StringBuilder csSerializeString, StringBuilder csDeserializeString,
@@ -85,7 +129,7 @@ namespace EmbedXrpcIdlParser
                     else
                     {
                         writeFlag = false;
-                        if (nextTargetField.TargetType.TargetType != BitFieldCppType)
+                        if (nextTargetField.TargetType.TargetType != BitFieldType)
                         {
                             throw new Exception("相邻的bit字段的类型必须一样!");
                         }
@@ -99,11 +143,11 @@ namespace EmbedXrpcIdlParser
                 if (writeFlag == true)
                 {
                     //var BitFieldCppTypeString = $"{ BaseType_TargetType.TypeReplaceDic[BitFieldCppType]}";
-                    SerializeCodeString.Add($"El_Memcpy(&sm->Buf[sm->Index],&bitsTempValue{BitFieldTempValueCount},sizeof({BitFieldCppTypeString}));");
-                    CsSerializeCodeString.Add($"sm.Buf.AddRange(SerializationManager.ToBytes(bitsTempValue{BitFieldTempValueCount},Type_t.{BitFieldCppType}));");
+                    SerializeCodeString.Add($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&bitsTempValue{BitFieldTempValueCount},sizeof({BitFieldCppTypeString}));");
+                    CsSerializeCodeString.Add($"sm.Buf.AddRange(sm.ToBytes(bitsTempValue{BitFieldTempValueCount},typeof({BitFieldType})));");
 
                     SerializeCodeString.Add($"sm->Index+=sizeof({BitFieldCppTypeString});");
-                    CsSerializeCodeString.Add($"sm.Index+=sizeof({BitFieldCppTypeString});");
+                    CsSerializeCodeString.Add($"sm.Index+=sizeof({BitFieldCsTypeString});");
 
                     foreach (var ss in SerializeCodeString)
                     {
@@ -146,22 +190,22 @@ namespace EmbedXrpcIdlParser
             string StructFreeNote = targetStructUnion.IsNeedFreeMemoryForNativeLanguage == true ? noNote : "//! ";
 
 
-            SerializeHeaderSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj);");
-            SerializeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_Serialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj)");
+            SerializeHeaderSb.AppendLine($"void {GetCppTypeName(targetStructUnion)}_Serialize(SerializationManager *sm,{GetCppTypeName(targetStructUnion)} *obj);");
+            SerializeCodeSb.AppendLine($"void {GetCppTypeName(targetStructUnion)}_Serialize(SerializationManager *sm,{GetCppTypeName(targetStructUnion)} *obj)");
             SerializeCodeSb.AppendLine("{");
 
             CsSerializeCodeSb.AppendLine($"public void Serialize(SerializationManager sm)");
             CsSerializeCodeSb.AppendLine("{");
 
-            DeserializeHeaderSb.AppendLine($"void {targetStructUnion.TypeName}_Deserialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj,int isIsr);");
-            DeserializeCodeSb.AppendLine($"void {targetStructUnion.TypeName}_Deserialize(SerializationManager *sm,{targetStructUnion.TypeName} *obj,int isIsr)");
+            DeserializeHeaderSb.AppendLine($"void {GetCppTypeName(targetStructUnion)}_Deserialize(SerializationManager *sm,{GetCppTypeName(targetStructUnion)} *obj,int isIsr);");
+            DeserializeCodeSb.AppendLine($"void {GetCppTypeName(targetStructUnion)}_Deserialize(SerializationManager *sm,{GetCppTypeName(targetStructUnion)} *obj,int isIsr)");
             DeserializeCodeSb.AppendLine("{");
 
             CsDeserializeCodeSb.AppendLine($"public void Deserialize(SerializationManager sm)");
             CsDeserializeCodeSb.AppendLine("{");
 
-            FreeHeaderSb.AppendLine($"{StructFreeNote}void {targetStructUnion.TypeName}_FreeData({targetStructUnion.TypeName} *obj);");
-            FreeCodeSb.AppendLine($"{StructFreeNote}void {targetStructUnion.TypeName}_FreeData({targetStructUnion.TypeName} *obj)");
+            FreeHeaderSb.AppendLine($"{StructFreeNote}void {GetCppTypeName(targetStructUnion)}_FreeData({GetCppTypeName(targetStructUnion)} *obj);");
+            FreeCodeSb.AppendLine($"{StructFreeNote}void {GetCppTypeName(targetStructUnion)}_FreeData({GetCppTypeName(targetStructUnion)} *obj)");
             FreeCodeSb.AppendLine($"{StructFreeNote}{{");
 
             List<ITargetField> TargetFields = targetStructUnion.TargetFields;
@@ -213,13 +257,13 @@ namespace EmbedXrpcIdlParser
 
                         FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}" +CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
                     }
-                    SerializeCodeSb.AppendLine($"case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
-                    CsSerializeCodeSb.AppendLine($"case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
+                    SerializeCodeSb.AppendLine($"case {GetCppTypeName(targetStructUnion)}_{field.FieldName}_FieldNumber:");
+                    CsSerializeCodeSb.AppendLine($"case {GetCsTypeName(targetStructUnion)}_{field.FieldName}_FieldNumber:");
 
-                    DeserializeCodeSb.AppendLine($"case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
-                    CsDeserializeCodeSb.AppendLine($"case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
+                    DeserializeCodeSb.AppendLine($"case {GetCppTypeName(targetStructUnion)}_{field.FieldName}_FieldNumber:");
+                    CsDeserializeCodeSb.AppendLine($"case {GetCsTypeName(targetStructUnion)}_{field.FieldName}_FieldNumber:");
 
-                    FreeCodeSb.AppendLine($"{StructFreeNote}case {targetStructUnion.TypeName}_{field.FieldName}_FieldNumber:");
+                    FreeCodeSb.AppendLine($"{StructFreeNote}case {GetCppTypeName(targetStructUnion)}_{field.FieldName}_FieldNumber:");
                 }
                 if (field.NoSerializationAttr != null)
                 {
@@ -257,7 +301,7 @@ namespace EmbedXrpcIdlParser
                 {
                     goto noSerialize;
                 }
-                if (field.TargetType.TargetType < TargetType_t.TYPE_ENUM)
+                if(IdlInfo.IsBaseType(field.TargetType.TargetType))//if (field.TargetType.TargetType < TargetType_t.TYPE_ENUM)
                 {
                     //if (isEncodeTlv == true)
                     //{
@@ -282,19 +326,22 @@ namespace EmbedXrpcIdlParser
                     {
                         if (bitFieldStateMachine.SerializeCodeString.Count == 0)
                         {
-                            bitFieldStateMachine.BitFieldCppType = base_TargetField.TargetType.TargetType;//{ BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]};
+                            bitFieldStateMachine.BitFieldType = base_TargetField.TargetType.TargetType;//{ BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]};
 
                             bitFieldStateMachine.SerializeCodeString.Add($"{bitFieldStateMachine.BitFieldCppTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
-                            bitFieldStateMachine.CsSerializeCodeString.Add($"{bitFieldStateMachine.BitFieldCppTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
+                            bitFieldStateMachine.CsSerializeCodeString.Add($"{bitFieldStateMachine.BitFieldCsTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
 
                             bitFieldStateMachine.DeserializeCodeString.Add($"{bitFieldStateMachine.BitFieldCppTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
-                            bitFieldStateMachine.CsDeserializeCodeString.Add($"{bitFieldStateMachine.BitFieldCppTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
-
-                            bitFieldStateMachine.DeserializeCodeString.Add($"DeserializeField((uint8_t *)&bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount},sm,sizeof({bitFieldStateMachine.BitFieldCppTypeString}),isIsr);");
-                            bitFieldStateMachine.CsDeserializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=({bitFieldStateMachine.BitFieldCppTypeString})sm.DeserializeField(Type_t.{base_TargetField.TargetType.TargetType});");
+                            bitFieldStateMachine.CsDeserializeCodeString.Add($"{bitFieldStateMachine.BitFieldCsTypeString} bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=0;");
+                            string sizeofStr = string.Empty;
+                            string sizeofStrForCs = string.Empty;
+                            sizeofStr = $"sizeof({CppBaseTargetTypeString[bitFieldStateMachine.BitFieldType]})";
+                            sizeofStrForCs = $"sizeof({CsBaseTargetTypeString[bitFieldStateMachine.BitFieldType]})";
+                            bitFieldStateMachine.DeserializeCodeString.Add($"DeserializeField((uint8_t *)&bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount},sm,{sizeofStr},isIsr);");
+                            bitFieldStateMachine.CsDeserializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}=({bitFieldStateMachine.BitFieldCsTypeString})sm.DeserializeField(typeof({base_TargetField.TargetType.TargetType}));");
                         }
                         bitFieldStateMachine.SerializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount} |= (({bitFieldStateMachine.BitFieldCppTypeString})(obj->{field.FieldName}))<< {bitFieldStateMachine.BitFieldLeftShiftAccer} ;");
-                        bitFieldStateMachine.CsSerializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount} |= (({bitFieldStateMachine.BitFieldCppTypeString})({field.FieldName}))<< {bitFieldStateMachine.BitFieldLeftShiftAccer} ;");
+                        bitFieldStateMachine.CsSerializeCodeString.Add($"bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount} |= (({bitFieldStateMachine.BitFieldCsTypeString})({field.FieldName}))<< {bitFieldStateMachine.BitFieldLeftShiftAccer} ;");
 
                         bitFieldStateMachine.DeserializeCodeString.Add($"obj->{field.FieldName}=bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}>>{bitFieldStateMachine.BitFieldLeftShiftAccer};");
                         bitFieldStateMachine.CsDeserializeCodeString.Add($"{field.FieldName}=bitsTempValue{BitFieldStateMachine.BitFieldTempValueCount}>>{bitFieldStateMachine.BitFieldLeftShiftAccer};");
@@ -306,14 +353,27 @@ namespace EmbedXrpcIdlParser
                     }
                     else
                     {
-                        SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{base_TargetField.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}));");
-                        CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(SerializationManager.ToBytes({base_TargetField.FieldName},Type_t.{base_TargetField.TargetType.TargetType}));");
+                        string sizeofStr = string.Empty;
+                        string sizeofStrForCs = string.Empty;
+                        if (base_TargetField.TargetType.TargetType == typeof(Enum))
+                        {
+                            var enumtt = base_TargetField.TargetType as EnumType_TargetType;
+                            sizeofStr = $"sizeof({CppBaseTargetTypeString[enumtt.NumberType]})";
+                            sizeofStr = $"sizeof({CsBaseTargetTypeString[enumtt.NumberType]})";
+                        }
+                        else
+                        {
+                            sizeofStr = $"sizeof({CppBaseTargetTypeString[base_TargetField.TargetType.TargetType]})";
+                            sizeofStrForCs = $"sizeof({CsBaseTargetTypeString[base_TargetField.TargetType.TargetType]})";
+                        }
+                        SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{base_TargetField.FieldName},{sizeofStr});");
+                        CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(sm.ToBytes({base_TargetField.FieldName},typeof({base_TargetField.TargetType.TargetType})));");
 
-                        SerializeCodeSb.AppendLine($"sm->Index+=sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]});");
-                        CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]});");
+                        SerializeCodeSb.AppendLine($"sm->Index+={sizeofStr};");
+                        CsSerializeCodeSb.AppendLine($"sm.Index+={sizeofStrForCs};");//sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}
 
-                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[base_TargetField.TargetType.TargetType]}),isIsr);");
-                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({field.TargetType.TypeName})sm.DeserializeField(Type_t.{base_TargetField.TargetType.TargetType});");
+                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,{sizeofStr},isIsr);");
+                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({GetCsTypeName(field.TargetType)})sm.DeserializeField(typeof({base_TargetField.TargetType.TargetType}));");
 
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                         //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);"); 
@@ -332,7 +392,7 @@ namespace EmbedXrpcIdlParser
                     }
 
                 }
-                else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
+                else if(field.TargetType.TargetType==typeof(Enum))//else if (field.TargetType.TargetType == TargetType_t.TYPE_ENUM)
                 {
                     EnumType_TargetType ettt = field.TargetType as EnumType_TargetType;
                     //if (isEncodeTlv == true)
@@ -349,14 +409,14 @@ namespace EmbedXrpcIdlParser
 
                         FreeCodeSb.AppendLine($"{StructFreeNote}" + CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
                     }
-                    SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
-                    CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(SerializationManager.ToBytes({field.FieldName},Type_t.{ettt.NumberType}));");
+                    SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},sizeof({CppBaseTargetTypeString[ettt.NumberType]}));");
+                    CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(sm.ToBytes({field.FieldName},typeof({ettt.NumberType})));");
 
-                    SerializeCodeSb.AppendLine($"sm->Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});");
-                    CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});");
+                    SerializeCodeSb.AppendLine($"sm->Index+=sizeof({CppBaseTargetTypeString[ettt.NumberType]});");
+                    CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({CsBaseTargetTypeString[ettt.NumberType]});");
 
-                    DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}),isIsr);");
-                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({field.TargetType.TypeName})sm.DeserializeField(Type_t.{ettt.NumberType});");
+                    DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName},sm,sizeof({CppBaseTargetTypeString[ettt.NumberType]}),isIsr);");
+                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=({GetCsTypeName(field.TargetType)})sm.DeserializeField(typeof({ettt.NumberType}));");
 
                     SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                     //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
@@ -372,7 +432,7 @@ namespace EmbedXrpcIdlParser
                         FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}" + CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
                     }
                 }
-                else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
+                else if(field.TargetType.TargetType==typeof(Array))//else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
                     //if (isEncodeTlv == true)
                     //{
@@ -395,20 +455,23 @@ namespace EmbedXrpcIdlParser
                     var lenstring = string.Empty;
                     var cslenstring = string.Empty;
 
-                    var len_type_string = string.Empty;
+                    var cpp_len_type_string = string.Empty;
+                    var cs_len_type_string = string.Empty;
                     if (arrayLenField != null)
                     {
                         lenstring = $"obj->{arrayLenField.FieldName}";
                         cslenstring = $"{arrayLenField.FieldName}";
 
-                        len_type_string = $"{arrayLenField.TargetType.TypeName}";
+                        cpp_len_type_string = $"{GetCppTypeName(arrayLenField.TargetType)}";
+                        cs_len_type_string = $"{GetCsTypeName(arrayLenField.TargetType)}";
                     }
                     else
                     {
                         lenstring = "1";
                         cslenstring = "1";
 
-                        len_type_string = "Byte";
+                        cpp_len_type_string = $"uint32_t";
+                        cs_len_type_string = $"UInt32";
                     }
                     //if(isEncodeTlv==true)
                     //{
@@ -425,66 +488,92 @@ namespace EmbedXrpcIdlParser
                     //    }
                     //}
 
-                    SerializeCodeSb.AppendLine($"for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
-                    CsSerializeCodeSb.AppendLine($"for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{cslenstring};{field.FieldName}_index++)");
+                    SerializeCodeSb.AppendLine($"for({cpp_len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
+                    CsSerializeCodeSb.AppendLine($"for({cs_len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{cslenstring};{field.FieldName}_index++)");
 
                     SerializeCodeSb.AppendLine("{");//for begin
                     CsSerializeCodeSb.AppendLine("{");//for begin
 
                     if (array_TargetField.MaxCountAttribute.IsFixed == false)
                     {
-                        DeserializeCodeSb.AppendLine($"obj->{field.FieldName}=({attt.ElementType.TypeName} *)El_Malloc(sizeof({attt.ElementType.TypeName})*{lenstring});");
-                        DeserializeCodeSb.AppendLine($"El_Memset(obj->{field.FieldName},0,sizeof({attt.ElementType.TypeName})*{lenstring});");
+                        string sizeofstr = string.Empty;
+                        string sizeofStrForCs = string.Empty;
+                        if(attt.ElementType.TargetType==typeof(Enum))
+                        {
+                            var enumtt = attt.ElementType as EnumType_TargetType;
+                            sizeofstr = $"sizeof({CppBaseTargetTypeString[enumtt.NumberType]})";
+                            sizeofStrForCs = $"sizeof({CsBaseTargetTypeString[enumtt.NumberType]})";
+                        }
+                        else
+                        {
+                            sizeofstr = $"sizeof({GetCppTypeName(attt.ElementType)})";
+                            sizeofStrForCs = $"sizeof({GetCsTypeName(attt.ElementType)})";
+                        }
+                        DeserializeCodeSb.AppendLine($"obj->{field.FieldName}=({GetCppTypeName(attt.ElementType)} *)El_Malloc({sizeofstr}*{lenstring});");
+                        DeserializeCodeSb.AppendLine($"El_Memset(obj->{field.FieldName},0,{sizeofstr}*{lenstring});");
                     }
-                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=new {attt.ElementType.TypeName}[{cslenstring}];");
+                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=new {GetCsTypeName(attt.ElementType)}[{cslenstring}];");
 
-                    DeserializeCodeSb.AppendLine($"for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
-                    CsDeserializeCodeSb.AppendLine($"for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{cslenstring};{field.FieldName}_index++)");
+                    DeserializeCodeSb.AppendLine($"for({cpp_len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
+                    CsDeserializeCodeSb.AppendLine($"for({cs_len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{cslenstring};{field.FieldName}_index++)");
 
                     DeserializeCodeSb.AppendLine("{");//for begin
                     CsDeserializeCodeSb.AppendLine("{");//for begin
 
-                    FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{ElementTypeFreeNote}for({len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
+                    FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{ElementTypeFreeNote}for({cpp_len_type_string} {field.FieldName}_index=0;{field.FieldName}_index<{lenstring};{field.FieldName}_index++)");
                     FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{ElementTypeFreeNote}{{");//for begin
-                    if (attt.ElementType.TargetType < TargetType_t.TYPE_ENUM)
+                    if(IdlInfo.IsBaseType(attt.ElementType.TargetType))//if (attt.ElementType.TargetType < TargetType_t.TYPE_ENUM)
                     {
-                        SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({attt.ElementType.TypeName}));");
-                        CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(SerializationManager.ToBytes({field.FieldName}[{field.FieldName}_index],Type_t.{attt.ElementType.TargetType}));");
+                        string sizeofstr = string.Empty;
+                        string sizeofStrForCs = string.Empty;
+                        if (attt.ElementType.TargetType == typeof(Enum))
+                        {
+                            var enumtt = attt.ElementType as EnumType_TargetType;
+                            sizeofstr = $"sizeof({CppBaseTargetTypeString[enumtt.NumberType]})";
+                            sizeofStrForCs = $"sizeof({CsBaseTargetTypeString[enumtt.NumberType]})";
+                        }
+                        else
+                        {
+                            sizeofstr = $"sizeof({GetCppTypeName(attt.ElementType)})";
+                            sizeofStrForCs = $"sizeof({GetCsTypeName(attt.ElementType)})";
+                        }
+                        SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],{sizeofstr});");
+                        CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(sm.ToBytes({field.FieldName}[{field.FieldName}_index],typeof({attt.ElementType.TargetType})));");
 
-                        SerializeCodeSb.AppendLine($"sm->Index+=sizeof({attt.ElementType.TypeName});");
-                        CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({attt.ElementType.TypeName});");
+                        SerializeCodeSb.AppendLine($"sm->Index+={sizeofstr};");
+                        CsSerializeCodeSb.AppendLine($"sm.Index+={sizeofStrForCs};");
 
-                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({attt.ElementType.TypeName}),isIsr);");
-                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({attt.ElementType.TypeName})sm.DeserializeField(Type_t.{attt.ElementType.TargetType});");
+                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,{sizeofstr},isIsr);");
+                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({GetCsTypeName(attt.ElementType)})sm.DeserializeField(typeof({attt.ElementType.TargetType}));");
 
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                         //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                     }
-                    else if (attt.ElementType.TargetType == TargetType_t.TYPE_ENUM)
+                    else if(attt.ElementType.TargetType==typeof(Enum))//else if (attt.ElementType.TargetType == TargetType_t.TYPE_ENUM)
                     {
                         var ettt = attt.ElementType as EnumType_TargetType;
-                        SerializeCodeSb.AppendLine($"El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}));");
-                        CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(SerializationManager.ToBytes({field.FieldName}[{field.FieldName}_index],Type_t.{ettt.NumberType}));");
+                        SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({CppBaseTargetTypeString[ettt.NumberType]}));");
+                        CsSerializeCodeSb.AppendLine($"sm.Buf.AddRange(sm.ToBytes({field.FieldName}[{field.FieldName}_index],typeof({ettt.NumberType})));");
 
-                        SerializeCodeSb.AppendLine($"sm->Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});");
-                        CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]});");
+                        SerializeCodeSb.AppendLine($"sm->Index+=sizeof({CppBaseTargetTypeString[ettt.NumberType]});");
+                        CsSerializeCodeSb.AppendLine($"sm.Index+=sizeof({CsBaseTargetTypeString[ettt.NumberType]});");
 
-                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]}),isIsr);");
-                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({BaseType_TargetType.TypeReplaceDic[ettt.NumberType]})sm.DeserializeField(Type_t.{ettt.NumberType});");
+                        DeserializeCodeSb.AppendLine($"DeserializeField((uint8_t *)&obj->{field.FieldName}[{field.FieldName}_index],sm,sizeof({CppBaseTargetTypeString[ettt.NumberType]}),isIsr);");
+                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=({CsBaseTargetTypeString[ettt.NumberType]})sm.DeserializeField(typeof({ettt.NumberType}));");
 
                         SerializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                         //DeserializeCodeSb.AppendLine("El_Assert(sm->Index<=sm->BufferLen);");
                     }
                     else
                     {
-                        SerializeCodeSb.AppendLine($"{attt.ElementType.TypeName}_Serialize(sm,&obj->{field.FieldName}[{field.FieldName}_index]);");
+                        SerializeCodeSb.AppendLine($"{GetCppTypeName(attt.ElementType)}_Serialize(sm,&obj->{field.FieldName}[{field.FieldName}_index]);");
                         CsSerializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index].Serialize(sm);");
 
-                        DeserializeCodeSb.AppendLine($"{attt.ElementType.TypeName}_Deserialize(sm,&obj->{field.FieldName}[{field.FieldName}_index],isIsr);");
-                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=new {attt.ElementType.TypeName}();");
+                        DeserializeCodeSb.AppendLine($"{GetCppTypeName(attt.ElementType)}_Deserialize(sm,&obj->{field.FieldName}[{field.FieldName}_index],isIsr);");
+                        CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index]=new {GetCsTypeName(attt.ElementType)}();");
                         CsDeserializeCodeSb.AppendLine($"{field.FieldName}[{field.FieldName}_index].Deserialize(sm);");
 
-                        FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{ElementTypeFreeNote}{attt.ElementType.TypeName}_FreeData(&obj->{field.FieldName}[{field.FieldName}_index]);");
+                        FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{ElementTypeFreeNote}{GetCppTypeName(attt.ElementType)}_FreeData(&obj->{field.FieldName}[{field.FieldName}_index]);");
                     }
                     SerializeCodeSb.AppendLine("}");//for end
                     CsSerializeCodeSb.AppendLine("}");//for end
@@ -510,7 +599,7 @@ namespace EmbedXrpcIdlParser
                         FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}" +CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));
                     }
                 }
-                else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
+                else if(field.TargetType.TargetType == typeof(object))//else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
                 {
                     //if (isEncodeTlv == true)
                     //{
@@ -527,14 +616,14 @@ namespace EmbedXrpcIdlParser
 
                         FreeCodeSb.AppendLine($"{StructFreeNote}{fieldNeedFreeMemoryNote}" + CppSerializableCommon.MacroControlWriteBegin(null, field.MacroControlAttr));
                     }
-                    SerializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Serialize(sm,&obj->{field.FieldName});");
+                    SerializeCodeSb.AppendLine($"{GetCppTypeName(field.TargetType)}_Serialize(sm,&obj->{field.FieldName});");
                     CsSerializeCodeSb.AppendLine($"{field.FieldName}.Serialize(sm);");
 
-                    DeserializeCodeSb.AppendLine($"{field.TargetType.TypeName}_Deserialize(sm,&obj->{field.FieldName},isIsr);");
-                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=new {field.TargetType.TypeName}();");
+                    DeserializeCodeSb.AppendLine($"{GetCppTypeName(field.TargetType)}_Deserialize(sm,&obj->{field.FieldName},isIsr);");
+                    CsDeserializeCodeSb.AppendLine($"{field.FieldName}=new {GetCsTypeName(field.TargetType)}();");
                     CsDeserializeCodeSb.AppendLine($"{field.FieldName}.Deserialize(sm);");
 
-                    FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{fieldNeedFreeMemoryNote}{field.TargetType.TypeName}_FreeData(&obj->{field.FieldName});");
+                    FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{fieldNeedFreeMemoryNote}{GetCppTypeName(field.TargetType)}_FreeData(&obj->{field.FieldName});");
                     if (field.MacroControlAttr != null && field.UnionFieldAttr == null)
                     {
                         SerializeCodeSb.AppendLine(CppSerializableCommon.MacroControlWriteEnd(null, field.MacroControlAttr));

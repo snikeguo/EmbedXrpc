@@ -26,8 +26,7 @@ namespace Sample1
         public void Add(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
         {
             serviceInvokeParameter.RpcObject.Start_SuspendTimer(serviceInvokeParameter.TargetTimeOut / 2);
-            Response.ReturnValue.Sum = (uint)(a+b);
-            Response.ReturnValue.dataLen = 0;
+            Response.ReturnValue = a + b;
             Thread.Sleep(1000);
             serviceInvokeParameter.RpcObject.Stop_SuspendTimer();
         }
@@ -57,17 +56,20 @@ namespace EmbedXrpc
                 Add_Requester<Win32UserDataOfTransportLayer> inter_Add = new Add_Requester<Win32UserDataOfTransportLayer>(client);
                 while (true)
                 {
+                    Random random = new Random();
+                    int a = random.Next();
                     Thread.Sleep(1000);
-                    var reAdd = inter_Add.Invoke(new Win32UserDataOfTransportLayer() {  Ip="123",Port=11},1,2,0,null);
+                    int b = random.Next();
+                    var reAdd = inter_Add.Invoke(new Win32UserDataOfTransportLayer() {  Ip="123",Port=11},a,b,0,null);
                     if(reAdd.State != RequestResponseState.ResponseState_Ok)
                     {
                         Console.WriteLine("request failed! error code:{0}", reAdd.State);
                     }
                     else
                     {
-                        Console.WriteLine($"{1}+{2}={reAdd.ReturnValue.Sum}");
+                        Console.WriteLine($"{a}+{b}={reAdd.ReturnValue}");
                     }
-                    
+                    Debug.Assert(a + b == reAdd.ReturnValue);
                     /*var reNoArg = inter.NoArg();
                     if (reNoArg.State == RequestResponseState.RequestState_Failed)
                     {

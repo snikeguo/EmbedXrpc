@@ -226,7 +226,7 @@ if(response->State==ResponseState_Ok)
 }
 }
 
-NoReturn_Return& NoReturn_Requester::NoReturn(RequestParameter* rp,Int32 a)
+NoReturn_Return& NoReturn_Requester::NoReturn(RequestParameter* rp,int32_t a)
 {
 //write serialization code:NoReturn(a,)
 SerializationManager sm;

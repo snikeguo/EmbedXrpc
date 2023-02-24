@@ -30,7 +30,6 @@ void EmbedXrpcObject::Init(InitConfig* cfg)
 		DataLinkBufferForResponse.MutexHandle = nullptr;
 	}
 
-	
 
 	TimeOut = cfg->TimeOut;
 	Send = cfg->Sender;

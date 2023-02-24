@@ -9,28 +9,7 @@ using System.Threading.Tasks;
 
 namespace EmbedXrpc
 {
-    public enum Type_t
-    {
-        TYPE_UINT8,
-        TYPE_INT8,
-
-        TYPE_UINT16,
-        TYPE_INT16,
-
-        TYPE_UINT32,
-        TYPE_INT32,
-
-        TYPE_UINT64,
-        TYPE_INT64,
-
-        TYPE_FLOAT,
-        TYPE_DOUBLE,
-
-        TYPE_ARRAY,   /*array*/
-        TYPE_STRUCT,  /*struct*/
-        TYPE_UNION,     /*union*/
-
-    };
+    
     public interface IEmbedXrpcSerialization
     {
         void Serialize(SerializationManager sm);
@@ -61,37 +40,43 @@ namespace EmbedXrpc
             Buf = data;
             Index = 0;
         }
-        public static byte[] ToBytes( object obj,Type_t tp)
+        public byte[] ToBytes( object obj,Type tp)
         {
             //Console.WriteLine($"u8:{d}");
             byte[] bs = null;
-            if (tp == Type_t.TYPE_UINT8)
+            if (tp == typeof(bool))
+            {
+                byte d = (bool)obj==true?(byte)1:(byte)0;
+                bs = new byte[1];
+                bs[0] = d;
+            }
+            else if (tp == typeof(byte))
             {
                 byte d = (byte)obj;
                 bs = new byte[1];
                 bs[0] = d;
             }
-            else if (tp == Type_t.TYPE_INT8)
+            else if (tp == typeof(sbyte))
             {
                 byte d = (byte)obj;
                 bs = new byte[1];
                 bs[0] = d;
             }
-            else if(tp==Type_t.TYPE_UINT16)
+            else if(tp == typeof(UInt16))
             {
                 bs = new byte[2];
                 UInt16 d = (UInt16)(obj);
                 bs[0] = (byte)(d & 0xFF);
                 bs[1] = (byte)(d >> 8 & 0xFF);
             }
-            else if (tp == Type_t.TYPE_INT16)
+            else if (tp == typeof(Int16))
             {
                 bs = new byte[2];
                 Int16 d = (Int16)(obj);
                 bs[0] = (byte)(d & 0xFF);
                 bs[1] = (byte)(d >> 8 & 0xFF);
             }
-            else if (tp == Type_t.TYPE_UINT32)
+            else if (tp == typeof(UInt32))
             {
                 bs = new byte[4];
                 UInt32 d = (UInt32)(obj);
@@ -100,7 +85,7 @@ namespace EmbedXrpc
                 bs[2] = (byte)(d >> 16 & 0xFF);
                 bs[3] = (byte)(d >> 24 & 0xFF);
             }
-            else if (tp == Type_t.TYPE_INT32)
+            else if (tp == typeof(Int32))
             {
                 bs = new byte[4];
                 Int32 d = (Int32)(obj);
@@ -109,7 +94,7 @@ namespace EmbedXrpc
                 bs[2] = (byte)(d >> 16 & 0xFF);
                 bs[3] = (byte)(d >> 24 & 0xFF);
             }
-            else if (tp == Type_t.TYPE_UINT64)
+            else if (tp == typeof(UInt64))
             {
                 bs = new byte[8];
                 UInt64 d = (UInt64)(obj);
@@ -122,7 +107,7 @@ namespace EmbedXrpc
                 bs[6] = (byte)(d >> 48 & 0xFF);
                 bs[7] = (byte)(d >> 56 & 0xFF);
             }
-            else if (tp == Type_t.TYPE_INT64)
+            else if (tp == typeof(Int64))
             {
                 bs = new byte[8];
                 Int64 d = (Int64)(obj);
@@ -135,7 +120,10 @@ namespace EmbedXrpc
                 bs[6] = (byte)(d >> 48 & 0xFF);
                 bs[7] = (byte)(d >> 56 & 0xFF);
             }
-
+            else
+            {
+                throw new NotSupportedException($"NotSupported");
+            }
             return bs;
             
         }
@@ -152,36 +140,41 @@ namespace EmbedXrpc
                 CurrentBitFieldType = null;
             }
         }
-        
-        public object DeserializeField(Type_t vt)
+        public object DeserializeField(Type vt)
         {
-            if (vt ==  Type_t.TYPE_UINT8)
+            if (vt == typeof(bool))
+            {
+                bool v = Convert.ToBoolean(Buf[Index]);
+                Index++;
+                return v;
+            }
+            else if (vt == typeof(byte))
             {
                 byte v =Convert.ToByte(Buf[Index]);
                 Index++;
                 return v;
             }
-            else if (vt == Type_t.TYPE_INT8)
+            else if (vt == typeof(sbyte))
             {
                 sbyte v = Convert.ToSByte(Buf[Index]);
                 Index++;
                 return v;
             }
-            else if (vt == Type_t.TYPE_UINT16)
+            else if (vt == typeof(UInt16))
             {
                 UInt16 v = Convert.ToUInt16((UInt16)Buf[Index + 1] << 8);
                 v |= Convert.ToUInt16((UInt16)Buf[Index]);
                 Index += 2;
                 return v;
             }
-            else if (vt == Type_t.TYPE_INT16)
+            else if (vt == typeof(Int16))
             {
                 Int16 v = Convert.ToInt16((Int16)Buf[Index + 1] << 8);
                 v |= Convert.ToInt16((Int16)Buf[Index]);
                 Index += 2;
                 return v;
             }
-            else if (vt == Type_t.TYPE_UINT32)
+            else if (vt == typeof(UInt32))
             {
                 UInt32 v = Convert.ToUInt32((UInt32)Buf[Index + 3] << 24);
                 v |= Convert.ToUInt32((UInt32)Buf[Index + 2] << 16);
@@ -190,7 +183,7 @@ namespace EmbedXrpc
                 Index += 4;
                 return v;
             }
-            else if (vt == Type_t.TYPE_INT32)
+            else if (vt == typeof(Int32))
             {
                 Int32 v = Convert.ToInt32((Int32)Buf[Index + 3] << 24);
                 v |= Convert.ToInt32((Int32)Buf[Index + 2] << 16);
@@ -199,7 +192,7 @@ namespace EmbedXrpc
                 Index += 4;
                 return v;
             }
-            else if (vt == Type_t.TYPE_UINT64)
+            else if (vt == typeof(UInt64))
             {
                 UInt64 v = Convert.ToUInt64((UInt64)Buf[Index + 7] << 56);
                 v |= Convert.ToUInt64((UInt64)Buf[Index + 6] << 48);
@@ -212,7 +205,7 @@ namespace EmbedXrpc
                 Index += 8;
                 return v;
             }
-            else if (vt == Type_t.TYPE_INT64)
+            else if (vt == typeof(Int64))
             {
                 Int64 v = Convert.ToInt64((Int64)Buf[Index + 7] << 56);
                 v |= Convert.ToInt64((Int64)Buf[Index + 6] << 48);
@@ -224,6 +217,10 @@ namespace EmbedXrpc
                 v |= Convert.ToInt64((Int64)Buf[Index]);
                 Index += 8;
                 return v;
+            }
+            else 
+            {
+                throw new NotSupportedException($"NotSupported");
             }
             throw new InvalidDataException($"len is {vt},but len only support 1/2/4/8");
         }

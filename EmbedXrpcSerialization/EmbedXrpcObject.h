@@ -4,7 +4,7 @@
 #include "EmbedLibrary.h"
 #include "EmbedXrpcCommon.h"
 #include "BlockBufferProvider.h"
-#define EmbedXrpcObjectVersion	"2.9.0"
+#define EmbedXrpcObjectVersion	"3.2.0"
 
 struct EmbedXrpcBufferConfig
 {
@@ -25,7 +25,6 @@ struct ClientNodeQuicklyInitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
 	EmbedXrpcBufferConfig DataLinkBufferConfigForRequest;
-
 	SendPack_t Sender;
 	uint32_t TimeOut;
 
@@ -39,7 +38,6 @@ struct ServerNodeQuicklyInitConfig
 {
 	char Name[EmbedXrpc_NameMaxLen];
 	EmbedXrpcBufferConfig DataLinkBufferConfigForResponse;
-
 
 	SendPack_t Sender;
 	uint32_t TimeOut;
@@ -58,7 +56,6 @@ struct InitConfig
 
 	EmbedXrpcBufferConfig DataLinkBufferConfigForRequest;
 	EmbedXrpcBufferConfig DataLinkBufferConfigForResponse;
-
 	SendPack_t Sender;
 	uint32_t TimeOut;
 
@@ -92,7 +89,6 @@ public:
 	BlockRingBufferProvider* BlockBufferProviderOfRequestService = nullptr;
 	
 	El_Queue_t MessageQueueOfRequestService = nullptr;
-
 
 	void* UserData;
 

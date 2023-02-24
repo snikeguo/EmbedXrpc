@@ -71,7 +71,7 @@
     <Compile Include="Commands.cs" />
     <Compile Include="CppCodeGenerater.cs" />
     <Compile Include="CsCodeGenerater.cs" />
-    <Compile Include="CppNanoSerializer.cs" />
+    <Compile Include="CppCsNanoSerializer.cs" />
     <Compile Include="CppReflectionSerializer.cs" />
     <Compile Include="ICodeGenerater.cs" />
     <None Include="idltest1.cs">

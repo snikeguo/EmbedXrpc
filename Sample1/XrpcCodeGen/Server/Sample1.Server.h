@@ -30,7 +30,7 @@ class Add_Service:public IService
 public:
 uint16_t GetSid(){return Add_ServiceId;}
 Add_Return Response;
-virtual void Add(ServiceInvokeParameter * serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,UInt8* data){}
+virtual void Add(ServiceInvokeParameter * serviceInvokeParameter,int32_t a,int32_t b,int32_t dataLen,uint8_t* data){}
 Add_Parameter request;
 void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager);
 };
@@ -51,7 +51,7 @@ class NoReturn_Service:public IService
 {
 public:
 uint16_t GetSid(){return NoReturn_ServiceId;}
-virtual void NoReturn(ServiceInvokeParameter * serviceInvokeParameter,Int32 a){}
+virtual void NoReturn(ServiceInvokeParameter * serviceInvokeParameter,int32_t a){}
 NoReturn_Parameter request;
 void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager);
 };
