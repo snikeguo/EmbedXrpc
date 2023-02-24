@@ -58,7 +58,7 @@ NoReturn_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return NoReturn_ServiceId;}
 NoReturn_Parameter NoReturn_SendData;
 NoReturn_Return NoReturn_reqresp;
-NoReturn_Return& NoReturn(RequestParameter* rp,Int32 a);
+NoReturn_Return& NoReturn(RequestParameter* rp,int32_t a);
 };
 
 class NoArgAndReturn_Requester

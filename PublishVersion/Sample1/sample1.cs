@@ -4,7 +4,7 @@ using EmbedXrpcIdlParser;
 [FileName("sample1.cs")]
 struct AddResult
 {
-    
+    bool boolTest;
     [FieldNumber(1)]
     [BitField(11)]
     uint Sum;
@@ -37,6 +37,8 @@ struct AddResult
 
     
     UInt32 Sum7;
+    [NoSerialization]
+    IntPtr PtrTest;
 }
 
 [FileName("sample1.cs")]

@@ -56,7 +56,6 @@ namespace EmbedXrpc
                     AllServices.Add(service);
                 }
             }
-
             TimeOut = timeout;
             Send = send;
 
