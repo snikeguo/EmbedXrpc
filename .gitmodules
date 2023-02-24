@@ -1,0 +1,3 @@
+[submodule "EmbedLibrary"]
+	path = EmbedLibrary
+	url = https://gitee.com/snikeguo/embed-library.git
