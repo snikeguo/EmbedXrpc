@@ -15,7 +15,7 @@ namespace EmbedXrpcIdlParser
 
         private void GenerateStruct(StreamWriter sw, StructType_TargetType objectType_TargetType)
         {
-            sw.WriteLine($"public class {CppCsNanoSerializer.GetCsTypeName(objectType_TargetType)}:IEmbedXrpcSerialization");
+            sw.WriteLine($"public class {CppCsNanoSerializer.GetCsTypeDefineName(objectType_TargetType)}:IEmbedXrpcSerialization");
             sw.WriteLine("{");//class begin
             foreach (var field in objectType_TargetType.TargetFields)
             {
@@ -24,7 +24,7 @@ namespace EmbedXrpcIdlParser
                     CppSerializableCommon.MacroControlWriteBegin(sw, field.MacroControlAttr);
                 }
 
-                sw.WriteLine($"public const int {CppCsNanoSerializer.GetCsTypeName(objectType_TargetType)}_{field.FieldName}_FieldNumber={field.FieldNumberAttr.Number};");
+                sw.WriteLine($"public const int {CppCsNanoSerializer.GetCsTypeDefineName(objectType_TargetType)}_{field.FieldName}_FieldNumber={field.FieldNumberAttr.Number};");
                 if (field.NoSerializationAttr != null)
                 {
                     sw.WriteLine($"[NoSerialization]");
@@ -47,7 +47,7 @@ namespace EmbedXrpcIdlParser
                     }
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
                     sw.WriteLine($"[ArrayLenFieldFlag( {base_TargetField.IsArrayLenField.ToString().ToString().ToLower()} ) ]");
-                    sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeName(field.TargetType)} {field.FieldName}{{get;set;}}");
+                    sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeDefineName(field.TargetType)} {field.FieldName}{{get;set;}}");
                 }
                 else if(field.TargetType.TargetType==typeof(Array))//else if (field.TargetType.TargetType == TargetType_t.TYPE_ARRAY)
                 {
@@ -61,7 +61,7 @@ namespace EmbedXrpcIdlParser
                     ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
                     string lenstring = arrayLenField == null ? "1" : "0";
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
-                    sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeName(attt.ElementType)}[] {array_TargetField.FieldName}{{get;set;}}=new {CppCsNanoSerializer.GetCsTypeName(attt.ElementType)}[{lenstring}];");
+                    sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeDefineName(attt.ElementType)}[] {array_TargetField.FieldName}{{get;set;}}=new {CppCsNanoSerializer.GetCsTypeDefineName(attt.ElementType)}[{lenstring}];");
 
                 }
                 else if(field.TargetType.TargetType==typeof(object))//else if (field.TargetType.TargetType == TargetType_t.TYPE_STRUCT)
@@ -72,7 +72,7 @@ namespace EmbedXrpcIdlParser
                         sw.WriteLine($"[UnionField]");
                     }
                     sw.WriteLine($"[FieldNumber( {field.FieldNumberAttr.Number}) ] ");
-                    sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeName(field.TargetType)} {field.FieldName}{{get;set;}}=new {CppCsNanoSerializer.GetCsTypeName(field.TargetType)}();");
+                    sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeDefineName(field.TargetType)} {field.FieldName}{{get;set;}}=new {CppCsNanoSerializer.GetCsTypeDefineName(field.TargetType)}();");
                 }
                 if (field.MacroControlAttr != null)
                 {
@@ -128,20 +128,20 @@ namespace EmbedXrpcIdlParser
             for (int pi = 0; pi < service.ParameterStructType.TargetFields.Count; pi++)
             {
                 var par = service.ParameterStructType.TargetFields[pi];
-                pars += CppCsNanoSerializer.GetCsTypeName(par.TargetType) + " " + par.FieldName;
+                pars += CppCsNanoSerializer.GetCsTypeDefineName(par.TargetType) + " " + par.FieldName;
                 if (pi + 1 < service.ParameterStructType.TargetFields.Count)
                 {
                     pars += ",";
                 }
             }
             var dh = pars == "" ? "" : ",";
-            sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeName(service.ReturnStructType)} Invoke(DTL userDataOfTransportLayer{dh}{pars})");
+            sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)} Invoke(DTL userDataOfTransportLayer{dh}{pars})");
             sw.WriteLine("{");//function begin
-            sw.WriteLine($"{service.ReturnStructType.TypeName} reqresp=new {CppCsNanoSerializer.GetCsTypeName(service.ReturnStructType)}();");
+            sw.WriteLine($"{service.ReturnStructType.TypeName} reqresp=new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();");
             sw.WriteLine("lock(XrpcObject.ObjectMutex) ");
             sw.WriteLine("{");//lock begin
             sw.WriteLine("XrpcObject.MessageQueueOfRequestServiceHandle.Reset();");
-            sw.WriteLine($"{CppCsNanoSerializer.GetCsTypeName(service.ParameterStructType)} request =new {CppCsNanoSerializer.GetCsTypeName(service.ParameterStructType)}();");
+            sw.WriteLine($"{CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)} request =new {CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)}();");
             for (int pi = 0; pi < service.ParameterStructType.TargetFields.Count; pi++)
             {
                 var par = service.ParameterStructType.TargetFields[pi];
@@ -171,9 +171,9 @@ namespace EmbedXrpcIdlParser
                 "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
-                sw.WriteLine($"var waitstate=XrpcObject.Wait<{CppCsNanoSerializer.GetCsTypeName(service.ReturnStructType)}>({service.ServiceName}_ServiceId, ref reqresp);");
+                sw.WriteLine($"var waitstate=XrpcObject.Wait<{CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}>({service.ServiceName}_ServiceId, ref reqresp);");
                 sw.WriteLine("if(reqresp==null)");
-                sw.WriteLine($"{{reqresp=new {CppCsNanoSerializer.GetCsTypeName(service.ReturnStructType)}();}}");
+                sw.WriteLine($"{{reqresp=new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();}}");
                 sw.WriteLine("reqresp.State=waitstate;");
                 sw.WriteLine("goto exi;");
             }
@@ -197,11 +197,11 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine($"public UInt16 GetSid(){{ return {service.ServiceName}_ServiceId;}}");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
-                sw.WriteLine($"private {CppCsNanoSerializer.GetCsTypeName(service.ReturnStructType)} Response = new {CppCsNanoSerializer.GetCsTypeName(service.ReturnStructType)}();");
+                sw.WriteLine($"private {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)} Response = new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();");
             }
             sw.WriteLine("public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)");
             sw.WriteLine("{");//function begin
-            sw.WriteLine($"{CppCsNanoSerializer.GetCsTypeName(service.ParameterStructType)} request = new {CppCsNanoSerializer.GetCsTypeName(service.ParameterStructType)}();");
+            sw.WriteLine($"{CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)} request = new {CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)}();");
             sw.WriteLine($"request.Deserialize(recManager);");
             string pars = string.Empty;
             string externstr = string.Empty;
@@ -209,7 +209,7 @@ namespace EmbedXrpcIdlParser
             {
                 var par = service.ParameterStructType.TargetFields[pi];
                 pars += "request." + par.FieldName;
-                externstr += CppCsNanoSerializer.GetCsTypeName(par.TargetType) + " " + par.FieldName;
+                externstr += CppCsNanoSerializer.GetCsTypeDefineName(par.TargetType) + " " + par.FieldName;
                 if (pi + 1 < service.ParameterStructType.TargetFields.Count)
                 {
                     pars += ",";
@@ -290,7 +290,7 @@ namespace EmbedXrpcIdlParser
             csStreamWriter.WriteLine("using Int8 = SByte;");
             foreach (var enu in idlInfo.TargetEnums)
             {
-                csStreamWriter.WriteLine($"public enum {CppCsNanoSerializer.GetCsTypeName(enu)}:{CppCsNanoSerializer.CsBaseTargetTypeString[enu.NumberType]}");
+                csStreamWriter.WriteLine($"public enum {CppCsNanoSerializer.GetCsTypeDefineName(enu)}:{CppCsNanoSerializer.TargetTypeStrings[enu.NumberType].CsBaseTargetTypeDefineString}");
                 csStreamWriter.WriteLine("{");//enum begin
                 foreach (var ev in enu.KeyValue)
                 {

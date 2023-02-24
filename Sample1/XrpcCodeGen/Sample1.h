@@ -19,7 +19,7 @@ WoMan = 9,
 }Sex;
 typedef struct AddResult
 {
-uint8_t boolTest;   //FieldNumber:1     
+bool boolTest;   //FieldNumber:1     
 uint32_t Sum:11;   //FieldNumber:2     
 uint32_t Sum2:19;   //FieldNumber:3     
 uint32_t Sum3:2;   //FieldNumber:4     
@@ -179,7 +179,7 @@ uint8_t* data;   //FieldNumber:4
 typedef struct NoArg_Return
 {
 RequestResponseState State;   //FieldNumber:1     
-uint8_t ReturnValue;   //FieldNumber:2     
+bool ReturnValue;   //FieldNumber:2     
 }NoArg_Return;
 #define NoArg_Return_State_FieldNumber  1
 #define NoArg_Return_ReturnValue_FieldNumber  2
