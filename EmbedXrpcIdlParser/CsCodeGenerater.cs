@@ -231,7 +231,7 @@ namespace EmbedXrpcIdlParser
         private void GenerateService(StreamWriter sw, TargetService service, RoleType genType)
         {
 
-            if (service.RoleAttribute.Role == RoleType.Client)
+            //if (service.RoleAttribute.Role == RoleType.Client)
             {
                 if (genType == RoleType.Client)
                 {
@@ -247,22 +247,22 @@ namespace EmbedXrpcIdlParser
                     EmitCallee(service, sw);
                 }
             }
-            if (service.RoleAttribute.Role == RoleType.Server)
-            {
-                if (genType == RoleType.Client)
-                {
-                    EmitCallee(service, sw);
-                }
-                else if (genType == RoleType.Server)
-                {
-                    EmitCaller(service, sw);
-                }
-                else
-                {
-                    EmitCaller(service, sw);
-                    EmitCallee(service, sw);
-                }
-            }
+            //if (service.RoleAttribute.Role == RoleType.Server)
+            //{
+            //    if (genType == RoleType.Client)
+            //    {
+            //        EmitCallee(service, sw);
+            //    }
+            //    else if (genType == RoleType.Server)
+            //    {
+            //        EmitCaller(service, sw);
+            //    }
+            //    else
+            //    {
+            //        EmitCaller(service, sw);
+            //        EmitCallee(service, sw);
+            //    }
+            //}
             sw.WriteLine(Environment.NewLine);
         }
         public void CodeGen(CSharpCodeGenParameter codeGenParameter)

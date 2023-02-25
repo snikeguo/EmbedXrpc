@@ -203,6 +203,7 @@ namespace EmbedXrpcIdlParser
         }
 
     }
+
     public enum RoleType
     {
         Client,
@@ -210,7 +211,7 @@ namespace EmbedXrpcIdlParser
         All
     }
 
-
+#if false
     [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
     public class RoleAttribute : Attribute
     {
@@ -226,4 +227,5 @@ namespace EmbedXrpcIdlParser
             private set;
         }     
     }
+#endif
 }

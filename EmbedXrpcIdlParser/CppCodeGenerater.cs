@@ -538,7 +538,7 @@ namespace EmbedXrpcIdlParser
         }
         public void EmitService(TargetService service, CppCodeGenParameter cppCodeGenParameter)
         {
-            if (service.RoleAttribute.Role == RoleType.Client)
+            //if (service.RoleAttribute.Role == RoleType.Client)
             { 
                 if(cppCodeGenParameter.RoleType== RoleType.Client)
                 {
@@ -556,22 +556,22 @@ namespace EmbedXrpcIdlParser
 
             }
 
-            if (service.RoleAttribute.Role == RoleType.Server)
-            {
-                if (cppCodeGenParameter.RoleType == RoleType.Client)
-                {
-                    EmitCallee(service, ClientHsw, ClientCsw);
-                }
-                else if (cppCodeGenParameter.RoleType == RoleType.Server)
-                {
-                    EmitCaller(service, ServerHsw, ServerCsw);
-                }
-                else
-                {
-                    EmitCaller(service, ServerHsw, ServerCsw);
-                    EmitCallee(service, ClientHsw, ClientCsw);
-                }
-            }
+            //if (service.RoleAttribute.Role == RoleType.Server)
+            //{
+            //    if (cppCodeGenParameter.RoleType == RoleType.Client)
+            //    {
+            //        EmitCallee(service, ClientHsw, ClientCsw);
+            //    }
+            //    else if (cppCodeGenParameter.RoleType == RoleType.Server)
+            //    {
+            //        EmitCaller(service, ServerHsw, ServerCsw);
+            //    }
+            //    else
+            //    {
+            //        EmitCaller(service, ServerHsw, ServerCsw);
+            //        EmitCallee(service, ClientHsw, ClientCsw);
+            //    }
+            //}
         }
     }
 }

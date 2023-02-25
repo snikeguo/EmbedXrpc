@@ -290,7 +290,7 @@ namespace EmbedXrpcIdlParser
         public StructType_TargetType ReturnStructType { get; set; } 
         public string ServiceName { get; set; }
         
-        public RoleAttribute RoleAttribute { get; internal set; }
+        //public RoleAttribute RoleAttribute { get; internal set; }
         public StructType_TargetType ParameterStructType { get; set; }
         public int ServiceId { get; internal set; }
 
@@ -890,11 +890,11 @@ namespace EmbedXrpcIdlParser
                     var MacroControlAttribute = type.GetCustomAttribute<MacroControlAttribute>();
                     targetService.MacroControlAttribute = MacroControlAttribute;
 
-                    targetService.RoleAttribute = type.GetCustomAttribute<RoleAttribute>();
-                    if(targetService.RoleAttribute==null)
-                    {
-                        throw new Exception($"the {type.Name} service NO have RoleAttribute！");
-                    }
+                    //targetService.RoleAttribute = type.GetCustomAttribute<RoleAttribute>();
+                    //if(targetService.RoleAttribute==null)
+                    //{
+                    //    throw new Exception($"the {type.Name} service NO have RoleAttribute！");
+                    //}
 
                     var mt = invokemi;
                     Type rt = mt.ReturnType;
