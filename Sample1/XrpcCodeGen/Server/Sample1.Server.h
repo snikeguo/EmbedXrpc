@@ -2,28 +2,25 @@
 #define Sample1_Server_H
 #include"EmbedXrpcObject.h"
 #include"Sample1.EmbedXrpcSerialization.h"
-class DateTimeChange_Requester
+class DateTimeChange_Service:public IService
 {
 public:
-EmbedXrpcObject *RpcObject=nullptr;
-DateTimeChange_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
-{}
 uint16_t GetSid(){return DateTimeChange_ServiceId;}
-DateTimeChange_Parameter DateTimeChange_SendData;
-DateTimeChange_Return DateTimeChange_reqresp;
-DateTimeChange_Return& DateTimeChange(RequestParameter* rp,DateTime_t now[1]);
+virtual void DateTimeChange(ServiceInvokeParameter * serviceInvokeParameter,DateTime_t now[1]){}
+DateTimeChange_Parameter request;
+void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager);
 };
 
-class Test2_Requester
+
+class Test2_Service:public IService
 {
 public:
-EmbedXrpcObject *RpcObject=nullptr;
-Test2_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
-{}
 uint16_t GetSid(){return Test2_ServiceId;}
-Test2_Parameter Test2_SendData;
-Test2_Return Test2_reqresp;
-Test2_Return& Test2(RequestParameter* rp);};
+virtual void Test2(ServiceInvokeParameter * serviceInvokeParameter,DateTime_t now[1]){}
+Test2_Parameter request;
+void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager);
+};
+
 
 class Add_Service:public IService
 {

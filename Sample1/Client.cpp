@@ -1,5 +1,6 @@
 #include <thread>
 #include "Sample1.Client.h"
+#include "Sample1.Server.h"
 extern EmbedXrpcObject ServerRpc;
 
 
