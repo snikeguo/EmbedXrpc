@@ -15,17 +15,6 @@ extern "C" {
 		QueueState_Timeout,
 	}QueueState;
 
-	typedef  uint8_t UInt8;
-	typedef  int8_t Int8;
-	typedef  uint16_t UInt16;
-	typedef  int16_t Int16;
-	typedef  uint32_t UInt32;
-	typedef  int32_t Int32;
-	typedef  uint64_t UInt64;
-	typedef  int64_t Int64;
-	typedef  float Float;
-	typedef  double Double;
-	typedef  UInt8 Byte;
 #ifndef Bool
 #define Bool uint8_t 
 #endif
@@ -96,7 +85,9 @@ extern "C" {
 	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr);
 	Bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr);
 
-
+	Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout,int isIsr);
+	void El_ReleaseSemaphore(El_Semaphore_t sem,int isIsr);
+	void El_ResetSemaphore(El_Semaphore_t sem,int isIsr);
 
 	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout, int isIsr);
 	QueueState El_SendQueue(El_Queue_t queue, void* item, uint32_t itemSize,int isIsr);

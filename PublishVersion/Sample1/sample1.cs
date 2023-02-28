@@ -119,31 +119,31 @@ struct DateTime_t
 }
 
 [FileName("sample1.cs")]
-[Role(RoleType.Server)]
+//[Role(RoleType.Server)]
 delegate void DateTimeChange(DateTime_t[] now);
 
 [FileName("sample1.cs")]
 [ExternalParameter(true)]
-[Role(RoleType.Server)]
+//[Role(RoleType.Server)]
 delegate void Test2(DateTime_t[] now);
 
 [FileName("sample1.cs")]
 [ExternalParameter(true)]
-[Role(RoleType.Client)]
+//[Role(RoleType.Client)]
 delegate AddResult Add(Int32 a, Int32 b, Int32 dataLen,
         [MaxCount(LenFieldName="dataLen",IsFixed=false)]
         byte[]data);
 
 [FileName("sample1.cs")]
-[Role(RoleType.Client)]
+//[Role(RoleType.Client)]
 delegate bool NoArg();
 
 [FileName("sample1.cs")]
-[Role(RoleType.Client)]
+//[Role(RoleType.Client)]
 delegate void NoReturn(int a);
 
 [FileName("sample1.cs")]
-[Role(RoleType.Client)]
+//[Role(RoleType.Client)]
 delegate void NoArgAndReturn();
 
 

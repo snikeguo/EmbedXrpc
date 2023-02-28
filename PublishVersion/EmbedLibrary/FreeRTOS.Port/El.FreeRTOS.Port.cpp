@@ -74,42 +74,42 @@ void El_DeleteTimer(El_Timer_t timer)
 	FreeRtosTimer_t *frt = (FreeRtosTimer_t *)pvTimerGetTimerID(xtimer);
 	vPortFree(frt);
 }
-void El_ThreadStart(El_Thread_t thread)
+void El_ThreadStart(El_Thread_t thread,int isIsr)
 {
 	auto x = static_cast<TaskHandle_t>(thread);
 	vTaskResume(x);
 }
-void El_TimerStart(El_Timer_t timer, uint16_t interval)
+void El_TimerStart(El_Timer_t timer, uint16_t interval,int isIsr)
 {
 	TimerHandle_t xtimer = (TimerHandle_t)timer;
 	xTimerStart(xtimer, 0);
 }
-void El_TimerReset(El_Timer_t timer)
+void El_TimerReset(El_Timer_t timer,int isIsr)
 {
 	TimerHandle_t xtimer = (TimerHandle_t)timer;
 	xTimerReset(xtimer, 0);
 }
-void El_TimerStop(El_Timer_t timer)
+void El_TimerStop(El_Timer_t timer,int isIsr)
 {
 	TimerHandle_t xtimer = (TimerHandle_t)timer;
 	xTimerStop(xtimer, 0);
 }
-Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout)
+Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout,int isIsr)
 {
 	auto frsem = static_cast<QueueHandle_t>(sem);
 	return xSemaphoreTake(frsem, timeout) == pdTRUE ? True : False;
 }
-void El_ReleaseSemaphore(El_Semaphore_t sem)
+void El_ReleaseSemaphore(El_Semaphore_t sem,int isIsr)
 {
 	auto frsem = static_cast<QueueHandle_t>(sem);
 	xSemaphoreGive(frsem);
 }
-void El_ResetSemaphore(El_Semaphore_t sem)
+void El_ResetSemaphore(El_Semaphore_t sem,int isIsr)
 {
 	auto frsem = static_cast<QueueHandle_t>(sem);
 	xQueueReset(frsem); //
 }
-Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout)
+Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout,int isIsr)
 {
 	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreTake(m, timeout);
@@ -122,7 +122,7 @@ Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout)
 		return False;
 	}
 }
-Bool El_ReleaseMutex(El_Mutex_t mutex)
+Bool El_ReleaseMutex(El_Mutex_t mutex,int isIsr)
 {
 	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreGive(m);
@@ -136,7 +136,7 @@ Bool El_ReleaseMutex(El_Mutex_t mutex)
 	}
 }
 
-QueueState El_ReceiveQueue(El_Queue_t queue, void *item, uint32_t itemlen, uint32_t timeout)
+QueueState El_ReceiveQueue(El_Queue_t queue, void *item, uint32_t itemlen, uint32_t timeout, int isIsr)
 {
 	auto q = static_cast<QueueHandle_t>(queue);
 	auto r = xQueueReceive(q, item, timeout);
@@ -172,12 +172,12 @@ QueueState El_SendQueue(El_Queue_t queue, void *item, uint32_t itemlen,int isIsr
 	}
 	return QueueState_Full;
 }
-void El_ResetQueue(El_Queue_t queue)
+void El_ResetQueue(El_Queue_t queue,int isIsr)
 {
 	auto q = static_cast<QueueHandle_t>(queue);
 	xQueueReset(q);
 }
-uint32_t El_QueueSpacesAvailable(El_Queue_t queue)
+uint32_t El_QueueSpacesAvailable(El_Queue_t queue,int isIsr)
 {
 	auto q = static_cast<QueueHandle_t>(queue);
 	return uxQueueSpacesAvailable(q);
