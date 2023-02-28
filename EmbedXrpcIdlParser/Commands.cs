@@ -96,7 +96,8 @@ namespace EmbedXrpcIdlParser
                     {
                         Directory.CreateDirectory(subendPath);
                     }
-
+                    if (fi.Name != fileIdlInfo.FileName)
+                        continue;
                     CppCodeGenParameter parameter = new CppCodeGenParameter()
                     {
                         FileIdlInfo = fileIdlInfo,
@@ -132,6 +133,8 @@ namespace EmbedXrpcIdlParser
                         OutPutPath = subendPath,
                         //IsEnableMataDataEncode = generater.IsEnableMataDataEncode
                     };
+                    if (fi.Name != fileIdlInfo.FileName)
+                        continue;
                     cs.CodeGen(parameter);
                 }   
             }
