@@ -30,6 +30,12 @@ void DateTime_t_Deserialize(SerializationManager *sm,DateTime_t *obj,int isIsr);
 
  void DateTime_t_FreeData(DateTime_t *obj);
 
+void TestSerialize_Serialize(SerializationManager *sm,TestSerialize *obj);
+
+void TestSerialize_Deserialize(SerializationManager *sm,TestSerialize *obj,int isIsr);
+
+ void TestSerialize_FreeData(TestSerialize *obj);
+
 void DateTimeChange_Return_Serialize(SerializationManager *sm,DateTimeChange_Return *obj);
 
 void DateTimeChange_Return_Deserialize(SerializationManager *sm,DateTimeChange_Return *obj,int isIsr);

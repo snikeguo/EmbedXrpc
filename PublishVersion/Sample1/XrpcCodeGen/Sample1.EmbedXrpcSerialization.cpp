@@ -246,6 +246,69 @@ Student_Deserialize(sm,&obj->David,isIsr);
   //!! Student_FreeData(&obj->David);
  }
 
+void TestSerialize_Serialize(SerializationManager *sm,TestSerialize *obj)
+{
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->EnumArrayLen,sizeof(int32_t));
+sm->Index+=4;
+El_Assert(sm->Index<=sm->BufferLen);
+for(int32_t EnumArray_index=0;EnumArray_index<obj->EnumArrayLen;EnumArray_index++)
+{
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->EnumArray[EnumArray_index],sizeof(Sex)<=8?sizeof(Sex):8);
+sm->Index+=8;
+El_Assert(sm->Index<=sm->BufferLen);
+}
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->ObjectArrayLen,sizeof(int32_t));
+sm->Index+=4;
+El_Assert(sm->Index<=sm->BufferLen);
+for(int32_t DateTimeArray_index=0;DateTimeArray_index<obj->EnumArrayLen;DateTimeArray_index++)
+{
+DateTime_t_Serialize(sm,&obj->DateTimeArray[DateTimeArray_index]);
+}
+for(int32_t FiexDateTimeArray_index=0;FiexDateTimeArray_index<obj->EnumArrayLen;FiexDateTimeArray_index++)
+{
+DateTime_t_Serialize(sm,&obj->FiexDateTimeArray[FiexDateTimeArray_index]);
+}
+}
+
+void TestSerialize_Deserialize(SerializationManager *sm,TestSerialize *obj,int isIsr)
+{
+DeserializeField((uint8_t *)&obj->EnumArrayLen,sm,4,sizeof(int32_t),isIsr);
+obj->EnumArray=(Sex *)El_Malloc(sizeof(Sex)*obj->EnumArrayLen);
+El_Memset(obj->EnumArray,0,sizeof(Sex)*obj->EnumArrayLen);
+for(int32_t EnumArray_index=0;EnumArray_index<obj->EnumArrayLen;EnumArray_index++)
+{
+DeserializeField((uint8_t *)&obj->EnumArray[EnumArray_index],sm,8,sizeof(Sex),isIsr);
+}
+DeserializeField((uint8_t *)&obj->ObjectArrayLen,sm,4,sizeof(int32_t),isIsr);
+obj->DateTimeArray=(DateTime_t *)El_Malloc(sizeof(DateTime_t)*obj->EnumArrayLen);
+El_Memset(obj->DateTimeArray,0,sizeof(DateTime_t)*obj->EnumArrayLen);
+for(int32_t DateTimeArray_index=0;DateTimeArray_index<obj->EnumArrayLen;DateTimeArray_index++)
+{
+DateTime_t_Deserialize(sm,&obj->DateTimeArray[DateTimeArray_index],isIsr);
+}
+for(int32_t FiexDateTimeArray_index=0;FiexDateTimeArray_index<obj->EnumArrayLen;FiexDateTimeArray_index++)
+{
+DateTime_t_Deserialize(sm,&obj->FiexDateTimeArray[FiexDateTimeArray_index],isIsr);
+}
+}
+
+ void TestSerialize_FreeData(TestSerialize *obj)
+ {
+  //!!!! for(int32_t EnumArray_index=0;EnumArray_index<obj->EnumArrayLen;EnumArray_index++)
+  //!!!! {
+  //!!!! }
+  El_Free(obj->EnumArray);
+   for(int32_t DateTimeArray_index=0;DateTimeArray_index<obj->EnumArrayLen;DateTimeArray_index++)
+   {
+   DateTime_t_FreeData(&obj->DateTimeArray[DateTimeArray_index]);
+   }
+  El_Free(obj->DateTimeArray);
+   for(int32_t FiexDateTimeArray_index=0;FiexDateTimeArray_index<obj->EnumArrayLen;FiexDateTimeArray_index++)
+   {
+   DateTime_t_FreeData(&obj->FiexDateTimeArray[FiexDateTimeArray_index]);
+   }
+ }
+
 void DateTimeChange_Return_Serialize(SerializationManager *sm,DateTimeChange_Return *obj)
 {
 if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
@@ -362,6 +425,10 @@ if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->data[data_index],sizeof(uint8_t)
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
+for(uint32_t test_index=0;test_index<1;test_index++)
+{
+TestSerialize_Serialize(sm,&obj->test[test_index]);
+}
 }
 
 void Add_Parameter_Deserialize(SerializationManager *sm,Add_Parameter *obj,int isIsr)
@@ -375,6 +442,10 @@ for(int32_t data_index=0;data_index<obj->dataLen;data_index++)
 {
 DeserializeField((uint8_t *)&obj->data[data_index],sm,1,sizeof(uint8_t),isIsr);
 }
+for(uint32_t test_index=0;test_index<1;test_index++)
+{
+TestSerialize_Deserialize(sm,&obj->test[test_index],isIsr);
+}
 }
 
  void Add_Parameter_FreeData(Add_Parameter *obj)
@@ -383,6 +454,10 @@ DeserializeField((uint8_t *)&obj->data[data_index],sm,1,sizeof(uint8_t),isIsr);
   //!!!! {
   //!!!! }
   El_Free(obj->data);
+   for(uint32_t test_index=0;test_index<1;test_index++)
+   {
+   TestSerialize_FreeData(&obj->test[test_index]);
+   }
  }
 
 void NoArg_Return_Serialize(SerializationManager *sm,NoArg_Return *obj)
