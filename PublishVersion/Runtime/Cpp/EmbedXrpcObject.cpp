@@ -117,7 +117,7 @@ void EmbedXrpcObject::DeInit()
 	{
 		delete ServiceBlockBufferProvider;
 	}
-	else
+	else if(ServiceMessageQueue!=nullptr)
 	{
 		El_DeleteQueue(ServiceMessageQueue);//server接受到的request队列数据
 	}
@@ -168,11 +168,11 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject* obj, ReceiveItemInfo& recD
 				rsm.Buf = recData.Data;
 			}
 
-			if (obj->RpcConfig.CheckSumValid == true)
-			{
-				SerializationManager_SetCalculateSum(&rsm, 0);
-				SerializationManager_SetReferenceSum(&rsm, recData.CheckSum);
-			}
+			//if (obj->RpcConfig.CheckSumValid == true)
+			//{
+			//	SerializationManager_SetCalculateSum(&rsm, 0);
+			//	SerializationManager_SetReferenceSum(&rsm, recData.CheckSum);
+			//}
 			if (obj->DataLinkBufferForResponse.MutexHandle != nullptr)
 			{
 				El_TakeMutex(obj->DataLinkBufferForResponse.MutexHandle, El_WAIT_FOREVER, isIsr);//由于使用DataLinkBufferForResponse，所以添加锁
@@ -321,14 +321,14 @@ ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint
 	raw.Sid = serviceId;
 	raw.DataLen = dataLen;
 	raw.TargetTimeout = targettimeout;
-	if (RpcConfig.CheckSumValid == true)
+	/*if (RpcConfig.CheckSumValid == true)
 	{
 		raw.CheckSum = GetSum(data, dataLen);
 	}
 	else
 	{
 		raw.CheckSum = 0;
-	}
+	}*/
 	if (rt == ReceiveType_Response)
 	{
 		//EmbedSerializationShowMessage("EmbedXrpcObject","Client ReceivedMessage  El_Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);

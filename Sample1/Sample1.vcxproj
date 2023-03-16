@@ -52,6 +52,7 @@
     <None Include="cmd.bat" />
     <None Include="readme.md" />
     <None Include="sample1.cs" />
+    <None Include="XrpcCodeGen\Sample1.cs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

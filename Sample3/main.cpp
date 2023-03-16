@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	printf("\n");
 	Student dest;
 	sm.Index = 0;
-	Student_Deserialize(&sm, &dest);
+	Student_Deserialize(&sm, &dest,0);
 	printf("反序列化化后:\n");
 	printf("a:0x%x\n", dest.a);
 	printf("b:0x%x\n", dest.b);

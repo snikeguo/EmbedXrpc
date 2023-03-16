@@ -5,18 +5,18 @@
 
 void GetSumResult_Serialize(SerializationManager *sm,GetSumResult *obj)
 {
-El_Memcpy(&sm->Buf[sm->Index],&obj->IsSuccess,sizeof(UInt8));
-sm->Index+=sizeof(UInt8);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->IsSuccess,sizeof(bool));
+sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Memcpy(&sm->Buf[sm->Index],&obj->Value,sizeof(Int32));
-sm->Index+=sizeof(Int32);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Value,sizeof(int32_t));
+sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 }
 
-void GetSumResult_Deserialize(SerializationManager *sm,GetSumResult *obj)
+void GetSumResult_Deserialize(SerializationManager *sm,GetSumResult *obj,int isIsr)
 {
-DeserializeField((uint8_t *)&obj->IsSuccess,sm,sizeof(UInt8));
-DeserializeField((uint8_t *)&obj->Value,sm,sizeof(Int32));
+DeserializeField((uint8_t *)&obj->IsSuccess,sm,1,sizeof(bool),isIsr);
+DeserializeField((uint8_t *)&obj->Value,sm,4,sizeof(int32_t),isIsr);
 }
 
 //! void GetSumResult_FreeData(GetSumResult *obj)
@@ -25,16 +25,16 @@ DeserializeField((uint8_t *)&obj->Value,sm,sizeof(Int32));
 
 void GetSum_Return_Serialize(SerializationManager *sm,GetSum_Return *obj)
 {
-El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(UInt8));
-sm->Index+=sizeof(UInt8);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
+sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 GetSumResult_Serialize(sm,&obj->ReturnValue);
 }
 
-void GetSum_Return_Deserialize(SerializationManager *sm,GetSum_Return *obj)
+void GetSum_Return_Deserialize(SerializationManager *sm,GetSum_Return *obj,int isIsr)
 {
-DeserializeField((uint8_t *)&obj->State,sm,sizeof(UInt8));
-GetSumResult_Deserialize(sm,&obj->ReturnValue);
+DeserializeField((uint8_t *)&obj->State,sm,1,sizeof(RequestResponseState),isIsr);
+GetSumResult_Deserialize(sm,&obj->ReturnValue,isIsr);
 }
 
 //! void GetSum_Return_FreeData(GetSum_Return *obj)
@@ -44,18 +44,18 @@ GetSumResult_Deserialize(sm,&obj->ReturnValue);
 
 void GetSum_Parameter_Serialize(SerializationManager *sm,GetSum_Parameter *obj)
 {
-El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(Int32));
-sm->Index+=sizeof(Int32);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(int32_t));
+sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Memcpy(&sm->Buf[sm->Index],&obj->b,sizeof(Int32));
-sm->Index+=sizeof(Int32);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->b,sizeof(int32_t));
+sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 }
 
-void GetSum_Parameter_Deserialize(SerializationManager *sm,GetSum_Parameter *obj)
+void GetSum_Parameter_Deserialize(SerializationManager *sm,GetSum_Parameter *obj,int isIsr)
 {
-DeserializeField((uint8_t *)&obj->a,sm,sizeof(Int32));
-DeserializeField((uint8_t *)&obj->b,sm,sizeof(Int32));
+DeserializeField((uint8_t *)&obj->a,sm,4,sizeof(int32_t),isIsr);
+DeserializeField((uint8_t *)&obj->b,sm,4,sizeof(int32_t),isIsr);
 }
 
 //! void GetSum_Parameter_FreeData(GetSum_Parameter *obj)

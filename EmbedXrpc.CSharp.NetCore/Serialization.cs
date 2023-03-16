@@ -17,29 +17,19 @@ namespace EmbedXrpc
     }
     public class SerializationManager
     {
-        private List<byte> buf = new List<byte>();
+        public byte[] Buf { get; set; }
         
-        public List<byte> Buf
-        {
-            get
-            {
-                return buf;
-            }
-            set
-            {
-                buf = value;
-            }
-        }
         public int Index { get; set; } = 0;
 
         private Assembly Assembly;
-        public SerializationManager(Assembly assembly,List<byte> data)
+        public SerializationManager(Assembly assembly,byte[] bytes,int index)
         {
             Assembly = assembly;
             //IsEnableMataDataEncode = isEnableMataDataEncode;
-            Buf = data;
-            Index = 0;
+            Buf = bytes;
+            Index = index;
         }
+
         public byte[] ToBytes( object obj,Type tp)
         {
             //Console.WriteLine($"u8:{d}");
@@ -140,38 +130,38 @@ namespace EmbedXrpc
                 CurrentBitFieldType = null;
             }
         }
-        public object DeserializeField(Type vt)
+        public object DeserializeField(Type vt,int serializeWidth)
         {
             if (vt == typeof(bool))
             {
                 bool v = Convert.ToBoolean(Buf[Index]);
-                Index++;
+                Index+= serializeWidth;
                 return v;
             }
             else if (vt == typeof(byte))
             {
                 byte v =Convert.ToByte(Buf[Index]);
-                Index++;
+                Index += serializeWidth;
                 return v;
             }
             else if (vt == typeof(sbyte))
             {
                 sbyte v = Convert.ToSByte(Buf[Index]);
-                Index++;
+                Index += serializeWidth;
                 return v;
             }
             else if (vt == typeof(UInt16))
             {
                 UInt16 v = Convert.ToUInt16((UInt16)Buf[Index + 1] << 8);
                 v |= Convert.ToUInt16((UInt16)Buf[Index]);
-                Index += 2;
+                Index += serializeWidth;
                 return v;
             }
             else if (vt == typeof(Int16))
             {
                 Int16 v = Convert.ToInt16((Int16)Buf[Index + 1] << 8);
                 v |= Convert.ToInt16((Int16)Buf[Index]);
-                Index += 2;
+                Index += serializeWidth;
                 return v;
             }
             else if (vt == typeof(UInt32))
@@ -180,7 +170,7 @@ namespace EmbedXrpc
                 v |= Convert.ToUInt32((UInt32)Buf[Index + 2] << 16);
                 v |= Convert.ToUInt32((UInt32)Buf[Index + 1] << 8);
                 v |= Convert.ToUInt32((UInt32)Buf[Index]);
-                Index += 4;
+                Index += serializeWidth;
                 return v;
             }
             else if (vt == typeof(Int32))
@@ -189,7 +179,7 @@ namespace EmbedXrpc
                 v |= Convert.ToInt32((Int32)Buf[Index + 2] << 16);
                 v |= Convert.ToInt32((Int32)Buf[Index + 1] << 8);
                 v |= Convert.ToInt32((Int32)Buf[Index]);
-                Index += 4;
+                Index += serializeWidth;
                 return v;
             }
             else if (vt == typeof(UInt64))
@@ -202,7 +192,7 @@ namespace EmbedXrpc
                 v |= Convert.ToUInt64((UInt64)Buf[Index + 2] << 16);
                 v |= Convert.ToUInt64((UInt64)Buf[Index + 1] << 8);
                 v |= Convert.ToUInt64((UInt64)Buf[Index]);
-                Index += 8;
+                Index += serializeWidth;
                 return v;
             }
             else if (vt == typeof(Int64))
@@ -215,7 +205,7 @@ namespace EmbedXrpc
                 v |= Convert.ToInt64((Int64)Buf[Index + 2] << 16);
                 v |= Convert.ToInt64((Int64)Buf[Index + 1] << 8);
                 v |= Convert.ToInt64((Int64)Buf[Index]);
-                Index += 8;
+                Index += serializeWidth;
                 return v;
             }
             else 

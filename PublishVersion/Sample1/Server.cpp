@@ -24,7 +24,7 @@ class Inter_AddServiceProvider :public Add_Service
 {
 public:
 	void Add(ServiceInvokeParameter* serviceInvokeParameter,
-		Int32 a, Int32 b, Int32 dataLen, UInt8* data)
+		int32_t a, int32_t b, int32_t dataLen, uint8_t* data)
 	{
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
@@ -100,14 +100,13 @@ static ServiceDescribe Services[] = //定义请求集合
 static InitConfig InitCfg =
 {
 	"Server",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},// DataLinkBufferConfigForRequest
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferConfigForResponse
+	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},// DataLinkBufferConfigForRequest
+	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferConfigForResponse
 	ServerSend,
 	500,
 	Services,
 	sizeof(Services)/sizeof(ServiceDescribe),
 	{
-		true,//CheckSumValid
 		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
@@ -118,7 +117,7 @@ static InitConfig InitCfg =
 		},
 		{
 			{nullptr,0,0},//BlockBufferOfRequestService_Config
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
+			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
 		},
 	},
 	nullptr,
@@ -132,7 +131,7 @@ void Server_Init()
 DateTimeChange_Requester DateTimeChanger(&ServerRpc);//实例化委托对象
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;
@@ -157,7 +156,7 @@ void ServerThread()
 		t.Sex = t.Sec % 2 == 0 ? Sex::Man : Sex::WoMan;
 		memset(t.DateString, 0x0, 128);
 		sprintf((char*)t.DateString, "server:%d-%d-%d %d:%d:%d!server\r\n", t.Year, t.Month, t.Day, t.Hour, t.Min, t.Sec);
-		t.DateStringLen = (UInt8)strlen((const char*)t.DateString) + 1;
+		t.DateStringLen = (uint8_t)strlen((const char*)t.DateString) + 1;
 
 		t.David.a = 1;
 		t.David.b = 5;

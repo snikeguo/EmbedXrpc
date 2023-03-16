@@ -122,5 +122,8 @@
       <Filter>otherfiles</Filter>
     </None>
     <None Include="readme.md" />
+    <None Include="XrpcCodeGen\Sample1.cs">
+      <Filter>CodeGen</Filter>
+    </None>
   </ItemGroup>
 </Project>

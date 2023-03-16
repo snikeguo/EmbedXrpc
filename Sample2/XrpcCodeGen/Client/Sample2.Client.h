@@ -11,7 +11,7 @@ GetSum_Requester(EmbedXrpcObject *rpcobj):RpcObject(rpcobj)
 uint16_t GetSid(){return GetSum_ServiceId;}
 GetSum_Parameter GetSum_SendData;
 GetSum_Return GetSum_reqresp;
-GetSum_Return& GetSum(UserDataOfTransportLayer_t* userDataOfTransportLayer,Int32 a,Int32 b);
+GetSum_Return& GetSum(RequestParameter* rp,int32_t a,int32_t b);
 void Free_GetSum(GetSum_Return *response);
 
 };

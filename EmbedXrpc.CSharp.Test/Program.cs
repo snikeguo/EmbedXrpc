@@ -26,7 +26,7 @@ namespace Sample1
         public void Add(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
         {
             serviceInvokeParameter.RpcObject.Start_SuspendTimer(serviceInvokeParameter.TargetTimeOut / 2);
-            Response.ReturnValue = a + b;
+            Response.ReturnValue = (Int64)a + b;
             Thread.Sleep(1000);
             serviceInvokeParameter.RpcObject.Stop_SuspendTimer();
         }
@@ -47,9 +47,9 @@ namespace EmbedXrpc
         {
 
 
-            client = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(100, clientSend, Assembly.GetExecutingAssembly());
+            client = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(100, clientSend, Assembly.GetExecutingAssembly(),4096);
             client.Start();
-            server = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(2000, serverSend, Assembly.GetExecutingAssembly());
+            server = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(2000, serverSend, Assembly.GetExecutingAssembly(), 4096);
             server.Start();
             Task.Run(() =>
             {
@@ -68,8 +68,9 @@ namespace EmbedXrpc
                     else
                     {
                         Console.WriteLine($"{a}+{b}={reAdd.ReturnValue}");
+                        Debug.Assert((Int64)a + b == reAdd.ReturnValue);
                     }
-                    Debug.Assert(a + b == reAdd.ReturnValue);
+                    
                     /*var reNoArg = inter.NoArg();
                     if (reNoArg.State == RequestResponseState.RequestState_Failed)
                     {
@@ -91,6 +92,7 @@ namespace EmbedXrpc
 
             Task.Run(() =>
             {
+                Thread.Sleep(-1);
                 DateTimeChange_Requester<Win32UserDataOfTransportLayer> broadcastDataTime = new DateTimeChange_Requester<Win32UserDataOfTransportLayer>(server);
                 while (true)
                 {

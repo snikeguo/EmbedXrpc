@@ -409,14 +409,14 @@ namespace EmbedXrpcIdlParser
                 csw.WriteLine("sm.BufferLen = recData.DataLen;");
                 csw.WriteLine("sm.Buf = recData.Data;");
                 csw.WriteLine("}");
-                csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
-                csw.WriteLine("SerializationManager_SetCalculateSum(&sm,0);");
-                csw.WriteLine("SerializationManager_SetReferenceSum(&sm,recData.CheckSum);");
-                csw.WriteLine("}");
+                //csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
+                //csw.WriteLine("SerializationManager_SetCalculateSum(&sm,0);");
+                //csw.WriteLine("SerializationManager_SetReferenceSum(&sm,recData.CheckSum);");
+                //csw.WriteLine("}");
                 csw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp,rp->IsIsr);");
-                csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
-                csw.WriteLine("El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
-                csw.WriteLine("}");
+                //csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
+                //csw.WriteLine("El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
+                //csw.WriteLine("}");
                 csw.WriteLine("}");
                 csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)\r\n{");
                 csw.WriteLine("if(waitstate != RequestResponseState::ResponseState_Timeout)");
@@ -499,9 +499,9 @@ namespace EmbedXrpcIdlParser
 
             csw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request,serviceInvokeParameter->IsIsr);");
 
-            csw.WriteLine($"if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
-            csw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
-            csw.WriteLine("}");
+            //csw.WriteLine($"if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
+            //csw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
+            //csw.WriteLine("}");
 
             dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
             csw.Write($"{service.ServiceName}(serviceInvokeParameter{dh}");

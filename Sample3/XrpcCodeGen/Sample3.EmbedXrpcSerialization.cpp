@@ -5,30 +5,30 @@
 
 void Student_Serialize(SerializationManager *sm,Student *obj)
 {
-El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(UInt8));
-sm->Index+=sizeof(UInt8);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(uint8_t));
+sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Memcpy(&sm->Buf[sm->Index],&obj->b,sizeof(UInt8));
-sm->Index+=sizeof(UInt8);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->b,sizeof(uint8_t));
+sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Memcpy(&sm->Buf[sm->Index],&obj->c,sizeof(UInt8));
-sm->Index+=sizeof(UInt8);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->c,sizeof(uint8_t));
+sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Memcpy(&sm->Buf[sm->Index],&obj->d,sizeof(UInt8));
-sm->Index+=sizeof(UInt8);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->d,sizeof(uint8_t));
+sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Memcpy(&sm->Buf[sm->Index],&obj->e,sizeof(Int32));
-sm->Index+=sizeof(Int32);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->e,sizeof(int32_t));
+sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 }
 
-void Student_Deserialize(SerializationManager *sm,Student *obj)
+void Student_Deserialize(SerializationManager *sm,Student *obj,int isIsr)
 {
-DeserializeField((uint8_t *)&obj->a,sm,sizeof(UInt8));
-DeserializeField((uint8_t *)&obj->b,sm,sizeof(UInt8));
-DeserializeField((uint8_t *)&obj->c,sm,sizeof(UInt8));
-DeserializeField((uint8_t *)&obj->d,sm,sizeof(UInt8));
-DeserializeField((uint8_t *)&obj->e,sm,sizeof(Int32));
+DeserializeField((uint8_t *)&obj->a,sm,1,sizeof(uint8_t),isIsr);
+DeserializeField((uint8_t *)&obj->b,sm,1,sizeof(uint8_t),isIsr);
+DeserializeField((uint8_t *)&obj->c,sm,1,sizeof(uint8_t),isIsr);
+DeserializeField((uint8_t *)&obj->d,sm,1,sizeof(uint8_t),isIsr);
+DeserializeField((uint8_t *)&obj->e,sm,4,sizeof(int32_t),isIsr);
 }
 
 //! void Student_FreeData(Student *obj)
@@ -37,44 +37,44 @@ DeserializeField((uint8_t *)&obj->e,sm,sizeof(Int32));
 
 void DynamicStudentArray_Serialize(SerializationManager *sm,DynamicStudentArray *obj)
 {
-El_Memcpy(&sm->Buf[sm->Index],&obj->dataLen,sizeof(Int32));
-sm->Index+=sizeof(Int32);
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->dataLen,sizeof(int32_t));
+sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-for(Int32 FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
+for(int32_t FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
 {
 Student_Serialize(sm,&obj->FalseFixedStudent[FalseFixedStudent_index]);
 }
-for(Int32 TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
+for(int32_t TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
 {
 Student_Serialize(sm,&obj->TrueFixedStudent[TrueFixedStudent_index]);
 }
  //NoSerializationStudent:NoSerialization
 }
 
-void DynamicStudentArray_Deserialize(SerializationManager *sm,DynamicStudentArray *obj)
+void DynamicStudentArray_Deserialize(SerializationManager *sm,DynamicStudentArray *obj,int isIsr)
 {
-DeserializeField((uint8_t *)&obj->dataLen,sm,sizeof(Int32));
+DeserializeField((uint8_t *)&obj->dataLen,sm,4,sizeof(int32_t),isIsr);
 obj->FalseFixedStudent=(Student *)El_Malloc(sizeof(Student)*obj->dataLen);
 El_Memset(obj->FalseFixedStudent,0,sizeof(Student)*obj->dataLen);
-for(Int32 FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
+for(int32_t FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
 {
-Student_Deserialize(sm,&obj->FalseFixedStudent[FalseFixedStudent_index]);
+Student_Deserialize(sm,&obj->FalseFixedStudent[FalseFixedStudent_index],isIsr);
 }
-for(Int32 TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
+for(int32_t TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
 {
-Student_Deserialize(sm,&obj->TrueFixedStudent[TrueFixedStudent_index]);
+Student_Deserialize(sm,&obj->TrueFixedStudent[TrueFixedStudent_index],isIsr);
 }
  //NoSerializationStudent:NoSerialization
 }
 
  void DynamicStudentArray_FreeData(DynamicStudentArray *obj)
  {
-  //!!!! for(Int32 FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
+  //!!!! for(int32_t FalseFixedStudent_index=0;FalseFixedStudent_index<obj->dataLen;FalseFixedStudent_index++)
   //!!!! {
   //!!!! Student_FreeData(&obj->FalseFixedStudent[FalseFixedStudent_index]);
   //!!!! }
   El_Free(obj->FalseFixedStudent);
-  //!!!! for(Int32 TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
+  //!!!! for(int32_t TrueFixedStudent_index=0;TrueFixedStudent_index<obj->dataLen;TrueFixedStudent_index++)
   //!!!! {
   //!!!! Student_FreeData(&obj->TrueFixedStudent[TrueFixedStudent_index]);
   //!!!! }
@@ -87,10 +87,10 @@ DynamicStudentArray_Serialize(sm,&obj->DynamicStudent);
 Student_Serialize(sm,&obj->OneStudent);
 }
 
-void MixedStudentArray_Deserialize(SerializationManager *sm,MixedStudentArray *obj)
+void MixedStudentArray_Deserialize(SerializationManager *sm,MixedStudentArray *obj,int isIsr)
 {
-DynamicStudentArray_Deserialize(sm,&obj->DynamicStudent);
-Student_Deserialize(sm,&obj->OneStudent);
+DynamicStudentArray_Deserialize(sm,&obj->DynamicStudent,isIsr);
+Student_Deserialize(sm,&obj->OneStudent,isIsr);
 }
 
  void MixedStudentArray_FreeData(MixedStudentArray *obj)

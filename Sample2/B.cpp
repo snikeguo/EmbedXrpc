@@ -10,17 +10,17 @@ extern EmbedXrpcObject C_RpcObject;
 extern GetSum_Requester B_Requester;
 #define AllTypeBufferLen	4096
 
-static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
+static bool Send(RequestParameter* rp,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
-	if (userDataOfTransportLayer->SourceAddress=='B'&& userDataOfTransportLayer->DestAddress == 'A')
+	if (rp->Udtl->SourceAddress=='B'&& rp->Udtl->DestAddress == 'A')
 	{
-		A_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer,0);
+		A_RpcObject.ReceivedMessage(dataLen, data, *rp->Udtl,0);
 	}
-	else if (userDataOfTransportLayer->SourceAddress == 'B' && userDataOfTransportLayer->DestAddress == 'C')
+	else if (rp->Udtl->SourceAddress == 'B' && rp->Udtl->DestAddress == 'C')
 	{
-		C_RpcObject.ReceivedMessage(dataLen, data, *userDataOfTransportLayer, 0);
+		C_RpcObject.ReceivedMessage(dataLen, data, *rp->Udtl, 0);
 	}
 	else
 	{
@@ -32,19 +32,22 @@ static bool Send(UserDataOfTransportLayer_t* userDataOfTransportLayer,
 class BServer_GetSumProvider :public GetSum_Service
 {
 public:
-	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, Int32 a, Int32 b)
+	void GetSum(ServiceInvokeParameter* serviceInvokeParameter, int32_t a, int32_t b)
 	{
 		
 		printf("B:Starting suppendTimer and Calling C's service...\n");
 
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.SourceAddress = 'B';
 		serviceInvokeParameter->RpcObject->UserDataOfTransportLayerOfSuspendTimerUsed.DestAddress = 'A';
-		El_TimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2);
+		El_TimerStart(serviceInvokeParameter->RpcObject->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2,0);
 
 		DTL bcdtl;
 		bcdtl.SourceAddress = 'B';
 		bcdtl.DestAddress = 'C';
-		auto ret = B_Requester.GetSum(&bcdtl, a, b);
+		RequestParameter rp;
+		rp.IsIsr = 0;
+		rp.Udtl = &bcdtl;
+		auto ret = B_Requester.GetSum(&rp, a, b);
 		if (ret.State == ResponseState_Ok && ret.ReturnValue.IsSuccess==1)
 		{
 			this->Response.ReturnValue = ret.ReturnValue;
@@ -68,14 +71,13 @@ static ServiceDescribe AllServices[] = //定义请求集合
 static InitConfig InitCfg =
 {
 	"B",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},// buffer for request
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
+	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},// buffer for request
+	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},//DataLinkBufferForResponse
 	Send,
 	500,
 	AllServices,//Request
 	1,
 	{
-		true,//CheckSumValid
 		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
@@ -85,8 +87,8 @@ static InitConfig InitCfg =
 			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferProviderOfRequestService
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
+			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferProviderOfRequestService
+			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
 		},
 	},
 	nullptr,

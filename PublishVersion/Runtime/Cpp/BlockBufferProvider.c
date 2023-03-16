@@ -4,8 +4,7 @@ void BlockRingBufferProvider_Init(BlockRingBufferProvider* obj, uint8_t* pool, u
 	if (size == 0 || pool == NULL)
 		return;
 	El_Memset(obj, 0, sizeof(BlockRingBufferProvider));
-	obj->CalculateSumValue = 0;
-	obj->ReferenceSumValue = 0;
+
 
 	obj->Pool = pool;
 	obj->Size = size;
@@ -38,7 +37,7 @@ Bool BlockRingBufferProvider_GetChar(BlockRingBufferProvider* obj, uint8_t* ch, 
 	}
 	if(ch!=NULL)
 		*ch = tch;
-	obj->CalculateSumValue += tch;
+
 	return  True;
 }
 Bool BlockRingBufferProvider_ViewChar(BlockRingBufferProvider* obj,  uint8_t* ch,uint16_t offset, int isIsr)
@@ -78,7 +77,6 @@ Bool BlockRingBufferProvider_PopChars(BlockRingBufferProvider* obj,  uint8_t* ch
 	for (uint16_t i = 0; i < len; i++)
 	{
 		rt_ringbuffer_getchar(&obj->RingBuffer, &tch);
-		obj->CalculateSumValue += tch;
 		if (ch != NULL)
 		{
 			ch[i] = tch;

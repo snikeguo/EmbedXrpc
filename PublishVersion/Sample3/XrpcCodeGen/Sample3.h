@@ -11,11 +11,11 @@ extern "C" {
 
 typedef struct Student
 {
-UInt8 a;   //FieldNumber:1     
-UInt8 b;   //FieldNumber:2     
-UInt8 c;   //FieldNumber:3     
-UInt8 d;   //FieldNumber:4     
-Int32 e;   //FieldNumber:5     
+uint8_t a;   //FieldNumber:1     
+uint8_t b;   //FieldNumber:2     
+uint8_t c;   //FieldNumber:3     
+uint8_t d;   //FieldNumber:4     
+int32_t e;   //FieldNumber:5     
 }Student;
 #define Student_a_FieldNumber  1
 #define Student_b_FieldNumber  2
@@ -26,7 +26,7 @@ Int32 e;   //FieldNumber:5
 
 typedef struct DynamicStudentArray
 {
-Int32 dataLen;   //FieldNumber:2     
+int32_t dataLen;   //FieldNumber:2     
 Student* FalseFixedStudent;   //FieldNumber:1     
 Student TrueFixedStudent[15];   //FieldNumber:3     
 Student* NoSerializationStudent;   //FieldNumber:4     NoSerialization

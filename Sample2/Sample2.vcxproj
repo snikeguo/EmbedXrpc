@@ -31,7 +31,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="B.cpp" />
     <ClCompile Include="XrpcCodeGen\Client\Sample2.Client.cpp" />
-    <ClCompile Include="XrpcCodeGen\Sample2.cpp" />
     <ClCompile Include="XrpcCodeGen\Sample2.EmbedXrpcSerialization.cpp" />
     <ClCompile Include="XrpcCodeGen\Server\Sample2.Server.cpp" />
   </ItemGroup>

@@ -21,7 +21,7 @@ class DateTimeChange_ServiceReceiver :public DateTimeChange_Service
 public:
 	void DateTimeChange(ServiceInvokeParameter* serviceInvokeParameter, DateTime_t now[1])//server广播后，client接受到的
 	{
-		printf("client:%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
+		printf("client:%u-%u-%u %u:%u:%u!client\r\n", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 		//printf("%s", now[0].DateString);
 	}
 };
@@ -31,7 +31,7 @@ class Test2_ServiceReceiver :public Test2_Service
 public:
 	void Test2(ServiceInvokeParameter* serviceInvokeParameter, DateTime_t now[1])//server广播后，client接受到的
 	{
-		printf("%u-%u-%u %u:%u:%u!client\r\n\0", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
+		printf("%u-%u-%u %u:%u:%u!client\r\n", now[0].Year, now[0].Month, now[0].Day, now[0].Hour, now[0].Min, now[0].Sec);
 		//printf("%s", now[0].DateString);
 	}
 };
@@ -51,14 +51,13 @@ static ServiceDescribe AllServices[2] =//定义委托对象集合
 static InitConfig InitCfg =
 {
 	"Client",
-	{new UInt8[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
+	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
 	{nullptr,0,false},
 	ClientSend,
 	1000,
 	AllServices,
 	2,
 	{
-		true,//CheckSumValid
 		1,//ServiceThreadPriority
 		2048,
 		false,//UseRingBufferWhenReceiving
@@ -68,7 +67,7 @@ static InitConfig InitCfg =
 			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{new UInt8[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
+			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
 			{nullptr,0,0},//ServiceBlockBufferConfig
 		},
 
@@ -88,7 +87,7 @@ void ClientThread()
 	//std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	int a = 1000, b = 5000;
 	uint8_t Bytes[7] = "123456";
-	UInt32 testcount = 0xffffffff;
+	uint32_t testcount = 0xffffffff;
 	Win32UserDataOfTransportLayerTest win32UserDataOfTransportLayerTest;
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
 	win32UserDataOfTransportLayerTest.Port = 6666;
@@ -102,7 +101,7 @@ void ClientThread()
 		Client.Add_SendData.a = a;
 		Client.Add_SendData.b = b;
 		Client.Add_SendData.dataLen = 4;
-		Client.Add_SendData.data = (UInt8*)"123";
+		Client.Add_SendData.data = (uint8_t*)"123";
 		auto sum = Client.Add(&rp);//request对象请求service
 		if (sum.State != ResponseState_Ok)
 		{

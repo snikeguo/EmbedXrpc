@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-typedef enum Sex
+typedef enum Sex //serialize number type:UInt64
 {
 Man = 2,
 WoMan = 9,

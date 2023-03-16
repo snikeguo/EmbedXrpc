@@ -47,21 +47,8 @@ typedef struct _SerializationManager
 	uint8_t* Buf;
 	uint32_t BufferLen;
 	BlockRingBufferProvider* BlockBufferProvider;
-
-
-	uint32_t ReferenceSum ;
-	uint32_t CalculateSum ;
-
 }SerializationManager;
-
-
-void SerializationManager_SetReferenceSum(SerializationManager* sm, uint32_t sum);
-void SerializationManager_SetCalculateSum(SerializationManager* sm, uint32_t sum);
-uint32_t SerializationManager_GetReferenceSum(SerializationManager* sm);
-uint32_t SerializationManager_GetCalculateSum(SerializationManager* sm);
-void SerializationManager_AppendSumToCalculateSum(SerializationManager* sm, uint32_t sum);//只有ringbuffer mode 为0的情况下使用。
-
-void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width,int isIsr);
+void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width_serialize, uint16_t field_width_define, int isIsr);
 
 #ifdef __cplusplus
 }

@@ -97,7 +97,7 @@ namespace EmbedXrpcIdlParser
 
         public static void EmitEnum(EnumType_TargetType targetEnum, StreamWriter CommonHsw)
         {
-            CommonHsw.WriteLine($"typedef enum {CppCsNanoSerializer.GetCppTypeDefineName(targetEnum)}");
+            CommonHsw.WriteLine($"typedef enum {CppCsNanoSerializer.GetCppTypeDefineName(targetEnum)} //serialize number type:{CppCsNanoSerializer.TargetTypeStrings[targetEnum.NumberType].CsBaseTargetTypeDefineString}");
             CommonHsw.WriteLine("{");
             foreach (var ev in targetEnum.KeyValue)
             {

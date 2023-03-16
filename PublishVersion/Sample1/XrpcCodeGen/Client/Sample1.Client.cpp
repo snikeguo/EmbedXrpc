@@ -179,16 +179,7 @@ sm.Index=0;
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
 }
-if(RpcObject->RpcConfig.CheckSumValid==true)
-{
-SerializationManager_SetCalculateSum(&sm,0);
-SerializationManager_SetReferenceSum(&sm,recData.CheckSum);
-}
 Add_Return_Deserialize(&sm,&Add_reqresp,rp->IsIsr);
-if(RpcObject->RpcConfig.CheckSumValid==true)
-{
-El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));
-}
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 {
@@ -281,16 +272,7 @@ sm.Index=0;
 sm.BufferLen = recData.DataLen;
 sm.Buf = recData.Data;
 }
-if(RpcObject->RpcConfig.CheckSumValid==true)
-{
-SerializationManager_SetCalculateSum(&sm,0);
-SerializationManager_SetReferenceSum(&sm,recData.CheckSum);
-}
 NoArg_Return_Deserialize(&sm,&NoArg_reqresp,rp->IsIsr);
-if(RpcObject->RpcConfig.CheckSumValid==true)
-{
-El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));
-}
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 {

@@ -12,8 +12,8 @@ extern "C" {
 
 typedef struct GetSumResult
 {
-UInt8 IsSuccess;   //FieldNumber:1     
-Int32 Value;   //FieldNumber:2     
+bool IsSuccess;   //FieldNumber:1     
+int32_t Value;   //FieldNumber:2     
 }GetSumResult;
 #define GetSumResult_IsSuccess_FieldNumber  1
 #define GetSumResult_Value_FieldNumber  2
@@ -30,8 +30,8 @@ GetSumResult ReturnValue;   //FieldNumber:2
 
 typedef struct GetSum_Parameter
 {
-Int32 a;   //FieldNumber:1     
-Int32 b;   //FieldNumber:2     
+int32_t a;   //FieldNumber:1     
+int32_t b;   //FieldNumber:2     
 }GetSum_Parameter;
 #define GetSum_Parameter_a_FieldNumber  1
 #define GetSum_Parameter_b_FieldNumber  2

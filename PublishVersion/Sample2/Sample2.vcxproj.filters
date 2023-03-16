@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="EmbedXrpcLib">
-      <UniqueIdentifier>{23b574ec-7517-4861-b360-c5c66ebf2107}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="EmbedXrpcLib\Win32.Port">
-      <UniqueIdentifier>{9b51191d-fbf1-4a84-8813-a17394d9db5f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="otherfiles">
       <UniqueIdentifier>{ef0a60cd-7b48-4620-b248-a21c3581822f}</UniqueIdentifier>
     </Filter>
@@ -30,6 +24,12 @@
     </Filter>
     <Filter Include="XRPCCodeGen\Server">
       <UniqueIdentifier>{c6835043-08a7-409e-afe1-4268146618ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EmbedXrpcLib">
+      <UniqueIdentifier>{23b574ec-7517-4861-b360-c5c66ebf2107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EmbedXrpcLib\Win32.Port">
+      <UniqueIdentifier>{9b51191d-fbf1-4a84-8813-a17394d9db5f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -62,9 +62,6 @@
     </ClCompile>
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp">
       <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
-    <ClCompile Include="XrpcCodeGen\Sample2.cpp">
-      <Filter>XRPCCodeGen</Filter>
     </ClCompile>
     <ClCompile Include="XrpcCodeGen\Sample2.EmbedXrpcSerialization.cpp">
       <Filter>XRPCCodeGen</Filter>

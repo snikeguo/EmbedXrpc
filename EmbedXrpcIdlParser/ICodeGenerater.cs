@@ -319,49 +319,49 @@ namespace EmbedXrpcIdlParser
             bool r = false;
             if(t==typeof(bool))
             {
-                return true;
+                r=true;
             }
-            if (t==typeof(byte))
+            else if (t==typeof(byte))
             {
                 
                 r = true;
             }
-            if (t == typeof(sbyte))
+            else if(t == typeof(sbyte))
             {
                
                 r = true;
             }
-            if (t == typeof(UInt16))
+            else if(t == typeof(UInt16))
             {
                 
                 r = true;
             }
-            if (t == typeof(Int16))
+            else if(t == typeof(Int16))
             {
                
                 r = true;
             }
-            if (t == typeof(UInt32))
+            else if(t == typeof(UInt32))
             {
                 
                 r = true;
             }
-            if (t == typeof(Int32))
+            else if(t == typeof(Int32))
             {
                 
                 r = true;
             }
-            if (t == typeof(UInt64))
+            else if(t == typeof(UInt64))
             {
                 
                 r = true;
             }
-            if (t == typeof(Int64))
+            else if(t == typeof(Int64))
             {
                 
                 r = true;
             }
-            if (t == typeof(IntPtr))
+            else if(t == typeof(IntPtr))
             {
 
                 r = true;

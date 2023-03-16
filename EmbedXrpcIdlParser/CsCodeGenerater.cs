@@ -147,27 +147,26 @@ namespace EmbedXrpcIdlParser
                 var par = service.ParameterStructType.TargetFields[pi];
                 sw.WriteLine($"request.{par.FieldName}={par.FieldName};");
             }
-            sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),new List<byte>());");
+            sw.WriteLine("SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.RequestBuffer,12);");
             sw.WriteLine("request.Serialize(sm);");
-            sw.WriteLine("List<byte> sendBytes = new List<byte>();");
-            sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId&0xff));");
-            sw.WriteLine($"sendBytes.Add((byte)({service.ServiceName}_ServiceId>>8&0xff));");
-            sw.WriteLine($"sendBytes.Add((byte)(XrpcObject.TimeOut&0xff));");
-            sw.WriteLine($"sendBytes.Add((byte)(((XrpcObject.TimeOut>>8&0xff)&0x3F)|((byte)ReceiveType.Request)<<6));\n");
+            sw.WriteLine($"XrpcObject.RequestBuffer[0]=((byte)({service.ServiceName}_ServiceId&0xff));");
+            sw.WriteLine($"XrpcObject.RequestBuffer[1]=((byte)({service.ServiceName}_ServiceId>>8&0xff));");
+            sw.WriteLine($"XrpcObject.RequestBuffer[2]=((byte)(XrpcObject.TimeOut&0xff));");
+            sw.WriteLine($"XrpcObject.RequestBuffer[3]=((byte)(((XrpcObject.TimeOut>>8&0xff)&0x3F)|((byte)ReceiveType.Request)<<6));\n");
 
-            sw.WriteLine("sendBytes.Add((byte)(sm.Index&0xff));");
-            sw.WriteLine("sendBytes.Add((byte)(sm.Index>>8&0xff));");
-            sw.WriteLine("sendBytes.Add((byte)(sm.Index>>16&0xff));");
-            sw.WriteLine("sendBytes.Add((byte)(sm.Index>>24&0xff));\n");
+            sw.WriteLine("var requestObject_dataLen=sm.Index-12;");
+            sw.WriteLine("XrpcObject.RequestBuffer[4]=((byte)(requestObject_dataLen&0xff));");
+            sw.WriteLine("XrpcObject.RequestBuffer[5]=((byte)(requestObject_dataLen>>8&0xff));");
+            sw.WriteLine("XrpcObject.RequestBuffer[6]=((byte)(requestObject_dataLen>>16&0xff));");
+            sw.WriteLine("XrpcObject.RequestBuffer[7]=((byte)(requestObject_dataLen>>24&0xff));\n");
 
-            sw.WriteLine("UInt32 bufcrc=XrpcObject.GetBufferCrc(sm.Buf.ToArray(),0,sm.Index);");
-            sw.WriteLine("sendBytes.Add((byte)(bufcrc&0xff));");
-            sw.WriteLine("sendBytes.Add((byte)(bufcrc>>8&0xff));");
-            sw.WriteLine("sendBytes.Add((byte)(bufcrc>>16&0xff));");
-            sw.WriteLine("sendBytes.Add((byte)(bufcrc>>24&0xff));");
+            sw.WriteLine("UInt32 bufcrc=XrpcObject.GetBufferCrc(sm.Buf,12,requestObject_dataLen);");
+            sw.WriteLine("XrpcObject.RequestBuffer[8]=((byte)(bufcrc&0xff));");
+            sw.WriteLine("XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));");
+            sw.WriteLine("XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));");
+            sw.WriteLine("XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));");
 
-            sw.WriteLine("sendBytes.AddRange(sm.Buf);");
-            sw.WriteLine("if( XrpcObject.Send ( userDataOfTransportLayer,sendBytes.Count,0,sendBytes.ToArray() )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
+            sw.WriteLine("if( XrpcObject.Send ( userDataOfTransportLayer,sm.Index,0,XrpcObject.RequestBuffer )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
                 "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {

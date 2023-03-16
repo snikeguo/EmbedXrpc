@@ -10,7 +10,7 @@ struct GetSumResult
 
 
 [FileName("Sample2.cs")]
-[Role(RoleType.Client)]
+
 delegate GetSumResult GetSum(int a, int b);
 
 [FileName("Sample2.cs")]

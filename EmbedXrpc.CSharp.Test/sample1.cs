@@ -142,15 +142,15 @@ struct DateTime_t
 
 }
 [FileName("sample1.cs")]
-[Role(RoleType.Server)]
+
 [MacroControl("MyMacro", "true")]
 delegate void DateTimeChange(DateTime_t[] now);
 
 
 [FileName("sample1.cs")]
 [ExternalParameter(true)]
-[Role(RoleType.Client)]
-delegate int Add(Int32 a, Int32 b, Int32 dataLen,
+
+delegate Int64 Add(Int32 a, Int32 b, Int32 dataLen,
         [MaxCount(LenFieldName="dataLen",IsFixed=false)]
         byte[]data);
 
