@@ -89,6 +89,8 @@ enum Sex: ulong
     Man=2,
     WoMan=9,
 }
+
+
 [FileName("sample1.cs")]
 struct DateTime_t
 {
@@ -117,7 +119,19 @@ struct DateTime_t
     [FieldNumber(7)]
     Student David;
 }
+[FileName("sample1.cs")]
+struct TestSerialize
+{
+    int EnumArrayLen;
+    [MaxCount(LenFieldName = "EnumArrayLen", IsFixed = false)]
 
+    Sex[] EnumArray;
+
+    int ObjectArrayLen;
+
+    [MaxCount(LenFieldName = "EnumArrayLen", IsFixed = false)]
+    DateTime_t[] DateTimeArray;
+}
 [FileName("sample1.cs")]
 //[Role(RoleType.Server)]
 delegate void DateTimeChange(DateTime_t[] now);

@@ -431,6 +431,71 @@ David.Deserialize(sm);
 }
 
 }
+public class TestSerialize:IEmbedXrpcSerialization
+{
+public const int TestSerialize_EnumArrayLen_FieldNumber=1;
+[FieldNumber( 1) ] 
+[ArrayLenFieldFlag( false ) ]
+public Int32 EnumArrayLen{get;set;}
+
+
+public const int TestSerialize_EnumArray_FieldNumber=2;
+[ArrayProperty(LenFieldName = "EnumArrayLen")]
+[FieldNumber( 2) ] 
+public Sex[] EnumArray{get;set;}=new Sex[0];
+
+
+public const int TestSerialize_ObjectArrayLen_FieldNumber=3;
+[FieldNumber( 3) ] 
+[ArrayLenFieldFlag( false ) ]
+public Int32 ObjectArrayLen{get;set;}
+
+
+public const int TestSerialize_DateTimeArray_FieldNumber=4;
+[ArrayProperty(LenFieldName = "EnumArrayLen")]
+[FieldNumber( 4) ] 
+public DateTime_t[] DateTimeArray{get;set;}=new DateTime_t[0];
+
+
+public void Serialize(SerializationManager sm)
+{
+byte[] bytes=null;
+if(sm.Buf!=null) bytes=sm.ToBytes(EnumArrayLen,typeof(System.Int32));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=4;
+for(Int32 EnumArray_index=0;EnumArray_index<EnumArrayLen;EnumArray_index++)
+{
+if(sm.Buf!=null) bytes=sm.ToBytes(EnumArray[EnumArray_index],typeof(Sex));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=8;
+}
+if(sm.Buf!=null) bytes=sm.ToBytes(ObjectArrayLen,typeof(System.Int32));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=4;
+for(Int32 DateTimeArray_index=0;DateTimeArray_index<EnumArrayLen;DateTimeArray_index++)
+{
+DateTimeArray[DateTimeArray_index].Serialize(sm);
+}
+}
+
+public void Deserialize(SerializationManager sm)
+{
+EnumArrayLen=(Int32)sm.DeserializeField(typeof(System.Int32),4);
+EnumArray=new Sex[EnumArrayLen];
+for(Int32 EnumArray_index=0;EnumArray_index<EnumArrayLen;EnumArray_index++)
+{
+EnumArray[EnumArray_index]=(UInt64)sm.DeserializeField(typeof(System.UInt64),8);
+}
+ObjectArrayLen=(Int32)sm.DeserializeField(typeof(System.Int32),4);
+DateTimeArray=new DateTime_t[EnumArrayLen];
+for(Int32 DateTimeArray_index=0;DateTimeArray_index<EnumArrayLen;DateTimeArray_index++)
+{
+DateTimeArray[DateTimeArray_index]=new DateTime_t();
+DateTimeArray[DateTimeArray_index].Deserialize(sm);
+}
+}
+
+}
 public class DateTimeChange_Parameter:IEmbedXrpcSerialization
 {
 public const int DateTimeChange_Parameter_now_FieldNumber=1;

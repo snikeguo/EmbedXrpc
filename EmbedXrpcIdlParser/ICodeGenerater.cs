@@ -592,6 +592,11 @@ namespace EmbedXrpcIdlParser
                         {
                             attt.ElementType = GetInstance(field.FieldType.GetElementType());//lrBaseValueTypeToTargetType_t(field.FieldType.GetElementType())
                         }
+                        else if (IsEnumType(field.FieldType.GetElementType()) == true)
+                        {
+                            var ettt = TargetTypes[field.FieldType.GetElementType().Name];
+                            attt.ElementType = ettt;
+                        }
                         else
                         {
                             attt.ElementType = StructTypeParse(field.FieldType.GetElementType());//如果list中没有targetstruct 那就去parse

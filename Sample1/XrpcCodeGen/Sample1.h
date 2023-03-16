@@ -126,6 +126,19 @@ Student David;   //FieldNumber:9
 #define DateTime_t_David_FieldNumber  9
 
 
+typedef struct TestSerialize
+{
+int32_t EnumArrayLen;   //FieldNumber:1     
+Sex* EnumArray;   //FieldNumber:2     
+int32_t ObjectArrayLen;   //FieldNumber:3     
+DateTime_t* DateTimeArray;   //FieldNumber:4     
+}TestSerialize;
+#define TestSerialize_EnumArrayLen_FieldNumber  1
+#define TestSerialize_EnumArray_FieldNumber  2
+#define TestSerialize_ObjectArrayLen_FieldNumber  3
+#define TestSerialize_DateTimeArray_FieldNumber  4
+
+
 typedef struct DateTimeChange_Return
 {
 RequestResponseState State;   //FieldNumber:1     

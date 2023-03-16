@@ -566,7 +566,7 @@ namespace EmbedXrpcIdlParser
                     else if(attt.ElementType.TargetType==typeof(Enum))//else if (attt.ElementType.TargetType == TargetType_t.TYPE_ENUM)
                     {
                         var ettt = attt.ElementType as EnumType_TargetType;
-                        var a = $"sizeof({ettt.TypeName}";
+                        var a = $"sizeof({ettt.TypeName})";
                         var b = $"{TargetTypeStrings[ettt.NumberType].TargetTypeSerializeWidth}";
                         SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],{a}<={b}?{a}:{b});");
                         CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) bytes=sm.ToBytes({field.FieldName}[{field.FieldName}_index],typeof({ettt.TypeName}));");

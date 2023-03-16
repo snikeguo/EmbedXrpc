@@ -66,7 +66,14 @@ namespace EmbedXrpcIdlParser
             {
                 Array_TargetField array_TargetField = field as Array_TargetField;
                 ArrayType_TargetType attt = array_TargetField.TargetType as ArrayType_TargetType;
-                cppType = CppCsNanoSerializer.GetCppTypeDefineName(attt.ElementType);
+                if(IdlInfo.IsBaseType(attt.ElementType.TargetType)==true)
+                {
+                    cppType = CppCsNanoSerializer.GetCppTypeDefineName(attt.ElementType);
+                }
+                else
+                {
+                    cppType = attt.ElementType.TypeName;
+                }
                 if (array_TargetField.MaxCountAttribute.IsFixed == false)
                 {
                     cppType = cppType + "*";
