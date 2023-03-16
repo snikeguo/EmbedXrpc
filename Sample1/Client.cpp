@@ -102,6 +102,13 @@ void ClientThread()
 		Client.Add_SendData.b = b;
 		Client.Add_SendData.dataLen = 4;
 		Client.Add_SendData.data = (uint8_t*)"123";
+		Client.Add_SendData.test[0].EnumArrayLen = 1;
+		Client.Add_SendData.test[0].EnumArray = (Sex*)malloc(sizeof(Sex) * 1);
+		Client.Add_SendData.test[0].EnumArray[0] = Sex::Man;
+		Client.Add_SendData.test[0].ObjectArrayLen = 2;
+		Client.Add_SendData.test[0].DateTimeArray = (DateTime_t*)malloc(sizeof(DateTime_t) * 2);
+		memset(Client.Add_SendData.test[0].DateTimeArray, 0, sizeof(DateTime_t) * 2);
+		Client.Add_SendData.test[0].DateTimeArray[0].Year = 1;
 		auto sum = Client.Add(&rp);//request∂‘œÛ«Î«Ûservice
 		if (sum.State != ResponseState_Ok)
 		{

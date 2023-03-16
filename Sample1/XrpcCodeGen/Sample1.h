@@ -132,11 +132,13 @@ int32_t EnumArrayLen;   //FieldNumber:1
 Sex* EnumArray;   //FieldNumber:2     
 int32_t ObjectArrayLen;   //FieldNumber:3     
 DateTime_t* DateTimeArray;   //FieldNumber:4     
+DateTime_t FiexDateTimeArray[16];   //FieldNumber:5     
 }TestSerialize;
 #define TestSerialize_EnumArrayLen_FieldNumber  1
 #define TestSerialize_EnumArray_FieldNumber  2
 #define TestSerialize_ObjectArrayLen_FieldNumber  3
 #define TestSerialize_DateTimeArray_FieldNumber  4
+#define TestSerialize_FiexDateTimeArray_FieldNumber  5
 
 
 typedef struct DateTimeChange_Return
@@ -182,11 +184,13 @@ int32_t a;   //FieldNumber:1
 int32_t b;   //FieldNumber:2     
 int32_t dataLen;   //FieldNumber:3     
 uint8_t* data;   //FieldNumber:4     
+TestSerialize test[1];   //FieldNumber:5     
 }Add_Parameter;
 #define Add_Parameter_a_FieldNumber  1
 #define Add_Parameter_b_FieldNumber  2
 #define Add_Parameter_dataLen_FieldNumber  3
 #define Add_Parameter_data_FieldNumber  4
+#define Add_Parameter_test_FieldNumber  5
 
 
 typedef struct NoArg_Return

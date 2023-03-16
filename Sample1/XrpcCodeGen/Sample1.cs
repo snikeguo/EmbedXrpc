@@ -457,6 +457,12 @@ public const int TestSerialize_DateTimeArray_FieldNumber=4;
 public DateTime_t[] DateTimeArray{get;set;}=new DateTime_t[0];
 
 
+public const int TestSerialize_FiexDateTimeArray_FieldNumber=5;
+[ArrayProperty(LenFieldName = "EnumArrayLen")]
+[FieldNumber( 5) ] 
+public DateTime_t[] FiexDateTimeArray{get;set;}=new DateTime_t[0];
+
+
 public void Serialize(SerializationManager sm)
 {
 byte[] bytes=null;
@@ -476,6 +482,10 @@ for(Int32 DateTimeArray_index=0;DateTimeArray_index<EnumArrayLen;DateTimeArray_i
 {
 DateTimeArray[DateTimeArray_index].Serialize(sm);
 }
+for(Int32 FiexDateTimeArray_index=0;FiexDateTimeArray_index<EnumArrayLen;FiexDateTimeArray_index++)
+{
+FiexDateTimeArray[FiexDateTimeArray_index].Serialize(sm);
+}
 }
 
 public void Deserialize(SerializationManager sm)
@@ -492,6 +502,12 @@ for(Int32 DateTimeArray_index=0;DateTimeArray_index<EnumArrayLen;DateTimeArray_i
 {
 DateTimeArray[DateTimeArray_index]=new DateTime_t();
 DateTimeArray[DateTimeArray_index].Deserialize(sm);
+}
+FiexDateTimeArray=new DateTime_t[EnumArrayLen];
+for(Int32 FiexDateTimeArray_index=0;FiexDateTimeArray_index<EnumArrayLen;FiexDateTimeArray_index++)
+{
+FiexDateTimeArray[FiexDateTimeArray_index]=new DateTime_t();
+FiexDateTimeArray[FiexDateTimeArray_index].Deserialize(sm);
 }
 }
 
@@ -750,6 +766,12 @@ public const int Add_Parameter_data_FieldNumber=4;
 public byte[] data{get;set;}=new byte[0];
 
 
+public const int Add_Parameter_test_FieldNumber=5;
+[ArrayProperty(LenFieldName = "")]
+[FieldNumber( 5) ] 
+public TestSerialize[] test{get;set;}=new TestSerialize[1];
+
+
 public void Serialize(SerializationManager sm)
 {
 byte[] bytes=null;
@@ -768,6 +790,10 @@ if(sm.Buf!=null) bytes=sm.ToBytes(data[data_index],typeof(System.Byte));
 if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
 sm.Index+=1;
 }
+for(UInt32 test_index=0;test_index<1;test_index++)
+{
+test[test_index].Serialize(sm);
+}
 }
 
 public void Deserialize(SerializationManager sm)
@@ -779,6 +805,12 @@ data=new byte[dataLen];
 for(Int32 data_index=0;data_index<dataLen;data_index++)
 {
 data[data_index]=(byte)sm.DeserializeField(typeof(System.Byte),1);
+}
+test=new TestSerialize[1];
+for(UInt32 test_index=0;test_index<1;test_index++)
+{
+test[test_index]=new TestSerialize();
+test[test_index].Deserialize(sm);
 }
 }
 
@@ -822,7 +854,7 @@ XrpcObject=xrpcObject;
 }
 public static readonly UInt16 Add_ServiceId=18;//0x12
 public UInt16 GetSid(){ return Add_ServiceId;}
-public Add_Return Invoke(DTL userDataOfTransportLayer,Int32 a,Int32 b,Int32 dataLen,Byte[] data)
+public Add_Return Invoke(DTL userDataOfTransportLayer,Int32 a,Int32 b,Int32 dataLen,Byte[] data,TestSerialize[] test)
 {
 Add_Return reqresp=new Add_Return();
 lock(XrpcObject.ObjectMutex) 
@@ -833,6 +865,7 @@ request.a=a;
 request.b=b;
 request.dataLen=dataLen;
 request.data=data;
+request.test=test;
 SerializationManager sm=new SerializationManager(Assembly.GetExecutingAssembly(),XrpcObject.RequestBuffer,12);
 request.Serialize(sm);
 XrpcObject.RequestBuffer[0]=((byte)(Add_ServiceId&0xff));
@@ -880,10 +913,10 @@ public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, Seri
 {
 Add_Parameter request = new Add_Parameter();
 request.Deserialize(recManager);
-Add(ref serviceInvokeParameter,request.a,request.b,request.dataLen,request.data);
+Add(ref serviceInvokeParameter,request.a,request.b,request.dataLen,request.data,request.test);
 Response.Serialize(sendManager);
 }
-//public void Add(ref serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,Byte[] data);
+//public void Add(ref serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,Byte[] data,TestSerialize[] test);
 }
 
 

@@ -27,7 +27,7 @@ class Add_Service:public IService
 public:
 uint16_t GetSid(){return Add_ServiceId;}
 Add_Return Response;
-virtual void Add(ServiceInvokeParameter * serviceInvokeParameter,int32_t a,int32_t b,int32_t dataLen,uint8_t* data){}
+virtual void Add(ServiceInvokeParameter * serviceInvokeParameter,int32_t a,int32_t b,int32_t dataLen,uint8_t* data,TestSerialize test[1]){}
 Add_Parameter request;
 void Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager);
 };

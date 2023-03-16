@@ -18,7 +18,7 @@ Test2_Parameter_FreeData(&request);
 void Add_Service::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)
 {
 Add_Parameter_Deserialize(recManager,&request,serviceInvokeParameter->IsIsr);
-Add(serviceInvokeParameter,request.a,request.b,request.dataLen,request.data);
+Add(serviceInvokeParameter,request.a,request.b,request.dataLen,request.data,request.test);
 Add_Parameter_FreeData(&request);
 Add_Return_Serialize(sendManager,&Response);
 if(IsFreeResponse==true){

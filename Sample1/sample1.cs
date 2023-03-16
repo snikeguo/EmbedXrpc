@@ -131,6 +131,9 @@ struct TestSerialize
 
     [MaxCount(LenFieldName = "EnumArrayLen", IsFixed = false)]
     DateTime_t[] DateTimeArray;
+
+    [MaxCount(LenFieldName = "EnumArrayLen", IsFixed = true, MaxCount = 16)]
+    DateTime_t[] FiexDateTimeArray;
 }
 [FileName("sample1.cs")]
 //[Role(RoleType.Server)]
@@ -146,7 +149,8 @@ delegate void Test2(DateTime_t[] now);
 //[Role(RoleType.Client)]
 delegate AddResult Add(Int32 a, Int32 b, Int32 dataLen,
         [MaxCount(LenFieldName="dataLen",IsFixed=false)]
-        byte[]data);
+        byte[]data,
+        TestSerialize[] test);
 
 [FileName("sample1.cs")]
 //[Role(RoleType.Client)]

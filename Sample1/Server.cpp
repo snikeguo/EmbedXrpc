@@ -24,7 +24,7 @@ class Inter_AddServiceProvider :public Add_Service
 {
 public:
 	void Add(ServiceInvokeParameter* serviceInvokeParameter,
-		int32_t a, int32_t b, int32_t dataLen, uint8_t* data)
+		int32_t a, int32_t b, int32_t dataLen, uint8_t* data,TestSerialize* test)
 	{
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
