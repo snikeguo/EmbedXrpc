@@ -111,7 +111,7 @@ static InitConfig InitCfg =
 		2048,
 		false,//UseRingBufferWhenReceiving
 		{
-			false,//IsSendToQueue
+			true,//IsSendToQueue
 			10,//MessageQueueOfRequestService_MaxItemNumber
 			10,//ServiceMessageQueue_MaxItemNumber
 		},
@@ -131,7 +131,7 @@ void Server_Init()
 DateTimeChange_Requester DateTimeChanger(&ServerRpc);//实例化委托对象
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;

@@ -60,7 +60,7 @@ static InitConfig InitCfg =
 	{
 		1,//ServiceThreadPriority
 		2048,
-		false,//UseRingBufferWhenReceiving
+		true,//UseRingBufferWhenReceiving
 		{
 			true,//IsSendToQueue
 			10,//MessageQueueOfRequestService_MaxItemNumber

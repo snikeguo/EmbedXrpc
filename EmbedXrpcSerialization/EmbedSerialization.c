@@ -2,20 +2,7 @@
 #include <stdarg.h>
 #include "EmbedXrpc.Port.h"
 
-void DeserializeField(uint8_t* field_ptr, SerializationManager* sm, uint16_t field_width_serialize,uint16_t field_width_define,int isIsr)
-{
-	if (sm->BlockBufferProvider != NULL)
-	{
-		uint8_t temp[8];
-		BlockRingBufferProvider_PopChars(sm->BlockBufferProvider, temp, (uint16_t)field_width_serialize,isIsr);
-		El_Memcpy(field_ptr, temp, field_width_define);
-	}
-	else
-	{
-		El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width_define>= field_width_serialize? field_width_serialize: field_width_define);
-		sm->Index += field_width_serialize;
-	}
-}
+
 
 //static const char* FilterStrings[] = FilterStringHeader;
 void EmbedSerializationShowMessage(const char* filter_string, const char* fmt, ...)

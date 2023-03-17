@@ -46,30 +46,30 @@ void EmbedXrpcObject::Init(InitConfig* cfg)
 
 	MessageQueueOfRequestService = El_CreateQueue("MessageQueueOfRequestService", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.MessageQueueOfRequestService_MaxItemNumber);
 	
-	if(RpcConfig.DynamicMemoryConfig.IsSendToQueue == true)
+	if(RpcConfig.UseRingBufferWhenReceiving == false)
 	{
-		if (RpcConfig.UseRingBufferWhenReceiving == false)
+		if (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true)
 		{
 			ServiceMessageQueue = El_CreateQueue("ServiceMessageQueue", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.ServiceMessageQueue_MaxItemNumber);
 		}
 		else
 		{	
-			BlockBufferProviderOfRequestService=new BlockRingBufferProvider();
-			BlockRingBufferProvider_Init(BlockBufferProviderOfRequestService,
-				RpcConfig.RingBufferConfig.BlockBufferOfRequestService_Config.Buffer,
-				RpcConfig.RingBufferConfig.BlockBufferOfRequestService_Config.Size,
-				RpcConfig.RingBufferConfig.BlockBufferOfRequestService_Config.MaxItemNumber);
-
-			ServiceBlockBufferProvider = new BlockRingBufferProvider();
-			BlockRingBufferProvider_Init(ServiceBlockBufferProvider,
-				RpcConfig.RingBufferConfig.ServiceBlockBufferConfig.Buffer,
-				RpcConfig.RingBufferConfig.ServiceBlockBufferConfig.Size,
-				RpcConfig.RingBufferConfig.ServiceBlockBufferConfig.MaxItemNumber);
+			
 		}
 	}
 	else
 	{
-		;
+		BlockBufferProviderOfRequestService = new BlockRingBufferProvider();
+		BlockRingBufferProvider_Init(BlockBufferProviderOfRequestService,
+			RpcConfig.RingBufferConfig.BlockBufferOfRequestService_Config.Buffer,
+			RpcConfig.RingBufferConfig.BlockBufferOfRequestService_Config.Size,
+			RpcConfig.RingBufferConfig.BlockBufferOfRequestService_Config.MaxItemNumber);
+
+		ServiceBlockBufferProvider = new BlockRingBufferProvider();
+		BlockRingBufferProvider_Init(ServiceBlockBufferProvider,
+			RpcConfig.RingBufferConfig.ServiceBlockBufferConfig.Buffer,
+			RpcConfig.RingBufferConfig.ServiceBlockBufferConfig.Size,
+			RpcConfig.RingBufferConfig.ServiceBlockBufferConfig.MaxItemNumber);
 	}
 
 
