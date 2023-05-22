@@ -360,7 +360,14 @@ namespace EmbedXrpcIdlParser
                         }
                         else
                         {
-                            csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}[0]={field.FieldName}[0];");
+                            if (array_TargetField.MaxCountAttribute.IsFixed == true)
+                            {
+                                csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}[0]={field.FieldName}[0];");
+                            }
+                            else
+                            {
+                                csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
+                            }
                         }
                     }
                     else
