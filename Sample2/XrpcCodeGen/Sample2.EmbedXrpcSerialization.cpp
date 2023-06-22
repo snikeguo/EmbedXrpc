@@ -13,9 +13,21 @@ sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 }
 
-void GetSumResult_Deserialize(SerializationManager *sm,GetSumResult *obj,int isIsr)
+void GetSumResult_Deserialize(SerializationManager *sm,GetSumResult *obj,int isIsr,void *cmp_field_ptr,uint32_t index)
 {
-DeserializeField((uint8_t *)&obj->IsSuccess,sm,1,sizeof(bool),isIsr);
+    if(cmp_ptr!=NULL&&cmp_ptr==(void*)&obj->IsSuccess)
+    {
+        //DeserializeField(NULL,sm,1,sizeof(bool),isIsr);
+        return;
+    }
+    else if(obj!=NULL)
+    {
+        DeserializeField((uint8_t *)&obj->IsSuccess,sm,1,sizeof(bool),isIsr);
+    }
+    else
+    {
+        DeserializeField((uint8_t *)NULL,sm,1,sizeof(bool),isIsr);
+    }
 DeserializeField((uint8_t *)&obj->Value,sm,4,sizeof(int32_t),isIsr);
 }
 
