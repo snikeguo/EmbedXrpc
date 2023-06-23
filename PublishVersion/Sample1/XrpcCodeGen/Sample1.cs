@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
 // auto code gen ! DO NOT modify this file!
-//C# Code Generater Version:3.3.1.0
+//C# Code Generater Version:3.6.0.0
 namespace Sample1
 {
 using UInt8 = Byte;

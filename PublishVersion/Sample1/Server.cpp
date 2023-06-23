@@ -19,18 +19,44 @@ bool ServerSend(RequestParameter* rp,
 	ClientRpc.ReceivedMessage(dataLen, data, *rp->Udtl,false);
 	return true;
 }
+
+void Add_Parameter_Deserialize2(SerializationManager* sm, Add_Parameter* obj, int isIsr)
+{
+	DeserializeField(nullptr, sm, 4, sizeof(int32_t), isIsr);
+	DeserializeField(nullptr, sm, 4, sizeof(int32_t), isIsr);
+	DeserializeField((uint8_t*)&obj->dataLen, sm, 4, sizeof(int32_t), isIsr);
+	//obj->data = (uint8_t*)El_Malloc(sizeof(uint8_t) * obj->dataLen);
+	//El_Memset(obj->data, 0, sizeof(uint8_t) * obj->dataLen);
+	obj->data = &sm->Buf[sm->Index];
+	sm->Index += obj->dataLen;
+
+
+	/*
+	for (int32_t data_index = 0; data_index < obj->dataLen; data_index++)
+	{
+		DeserializeField((uint8_t*)&obj->data[data_index], sm, 1, sizeof(uint8_t), isIsr);
+	}
+	*/
+	for (uint32_t test_index = 0; test_index < 1; test_index++)
+	{
+		TestSerialize_Deserialize(sm, &obj->test[test_index], isIsr);
+	}
+}
+
 //特化子类继承
 class Inter_AddServiceProvider :public Add_Service
 {
 public:
-	void Add(ServiceInvokeParameter* serviceInvokeParameter,
-		int32_t a, int32_t b, int32_t dataLen, uint8_t* data,TestSerialize* test)
+	void Add(ServiceInvokeParameter* serviceInvokeParameter,SerializationManager *recManager)//int32_t a, int32_t b, int32_t dataLen, uint8_t* data,TestSerialize* test
 	{
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
 		RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
 		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2,0);
 		this->IsFreeResponse = true;
+		
+		Add_Parameter_Deserialize2(recManager, &request, serviceInvokeParameter->IsIsr);
+
 		Response.ReturnValue.Sum = 1;
 		Response.ReturnValue.Sum2 = 2;
 		Response.ReturnValue.Sum3 = 3;
@@ -38,7 +64,7 @@ public:
 		Response.ReturnValue.Sum4 = 1;
 		Response.ReturnValue.Sum5 = 2;
 		Response.ReturnValue.Sum6 = 3;
-		Response.ReturnValue.Sum7 = a+b;
+		//Response.ReturnValue.Sum7 = a+b;
 
 		Response.ReturnValue.dataLen = 0;
 		Response.ReturnValue.data = NULL;

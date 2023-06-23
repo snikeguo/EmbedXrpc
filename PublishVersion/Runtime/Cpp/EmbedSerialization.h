@@ -55,10 +55,12 @@ static inline void DeserializeField(uint8_t* field_ptr, SerializationManager* sm
 	{
 		uint8_t temp[8];
 		BlockRingBufferProvider_PopChars(sm->BlockBufferProvider, temp, (uint16_t)field_width_serialize, isIsr);
+		if(field_ptr!=NULL)
 		El_Memcpy(field_ptr, temp, field_width_define);
 }
 	else
 	{
+		if (field_ptr != NULL)
 		El_Memcpy(field_ptr, &sm->Buf[sm->Index], field_width_define >= field_width_serialize ? field_width_serialize : field_width_define);
 		sm->Index += field_width_serialize;
 	}

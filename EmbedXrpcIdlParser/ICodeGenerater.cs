@@ -297,6 +297,7 @@ namespace EmbedXrpcIdlParser
         public ExternalParameterAttribute ExternalParameter { get; internal set;}
         public MacroControlAttribute MacroControlAttribute { get; internal set; }
 
+        public NoDeserializeParameterAttribute NoDeserializeParameterAttribute { get; internal set; }
     }
     /// <summary>
     /// 本文件中所有的资源
@@ -894,6 +895,8 @@ namespace EmbedXrpcIdlParser
 
                     var MacroControlAttribute = type.GetCustomAttribute<MacroControlAttribute>();
                     targetService.MacroControlAttribute = MacroControlAttribute;
+                    var NoDeserializeParameterAttribute = type.GetCustomAttribute<NoDeserializeParameterAttribute>();
+                    targetService.NoDeserializeParameterAttribute = NoDeserializeParameterAttribute;    
 
                     //targetService.RoleAttribute = type.GetCustomAttribute<RoleAttribute>();
                     //if(targetService.RoleAttribute==null)

@@ -478,25 +478,33 @@ namespace EmbedXrpcIdlParser
                 hsw.WriteLine($"{service.ReturnStructType.TypeName} Response;");
             }
 
-            string returnType = "void";
-            var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-            hsw.Write($"virtual {returnType} {service.ServiceName}(ServiceInvokeParameter * serviceInvokeParameter{dh}");
-
-            var temp_fileds = string.Empty;
-            for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
+            if(service.NoDeserializeParameterAttribute!=null)
             {
-                var field = service.ParameterStructType.TargetFields[i];
-                string name = field.FieldName;
-                temp_fileds += name + ",";
-
-                hsw.Write($"{CppSerializableCommon.EmitField(field)}");
-
-                if (i + 1 < service.ParameterStructType.TargetFields.Count)
-                {
-                    hsw.Write(",");
-                }
+                hsw.WriteLine($"virtual void {service.ServiceName}(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager){{}}");
             }
-            hsw.WriteLine("){}");
+            else
+            {
+                string returnType = "void";
+                var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                hsw.Write($"virtual {returnType} {service.ServiceName}(ServiceInvokeParameter * serviceInvokeParameter{dh}");
+
+                var temp_fileds = string.Empty;
+                for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
+                {
+                    var field = service.ParameterStructType.TargetFields[i];
+                    string name = field.FieldName;
+                    temp_fileds += name + ",";
+
+                    hsw.Write($"{CppSerializableCommon.EmitField(field)}");
+
+                    if (i + 1 < service.ParameterStructType.TargetFields.Count)
+                    {
+                        hsw.Write(",");
+                    }
+                }
+                hsw.WriteLine("){}");
+            }
+           
 
             //code gen invoke
             hsw.WriteLine($"{service.ParameterStructType.TypeName} request;");
@@ -504,27 +512,35 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine($"void {service.ServiceName}_Service::Invoke(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager, SerializationManager* sendManager)");
             csw.WriteLine("{");
 
-            csw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request,serviceInvokeParameter->IsIsr);");
-
-            //csw.WriteLine($"if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
-            //csw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
-            //csw.WriteLine("}");
-
-            dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
-            csw.Write($"{service.ServiceName}(serviceInvokeParameter{dh}");
-            for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
+            if(service.NoDeserializeParameterAttribute!=null)
             {
-                var par = service.ParameterStructType.TargetFields[i];
-                csw.Write($"request.{par.FieldName}");
-                if (i + 1 < service.ParameterStructType.TargetFields.Count)
-                {
-                    csw.Write(",");
-                }
+                csw.WriteLine($"{service.ServiceName}(serviceInvokeParameter,recManager);");
             }
-            csw.WriteLine(");");//生成调用目标函数。
+            else
+            {
+                csw.WriteLine($"{service.ParameterStructType.TypeName}_Deserialize(recManager,&request,serviceInvokeParameter->IsIsr);");
 
+                //csw.WriteLine($"if(serviceInvokeParameter->RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
+                //csw.WriteLine($"El_Assert(SerializationManager_GetReferenceSum(recManager)==SerializationManager_GetCalculateSum(recManager));");
+                //csw.WriteLine("}");
 
-            csw.WriteLine($"{ParameterStructFreeNote}{service.ParameterStructType.TypeName}_FreeData(&request);");//free
+                var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
+                csw.Write($"{service.ServiceName}(serviceInvokeParameter{dh}");
+                for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
+                {
+                    var par = service.ParameterStructType.TargetFields[i];
+                    csw.Write($"request.{par.FieldName}");
+                    if (i + 1 < service.ParameterStructType.TargetFields.Count)
+                    {
+                        csw.Write(",");
+                    }
+                }
+                csw.WriteLine(");");//生成调用目标函数。
+            }
+            
+
+            if(service.NoDeserializeParameterAttribute==null)
+                csw.WriteLine($"{ParameterStructFreeNote}{service.ParameterStructType.TypeName}_FreeData(&request);");//free
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
                 csw.WriteLine($"{service.ReturnStructType.TypeName}_Serialize(sendManager,&Response);");

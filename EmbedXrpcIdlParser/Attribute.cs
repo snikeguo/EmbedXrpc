@@ -54,6 +54,13 @@ namespace EmbedXrpcIdlParser
         public int ServiceId { get; set; }
     }
     [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
+    public class NoDeserializeParameterAttribute : Attribute
+    {
+        public NoDeserializeParameterAttribute()
+        {
+        }
+    }
+    [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
     public sealed class ExternalParameterAttribute : Attribute
     {
         public ExternalParameterAttribute(bool isExternal)

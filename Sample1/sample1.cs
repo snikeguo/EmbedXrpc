@@ -146,7 +146,7 @@ delegate void Test2(DateTime_t[] now);
 
 [FileName("sample1.cs")]
 [ExternalParameter(true)]
-//[Role(RoleType.Client)]
+[NoDeserializeParameter]
 delegate AddResult Add(Int32 a, Int32 b, Int32 dataLen,
         [MaxCount(LenFieldName="dataLen",IsFixed=false)]
         byte[]data,
