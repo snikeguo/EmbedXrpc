@@ -294,15 +294,44 @@ void TestSerialize_Serialize(SerializationManager *sm, TestSerialize *obj)
     DateTime_t_Serialize(sm, &obj->FiexDateTimeArray[FiexDateTimeArray_index]);
   }
 }
-
-void TestSerialize_Deserialize(SerializationManager *sm, TestSerialize *obj, int isIsr)
+struct DeserializeStopPoint
 {
-  DeserializeField((uint8_t *)&obj->EnumArrayLen, sm, 4, sizeof(int32_t), isIsr);
-  obj->EnumArray = (Sex *)El_Malloc(sizeof(Sex) * obj->EnumArrayLen);
-  El_Memset(obj->EnumArray, 0, sizeof(Sex) * obj->EnumArrayLen);
+    void *FieldPtr;
+    uint64_t ArrayIndex;
+};
+void TestSerialize_Deserialize(SerializationManager *sm, TestSerialize *obj, int isIsr,DeserializeStopPoint *dsp=nullptr)
+{
+  if(dsp!=nullptr && dsp->FieldPtr ==&obj->EnumArrayLen )
+  {
+    return ;
+  }
+  else if(obj!=nullptr)
+  {
+    DeserializeField((uint8_t *)&obj->EnumArrayLen, sm, 4, sizeof(int32_t), isIsr);
+  }
+  else
+  {
+    DeserializeField(NULL, sm, 4, sizeof(int32_t), isIsr);
+  }
+  if(obj!=nullptr)
+  {
+    obj->EnumArray = (Sex *)El_Malloc(sizeof(Sex) * obj->EnumArrayLen);
+    El_Memset(obj->EnumArray, 0, sizeof(Sex) * obj->EnumArrayLen);
+  }
   for (int32_t EnumArray_index = 0; EnumArray_index < obj->EnumArrayLen; EnumArray_index++)
   {
-    DeserializeField((uint8_t *)&obj->EnumArray[EnumArray_index], sm, 8, sizeof(Sex), isIsr);
+    if(dsp!=nullptr && dsp->FieldPtr==obj->EnumArray && dsp->ArrayIndex==EnumArray_index)
+    {
+      return stop;
+    }
+    else if(obj!=nullptr)
+    {
+      DeserializeField((uint8_t *)&obj->EnumArray[EnumArray_index], sm, 8, sizeof(Sex), isIsr);
+    }
+    else
+    {
+      DeserializeField(nullptr, sm, 8, sizeof(Sex), isIsr);
+    }
   }
   DeserializeField((uint8_t *)&obj->ObjectArrayLen, sm, 4, sizeof(int32_t), isIsr);
   obj->DateTimeArray = (DateTime_t *)El_Malloc(sizeof(DateTime_t) * obj->EnumArrayLen);
@@ -315,6 +344,7 @@ void TestSerialize_Deserialize(SerializationManager *sm, TestSerialize *obj, int
   {
     DateTime_t_Deserialize(sm, &obj->FiexDateTimeArray[FiexDateTimeArray_index], isIsr);
   }
+  return true;
 }
 
 void TestSerialize_FreeData(TestSerialize *obj)

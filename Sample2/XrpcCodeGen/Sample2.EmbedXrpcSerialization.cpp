@@ -12,10 +12,14 @@ if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->Value;
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 }
-
-void GetSumResult_Deserialize(SerializationManager *sm,GetSumResult *obj,int isIsr,void *cmp_field_ptr,uint32_t index)
+struct DeserializeEndPoint
 {
-    if(cmp_ptr!=NULL&&cmp_ptr==(void*)&obj->IsSuccess)
+    void *FieldPtr;
+    uint64_t ArrayIndex;
+};
+void GetSumResult_Deserialize(SerializationManager *sm,GetSumResult *obj,int isIsr,DeserializeEndPoint *dep)
+{
+    if(dep!=NULL&&dep->FieldPtr==(void*)&obj->IsSuccess)
     {
         //DeserializeField(NULL,sm,1,sizeof(bool),isIsr);
         return;

@@ -1,18 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+	  <TargetFrameworks>net7.0;net472</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Version>0.0.1</Version>
     <Authors>snikeguo email:408260925@qq.com</Authors>
     <Company>snikeguo</Company>
     <Description>和单片机通讯的序列化和RPC库</Description>
-    <Platforms>AnyCPU;x86</Platforms>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Win32Queue.NetCore" Version="2.0.0" />
+  </ItemGroup>
+
 
 </Project>
