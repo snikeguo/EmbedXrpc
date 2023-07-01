@@ -43,6 +43,8 @@ extern "C" {
 	#define El_Assert assert
 #define El_Debug	printf
 #define El_Delay(x)    Sleep(x)
+#define ThreadBeginHook()
+#define ThreadExitHook()	
 #elif SupportedOs==FreeRtos
 	#include "FreeRTOS.h"
 	#include "task.h"
@@ -56,6 +58,8 @@ extern "C" {
 #define El_Debug	rt_kprintf
 #define El_Assert configASSERT
 #define El_Delay(x)    vTaskDelay(x)
+#define ThreadBeginHook()
+#define ThreadExitHook()	vTaskDelete(xTaskGetCurrentTaskHandle());
 #endif
 #define El_Strncpy strncpy
 #define El_Strncmp    strncmp

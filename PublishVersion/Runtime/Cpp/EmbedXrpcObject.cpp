@@ -402,6 +402,7 @@ void EmbedXrpcObject::SuspendTimerCallBack(void* arg)
 
 void EmbedXrpcObject::ServiceThread(void* arg)
 {
+	ThreadBeginHook();
 	EmbedXrpcObject* obj = (EmbedXrpcObject*)arg;
 	ReceiveItemInfo recData;
 	bool waitResult = true;
@@ -425,6 +426,7 @@ void EmbedXrpcObject::ServiceThread(void* arg)
 		if (obj->DeInitFlag == true)
 		{
 			obj->ServiceThreadExitState = true;
+			ThreadExitHook();
 			return;
 		}
 	}
