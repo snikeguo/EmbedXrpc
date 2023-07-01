@@ -277,7 +277,7 @@ obj->EnumArray=(Sex *)El_Malloc(sizeof(Sex)*obj->EnumArrayLen);
 El_Memset(obj->EnumArray,0,sizeof(Sex)*obj->EnumArrayLen);
 for(int32_t EnumArray_index=0;EnumArray_index<obj->EnumArrayLen;EnumArray_index++)
 {
-DeserializeField( obj? (uint8_t *)&obj->EnumArray[EnumArray_index]:nullptr,sm,8,sizeof(Sex),isIsr);
+DeserializeField((uint8_t *)&obj->EnumArray[EnumArray_index],sm,8,sizeof(Sex),isIsr);
 }
 DeserializeField((uint8_t *)&obj->ObjectArrayLen,sm,4,sizeof(int32_t),isIsr);
 obj->DateTimeArray=(DateTime_t *)El_Malloc(sizeof(DateTime_t)*obj->EnumArrayLen);

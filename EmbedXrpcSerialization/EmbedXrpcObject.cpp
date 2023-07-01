@@ -109,7 +109,7 @@ void EmbedXrpcObject::DeInit()
 
 	if (ServiceThreadHandle != nullptr)
 	{
-		while (ServiceThreadExitState == false);
+		while (ServiceThreadExitState == false) { El_Delay(10); }
 		El_DeleteThread(ServiceThreadHandle);
 	}
 

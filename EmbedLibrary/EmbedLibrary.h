@@ -33,6 +33,7 @@ extern "C" {
 #define SupportedOs	Windows
 
 #if SupportedOs==Windows
+#include "windows.h"
 	typedef void* El_Semaphore_t;
 	typedef void* El_Mutex_t;
 	typedef void* El_Thread_t;

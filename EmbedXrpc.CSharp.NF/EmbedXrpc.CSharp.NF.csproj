@@ -62,22 +62,22 @@
     <Compile Include="..\EmbedXrpc.CSharp.NetCore\EmbedXrpcCommon.cs">
       <Link>EmbedXrpcCommon.cs</Link>
     </Compile>
-	  <Compile Include="..\EmbedXrpc.CSharp.NetCore\Crc.cs">
-		  <Link>Crc.cs</Link>
-	  </Compile>
+    <Compile Include="..\EmbedXrpc.CSharp.NetCore\Crc.cs">
+      <Link>Crc.cs</Link>
+    </Compile>
     <Compile Include="..\EmbedXrpc.CSharp.NetCore\EmbedXrpcObject.cs">
       <Link>EmbedXrpcObject.cs</Link>
     </Compile>
     <Compile Include="..\EmbedXrpc.CSharp.NetCore\Serialization.cs">
       <Link>Serialization.cs</Link>
     </Compile>
-    <Compile Include="..\EmbedXrpc.CSharp.NetCore\Win32Queue.cs">
-      <Link>Win32Queue.cs</Link>
-    </Compile>
-    <Compile Include="..\EmbedXrpc.CSharp.NetCore\Win32Signal.cs">
-      <Link>Win32Signal.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Win32Queue.NetCore\Win32Queue.NetCore.csproj">
+      <Project>{02c35df4-17df-4961-9091-e27309550461}</Project>
+      <Name>Win32Queue.NetCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

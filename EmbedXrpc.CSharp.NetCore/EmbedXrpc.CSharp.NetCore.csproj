@@ -2,7 +2,6 @@
 
   <PropertyGroup>
 	  <TargetFrameworks>net7.0;net472</TargetFrameworks>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Version>0.0.1</Version>
     <Authors>snikeguo email:408260925@qq.com</Authors>
@@ -12,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Win32Queue.NetCore" Version="2.0.0" />
+    <ProjectReference Include="..\Win32Queue.NetCore\Win32Queue.NetCore.csproj" />
   </ItemGroup>
 
 
