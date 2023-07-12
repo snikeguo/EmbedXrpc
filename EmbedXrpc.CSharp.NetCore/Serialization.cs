@@ -146,7 +146,7 @@ namespace EmbedXrpc
             }
             else if (vt == typeof(sbyte))
             {
-                byte v = Convert.ToByte(Buf[Index]);
+                byte v = Convert.ToByte((byte)Buf[Index]);
                 Index += serializeWidth;
                 return (sbyte)v;
             }
@@ -175,10 +175,10 @@ namespace EmbedXrpc
             }
             else if (vt == typeof(Int32))
             {
-                UInt32 v = Convert.ToUInt32((Int32)Buf[Index + 3] << 24);
-                v |= Convert.ToUInt32((Int32)Buf[Index + 2] << 16);
-                v |= Convert.ToUInt32((Int32)Buf[Index + 1] << 8);
-                v |= Convert.ToUInt32((Int32)Buf[Index]);
+                UInt32 v = Convert.ToUInt32((UInt32)Buf[Index + 3] << 24);
+                v |= Convert.ToUInt32((UInt32)Buf[Index + 2] << 16);
+                v |= Convert.ToUInt32((UInt32)Buf[Index + 1] << 8);
+                v |= Convert.ToUInt32((UInt32)Buf[Index]);
                 Index += serializeWidth;
                 return (Int32)v;
             }
@@ -197,14 +197,14 @@ namespace EmbedXrpc
             }
             else if (vt == typeof(Int64))
             {
-                UInt64 v = Convert.ToUInt64((Int64)Buf[Index + 7] << 56);
-                v |= Convert.ToUInt64((Int64)Buf[Index + 6] << 48);
-                v |= Convert.ToUInt64((Int64)Buf[Index + 5] << 40);
-                v |= Convert.ToUInt64((Int64)Buf[Index + 4] << 32);
-                v |= Convert.ToUInt64((Int64)Buf[Index + 3] << 24);
-                v |= Convert.ToUInt64((Int64)Buf[Index + 2] << 16);
-                v |= Convert.ToUInt64((Int64)Buf[Index + 1] << 8);
-                v |= Convert.ToUInt64((Int64)Buf[Index]);
+                UInt64 v = Convert.ToUInt64((UInt64)Buf[Index + 7] << 56);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 6] << 48);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 5] << 40);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 4] << 32);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 3] << 24);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 2] << 16);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 1] << 8);
+                v |= Convert.ToUInt64((UInt64)Buf[Index]);
                 Index += serializeWidth;
                 return (Int64)v;
             }
