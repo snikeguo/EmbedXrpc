@@ -362,6 +362,16 @@ namespace EmbedXrpcIdlParser
                 
                 r = true;
             }
+            else if (t == typeof(float))
+            {
+
+                r = true;
+            }
+            else if (t == typeof(double))
+            {
+
+                r = true;
+            }
             else if(t == typeof(IntPtr))
             {
 

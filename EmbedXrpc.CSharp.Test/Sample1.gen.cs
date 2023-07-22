@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
 // auto code gen ! DO NOT modify this file!
-//C# Code Generater Version:3.3.0.0
+//C# Code Generater Version:3.6.1.0
 namespace Sample1
 {
 using UInt8 = Byte;
@@ -366,6 +366,118 @@ Sum7=(UInt32)sm.DeserializeField(typeof(System.UInt32),4);
 }
 
 }
+public class Student2:IEmbedXrpcSerialization
+{
+public const int Student2_u8_FieldNumber=1;
+[FieldNumber( 1) ] 
+[ArrayLenFieldFlag( false ) ]
+public byte u8{get;set;}
+
+
+public const int Student2_s8_FieldNumber=2;
+[FieldNumber( 2) ] 
+[ArrayLenFieldFlag( false ) ]
+public sbyte s8{get;set;}
+
+
+public const int Student2_u16_FieldNumber=3;
+[FieldNumber( 3) ] 
+[ArrayLenFieldFlag( false ) ]
+public UInt16 u16{get;set;}
+
+
+public const int Student2_i16_FieldNumber=4;
+[FieldNumber( 4) ] 
+[ArrayLenFieldFlag( false ) ]
+public Int16 i16{get;set;}
+
+
+public const int Student2_u32_FieldNumber=5;
+[FieldNumber( 5) ] 
+[ArrayLenFieldFlag( false ) ]
+public UInt32 u32{get;set;}
+
+
+public const int Student2_i32_FieldNumber=6;
+[FieldNumber( 6) ] 
+[ArrayLenFieldFlag( false ) ]
+public Int32 i32{get;set;}
+
+
+public const int Student2_u64_FieldNumber=7;
+[FieldNumber( 7) ] 
+[ArrayLenFieldFlag( false ) ]
+public UInt64 u64{get;set;}
+
+
+public const int Student2_i64_FieldNumber=8;
+[FieldNumber( 8) ] 
+[ArrayLenFieldFlag( false ) ]
+public Int64 i64{get;set;}
+
+
+public const int Student2_f_FieldNumber=9;
+[FieldNumber( 9) ] 
+[ArrayLenFieldFlag( false ) ]
+public float f{get;set;}
+
+
+public const int Student2_d_FieldNumber=10;
+[FieldNumber( 10) ] 
+[ArrayLenFieldFlag( false ) ]
+public double d{get;set;}
+
+
+public void Serialize(SerializationManager sm)
+{
+byte[] bytes=null;
+if(sm.Buf!=null) bytes=sm.ToBytes(u8,typeof(System.Byte));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=1;
+if(sm.Buf!=null) bytes=sm.ToBytes(s8,typeof(System.SByte));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=1;
+if(sm.Buf!=null) bytes=sm.ToBytes(u16,typeof(System.UInt16));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=2;
+if(sm.Buf!=null) bytes=sm.ToBytes(i16,typeof(System.Int16));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=2;
+if(sm.Buf!=null) bytes=sm.ToBytes(u32,typeof(System.UInt32));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=4;
+if(sm.Buf!=null) bytes=sm.ToBytes(i32,typeof(System.Int32));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=4;
+if(sm.Buf!=null) bytes=sm.ToBytes(u64,typeof(System.UInt64));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=8;
+if(sm.Buf!=null) bytes=sm.ToBytes(i64,typeof(System.Int64));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=8;
+if(sm.Buf!=null) bytes=sm.ToBytes(f,typeof(System.Single));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=4;
+if(sm.Buf!=null) bytes=sm.ToBytes(d,typeof(System.Double));
+if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
+sm.Index+=8;
+}
+
+public void Deserialize(SerializationManager sm)
+{
+u8=(byte)sm.DeserializeField(typeof(System.Byte),1);
+s8=(sbyte)sm.DeserializeField(typeof(System.SByte),1);
+u16=(UInt16)sm.DeserializeField(typeof(System.UInt16),2);
+i16=(Int16)sm.DeserializeField(typeof(System.Int16),2);
+u32=(UInt32)sm.DeserializeField(typeof(System.UInt32),4);
+i32=(Int32)sm.DeserializeField(typeof(System.Int32),4);
+u64=(UInt64)sm.DeserializeField(typeof(System.UInt64),8);
+i64=(Int64)sm.DeserializeField(typeof(System.Int64),8);
+f=(float)sm.DeserializeField(typeof(System.Single),4);
+d=(double)sm.DeserializeField(typeof(System.Double),8);
+}
+
+}
 public class DateTime_t:IEmbedXrpcSerialization
 {
 public const int DateTime_t_Year_FieldNumber=10086;
@@ -722,7 +834,7 @@ exi:
 return reqresp;
 }
 }
-//[ResponseServiceInfo(Name="Add",ServiceId=17)]
+[ResponseServiceInfo(Name="Add",ServiceId=17)]
 public partial class Add_Service<DTL>:IService<DTL> where DTL:struct
 {
 public static readonly UInt16 Add_ServiceId=17;//0x11

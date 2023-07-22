@@ -18,18 +18,6 @@ void Student_Deserialize(SerializationManager *sm,Student *obj,int isIsr);
 
 //! void Student_FreeData(Student *obj);
 
-void DynamicStudentArray_Serialize(SerializationManager *sm,DynamicStudentArray *obj);
-
-void DynamicStudentArray_Deserialize(SerializationManager *sm,DynamicStudentArray *obj,int isIsr);
-
- void DynamicStudentArray_FreeData(DynamicStudentArray *obj);
-
-void MixedStudentArray_Serialize(SerializationManager *sm,MixedStudentArray *obj);
-
-void MixedStudentArray_Deserialize(SerializationManager *sm,MixedStudentArray *obj,int isIsr);
-
- void MixedStudentArray_FreeData(MixedStudentArray *obj);
-
 #ifdef  __cplusplus
 }
 #endif

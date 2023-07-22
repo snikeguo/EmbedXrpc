@@ -4,38 +4,18 @@ using EmbedXrpcIdlParser;
 [FileName("Sample3.cs")]
 struct Student
 {
-    byte a;
-    byte b;
-    byte c;
-    byte d;
-
-    int e;
-
-
-
+    byte u8;
+    sbyte s8;
+    UInt16 u16;
+    Int16 i16;
+    UInt32 u32;
+    Int32 i32;
+    UInt64 u64;
+    Int64 i64;
+    float f;
+    double d;
 }
-[FileName("Sample3.cs")]
-struct DynamicStudentArray
-{
-    [FieldNumber(2)]
-    Int32 dataLen;
 
-    [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
-    Student[] FalseFixedStudent;
-
-    [MaxCount(LenFieldName = "dataLen", MaxCount = 15, IsFixed = true)]
-    Student[] TrueFixedStudent;
-
-    [MaxCount(LenFieldName = "dataLen", IsFixed = false)]
-    [NoSerialization]
-    Student[] NoSerializationStudent;
-}
-[FileName("Sample3.cs")]
-struct MixedStudentArray
-{
-    DynamicStudentArray DynamicStudent;
-    Student OneStudent;
-}
 [FileName("Sample3.cs")]
 public class OptionProcess : IOptionProcess
 {

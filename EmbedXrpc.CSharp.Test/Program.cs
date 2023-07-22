@@ -45,6 +45,35 @@ namespace EmbedXrpc
     {
         static void Main(string[] args)
         {
+            Student2 stu = new Student2();
+            stu.u8 = 0xff;
+            stu.s8 = -1;
+            stu.u16 = 0xffff;
+            stu.i16 = -1;
+            stu.u32 = UInt32.MaxValue;
+            stu.i32 = -1;
+            stu.u64 = UInt64.MaxValue;
+            stu.i64 = Int64.MaxValue;
+            stu.f = float.MaxValue;
+            stu.d = double.MaxValue;
+
+            byte[]x=new byte[128];
+            SerializationManager sm = new SerializationManager(Assembly.GetExecutingAssembly(),x,0);
+            stu.Serialize(sm);
+
+            var x2 = new byte[]
+            {
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+0xff,0xff,0x7f,0x7f,0xff,0xff,0xff,0xff,0xff,0xff,
+0xef,0x7f,
+            };
+            sm.Buf = x2;
+
+            sm.Index = 0;
+            Student2 dest = new Student2();
+            dest.Deserialize(sm);
 
 
             client = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(100, clientSend, Assembly.GetExecutingAssembly(),4096);

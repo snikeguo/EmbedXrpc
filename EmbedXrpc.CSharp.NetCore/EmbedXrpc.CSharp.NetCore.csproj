@@ -8,6 +8,7 @@
     <Company>snikeguo</Company>
     <Description>和单片机通讯的序列化和RPC库</Description>
     <Platforms>AnyCPU</Platforms>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

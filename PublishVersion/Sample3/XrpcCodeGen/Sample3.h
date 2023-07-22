@@ -11,39 +11,27 @@ extern "C" {
 
 typedef struct Student
 {
-uint8_t a;   //FieldNumber:1     
-uint8_t b;   //FieldNumber:2     
-uint8_t c;   //FieldNumber:3     
-uint8_t d;   //FieldNumber:4     
-int32_t e;   //FieldNumber:5     
+uint8_t u8;   //FieldNumber:1     
+int8_t s8;   //FieldNumber:2     
+uint16_t u16;   //FieldNumber:3     
+int16_t i16;   //FieldNumber:4     
+uint32_t u32;   //FieldNumber:5     
+int32_t i32;   //FieldNumber:6     
+uint64_t u64;   //FieldNumber:7     
+int64_t i64;   //FieldNumber:8     
+float f;   //FieldNumber:9     
+double d;   //FieldNumber:10     
 }Student;
-#define Student_a_FieldNumber  1
-#define Student_b_FieldNumber  2
-#define Student_c_FieldNumber  3
-#define Student_d_FieldNumber  4
-#define Student_e_FieldNumber  5
-
-
-typedef struct DynamicStudentArray
-{
-int32_t dataLen;   //FieldNumber:2     
-Student* FalseFixedStudent;   //FieldNumber:1     
-Student TrueFixedStudent[15];   //FieldNumber:3     
-Student* NoSerializationStudent;   //FieldNumber:4     NoSerialization
-}DynamicStudentArray;
-#define DynamicStudentArray_dataLen_FieldNumber  2
-#define DynamicStudentArray_FalseFixedStudent_FieldNumber  1
-#define DynamicStudentArray_TrueFixedStudent_FieldNumber  3
-#define DynamicStudentArray_NoSerializationStudent_FieldNumber  4
-
-
-typedef struct MixedStudentArray
-{
-DynamicStudentArray DynamicStudent;   //FieldNumber:1     
-Student OneStudent;   //FieldNumber:2     
-}MixedStudentArray;
-#define MixedStudentArray_DynamicStudent_FieldNumber  1
-#define MixedStudentArray_OneStudent_FieldNumber  2
+#define Student_u8_FieldNumber  1
+#define Student_s8_FieldNumber  2
+#define Student_u16_FieldNumber  3
+#define Student_i16_FieldNumber  4
+#define Student_u32_FieldNumber  5
+#define Student_i32_FieldNumber  6
+#define Student_u64_FieldNumber  7
+#define Student_i64_FieldNumber  8
+#define Student_f_FieldNumber  9
+#define Student_d_FieldNumber  10
 
 
 #ifdef  __cplusplus

@@ -30,7 +30,7 @@ namespace EmbedXrpc
             Index = index;
         }
 
-        public byte[] ToBytes( object obj,Type tp)
+        public unsafe byte[] ToBytes( object obj,Type tp)
         {
             //Console.WriteLine($"u8:{d}");
             byte[] bs = null;
@@ -48,7 +48,7 @@ namespace EmbedXrpc
             }
             else if (tp == typeof(sbyte))
             {
-                byte d = (byte)obj;
+                byte d=(byte)((sbyte)obj);
                 bs = new byte[1];
                 bs[0] = d;
             }
@@ -110,6 +110,30 @@ namespace EmbedXrpc
                 bs[6] = (byte)(d >> 48 & 0xFF);
                 bs[7] = (byte)(d >> 56 & 0xFF);
             }
+            else if (tp == typeof(System.Single))
+            {
+                bs = new byte[4];
+                float temp = (float)(obj);
+                UInt32 d = *((UInt32 *)(&temp));
+                bs[0] = (byte)(d & 0xFF);
+                bs[1] = (byte)(d >> 8 & 0xFF);
+                bs[2] = (byte)(d >> 16 & 0xFF);
+                bs[3] = (byte)(d >> 24 & 0xFF);
+            }
+            else if (tp == typeof(double))
+            {
+                bs = new byte[8];
+                double temp = (double)(obj);
+                UInt64 d = *((UInt64*)(&temp));
+                bs[0] = (byte)(d & 0xFF);
+                bs[1] = (byte)(d >> 8 & 0xFF);
+                bs[2] = (byte)(d >> 16 & 0xFF);
+                bs[3] = (byte)(d >> 24 & 0xFF);
+                bs[4] = (byte)(d >> 32 & 0xFF);
+                bs[5] = (byte)(d >> 40 & 0xFF);
+                bs[6] = (byte)(d >> 48 & 0xFF);
+                bs[7] = (byte)(d >> 56 & 0xFF);
+            }
             else
             {
                 throw new NotSupportedException($"NotSupported");
@@ -130,7 +154,7 @@ namespace EmbedXrpc
                 CurrentBitFieldType = null;
             }
         }
-        public object DeserializeField(Type vt,int serializeWidth)
+        public unsafe object DeserializeField(Type vt,int serializeWidth)
         {
             if (vt == typeof(bool))
             {
@@ -207,6 +231,30 @@ namespace EmbedXrpc
                 v |= Convert.ToUInt64((UInt64)Buf[Index]);
                 Index += serializeWidth;
                 return (Int64)v;
+            }
+            else if (vt == typeof(System.Single))
+            {
+                UInt32 v = Convert.ToUInt32((UInt32)Buf[Index + 3] << 24);
+                v |= Convert.ToUInt32((UInt32)Buf[Index + 2] << 16);
+                v |= Convert.ToUInt32((UInt32)Buf[Index + 1] << 8);
+                v |= Convert.ToUInt32((UInt32)Buf[Index]);
+                Index += serializeWidth;
+                var ret = *((float*)&v);
+                return ret;
+            }
+            else if (vt == typeof(System.Double))
+            {
+                UInt64 v = Convert.ToUInt64((UInt64)Buf[Index + 7] << 56);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 6] << 48);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 5] << 40);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 4] << 32);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 3] << 24);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 2] << 16);
+                v |= Convert.ToUInt64((UInt64)Buf[Index + 1] << 8);
+                v |= Convert.ToUInt64((UInt64)Buf[Index]);
+                Index += serializeWidth;
+                var ret = *((double*)&v);
+                return ret;
             }
             else 
             {
