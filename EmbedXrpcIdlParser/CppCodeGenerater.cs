@@ -481,7 +481,7 @@ namespace EmbedXrpcIdlParser
 
             if(service.NoDeserializeParameterAttribute!=null)
             {
-                hsw.WriteLine($"virtual void {service.ServiceName}(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager){{}}");
+                hsw.WriteLine($"virtual void {service.ServiceName}(ServiceInvokeParameter * serviceInvokeParameter,SerializationManager *recManager)=0;");
             }
             else
             {
@@ -503,7 +503,7 @@ namespace EmbedXrpcIdlParser
                         hsw.Write(",");
                     }
                 }
-                hsw.WriteLine("){}");
+                hsw.WriteLine(")=0;");
             }
            
 
