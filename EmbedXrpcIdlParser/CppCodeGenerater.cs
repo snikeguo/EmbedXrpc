@@ -348,7 +348,8 @@ namespace EmbedXrpcIdlParser
                         {
                             if (array_TargetField.MaxCountAttribute.IsFixed == true)
                             {
-                                csw.WriteLine($"for({lenField.TargetType.TypeName} index=0;index<{lenField.FieldName};index++)");
+                                var index_name=CppCsNanoSerializer.GetCppTypeDefineName(lenField.TargetType);
+                                csw.WriteLine($"for({index_name} index=0;index<{lenField.FieldName};index++)");
                                 csw.WriteLine("{");
                                 csw.WriteLine($"  {service.ServiceName}_SendData.{field.FieldName}[index]={field.FieldName}[index];");
                                 csw.WriteLine("}");
