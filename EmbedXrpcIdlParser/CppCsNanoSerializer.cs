@@ -138,8 +138,8 @@ namespace EmbedXrpcIdlParser
                     //var BitFieldCppTypeString = $"{ BaseType_TargetType.TypeReplaceDic[BitFieldCppType]}";
                     var a = $"sizeof({BitFieldCppDefineType})";
                     var b = $"{TargetTypeStrings[Field.TargetType.TargetType].TargetTypeSerializeWidth}";
-                    //SerializeCodeString.Add($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&bitsTempValue{BitFieldTempValueCount},{a});");
-                    SerializeCodeString.Add($"if(sm->Buf) *(({BitFieldCppDefineType} *)( &sm->Buf[sm->Index])) = bitsTempValue{BitFieldTempValueCount};");
+                    SerializeCodeString.Add($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&bitsTempValue{BitFieldTempValueCount},{a});");
+                    //SerializeCodeString.Add($"if(sm->Buf) *(({BitFieldCppDefineType} *)( &sm->Buf[sm->Index])) = bitsTempValue{BitFieldTempValueCount};");
                     // CsSerializeCodeString.Add($"sm.Buf.AddRange(sm.ToBytes(bitsTempValue{BitFieldTempValueCount},typeof({BitFieldType})));");
                     CsSerializeCodeString.Add($"if(sm.Buf!=null) bytes=sm.ToBytes(bitsTempValue{BitFieldTempValueCount},typeof({BitFieldType}));");
                     CsSerializeCodeString.Add($"if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);");
@@ -370,8 +370,8 @@ namespace EmbedXrpcIdlParser
                             defineSizeStrForCs = $"sizeof({TargetTypeStrings[base_TargetField.TargetType.TargetType].CsBaseTargetTypeDefineString})";
 
                         }
-                        //SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{base_TargetField.FieldName},{defineSizeStr});");
-                        SerializeCodeSb.AppendLine($"if(sm->Buf) *({TargetTypeStrings[base_TargetField.TargetType.TargetType].CppBaseTargetTypeDefineString} *)(&sm->Buf[sm->Index])=obj->{base_TargetField.FieldName};");
+                        SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{base_TargetField.FieldName},{defineSizeStr});");
+                        //SerializeCodeSb.AppendLine($"if(sm->Buf) *({TargetTypeStrings[base_TargetField.TargetType.TargetType].CppBaseTargetTypeDefineString} *)(&sm->Buf[sm->Index])=obj->{base_TargetField.FieldName};");
 
                         CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) bytes=sm.ToBytes({base_TargetField.FieldName},typeof({base_TargetField.TargetType.TargetType}));");
                         CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);");
@@ -418,8 +418,8 @@ namespace EmbedXrpcIdlParser
                     }
                     var a = $"sizeof({field.TargetType.TypeName})";
                     var b = $"{TargetTypeStrings[ettt.NumberType].TargetTypeSerializeWidth}";
-                    //SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},{a}<={b}?{a}:{b});");
-                    SerializeCodeSb.AppendLine($"if(sm->Buf) *({field.TargetType.TypeName} *)(&sm->Buf[sm->Index])=obj->{field.FieldName};");
+                    SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName},{a}<={b}?{a}:{b});");
+                    //SerializeCodeSb.AppendLine($"if(sm->Buf) *({field.TargetType.TypeName} *)(&sm->Buf[sm->Index])=obj->{field.FieldName};");
                     CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) bytes=sm.ToBytes({field.FieldName},typeof({ettt.NumberType}));");
                     CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);");
 
@@ -554,8 +554,8 @@ namespace EmbedXrpcIdlParser
                         {
                             serializeSizeOfStr = $"{TargetTypeStrings[attt.ElementType.TargetType].TargetTypeSerializeWidth}";
                         }
-                        //SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({TargetTypeStrings[attt.ElementType.TargetType].CppBaseTargetTypeDefineString}));");
-                        SerializeCodeSb.AppendLine($"if(sm->Buf) *({TargetTypeStrings[attt.ElementType.TargetType].CppBaseTargetTypeDefineString}*)(&sm->Buf[sm->Index])=obj->{field.FieldName}[{field.FieldName}_index];");
+                        SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],sizeof({TargetTypeStrings[attt.ElementType.TargetType].CppBaseTargetTypeDefineString}));");
+                        //SerializeCodeSb.AppendLine($"if(sm->Buf) *({TargetTypeStrings[attt.ElementType.TargetType].CppBaseTargetTypeDefineString}*)(&sm->Buf[sm->Index])=obj->{field.FieldName}[{field.FieldName}_index];");
                         CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) bytes=sm.ToBytes({field.FieldName}[{field.FieldName}_index],typeof({attt.ElementType.TargetType}));");
                         CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);");
 
@@ -573,8 +573,8 @@ namespace EmbedXrpcIdlParser
                         var ettt = attt.ElementType as EnumType_TargetType;
                         var a = $"sizeof({ettt.TypeName})";
                         var b = $"{TargetTypeStrings[ettt.NumberType].TargetTypeSerializeWidth}";
-                        //SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],{a}<={b}?{a}:{b});");
-                        SerializeCodeSb.AppendLine($"if(sm->Buf) *({ettt.TypeName}*)(&sm->Buf[sm->Index])=obj->{field.FieldName}[{field.FieldName}_index];");
+                        SerializeCodeSb.AppendLine($"if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->{field.FieldName}[{field.FieldName}_index],{a}<={b}?{a}:{b});");
+                        //SerializeCodeSb.AppendLine($"if(sm->Buf) *({ettt.TypeName}*)(&sm->Buf[sm->Index])=obj->{field.FieldName}[{field.FieldName}_index];");
                         CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) bytes=sm.ToBytes({field.FieldName}[{field.FieldName}_index],typeof({ettt.TypeName}));");
                         CsSerializeCodeSb.AppendLine($"if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);");
 
