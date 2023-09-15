@@ -110,7 +110,7 @@ namespace EmbedXrpcIdlParser
             {
                 CommonHsw.WriteLine(ev.Key + " = " + ev.Value.ToString() + ",");
             }
-            CommonHsw.WriteLine($"}}{CppCsNanoSerializer.GetCppTypeDefineName(targetEnum)};");
+            CommonHsw.WriteLine($"}}{CppCsNanoSerializer.GetCppTypeDefineName(targetEnum)};\r\n\r\n");
         }
 
         public static void EmitStruct(StructType_TargetType structType, StreamWriter CommonHsw)
@@ -120,6 +120,13 @@ namespace EmbedXrpcIdlParser
             SerializeCsw、SerializeHsw用来定义序列化的操作、行为等
              */
             StringBuilder FieldNumberSb = new StringBuilder();
+
+            if (structType.AlignAttribute != null)
+            {
+                CommonHsw.WriteLine("#pragma pack(push)");
+                CommonHsw.WriteLine($"#pragma pack({structType.AlignAttribute.Value})");
+            }
+
             CommonHsw.WriteLine($"typedef struct {CppCsNanoSerializer.GetCppTypeDefineName(structType)}");
             CommonHsw.WriteLine("{");
             if(structType.CppCustomMethodSignatures!=null)
@@ -129,7 +136,7 @@ namespace EmbedXrpcIdlParser
                     string fh = customMethodSign.Signature[customMethodSign.Signature.Length - 1] == ';' ? "" : ";";
                     CommonHsw.WriteLine(customMethodSign.Signature + fh);
                 }
-            }
+            } 
             
             foreach (var field in structType.TargetFields)
             {
@@ -167,6 +174,12 @@ namespace EmbedXrpcIdlParser
                 }
             }
             CommonHsw.WriteLine($"}}{CppCsNanoSerializer.GetCppTypeDefineName(structType)};");
+
+            if (structType.AlignAttribute != null)
+            {
+                CommonHsw.WriteLine("#pragma pack(pop)");
+            }
+
             FieldNumberSb.Append("\r\n");
             CommonHsw.WriteLine(FieldNumberSb.ToString());
 

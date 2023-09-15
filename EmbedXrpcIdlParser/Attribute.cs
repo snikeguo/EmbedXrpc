@@ -218,6 +218,16 @@ namespace EmbedXrpcIdlParser
         All
     }
 
+    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
+    public class AlignAttribute : Attribute
+    {
+        
+        public AlignAttribute(int v)
+        {
+            Value = v;   
+        }
+        public int Value { get; set; }
+    }
 #if false
     [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
     public class RoleAttribute : Attribute

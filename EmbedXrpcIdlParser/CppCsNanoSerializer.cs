@@ -270,31 +270,31 @@ namespace EmbedXrpcIdlParser
                 {
                     if (field.NoSerializationAttr.FieldName != string.Empty)
                     {
-                        SerializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}if(obj->{field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
-                        SerializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{{//{field.FieldName}");
+                        SerializeCodeSb.AppendLine($"if(obj->{field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
+                        SerializeCodeSb.AppendLine($"{{//{field.FieldName}");
 
-                        CsSerializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}if({field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
-                        CsSerializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{{//{field.FieldName}");
+                        CsSerializeCodeSb.AppendLine($"if({field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
+                        CsSerializeCodeSb.AppendLine($"{{//{field.FieldName}");
 
-                        DeserializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}if(obj->{field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
-                        DeserializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{{//{field.FieldName}");
+                        DeserializeCodeSb.AppendLine($"if(obj->{field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
+                        DeserializeCodeSb.AppendLine($"{{//{field.FieldName}");
 
-                        CsDeserializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}if({field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
-                        CsDeserializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{{");
+                        CsDeserializeCodeSb.AppendLine($"if({field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
+                        CsDeserializeCodeSb.AppendLine($"{{");
 
 
-                        FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{fieldNeedFreeMemoryNote}if(obj->{field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
-                        FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{fieldNeedFreeMemoryNote}{{//{field.FieldName}");
+                        FreeCodeSb.AppendLine($"if(obj->{field.NoSerializationAttr.FieldName}=={field.NoSerializationAttr.CompareValue})");
+                        FreeCodeSb.AppendLine($"{{//{field.FieldName}");
                     }
                     else
                     {
-                        SerializeCodeSb.AppendLine($"{StructFreeNote}//{field.FieldName}:NoSerialization");
-                        CsSerializeCodeSb.AppendLine($"{StructFreeNote}//{field.FieldName}:NoSerialization");
+                        SerializeCodeSb.AppendLine($"//{field.FieldName}:NoSerialization");
+                        CsSerializeCodeSb.AppendLine($"//{field.FieldName}:NoSerialization");
 
-                        DeserializeCodeSb.AppendLine($"{StructFreeNote}//{field.FieldName}:NoSerialization");
-                        CsDeserializeCodeSb.AppendLine($"{StructFreeNote}//{field.FieldName}:NoSerialization");
+                        DeserializeCodeSb.AppendLine($"//{field.FieldName}:NoSerialization");
+                        CsDeserializeCodeSb.AppendLine($"//{field.FieldName}:NoSerialization");
 
-                        FreeCodeSb.AppendLine($"{StructFreeNote}//{field.FieldName}:NoSerialization ");
+                        FreeCodeSb.AppendLine($"//{field.FieldName}:NoSerialization ");
                     }
                     
                 }
@@ -661,11 +661,11 @@ namespace EmbedXrpcIdlParser
                 noSerialize:
                 if (field.NoSerializationAttr != null && field.NoSerializationAttr.FieldName != string.Empty)
                 {
-                    SerializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}}}");
-                    CsSerializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}}}");
-                    DeserializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}}}");
-                    CsDeserializeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}}}");
-                    FreeCodeSb.AppendLine($"{StructFreeNote}{noSerializeAttrNote}{fieldNeedFreeMemoryNote}}}");
+                    SerializeCodeSb.AppendLine($"}}");
+                    CsSerializeCodeSb.AppendLine($"}}");
+                    DeserializeCodeSb.AppendLine($"}}");
+                    CsDeserializeCodeSb.AppendLine($"}}");
+                    FreeCodeSb.AppendLine($"}}");
                 }
                 if (field.UnionFieldAttr != null)
                 {

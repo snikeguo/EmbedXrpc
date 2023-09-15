@@ -162,6 +162,7 @@ namespace EmbedXrpcIdlParser
         public ITargetField UnionTargetTypeField { get; set; }
 
         public List<CppCustomMethodSignatureAttribute> CppCustomMethodSignatures { get; set; }
+        public AlignAttribute AlignAttribute { get; set; }
 
         public bool? _IsNeedFreeMemoryForNativeLanguage;
         public bool IsNeedFreeMemoryForNativeLanguage
@@ -467,6 +468,8 @@ namespace EmbedXrpcIdlParser
             BitFieldStateMachine bitFieldStateMachine = new BitFieldStateMachine();
             List<CppCustomMethodSignatureAttribute> cppCustomMethodSignatures = new List<CppCustomMethodSignatureAttribute>(object_type.GetCustomAttributes<CppCustomMethodSignatureAttribute>());
             targetStructType.CppCustomMethodSignatures = cppCustomMethodSignatures;
+
+            targetStructType.AlignAttribute = object_type.GetCustomAttribute<AlignAttribute>();
 
             bool isWriteUnion = false;
             //bool IsUnionComplete = false;
