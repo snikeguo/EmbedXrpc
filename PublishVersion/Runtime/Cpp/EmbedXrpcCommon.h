@@ -4,17 +4,20 @@
 
 #include "EmbedXrpcPortInterface.h"
 #include "EmbedSerialization.h"
+#define EmbedXrpcNoReceivedSid  0x0
 #define EmbedXrpcSuspendSid 0x01
 #define EmbedXrpcUnsupportedSid 0x2
+
 class EmbedXrpcObject;
- enum RequestResponseState
- {
-     RequestState_Ok=1,
-     RequestState_Failed=2,
-     ResponseState_Ok=3,
-     ResponseState_Timeout=4,
-     ResponseState_SidError=5,
-     ResponseState_UnsupportedSid = 6,
+enum RequestResponseState
+{
+    RequestState_Ok = 1,
+    RequestState_Failed = 2,
+    ResponseState_Ok = 3,
+    ResponseState_Timeout = 4,
+    ResponseState_SidError = 5,
+    ResponseState_UnsupportedSid = 6,
+    ResponseState_NoReceived = 7,
  };
  struct BlockBufferProviderConfig
  {

@@ -10,5 +10,5 @@ typedef struct DTL UserDataOfTransportLayer_t;
 
 #define EmbedXrpc_NameMaxLen	32
 
-
+#define EmbedXrpc_UsingOs 1
 #endif

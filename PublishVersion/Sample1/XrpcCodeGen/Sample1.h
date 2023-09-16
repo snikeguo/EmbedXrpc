@@ -17,6 +17,8 @@ typedef enum Sex //serialize number type:UInt64
 Man = 2,
 WoMan = 9,
 }Sex;
+
+
 typedef struct AddResult
 {
 bool boolTest;   //FieldNumber:1     

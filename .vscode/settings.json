@@ -1,5 +1,11 @@
 {
     "files.associations": {
-        "array": "cpp"
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "chrono": "cpp",
+        "functional": "cpp",
+        "limits": "cpp",
+        "thread": "cpp",
+        "type_traits": "cpp"
     }
 }

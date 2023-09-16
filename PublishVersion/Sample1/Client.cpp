@@ -109,7 +109,20 @@ void ClientThread()
 		Client.Add_SendData.test[0].DateTimeArray = (DateTime_t*)malloc(sizeof(DateTime_t) * 2);
 		memset(Client.Add_SendData.test[0].DateTimeArray, 0, sizeof(DateTime_t) * 2);
 		Client.Add_SendData.test[0].DateTimeArray[0].Year = 1;
-		auto sum = Client.Add(&rp);//request对象请求service
+#if EmbedXrpc_UsingOs==0
+		auto sum = Client.NoOs_Add(&rp);//request对象请求service 
+		while (1)
+		{
+			sum = Client.NoOs_QueryServiceState(&rp);
+			if (sum.State != RequestResponseState::ResponseState_NoReceived)
+			{
+				break;
+			}
+			Sleep(1);
+		}
+#else
+		auto sum = Client.Add(&rp);//request对象请求service 
+#endif
 		if (sum.State != ResponseState_Ok)
 		{
 			printf("Client was requested the \"Add\" service Faild! error code:%d\n", sum.State);
@@ -119,7 +132,7 @@ void ClientThread()
 			printf("client:sum7 is:%d\n", sum.ReturnValue.Sum7);
 		}
 		Client.Free_Add(&sum);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
 	ClientRpc.DeInit();

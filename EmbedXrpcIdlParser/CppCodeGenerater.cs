@@ -269,6 +269,13 @@ namespace EmbedXrpcIdlParser
         {
             //生成客户端代码
             string ReturnStructFreeNote = service.ReturnStructType.IsNeedFreeMemoryForNativeLanguage == true ? "" : "//!";
+
+            var noOsCms = new MemoryStream();
+            var noOsHms=new MemoryStream();
+            StreamWriter noOsCsw=new StreamWriter(noOsCms);
+            StreamWriter noOsHsw=new StreamWriter(noOsHms);
+            noOsHsw.WriteLine("//---------No Os-----------");
+
             CppSerializableCommon.MacroControlWriteBegin(hsw, service.MacroControlAttribute);
             CppSerializableCommon.MacroControlWriteBegin(csw, service.MacroControlAttribute);
             hsw.WriteLine("class " + service.ServiceName + "_Requester");
@@ -278,7 +285,8 @@ namespace EmbedXrpcIdlParser
             hsw.WriteLine("uint16_t GetSid(){{return {0}_ServiceId;}}", service.ServiceName);
             string temp_fileds = string.Empty;
 
-
+            noOsHsw.WriteLine("uint32_t RequestTick;");
+            noOsHsw.WriteLine($"{service.ReturnStructType.TypeName}& NoOs_QueryServiceState(RequestParameter* rp);");
             hsw.WriteLine($"{service.ParameterStructType.TypeName} {service.ServiceName}_SendData;");
             hsw.WriteLine($"{service.ReturnStructType.TypeName} {service.ServiceName}_reqresp;");
             //string GeneratServiceName = targetInterface.Name + "_" + service.ServiceName;
@@ -286,7 +294,11 @@ namespace EmbedXrpcIdlParser
             {
                 var dh = service.ParameterStructType.TargetFields.Count > 0 ? "," : "";
                 hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(RequestParameter* rp{dh}");
+                noOsHsw.Write($"{service.ReturnStructType.TypeName}& NoOs_{service.ServiceName}(RequestParameter* rp{dh}");
+
                 csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(RequestParameter* rp{dh}");
+                noOsCsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::NoOs_{service.ServiceName}(RequestParameter* rp{dh}");
+
                 temp_fileds = string.Empty;
                 for (int i = 0; i < service.ParameterStructType.TargetFields.Count; i++)
                 {
@@ -295,33 +307,49 @@ namespace EmbedXrpcIdlParser
                     temp_fileds += name + ",";
 
                     hsw.Write($"{CppSerializableCommon.EmitField(field)}");
+                    noOsHsw.Write($"{CppSerializableCommon.EmitField(field)}");
                     csw.Write($"{CppSerializableCommon.EmitField(field)}");
+                    noOsCsw.Write($"{CppSerializableCommon.EmitField(field)}");
 
                     if (i + 1 < service.ParameterStructType.TargetFields.Count)
                     {
                         hsw.Write(",");
+                        noOsHsw.Write(",");
                         csw.Write(",");
+                        noOsCsw.Write(",");
                     }
                 }
                 hsw.WriteLine(");");
+                noOsHsw.WriteLine(");");
                 csw.WriteLine(")\n{");
+                noOsCsw.WriteLine(")\n{");
             }
             else
             {
                 hsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}(RequestParameter* rp);");
+                noOsHsw.Write($"{service.ReturnStructType.TypeName}& NoOs_{service.ServiceName}(RequestParameter* rp);");
                 csw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::{service.ServiceName}(RequestParameter* rp)\n{{");
+                noOsCsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::NoOs_{service.ServiceName}(RequestParameter* rp)\n{{");
             }
 
 
 
             csw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
+            noOsCsw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
+
             csw.WriteLine($"SerializationManager sm;");
+            noOsCsw.WriteLine($"SerializationManager sm;");
+
             csw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
+            noOsCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
+
             csw.WriteLine($"auto result=false;");
+            noOsCsw.WriteLine($"auto result=false;");
 
             if (service.ReturnStructType.TargetFields.Count > 1)//index 0 is state. 1 is returnfield
             {
                 csw.WriteLine($"auto waitstate=ResponseState_Timeout;");
+                noOsCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
             }
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
@@ -331,8 +359,15 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);");
             csw.WriteLine("}\r\nelse\r\n{");
             csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService,rp->IsIsr);");
+            noOsCsw.WriteLine("RequestTick=El_GetTick(rp->IsIsr);");
+            noOsCsw.WriteLine("RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;");
+            noOsCsw.WriteLine("RpcObject->CurrentReceivedData.DataLen=0;");
+            noOsCsw.WriteLine("RpcObject->CurrentReceivedData.Data=NULL;");
             csw.WriteLine("}\r\n");
             csw.WriteLine("sm.Index=0;\n" +
+                "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];\n" +
+                "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;");
+            noOsCsw.WriteLine("sm.Index=0;\n" +
                 "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];\n" +
                 "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;");
 
@@ -350,13 +385,18 @@ namespace EmbedXrpcIdlParser
                             {
                                 var index_name=CppCsNanoSerializer.GetCppTypeDefineName(lenField.TargetType);
                                 csw.WriteLine($"for({index_name} index=0;index<{lenField.FieldName};index++)");
+                                noOsCsw.WriteLine($"for({index_name} index=0;index<{lenField.FieldName};index++)");
                                 csw.WriteLine("{");
+                                noOsCsw.WriteLine("{");
                                 csw.WriteLine($"  {service.ServiceName}_SendData.{field.FieldName}[index]={field.FieldName}[index];");
+                                noOsCsw.WriteLine($"  {service.ServiceName}_SendData.{field.FieldName}[index]={field.FieldName}[index];");
                                 csw.WriteLine("}");
+                                noOsCsw.WriteLine("}");
                             }
                             else
                             {
                                 csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
+                                noOsCsw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
                             }
                         }
                         else
@@ -364,44 +404,86 @@ namespace EmbedXrpcIdlParser
                             if (array_TargetField.MaxCountAttribute.IsFixed == true)
                             {
                                 csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}[0]={field.FieldName}[0];");
+                                noOsCsw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}[0]={field.FieldName}[0];");
                             }
                             else
                             {
                                 csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
+                                noOsCsw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
                             }
                         }
                     }
                     else
                     {
                         csw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
+                        noOsCsw.WriteLine($"{service.ServiceName}_SendData.{field.FieldName}={field.FieldName};");
                     }
 
                 }
             }
             csw.WriteLine($"{service.ParameterStructType.TypeName}_Serialize(&sm,&{service.ServiceName}_SendData);");
+            noOsCsw.WriteLine($"{service.ParameterStructType.TypeName}_Serialize(&sm,&{service.ServiceName}_SendData);");
 
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);\n");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);\n");
 
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);\n");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);\n");
+
 
             csw.WriteLine($"uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);");
+            noOsCsw.WriteLine($"uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
+
             csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
+            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
+
 
             csw.WriteLine($"result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
+            noOsCsw.WriteLine($"result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
+
             csw.WriteLine("sm.Index=0;");
+            noOsCsw.WriteLine("sm.Index=0;");
+
+
             csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\n}}");
+            noOsCsw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\n}}");
+
             csw.WriteLine("else\n{");
+            noOsCsw.WriteLine("else\n{");
+
             csw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Ok;\n");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Ok;\n");
+
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
 
@@ -441,24 +523,80 @@ namespace EmbedXrpcIdlParser
                 csw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");
             }
             csw.WriteLine("}");
+            noOsCsw.WriteLine("}");
+
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
             csw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle,rp->IsIsr);");
             csw.WriteLine("}");
+
             csw.WriteLine($"return {service.ServiceName}_reqresp;");
+            noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+
             csw.WriteLine("}");
+            noOsCsw.WriteLine("}");
+
 
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
                 hsw.WriteLine($"void Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response);\n");
+
                 csw.WriteLine($"void {service.ServiceName}_Requester::Free_{service.ServiceName}({service.ReturnStructType.TypeName} *response)");
+
                 csw.WriteLine("{\nif(response->State==ResponseState_Ok)\n{");
+
                 csw.WriteLine($"{ReturnStructFreeNote}{service.ReturnStructType.TypeName}_FreeData(response);");
+
                 csw.WriteLine("}\n}");
             }
 
 
             csw.WriteLine();
+            noOsCsw.WriteLine();
+
+            //裸机实现
+            noOsCsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::NoOs_QueryServiceState(RequestParameter* rp)\n{{");
+            noOsCsw.WriteLine($"SerializationManager sm;");
+            noOsCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
+            noOsCsw.WriteLine($"uint32_t nowTick = El_GetTick(rp->IsIsr);");
+
+            noOsCsw.WriteLine("if((RequestTick+RpcObject->TimeOut)<nowTick)\n{");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_Timeout;");
+            noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+            noOsCsw.WriteLine("}");
+
+            noOsCsw.WriteLine("if(RpcObject->CurrentReceivedData.Sid == EmbedXrpcNoReceivedSid)\n{");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_NoReceived;");
+            noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+            noOsCsw.WriteLine("}");
+
+            noOsCsw.WriteLine($"else if (RpcObject->CurrentReceivedData.Sid == {service.ServiceName}_ServiceId)\n{{");
+            noOsCsw.WriteLine($"sm.Index=0;");
+            noOsCsw.WriteLine($"sm.BufferLen = RpcObject->CurrentReceivedData.DataLen;");
+            noOsCsw.WriteLine($"sm.Buf = RpcObject->CurrentReceivedData.Data;");
+            noOsCsw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp,rp->IsIsr);");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_Ok;");
+            noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+            noOsCsw.WriteLine("}");
+
+            noOsCsw.WriteLine("else\n{");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_SidError;");
+            noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+            noOsCsw.WriteLine("}");
+
+            noOsCsw.WriteLine("}");//NoOs_QueryServiceState
+
+            noOsCsw.Flush();
+            noOsHsw.Flush();
+
+            csw.Flush();
+            hsw.Flush();
+
+            noOsCsw.BaseStream.Position = 0;
+            noOsHsw.BaseStream.Position = 0;
+            noOsCsw.BaseStream.CopyTo(csw.BaseStream);
+            noOsHsw.BaseStream.CopyTo(hsw.BaseStream);
+
             hsw.WriteLine("};\n");//class end
 
             CppSerializableCommon.MacroControlWriteEnd(csw, service.MacroControlAttribute);

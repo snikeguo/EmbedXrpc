@@ -215,3 +215,7 @@ extern "C"
 		::memset(d, v, size);
 	}
 }
+uint32_t El_GetTick(int isIsr)
+{
+	return GetTickCount();
+}

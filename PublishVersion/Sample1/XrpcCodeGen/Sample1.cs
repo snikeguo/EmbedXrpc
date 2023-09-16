@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using EmbedXrpc;
 // auto code gen ! DO NOT modify this file!
-//C# Code Generater Version:3.6.0.0
+//C# Code Generater Version:4.2.0.0
 namespace Sample1
 {
 using UInt8 = Byte;
@@ -105,7 +105,7 @@ sm.Index+=4;
 if(sm.Buf!=null) bytes=sm.ToBytes(dataLen,typeof(System.Int32));
 if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
 sm.Index+=4;
-//! //data:NoSerialization
+//data:NoSerialization
 UInt64 bitsTempValue1=0;
 bitsTempValue1 |= ((UInt64)(Sum4))<< 0 ;
 bitsTempValue1 |= ((UInt64)(Sum5))<< 11 ;
@@ -116,7 +116,7 @@ sm.Index+=8;
 if(sm.Buf!=null) bytes=sm.ToBytes(Sum7,typeof(System.UInt32));
 if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
 sm.Index+=4;
-//! //PtrTest:NoSerialization
+//PtrTest:NoSerialization
 }
 
 public void Deserialize(SerializationManager sm)
@@ -128,14 +128,14 @@ Sum=bitsTempValue0>>0;
 Sum2=bitsTempValue0>>11;
 Sum3=bitsTempValue0>>30;
 dataLen=(Int32)sm.DeserializeField(typeof(System.Int32),4);
-//! //data:NoSerialization
+//data:NoSerialization
 UInt64 bitsTempValue1=0;
 bitsTempValue1=(UInt64)sm.DeserializeField(typeof(System.UInt64),8);
 Sum4=bitsTempValue1>>0;
 Sum5=bitsTempValue1>>11;
 Sum6=bitsTempValue1>>30;
 Sum7=(UInt32)sm.DeserializeField(typeof(System.UInt32),4);
-//! //PtrTest:NoSerialization
+//PtrTest:NoSerialization
 }
 
 }

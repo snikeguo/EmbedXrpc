@@ -14,6 +14,10 @@ GetSum_Return GetSum_reqresp;
 GetSum_Return& GetSum(RequestParameter* rp,int32_t a,int32_t b);
 void Free_GetSum(GetSum_Return *response);
 
+//---------No Os-----------
+uint32_t RequestTick;
+GetSum_Return& NoOs_QueryServiceState(RequestParameter* rp);
+GetSum_Return& NoOs_GetSum(RequestParameter* rp,int32_t a,int32_t b);
 };
 
 

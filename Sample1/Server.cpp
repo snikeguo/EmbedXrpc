@@ -22,8 +22,8 @@ bool ServerSend(RequestParameter* rp,
 
 void Add_Parameter_Deserialize2(SerializationManager* sm, Add_Parameter* obj, int isIsr)
 {
-	DeserializeField(nullptr, sm, 4, sizeof(int32_t), isIsr);
-	DeserializeField(nullptr, sm, 4, sizeof(int32_t), isIsr);
+	DeserializeField((uint8_t*)&obj->a, sm, 4, sizeof(int32_t), isIsr);
+	DeserializeField((uint8_t*)&obj->b, sm, 4, sizeof(int32_t), isIsr);
 	DeserializeField((uint8_t*)&obj->dataLen, sm, 4, sizeof(int32_t), isIsr);
 	//obj->data = (uint8_t*)El_Malloc(sizeof(uint8_t) * obj->dataLen);
 	//El_Memset(obj->data, 0, sizeof(uint8_t) * obj->dataLen);
@@ -47,15 +47,13 @@ void Add_Parameter_Deserialize2(SerializationManager* sm, Add_Parameter* obj, in
 class Inter_AddServiceProvider :public Add_Service
 {
 public:
-	void Add(ServiceInvokeParameter* serviceInvokeParameter,SerializationManager *recManager)//int32_t a, int32_t b, int32_t dataLen, uint8_t* data,TestSerialize* test
+	void Add(ServiceInvokeParameter* serviceInvokeParameter, int32_t a, int32_t b, int32_t dataLen, uint8_t* data, TestSerialize test[1])//int32_t a, int32_t b, int32_t dataLen, uint8_t* data,TestSerialize* test
 	{
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
 		RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
-		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2,0);
+		//El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2,0);
 		this->IsFreeResponse = true;
-		
-		Add_Parameter_Deserialize2(recManager, &request, serviceInvokeParameter->IsIsr);
 
 		Response.ReturnValue.Sum = 1;
 		Response.ReturnValue.Sum2 = 2;
@@ -64,12 +62,12 @@ public:
 		Response.ReturnValue.Sum4 = 1;
 		Response.ReturnValue.Sum5 = 2;
 		Response.ReturnValue.Sum6 = 3;
-		//Response.ReturnValue.Sum7 = a+b;
+		Response.ReturnValue.Sum7 = a+ b;
 
 		Response.ReturnValue.dataLen = 0;
 		Response.ReturnValue.data = NULL;
 		printf("server: addservice 模拟耗时操作  延时2秒\n");
-		std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 		//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 		//printf("len:%d\n", dataLen);
 	}

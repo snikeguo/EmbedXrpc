@@ -206,6 +206,19 @@ void El_Memset(void* d, int v, uint32_t size)
 {
 	memset(d, v, size);
 }
+uint32_t El_GetTick(int isIsr)
+{
+	if(isIsr)
+	{
+		return xTaskGetTickCountFromISR();
+	}
+	else
+	{
+		return xTaskGetTickCount();
+	}
+	
+}
+
 #ifdef __cplusplus
 }
 #endif

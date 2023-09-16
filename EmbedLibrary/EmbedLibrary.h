@@ -102,6 +102,7 @@ extern "C" {
 	void El_Free(void* ptr);
 	void El_Memcpy(void* d, const void* s, uint32_t size);
 	void El_Memset(void* d, int v, uint32_t size);
+	uint32_t El_GetTick(int isIsr);
 #ifdef __cplusplus
 }
 #endif

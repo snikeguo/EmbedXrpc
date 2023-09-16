@@ -5,29 +5,29 @@
 
 void AddResult_Serialize(SerializationManager *sm,AddResult *obj)
 {
-if(sm->Buf) *(bool *)(&sm->Buf[sm->Index])=obj->boolTest;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->boolTest,sizeof(bool));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 uint32_t bitsTempValue0=0;
 bitsTempValue0 |= ((uint32_t)(obj->Sum))<< 0 ;
 bitsTempValue0 |= ((uint32_t)(obj->Sum2))<< 11 ;
 bitsTempValue0 |= ((uint32_t)(obj->Sum3))<< 30 ;
-if(sm->Buf) *((uint32_t *)( &sm->Buf[sm->Index])) = bitsTempValue0;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&bitsTempValue0,sizeof(uint32_t));
 sm->Index+=4;
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->dataLen;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->dataLen,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-//! //data:NoSerialization
+//data:NoSerialization
 uint64_t bitsTempValue1=0;
 bitsTempValue1 |= ((uint64_t)(obj->Sum4))<< 0 ;
 bitsTempValue1 |= ((uint64_t)(obj->Sum5))<< 11 ;
 bitsTempValue1 |= ((uint64_t)(obj->Sum6))<< 30 ;
-if(sm->Buf) *((uint64_t *)( &sm->Buf[sm->Index])) = bitsTempValue1;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&bitsTempValue1,sizeof(uint64_t));
 sm->Index+=8;
-if(sm->Buf) *(uint32_t *)(&sm->Buf[sm->Index])=obj->Sum7;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Sum7,sizeof(uint32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-//! //PtrTest:NoSerialization
+//PtrTest:NoSerialization
 }
 
 void AddResult_Deserialize(SerializationManager *sm,AddResult *obj,int isIsr)
@@ -39,54 +39,54 @@ obj->Sum=bitsTempValue0>>0;
 obj->Sum2=bitsTempValue0>>11;
 obj->Sum3=bitsTempValue0>>30;
 DeserializeField((uint8_t *)&obj->dataLen,sm,4,sizeof(int32_t),isIsr);
-//! //data:NoSerialization
+//data:NoSerialization
 uint64_t bitsTempValue1=0;
 DeserializeField((uint8_t *)&bitsTempValue1,sm,8,sizeof(uint64_t),isIsr);
 obj->Sum4=bitsTempValue1>>0;
 obj->Sum5=bitsTempValue1>>11;
 obj->Sum6=bitsTempValue1>>30;
 DeserializeField((uint8_t *)&obj->Sum7,sm,4,sizeof(uint32_t),isIsr);
-//! //PtrTest:NoSerialization
+//PtrTest:NoSerialization
 }
 
 //! void AddResult_FreeData(AddResult *obj)
 //! {
-//! //data:NoSerialization 
-//! //PtrTest:NoSerialization 
+//data:NoSerialization 
+//PtrTest:NoSerialization 
 //! }
 
 void Student_Serialize(SerializationManager *sm,Student *obj)
 {
 #if MyMacro==TRUE
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->a;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 #endif // #if MyMacro==TRUE
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->b;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->b,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->AddressType;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->AddressType,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 switch(obj->AddressType)
 {
 #if MyMacro==TRUE
 case Student_u1_FieldNumber:
-if(sm->Buf) *(uint8_t *)(&sm->Buf[sm->Index])=obj->u1;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->u1,sizeof(uint8_t));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 break;
 #endif // #if MyMacro==TRUE
 #if MyMacro==TRUE
 case Student_u2_FieldNumber:
-if(sm->Buf) *(uint64_t *)(&sm->Buf[sm->Index])=obj->u2;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->u2,sizeof(uint64_t));
 sm->Index+=8;
 El_Assert(sm->Index<=sm->BufferLen);
 break;
 #endif // #if MyMacro==TRUE
 #if MyMacro==TRUE
 case Student_u3_FieldNumber:
-if(sm->Buf) *(Sex *)(&sm->Buf[sm->Index])=obj->u3;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->u3,sizeof(Sex)<=8?sizeof(Sex):8);
 sm->Index+=8;
 El_Assert(sm->Index<=sm->BufferLen);
 break;
@@ -98,12 +98,12 @@ break;
 #endif // #if MyMacro==TRUE
 }
 #if MyMacro==TRUE
-if(sm->Buf) *(uint8_t *)(&sm->Buf[sm->Index])=obj->uend1;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->uend1,sizeof(uint8_t));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 #endif // #if MyMacro==TRUE
 #if MyMacro==TRUE
-if(sm->Buf) *(uint8_t *)(&sm->Buf[sm->Index])=obj->uend2;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->uend2,sizeof(uint8_t));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 #endif // #if MyMacro==TRUE
@@ -179,34 +179,34 @@ DeserializeField((uint8_t *)&obj->uend2,sm,1,sizeof(uint8_t),isIsr);
 
 void DateTime_t_Serialize(SerializationManager *sm,DateTime_t *obj)
 {
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->Year;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Year,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->Month;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Month,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->Day;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Day,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->Hour;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Hour,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->Min;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Min,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->Sec;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Sec,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(Sex *)(&sm->Buf[sm->Index])=obj->Sex;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->Sex,sizeof(Sex)<=8?sizeof(Sex):8);
 sm->Index+=8;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(uint8_t *)(&sm->Buf[sm->Index])=obj->DateStringLen;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->DateStringLen,sizeof(uint8_t));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 #if MyMacro==TRUE
 for(uint8_t DateString_index=0;DateString_index<obj->DateStringLen;DateString_index++)
 {
-if(sm->Buf) *(uint8_t*)(&sm->Buf[sm->Index])=obj->DateString[DateString_index];
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->DateString[DateString_index],sizeof(uint8_t));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
@@ -248,16 +248,16 @@ Student_Deserialize(sm,&obj->David,isIsr);
 
 void TestSerialize_Serialize(SerializationManager *sm,TestSerialize *obj)
 {
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->EnumArrayLen;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->EnumArrayLen,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 for(int32_t EnumArray_index=0;EnumArray_index<obj->EnumArrayLen;EnumArray_index++)
 {
-if(sm->Buf) *(Sex*)(&sm->Buf[sm->Index])=obj->EnumArray[EnumArray_index];
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->EnumArray[EnumArray_index],sizeof(Sex)<=8?sizeof(Sex):8);
 sm->Index+=8;
 El_Assert(sm->Index<=sm->BufferLen);
 }
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->ObjectArrayLen;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->ObjectArrayLen,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 for(int32_t DateTimeArray_index=0;DateTimeArray_index<obj->EnumArrayLen;DateTimeArray_index++)
@@ -311,7 +311,7 @@ DateTime_t_Deserialize(sm,&obj->FiexDateTimeArray[FiexDateTimeArray_index],isIsr
 
 void DateTimeChange_Return_Serialize(SerializationManager *sm,DateTimeChange_Return *obj)
 {
-if(sm->Buf) *(RequestResponseState *)(&sm->Buf[sm->Index])=obj->State;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
@@ -351,7 +351,7 @@ DateTime_t_Deserialize(sm,&obj->now[now_index],isIsr);
 
 void Test2_Return_Serialize(SerializationManager *sm,Test2_Return *obj)
 {
-if(sm->Buf) *(RequestResponseState *)(&sm->Buf[sm->Index])=obj->State;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
@@ -391,7 +391,7 @@ DateTime_t_Deserialize(sm,&obj->now[now_index],isIsr);
 
 void Add_Return_Serialize(SerializationManager *sm,Add_Return *obj)
 {
-if(sm->Buf) *(RequestResponseState *)(&sm->Buf[sm->Index])=obj->State;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 AddResult_Serialize(sm,&obj->ReturnValue);
@@ -410,18 +410,18 @@ AddResult_Deserialize(sm,&obj->ReturnValue,isIsr);
 
 void Add_Parameter_Serialize(SerializationManager *sm,Add_Parameter *obj)
 {
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->a;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->b;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->b,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->dataLen;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->dataLen,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 for(int32_t data_index=0;data_index<obj->dataLen;data_index++)
 {
-if(sm->Buf) *(uint8_t*)(&sm->Buf[sm->Index])=obj->data[data_index];
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->data[data_index],sizeof(uint8_t));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
@@ -462,10 +462,10 @@ TestSerialize_Deserialize(sm,&obj->test[test_index],isIsr);
 
 void NoArg_Return_Serialize(SerializationManager *sm,NoArg_Return *obj)
 {
-if(sm->Buf) *(RequestResponseState *)(&sm->Buf[sm->Index])=obj->State;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
-if(sm->Buf) *(bool *)(&sm->Buf[sm->Index])=obj->ReturnValue;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->ReturnValue,sizeof(bool));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
@@ -494,7 +494,7 @@ void NoArg_Parameter_Deserialize(SerializationManager *sm,NoArg_Parameter *obj,i
 
 void NoReturn_Return_Serialize(SerializationManager *sm,NoReturn_Return *obj)
 {
-if(sm->Buf) *(RequestResponseState *)(&sm->Buf[sm->Index])=obj->State;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
@@ -510,7 +510,7 @@ DeserializeField((uint8_t *)&obj->State,sm,1,sizeof(RequestResponseState),isIsr)
 
 void NoReturn_Parameter_Serialize(SerializationManager *sm,NoReturn_Parameter *obj)
 {
-if(sm->Buf) *(int32_t *)(&sm->Buf[sm->Index])=obj->a;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->a,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
 }
@@ -526,7 +526,7 @@ DeserializeField((uint8_t *)&obj->a,sm,4,sizeof(int32_t),isIsr);
 
 void NoArgAndReturn_Return_Serialize(SerializationManager *sm,NoArgAndReturn_Return *obj)
 {
-if(sm->Buf) *(RequestResponseState *)(&sm->Buf[sm->Index])=obj->State;
+if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->State,sizeof(RequestResponseState)<=1?sizeof(RequestResponseState):1);
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 }
