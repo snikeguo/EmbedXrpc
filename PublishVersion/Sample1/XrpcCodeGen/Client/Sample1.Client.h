@@ -14,7 +14,6 @@ DateTimeChange_Return DateTimeChange_reqresp;
 DateTimeChange_Return& DateTimeChange(RequestParameter* rp,DateTime_t now[1]);
 //---------No Os-----------
 uint32_t RequestTick;
-DateTimeChange_Return& NoOs_QueryServiceState(RequestParameter* rp);
 DateTimeChange_Return& NoOs_DateTimeChange(RequestParameter* rp,DateTime_t now[1]);
 };
 
@@ -29,7 +28,6 @@ Test2_Parameter Test2_SendData;
 Test2_Return Test2_reqresp;
 Test2_Return& Test2(RequestParameter* rp);//---------No Os-----------
 uint32_t RequestTick;
-Test2_Return& NoOs_QueryServiceState(RequestParameter* rp);
 Test2_Return& NoOs_Test2(RequestParameter* rp);};
 
 class Add_Requester
@@ -78,7 +76,6 @@ NoReturn_Return NoReturn_reqresp;
 NoReturn_Return& NoReturn(RequestParameter* rp,int32_t a);
 //---------No Os-----------
 uint32_t RequestTick;
-NoReturn_Return& NoOs_QueryServiceState(RequestParameter* rp);
 NoReturn_Return& NoOs_NoReturn(RequestParameter* rp,int32_t a);
 };
 
@@ -94,7 +91,6 @@ NoArgAndReturn_Return NoArgAndReturn_reqresp;
 NoArgAndReturn_Return& NoArgAndReturn(RequestParameter* rp);
 //---------No Os-----------
 uint32_t RequestTick;
-NoArgAndReturn_Return& NoOs_QueryServiceState(RequestParameter* rp);
 NoArgAndReturn_Return& NoOs_NoArgAndReturn(RequestParameter* rp);
 };
 

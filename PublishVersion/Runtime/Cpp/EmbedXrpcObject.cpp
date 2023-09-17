@@ -474,7 +474,3 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo *recDat
 	}
 	return ret;
 }
-void EmbedXrpcObject::NoOs_TimerUpdate(uint32_t tickInterval)
-{
-	Tick += tickInterval;
-}
