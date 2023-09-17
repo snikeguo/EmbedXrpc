@@ -579,6 +579,12 @@ namespace EmbedXrpcIdlParser
             noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
             noOsCsw.WriteLine("}");
 
+            noOsCsw.WriteLine($"else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)\n{{");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_NoReceived;");
+            noOsCsw.WriteLine($"RequestTick=nowTick;");
+            noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+            noOsCsw.WriteLine("}");
+
             noOsCsw.WriteLine("else\n{");
             noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_SidError;");
             noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");

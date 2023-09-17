@@ -128,6 +128,12 @@ DateTimeChange_Return& DateTimeChange_Requester::NoOs_QueryServiceState(RequestP
 		DateTimeChange_reqresp.State = RequestResponseState::ResponseState_Ok;
 		return DateTimeChange_reqresp;
 	}
+	else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+	{
+		DateTimeChange_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+		RequestTick = nowTick;
+		return DateTimeChange_reqresp;
+	}
 	else
 	{
 		DateTimeChange_reqresp.State = RequestResponseState::ResponseState_SidError;
@@ -257,6 +263,12 @@ Test2_Return& Test2_Requester::NoOs_QueryServiceState(RequestParameter* rp)
 		sm.Buf = RpcObject->CurrentReceivedData.Data;
 		Test2_Return_Deserialize(&sm, &Test2_reqresp, rp->IsIsr);
 		Test2_reqresp.State = RequestResponseState::ResponseState_Ok;
+		return Test2_reqresp;
+	}
+	else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+	{
+		Test2_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+		RequestTick = nowTick;
 		return Test2_reqresp;
 	}
 	else
@@ -424,6 +436,12 @@ Add_Return& Add_Requester::NoOs_QueryServiceState(RequestParameter* rp)
 		sm.Buf = RpcObject->CurrentReceivedData.Data;
 		Add_Return_Deserialize(&sm, &Add_reqresp, rp->IsIsr);
 		Add_reqresp.State = RequestResponseState::ResponseState_Ok;
+		return Add_reqresp;
+	}
+	else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+	{
+		Add_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+		RequestTick = nowTick;
 		return Add_reqresp;
 	}
 	else
@@ -595,6 +613,12 @@ NoArg_Return& NoArg_Requester::NoOs_QueryServiceState(RequestParameter* rp)
 		NoArg_reqresp.State = RequestResponseState::ResponseState_Ok;
 		return NoArg_reqresp;
 	}
+	else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+	{
+		NoArg_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+		RequestTick = nowTick;
+		return NoArg_reqresp;
+	}
 	else
 	{
 		NoArg_reqresp.State = RequestResponseState::ResponseState_SidError;
@@ -730,6 +754,12 @@ NoReturn_Return& NoReturn_Requester::NoOs_QueryServiceState(RequestParameter* rp
 		NoReturn_reqresp.State = RequestResponseState::ResponseState_Ok;
 		return NoReturn_reqresp;
 	}
+	else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+	{
+		NoReturn_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+		RequestTick = nowTick;
+		return NoReturn_reqresp;
+	}
 	else
 	{
 		NoReturn_reqresp.State = RequestResponseState::ResponseState_SidError;
@@ -861,6 +891,12 @@ NoArgAndReturn_Return& NoArgAndReturn_Requester::NoOs_QueryServiceState(RequestP
 		sm.Buf = RpcObject->CurrentReceivedData.Data;
 		NoArgAndReturn_Return_Deserialize(&sm, &NoArgAndReturn_reqresp, rp->IsIsr);
 		NoArgAndReturn_reqresp.State = RequestResponseState::ResponseState_Ok;
+		return NoArgAndReturn_reqresp;
+	}
+	else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+	{
+		NoArgAndReturn_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+		RequestTick = nowTick;
 		return NoArgAndReturn_reqresp;
 	}
 	else
