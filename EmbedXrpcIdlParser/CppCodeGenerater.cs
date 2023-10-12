@@ -512,15 +512,15 @@ namespace EmbedXrpcIdlParser
                 //csw.WriteLine("}");
                 csw.WriteLine("}");
                 csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)\r\n{");
-                csw.WriteLine("if(waitstate != RequestResponseState::ResponseState_Timeout)");
-                csw.WriteLine("{");
+                //csw.WriteLine("if(waitstate != RequestResponseState::ResponseState_Timeout)");
+                //csw.WriteLine("{");
 
                 csw.WriteLine("if (recData.DataLen > 0)");
                 csw.WriteLine("{");
                 csw.WriteLine("El_Free(recData.Data);");
                 csw.WriteLine("}");
 
-                csw.WriteLine("}");
+                //csw.WriteLine("}");
                 csw.WriteLine("}//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)");
 
                 csw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");

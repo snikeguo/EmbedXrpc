@@ -273,12 +273,9 @@ Add_Return_Deserialize(&sm,&Add_reqresp,rp->IsIsr);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 {
-if(waitstate != RequestResponseState::ResponseState_Timeout)
-{
 if (recData.DataLen > 0)
 {
 El_Free(recData.Data);
-}
 }
 }//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 Add_reqresp.State=waitstate;
@@ -446,12 +443,9 @@ NoArg_Return_Deserialize(&sm,&NoArg_reqresp,rp->IsIsr);
 }
 if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 {
-if(waitstate != RequestResponseState::ResponseState_Timeout)
-{
 if (recData.DataLen > 0)
 {
 El_Free(recData.Data);
-}
 }
 }//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)
 NoArg_reqresp.State=waitstate;

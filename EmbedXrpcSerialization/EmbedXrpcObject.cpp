@@ -436,30 +436,43 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo *recDat
 	RequestResponseState ret = ResponseState_Ok;
 	// ReceiveItemInfo recData;
 	bool waitResult = true;
+	uint32_t endTick = El_GetTick(IsIsr)+ TimeOut;
+	uint32_t curTick = 0;
+	uint32_t maxWaitingTickOfThisTime=0;
+	memset(recData, 0, sizeof(ReceiveItemInfo));
 	while (true)
 	{
-		if (RpcConfig.UseRingBufferWhenReceiving == true)
+		curTick = El_GetTick(IsIsr);
+		if (endTick < curTick)
 		{
-			waitResult = BlockRingBufferProvider_Receive(BlockBufferProviderOfRequestService, recData, TimeOut, IsIsr);
+			break;//时间过了跳出
 		}
 		else
 		{
-			waitResult = El_ReceiveQueue(MessageQueueOfRequestService, recData, sizeof(ReceiveItemInfo), TimeOut, IsIsr) == QueueState_OK ? true : false;
+			maxWaitingTickOfThisTime = endTick - curTick;
+		}
+		if (RpcConfig.UseRingBufferWhenReceiving == true)
+		{
+			waitResult = BlockRingBufferProvider_Receive(BlockBufferProviderOfRequestService, recData, maxWaitingTickOfThisTime, IsIsr);
+		}
+		else
+		{
+			waitResult = El_ReceiveQueue(MessageQueueOfRequestService, recData, sizeof(ReceiveItemInfo), maxWaitingTickOfThisTime, IsIsr) == QueueState_OK ? true : false;
 		}
 		if (waitResult != true)
 		{
-			return ResponseState_Timeout;
+			ret= ResponseState_Timeout;
+			break;//超时跳出
 		}
-
-		if (recData->Sid == EmbedXrpcSuspendSid)
+		else if (recData->Sid == EmbedXrpcSuspendSid)
 		{
 			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcSuspendSid\n");
-			continue;
+			ret = ResponseState_Timeout;
 		}
 		else if (recData->Sid == EmbedXrpcUnsupportedSid)
 		{
 			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcUnsupportedSid\n");
-			ret = ResponseState_UnsupportedSid;
+			ret = ResponseState_Timeout;
 		}
 		else if (sid != recData->Sid)
 		{
@@ -469,8 +482,9 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo *recDat
 		{
 			EmbedSerializationShowMessage("EmbedXrpcObject", "sid == recData.Sid\n");
 			ret = ResponseState_Ok;
+			break;//接受OK跳出
 		}
-		break;
+		
 	}
 	return ret;
 }
