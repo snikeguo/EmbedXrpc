@@ -82,6 +82,7 @@ void Client_Init()
 }
 
 Add_Requester Client(&ClientRpc);//定义request对象
+uint8_t requestBuffer[4096];
 void ClientThread()
 {
 	//std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
@@ -94,6 +95,9 @@ void ClientThread()
 	RequestParameter rp;
 	rp.Udtl = &win32UserDataOfTransportLayerTest;
 	rp.IsIsr = 0;
+	rp.IsProvideBuffer = true;
+	rp.Buffer = requestBuffer;
+	rp.BufferLen = sizeof(requestBuffer);
 	while (testcount-- > 0)
 	{
 		a++;

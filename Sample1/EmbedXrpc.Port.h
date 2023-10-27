@@ -11,7 +11,7 @@ extern "C" {
 	};
 	typedef struct Win32UserDataOfTransportLayerTest UserDataOfTransportLayer_t;
 #define EmbedXrpc_NameMaxLen	32
-#define EmbedXrpc_UsingOs	0
+#define EmbedXrpc_UsingOs	1
 #ifdef __cplusplus
 }
 #endif

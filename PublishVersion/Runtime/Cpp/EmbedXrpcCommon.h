@@ -61,6 +61,9 @@ enum RequestResponseState
  public:
      UserDataOfTransportLayer_t* Udtl;
      int IsIsr = 0;
+     bool IsProvideBuffer;
+     uint32_t BufferLen;
+     uint8_t* Buffer;
  };
 
  class ServiceInvokeParameter

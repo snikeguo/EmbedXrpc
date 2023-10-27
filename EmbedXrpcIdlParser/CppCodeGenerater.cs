@@ -349,11 +349,23 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine($"auto result=false;");
             noOsCsw.WriteLine($"auto result=false;");
 
+            csw.WriteLine($"uint8_t* buffer = nullptr;");
+            noOsCsw.WriteLine($"uint8_t* buffer = nullptr;");
+
+            csw.WriteLine($"uint32_t bufferLen = 0;");
+            noOsCsw.WriteLine($"uint32_t bufferLen = 0;");
+
             if (service.ReturnStructType.TargetFields.Count > 1)//index 0 is state. 1 is returnfield
             {
                 csw.WriteLine($"auto waitstate=ResponseState_Timeout;");
                 noOsCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
             }
+
+            csw.WriteLine($"if (rp->IsProvideBuffer == false)");
+            csw.WriteLine("{");
+            noOsCsw.WriteLine($"if (rp->IsProvideBuffer == false)");
+            noOsCsw.WriteLine("{");
+
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
             csw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER,rp->IsIsr);");
@@ -362,17 +374,39 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);");
             csw.WriteLine("}\r\nelse\r\n{");
             csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService,rp->IsIsr);");
+
             noOsCsw.WriteLine("RequestTick=El_GetTick(rp->IsIsr);");
             noOsCsw.WriteLine("RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;");
             noOsCsw.WriteLine("RpcObject->CurrentReceivedData.DataLen=0;");
             noOsCsw.WriteLine("RpcObject->CurrentReceivedData.Data=NULL;");
-            csw.WriteLine("}\r\n");
+            csw.WriteLine("}");
+
+            csw.WriteLine("buffer = RpcObject->DataLinkBufferForRequest.Buffer;");
+            csw.WriteLine("bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;");
+            noOsCsw.WriteLine("buffer = RpcObject->DataLinkBufferForRequest.Buffer;");
+            noOsCsw.WriteLine("bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;");
+
+            csw.WriteLine("}");
+            noOsCsw.WriteLine("}");
+
+            csw.WriteLine("else");
+            csw.WriteLine("{");
+            csw.WriteLine("buffer = rp->Buffer;");
+            csw.WriteLine("bufferLen = rp->BufferLen;");
+            csw.WriteLine("}");
+
+            noOsCsw.WriteLine("else");
+            noOsCsw.WriteLine("{");
+            noOsCsw.WriteLine("buffer = rp->Buffer;");
+            noOsCsw.WriteLine("bufferLen = rp->BufferLen;");
+            noOsCsw.WriteLine("}");
+
             csw.WriteLine("sm.Index=0;\n" +
-                "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];\n" +
-                "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;");
+                "sm.Buf = &buffer[4+4+4];\n" +
+                "sm.BufferLen = bufferLen-4-4-4;");
             noOsCsw.WriteLine("sm.Index=0;\n" +
-                "sm.Buf = &RpcObject->DataLinkBufferForRequest.Buffer[4+4+4];\n" +
-                "sm.BufferLen = RpcObject->DataLinkBufferForRequest.BufferLen-4-4-4;");
+                "sm.Buf = &buffer[4+4+4];\n" +
+                "sm.BufferLen = bufferLen-4-4-4;");
 
             if (service.ExternalParameter.IsExternal == false)
             {
@@ -427,52 +461,52 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine($"{service.ParameterStructType.TypeName}_Serialize(&sm,&{service.ServiceName}_SendData);");
             noOsCsw.WriteLine($"{service.ParameterStructType.TypeName}_Serialize(&sm,&{service.ServiceName}_SendData);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
+            csw.WriteLine($"buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
+            noOsCsw.WriteLine($"buffer[0]=(uint8_t)({service.ServiceName}_ServiceId&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
+            csw.WriteLine($"buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
+            noOsCsw.WriteLine($"buffer[1]=(uint8_t)({service.ServiceName}_ServiceId>>8&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+            csw.WriteLine($"buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
+            noOsCsw.WriteLine($"buffer[2]=(uint8_t)(RpcObject->TimeOut>>0&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
+            csw.WriteLine($"buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
+            noOsCsw.WriteLine($"buffer[3]=(uint8_t)((RpcObject->TimeOut>>8&0xff)&0x3FF);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);\n");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);\n");
+            csw.WriteLine($"buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);\n");
+            noOsCsw.WriteLine($"buffer[3]|=(uint8_t)((uint8_t)(ReceiveType_Request)<<6);\n");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[4]=(uint8_t)(sm.Index&0xff);");
+            csw.WriteLine($"buffer[4]=(uint8_t)(sm.Index&0xff);");
+            noOsCsw.WriteLine($"buffer[4]=(uint8_t)(sm.Index&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[5]=(uint8_t)(sm.Index>>8&0xff);");
+            csw.WriteLine($"buffer[5]=(uint8_t)(sm.Index>>8&0xff);");
+            noOsCsw.WriteLine($"buffer[5]=(uint8_t)(sm.Index>>8&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[6]=(uint8_t)(sm.Index>>16&0xff);");
+            csw.WriteLine($"buffer[6]=(uint8_t)(sm.Index>>16&0xff);");
+            noOsCsw.WriteLine($"buffer[6]=(uint8_t)(sm.Index>>16&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);\n");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[7]=(uint8_t)(sm.Index>>24&0xff);\n");
+            csw.WriteLine($"buffer[7]=(uint8_t)(sm.Index>>24&0xff);\n");
+            noOsCsw.WriteLine($"buffer[7]=(uint8_t)(sm.Index>>24&0xff);\n");
 
 
             csw.WriteLine($"uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);");
             noOsCsw.WriteLine($"uint32_t bufcrc=GetBufferCrc(sm.Index,sm.Buf);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[8]=(uint8_t)(bufcrc&0xff);");
+            csw.WriteLine($"buffer[8]=(uint8_t)(bufcrc&0xff);");
+            noOsCsw.WriteLine($"buffer[8]=(uint8_t)(bufcrc&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[9]=(uint8_t)(bufcrc>>8&0xff);");
+            csw.WriteLine($"buffer[9]=(uint8_t)(bufcrc>>8&0xff);");
+            noOsCsw.WriteLine($"buffer[9]=(uint8_t)(bufcrc>>8&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
+            csw.WriteLine($"buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
+            noOsCsw.WriteLine($"buffer[10]=(uint8_t)(bufcrc>>16&0xff);");
 
-            csw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
-            noOsCsw.WriteLine($"RpcObject->DataLinkBufferForRequest.Buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
+            csw.WriteLine($"buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
+            noOsCsw.WriteLine($"buffer[11]=(uint8_t)(bufcrc>>24&0xff);\n");
 
 
-            csw.WriteLine($"result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
-            noOsCsw.WriteLine($"result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,RpcObject->DataLinkBufferForRequest.Buffer);");
+            csw.WriteLine($"result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);");
+            noOsCsw.WriteLine($"result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);");
 
             csw.WriteLine("sm.Index=0;");
             noOsCsw.WriteLine("sm.Index=0;");
@@ -484,8 +518,8 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("else\n{");
             noOsCsw.WriteLine("else\n{");
 
-            csw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Ok;\n");
-            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Ok;\n");
+            csw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Ok;");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Ok;");
 
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
@@ -528,9 +562,14 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("}");
             noOsCsw.WriteLine("}");
 
+            csw.WriteLine("if (rp->IsProvideBuffer == false)");
+            csw.WriteLine("{");
+
             csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
             csw.WriteLine("{");
             csw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle,rp->IsIsr);");
+            csw.WriteLine("}");
+
             csw.WriteLine("}");
 
             csw.WriteLine($"return {service.ServiceName}_reqresp;");

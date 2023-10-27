@@ -5,8 +5,8 @@ Copy-Item -Path  .\EmbedXrpcIdlParser\bin\x86\Debug\EmbedXrpcIdlParser.exe -Dest
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\EmbedXrpcCommon.cs -Destination PublishVersion\Runtime\Cs\EmbedXrpcCommon.cs
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\EmbedXrpcObject.cs -Destination PublishVersion\Runtime\Cs\EmbedXrpcObject.cs
 Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\Serialization.cs -Destination PublishVersion\Runtime\Cs\Serialization.cs
-Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\Win32Queue.cs -Destination PublishVersion\Runtime\Cs\Win32Queue.cs
-Copy-Item -Path  .\EmbedXrpc.CSharp.NetCore\Win32Signal.cs -Destination PublishVersion\Runtime\Cs\Win32Signal.cs
+Copy-Item -Path  .\Win32Queue.NetCore\Win32Queue.cs -Destination PublishVersion\Runtime\Cs\Win32Queue.cs
+Copy-Item -Path  .\Win32Queue.NetCore\Win32Signal.cs -Destination PublishVersion\Runtime\Cs\Win32Signal.cs
 Copy-Item -Path  .\EmbedXrpcSerialization\BlockBufferProvider.c -Destination PublishVersion\Runtime\Cpp\BlockBufferProvider.c
 Copy-Item -Path  .\EmbedXrpcSerialization\BlockBufferProvider.h -Destination PublishVersion\Runtime\Cpp\BlockBufferProvider.h
 Copy-Item -Path  .\EmbedXrpcSerialization\EmbedSerialization.c -Destination PublishVersion\Runtime\Cpp\EmbedSerialization.c
