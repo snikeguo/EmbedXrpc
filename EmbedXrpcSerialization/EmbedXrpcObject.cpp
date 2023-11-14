@@ -44,6 +44,10 @@ void EmbedXrpcObject::Init(InitConfig *cfg)
 
 	MessageQueueOfRequestService = El_CreateQueue("MessageQueueOfRequestService", sizeof(ReceiveItemInfo), RpcConfig.DynamicMemoryConfig.MessageQueueOfRequestService_MaxItemNumber);
 
+#if EmbedXrpc_UsingOs==0
+	El_Assert(RpcConfig.UseRingBufferWhenReceiving == true);
+#endif
+
 	if (RpcConfig.UseRingBufferWhenReceiving == false)
 	{
 		if (RpcConfig.DynamicMemoryConfig.IsSendToQueue == true)
@@ -262,6 +266,16 @@ void EmbedXrpcObject::ServiceExecute(EmbedXrpcObject *obj, ReceiveItemInfo &recD
 	}
 }
 
+void EmbedXrpcObject::NoOs_ServiceExecute(int isIsr)
+{
+	//if (CurrentReceivedRequestData.Sid != EmbedXrpcNoReceivedSid)
+	ReceiveItemInfo requestServiceData;
+	if (BlockRingBufferProvider_Receive(ServiceBlockBufferProvider,&requestServiceData,0,isIsr) == True)
+	{
+		ServiceExecute(this, requestServiceData, false, isIsr);
+	}
+}
+
 #define TrySendDataToQueue(queue, datalen, data, raw, gotolib, itemType, result, isIsr)                                                                                \
 	{                                                                                                                                                                  \
 		if (El_QueueSpacesAvailable(queue, isIsr) > 0)                                                                                                                 \
@@ -319,16 +333,16 @@ ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint
 #endif
 
 #if EmbedXrpc_UsingOs == 0
-	raw.Data = data;
+	raw.Data = nullptr;
 	if (rt == ReceiveType_Response)
 	{
-		CurrentReceivedData = raw;
+		El_SendQueueResult = BlockRingBufferProvider_Send(BlockBufferProviderOfRequestService, &raw, data, isIsr) == True ? ReceivedMessageStatus::Ok : ReceivedMessageStatus::QueueFull;
 	}
 	else if (rt == ReceiveType_Request)
 	{
-		ServiceExecute(this, raw, false, isIsr);
+		El_SendQueueResult = BlockRingBufferProvider_Send(ServiceBlockBufferProvider, &raw, data, isIsr) == True ? ReceivedMessageStatus::Ok : ReceivedMessageStatus::QueueFull;
 	}
-	El_SendQueueResult = ReceivedMessageStatus::Ok;
+	//El_SendQueueResult = ReceivedMessageStatus::Ok;
 #else
 	if (rt == ReceiveType_Response)
 	{
@@ -433,7 +447,7 @@ void EmbedXrpcObject::ServiceThread(void *arg)
 
 RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo *recData, int IsIsr)
 {
-	RequestResponseState ret = ResponseState_Ok;
+	RequestResponseState ret = ResponseState_Timeout;
 	// ReceiveItemInfo recData;
 	bool waitResult = true;
 	uint32_t endTick = El_GetTick(IsIsr)+ TimeOut;
@@ -464,27 +478,31 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo *recDat
 			ret= ResponseState_Timeout;
 			break;//超时跳出
 		}
+		if (sid == recData->Sid)
+		{
+			EmbedSerializationShowMessage("EmbedXrpcObject", "sid == recData.Sid\n");
+			ret = ResponseState_Ok;
+			break;//接受OK跳出
+		}
 		else if (recData->Sid == EmbedXrpcSuspendSid)
 		{
 			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcSuspendSid\n");
-			ret = ResponseState_Timeout;
+			endTick = El_GetTick(IsIsr) + TimeOut;
 		}
 		else if (recData->Sid == EmbedXrpcUnsupportedSid)
 		{
 			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcUnsupportedSid\n");
 			ret = ResponseState_Timeout;
 		}
-		else if (sid != recData->Sid)
-		{
-			ret = ResponseState_SidError;
-		}
 		else
 		{
-			EmbedSerializationShowMessage("EmbedXrpcObject", "sid == recData.Sid\n");
-			ret = ResponseState_Ok;
-			break;//接受OK跳出
+			ret = ResponseState_Timeout;
 		}
-		
+		//只有if (sid == recData->Sid) 才不释放，因为外面要反序列化，其他的都直接抛弃掉了。
+		if (recData->DataLen > 0)
+		{
+			El_Free(recData->Data);
+		}
 	}
 	return ret;
 }

@@ -145,3 +145,9 @@ void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj, int isIsr)
 	rt_ringbuffer_reset(&obj->RingBuffer);
 	El_ResetQueue(obj->Queue,isIsr);
 }
+uint32_t BlockRingBufferProvider_DataLen(BlockRingBufferProvider* obj, int isIsr)
+{
+	if (obj->Size == 0 || obj->Pool == NULL)
+		return 0;
+	return rt_ringbuffer_data_len(&obj->RingBuffer);
+}

@@ -5,21 +5,30 @@
 
 #include "BlockQueue.h"
 #include "windows.h"
+#include "EmbedXrpcCommon.h"
 using Semaphore = BlockingQueue<int>;
 extern "C"
 {
 
 	El_Thread_t El_CreateThread(const char* threadName, uint8_t priority, void(*Thread)(void*), void* Arg, uint16_t stack_size)
 	{
+#if EmbedXrpc_UsingOs == 1
 		std::thread* ServiceThread = new std::thread(Thread, Arg);
 		return  ServiceThread;
+#else
+		return nullptr;
+#endif
 	}
 
 	El_Mutex_t El_CreateMutex(const char* mutexName)
 	{
 		//QMutex* mutex = new QMutex();
+#if EmbedXrpc_UsingOs == 1
 		std::timed_mutex* mutex = new std::timed_mutex();
 		return  mutex;
+#else
+		return nullptr;
+#endif
 	}
 	El_Queue_t El_CreateQueue(const char* queueName, uint32_t queueItemSize, uint32_t maxItemLen)
 	{
@@ -29,8 +38,12 @@ extern "C"
 	}
 	El_Semaphore_t  El_CreateSemaphore(const char* SemaphoreName)
 	{
+#if EmbedXrpc_UsingOs == 1
 		Semaphore* sem = new Semaphore();
 		return sem;
+#else
+		return nullptr;
+#endif
 	}
 	class Win32Timer //¼òµ¥µÄtimer
 	{
@@ -93,19 +106,31 @@ extern "C"
 	};
 	El_Timer_t El_CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
 	{
+#if EmbedXrpc_UsingOs == 1
 		Win32Timer* timer = new Win32Timer(timerName, timeout, timercb, Arg);
 		return timer;
+#else
+		return nullptr;
+#endif
 	}
 	void El_DeleteThread(El_Thread_t thread)
 	{
 		//auto qtThread = static_cast<QThread*>(thread);
+#if EmbedXrpc_UsingOs == 1
 		auto qtThread = static_cast<std::thread*>(thread);
 		delete qtThread;
+#else
+		return ;
+#endif
 	}
 	void El_DeleteMutex(El_Mutex_t mutex)
 	{
+#if EmbedXrpc_UsingOs == 1
 		auto qtMutex = static_cast<std::mutex*>(mutex);
 		delete qtMutex;
+#else
+		return;
+#endif
 	}
 	void El_DeleteQueue(El_Queue_t queue)
 	{
@@ -115,51 +140,83 @@ extern "C"
 	}
 	void El_DeleteSemaphore(El_Semaphore_t sem)
 	{
+#if EmbedXrpc_UsingOs == 1
 		Semaphore* qtsem = static_cast<Semaphore*>(sem);
 		qtsem->Reset();
 		delete sem;
+#else
+		return;
+#endif
 	}
 	void El_DeleteTimer(El_Timer_t timer)
 	{
+#if EmbedXrpc_UsingOs == 1
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
 		delete win32timer;
+#else
+		return;
+#endif
 	}
 	void El_ThreadStart(El_Thread_t thread, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		std::thread* x = static_cast<std::thread*>(thread);
 		x->detach();
+#else
+		return;
+#endif
 	}
 	void  El_TimerStart(El_Timer_t timer, uint16_t interval, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->timerout = interval;
 		win32timer->Start();
+#else
+		return;
+#endif
 	}
 	void El_TimerReset(El_Timer_t timer, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
+#else
+		return;
+#endif
 	}
 	void El_TimerStop(El_Timer_t timer, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		Win32Timer* win32timer = static_cast<Win32Timer*>(timer);
 		win32timer->Stop();
+#else
+		return;
+#endif
 	}
 
 	
 
 	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
 		std::chrono::milliseconds to(timeout);
 		return m->try_lock_for(to);
+#else
+		return true;
+#endif
 	}
 	Bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
 		m->unlock();
 		return true;
+#else
+		return true;
+#endif
 	}
 
 	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout, int isIsr)
@@ -174,7 +231,6 @@ extern "C"
 		{
 			return QueueState_Timeout;
 		}
-
 	}
 	QueueState El_SendQueue(El_Queue_t queue, void* item, uint32_t itemSize,int isIsr)
 	{

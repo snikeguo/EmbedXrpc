@@ -51,6 +51,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -79,12 +80,9 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 uint8_t* buffer = nullptr;
 uint32_t bufferLen = 0;
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);
 if (rp->IsProvideBuffer == false)
 {
-RequestTick=El_GetTick(rp->IsIsr);
-RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;
-RpcObject->CurrentReceivedData.DataLen=0;
-RpcObject->CurrentReceivedData.Data=NULL;
 buffer = RpcObject->DataLinkBufferForRequest.Buffer;
 bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;
 }
@@ -93,6 +91,7 @@ else
 buffer = rp->Buffer;
 bufferLen = rp->BufferLen;
 }
+RpcObject->CurrentRequestSid=DateTimeChange_ServiceId;
 sm.Index=0;
 sm.Buf = &buffer[4+4+4];
 sm.BufferLen = bufferLen-4-4-4;
@@ -115,6 +114,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -178,6 +178,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -205,12 +206,9 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 uint8_t* buffer = nullptr;
 uint32_t bufferLen = 0;
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);
 if (rp->IsProvideBuffer == false)
 {
-RequestTick=El_GetTick(rp->IsIsr);
-RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;
-RpcObject->CurrentReceivedData.DataLen=0;
-RpcObject->CurrentReceivedData.Data=NULL;
 buffer = RpcObject->DataLinkBufferForRequest.Buffer;
 bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;
 }
@@ -219,6 +217,7 @@ else
 buffer = rp->Buffer;
 bufferLen = rp->BufferLen;
 }
+RpcObject->CurrentRequestSid=Test2_ServiceId;
 sm.Index=0;
 sm.Buf = &buffer[4+4+4];
 sm.BufferLen = bufferLen-4-4-4;
@@ -240,6 +239,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -304,6 +304,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -362,13 +363,10 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 uint8_t* buffer = nullptr;
 uint32_t bufferLen = 0;
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);
 auto waitstate=ResponseState_Timeout;
 if (rp->IsProvideBuffer == false)
 {
-RequestTick=El_GetTick(rp->IsIsr);
-RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;
-RpcObject->CurrentReceivedData.DataLen=0;
-RpcObject->CurrentReceivedData.Data=NULL;
 buffer = RpcObject->DataLinkBufferForRequest.Buffer;
 bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;
 }
@@ -377,6 +375,7 @@ else
 buffer = rp->Buffer;
 bufferLen = rp->BufferLen;
 }
+RpcObject->CurrentRequestSid=Add_ServiceId;
 sm.Index=0;
 sm.Buf = &buffer[4+4+4];
 sm.BufferLen = bufferLen-4-4-4;
@@ -398,6 +397,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -415,36 +415,39 @@ Add_Return& Add_Requester::NoOs_QueryServiceState(RequestParameter* rp)
 {SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 uint32_t nowTick = El_GetTick(rp->IsIsr);
+ReceiveItemInfo currentReceivedResponseData;
+memset(&currentReceivedResponseData,0,sizeof(currentReceivedResponseData));
 if((RequestTick+RpcObject->TimeOut)<nowTick)
 {
 Add_reqresp.State = RequestResponseState::ResponseState_Timeout;
 return Add_reqresp;
 }
-if(RpcObject->CurrentReceivedData.Sid == EmbedXrpcNoReceivedSid)
+if(BlockRingBufferProvider_Receive(RpcObject->BlockBufferProviderOfRequestService, &currentReceivedResponseData,0,rp->IsIsr) == False)
 {
 Add_reqresp.State = RequestResponseState::ResponseState_NoReceived;
 return Add_reqresp;
 }
-else if (RpcObject->CurrentReceivedData.Sid == Add_ServiceId)
+if(currentReceivedResponseData.Sid == EmbedXrpcNoReceivedSid)
+{
+Add_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+}
+else if (currentReceivedResponseData.Sid == Add_ServiceId)
 {
 sm.Index=0;
-sm.BufferLen = RpcObject->CurrentReceivedData.DataLen;
-sm.Buf = RpcObject->CurrentReceivedData.Data;
+sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;
 Add_Return_Deserialize(&sm,&Add_reqresp,rp->IsIsr);
 Add_reqresp.State = RequestResponseState::ResponseState_Ok;
-return Add_reqresp;
 }
-else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+else if (currentReceivedResponseData.Sid == EmbedXrpcSuspendSid)
 {
 Add_reqresp.State = RequestResponseState::ResponseState_NoReceived;
 RequestTick=nowTick;
-return Add_reqresp;
 }
 else
 {
-Add_reqresp.State = RequestResponseState::ResponseState_SidError;
-return Add_reqresp;
+Add_reqresp.State = RequestResponseState::ResponseState_NoReceived;
 }
+return Add_reqresp;
 }
 NoArg_Return& NoArg_Requester::NoArg(RequestParameter* rp)
 {
@@ -498,6 +501,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -557,13 +561,10 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 uint8_t* buffer = nullptr;
 uint32_t bufferLen = 0;
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);
 auto waitstate=ResponseState_Timeout;
 if (rp->IsProvideBuffer == false)
 {
-RequestTick=El_GetTick(rp->IsIsr);
-RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;
-RpcObject->CurrentReceivedData.DataLen=0;
-RpcObject->CurrentReceivedData.Data=NULL;
 buffer = RpcObject->DataLinkBufferForRequest.Buffer;
 bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;
 }
@@ -572,6 +573,7 @@ else
 buffer = rp->Buffer;
 bufferLen = rp->BufferLen;
 }
+RpcObject->CurrentRequestSid=NoArg_ServiceId;
 sm.Index=0;
 sm.Buf = &buffer[4+4+4];
 sm.BufferLen = bufferLen-4-4-4;
@@ -593,6 +595,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -610,36 +613,39 @@ NoArg_Return& NoArg_Requester::NoOs_QueryServiceState(RequestParameter* rp)
 {SerializationManager sm;
 El_Memset(&sm,0,sizeof(SerializationManager));
 uint32_t nowTick = El_GetTick(rp->IsIsr);
+ReceiveItemInfo currentReceivedResponseData;
+memset(&currentReceivedResponseData,0,sizeof(currentReceivedResponseData));
 if((RequestTick+RpcObject->TimeOut)<nowTick)
 {
 NoArg_reqresp.State = RequestResponseState::ResponseState_Timeout;
 return NoArg_reqresp;
 }
-if(RpcObject->CurrentReceivedData.Sid == EmbedXrpcNoReceivedSid)
+if(BlockRingBufferProvider_Receive(RpcObject->BlockBufferProviderOfRequestService, &currentReceivedResponseData,0,rp->IsIsr) == False)
 {
 NoArg_reqresp.State = RequestResponseState::ResponseState_NoReceived;
 return NoArg_reqresp;
 }
-else if (RpcObject->CurrentReceivedData.Sid == NoArg_ServiceId)
+if(currentReceivedResponseData.Sid == EmbedXrpcNoReceivedSid)
+{
+NoArg_reqresp.State = RequestResponseState::ResponseState_NoReceived;
+}
+else if (currentReceivedResponseData.Sid == NoArg_ServiceId)
 {
 sm.Index=0;
-sm.BufferLen = RpcObject->CurrentReceivedData.DataLen;
-sm.Buf = RpcObject->CurrentReceivedData.Data;
+sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;
 NoArg_Return_Deserialize(&sm,&NoArg_reqresp,rp->IsIsr);
 NoArg_reqresp.State = RequestResponseState::ResponseState_Ok;
-return NoArg_reqresp;
 }
-else if (RpcObject->CurrentReceivedData.Sid == EmbedXrpcSuspendSid)
+else if (currentReceivedResponseData.Sid == EmbedXrpcSuspendSid)
 {
 NoArg_reqresp.State = RequestResponseState::ResponseState_NoReceived;
 RequestTick=nowTick;
-return NoArg_reqresp;
 }
 else
 {
-NoArg_reqresp.State = RequestResponseState::ResponseState_SidError;
-return NoArg_reqresp;
+NoArg_reqresp.State = RequestResponseState::ResponseState_NoReceived;
 }
+return NoArg_reqresp;
 }
 NoReturn_Return& NoReturn_Requester::NoReturn(RequestParameter* rp,int32_t a)
 {
@@ -693,6 +699,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -721,12 +728,9 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 uint8_t* buffer = nullptr;
 uint32_t bufferLen = 0;
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);
 if (rp->IsProvideBuffer == false)
 {
-RequestTick=El_GetTick(rp->IsIsr);
-RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;
-RpcObject->CurrentReceivedData.DataLen=0;
-RpcObject->CurrentReceivedData.Data=NULL;
 buffer = RpcObject->DataLinkBufferForRequest.Buffer;
 bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;
 }
@@ -735,6 +739,7 @@ else
 buffer = rp->Buffer;
 bufferLen = rp->BufferLen;
 }
+RpcObject->CurrentRequestSid=NoReturn_ServiceId;
 sm.Index=0;
 sm.Buf = &buffer[4+4+4];
 sm.BufferLen = bufferLen-4-4-4;
@@ -757,6 +762,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -821,6 +827,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)
@@ -849,12 +856,9 @@ El_Memset(&sm,0,sizeof(SerializationManager));
 auto result=false;
 uint8_t* buffer = nullptr;
 uint32_t bufferLen = 0;
+BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);
 if (rp->IsProvideBuffer == false)
 {
-RequestTick=El_GetTick(rp->IsIsr);
-RpcObject->CurrentReceivedData.Sid=EmbedXrpcNoReceivedSid;
-RpcObject->CurrentReceivedData.DataLen=0;
-RpcObject->CurrentReceivedData.Data=NULL;
 buffer = RpcObject->DataLinkBufferForRequest.Buffer;
 bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;
 }
@@ -863,6 +867,7 @@ else
 buffer = rp->Buffer;
 bufferLen = rp->BufferLen;
 }
+RpcObject->CurrentRequestSid=NoArgAndReturn_ServiceId;
 sm.Index=0;
 sm.Buf = &buffer[4+4+4];
 sm.BufferLen = bufferLen-4-4-4;
@@ -884,6 +889,7 @@ buffer[9]=(uint8_t)(bufcrc>>8&0xff);
 buffer[10]=(uint8_t)(bufcrc>>16&0xff);
 buffer[11]=(uint8_t)(bufcrc>>24&0xff);
 
+RequestTick=El_GetTick(rp->IsIsr);
 result=RpcObject->Send(rp,RpcObject,sm.Index+4+4+4,buffer);
 sm.Index=0;
 if(result==false)

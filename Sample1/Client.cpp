@@ -7,12 +7,13 @@ extern EmbedXrpcObject ServerRpc;
 #define AllTypeBufferLen	4096
 
 
-
+uint8_t ServerBuffer[AllTypeBufferLen];
 bool ClientSend(RequestParameter* rp,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
-	assert(ServerRpc.ReceivedMessage(dataLen, data, *rp->Udtl,false) == ReceivedMessageStatus::Ok);
+	memcpy(ServerBuffer, data, dataLen);
+	assert(ServerRpc.ReceivedMessage(dataLen, ServerBuffer, *rp->Udtl,false) == ReceivedMessageStatus::Ok);
 	return true;
 }
 //特化子类继承
@@ -68,7 +69,7 @@ static InitConfig InitCfg =
 		},
 		{
 			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
-			{nullptr,0,0},//ServiceBlockBufferConfig
+			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferConfig
 		},
 
 	},
@@ -100,6 +101,7 @@ void ClientThread()
 	rp.BufferLen = sizeof(requestBuffer);
 	while (testcount-- > 0)
 	{
+#if 1
 		a++;
 		b++;
 		Client.Add_SendData.a = a;
@@ -112,7 +114,8 @@ void ClientThread()
 		Client.Add_SendData.test[0].ObjectArrayLen = 2;
 		Client.Add_SendData.test[0].DateTimeArray = (DateTime_t*)malloc(sizeof(DateTime_t) * 2);
 		memset(Client.Add_SendData.test[0].DateTimeArray, 0, sizeof(DateTime_t) * 2);
-		Client.Add_SendData.test[0].DateTimeArray[0].Year = 1;
+		Client.Add_SendData.test[0].DateTimeArray[0].Year = 1; 
+
 #if EmbedXrpc_UsingOs==0
 		auto sum = Client.NoOs_Add(&rp);//request对象请求service 
 		while (1)
@@ -124,6 +127,7 @@ void ClientThread()
 			}
 			Sleep(1);
 		}
+		ClientRpc.NoOs_ServiceExecute(0);
 #else
 		auto sum = Client.Add(&rp);//request对象请求service 
 #endif
@@ -136,7 +140,9 @@ void ClientThread()
 			printf("client:sum7 is:%d\n", sum.ReturnValue.Sum7);
 		}
 		Client.Free_Add(&sum);
-		std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+		
+#endif
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
 	ClientRpc.DeInit();

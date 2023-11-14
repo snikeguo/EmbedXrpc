@@ -22,6 +22,7 @@ extern "C" {
     Bool BlockRingBufferProvider_Receive(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint32_t timeout, int isIsr);
     Bool BlockRingBufferProvider_Send(BlockRingBufferProvider* obj, ReceiveItemInfo* item, uint8_t* buf,int isIsr);
     void BlockRingBufferProvider_Reset(BlockRingBufferProvider* obj, int isIsr);
+    uint32_t BlockRingBufferProvider_DataLen(BlockRingBufferProvider* obj, int isIsr);
 #ifdef __cplusplus
 }
 #endif
