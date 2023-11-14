@@ -27,8 +27,8 @@ Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.cpp  -Destination PublishVe
 Copy-Item -Path .\EmbedLibrary\Win32.Port\BlockQueue.h  -Destination PublishVersion\EmbedLibrary\Win32.Port\BlockQueue.h
 Copy-Item -Path .\EmbedLibrary\Win32.Port\El.Win32.Port.cpp  -Destination PublishVersion\EmbedLibrary\Win32.Port\El.Win32.Port.cpp
 Copy-Item -Path .\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp  -Destination PublishVersion\EmbedLibrary\FreeRTOS.Port\El.FreeRTOS.Port.cpp
-
-
+Copy-Item -Path .\EmbedLibrary\noos_queue.c  -Destination PublishVersion\EmbedLibrary\noos_queue.c
+Copy-Item -Path .\EmbedLibrary\noos_queue.h  -Destination PublishVersion\EmbedLibrary\noos_queue.h
 
 # copy Sample
 if(Test-Path .\PublishVersion\Sample1)

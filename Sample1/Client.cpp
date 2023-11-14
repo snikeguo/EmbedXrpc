@@ -125,9 +125,8 @@ void ClientThread()
 			{
 				break;
 			}
-			Sleep(1);
+			//Sleep(1);
 		}
-		ClientRpc.NoOs_ServiceExecute(0);
 #else
 		auto sum = Client.Add(&rp);//request∂‘œÛ«Î«Ûservice 
 #endif
@@ -141,6 +140,9 @@ void ClientThread()
 		}
 		Client.Free_Add(&sum);
 		
+#endif
+#if EmbedXrpc_UsingOs==0
+		ClientRpc.NoOs_ServiceExecute(0);
 #endif
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}

@@ -75,6 +75,9 @@
     <ClCompile Include="..\EmbedXrpcSerialization\SoftCrc32.c">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
+    <ClCompile Include="..\EmbedLibrary\noos_queue.c">
+      <Filter>EmbedXrpcLib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="MyInclude.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EmbedLibrary\noos_queue.h">
+      <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -14,6 +14,7 @@ DateTimeChange_Return DateTimeChange_reqresp;
 DateTimeChange_Return& DateTimeChange(RequestParameter* rp,DateTime_t now[1]);
 //---------No Os-----------
 uint32_t RequestTick;
+//NoOs_DateTimeChange接口只能放到while1执行,不能放到中断里面跑
 DateTimeChange_Return& NoOs_DateTimeChange(RequestParameter* rp,DateTime_t now[1]);
 };
 
@@ -28,6 +29,7 @@ Test2_Parameter Test2_SendData;
 Test2_Return Test2_reqresp;
 Test2_Return& Test2(RequestParameter* rp);//---------No Os-----------
 uint32_t RequestTick;
+//NoOs_Test2接口只能放到while1执行,不能放到中断里面跑
 Test2_Return& NoOs_Test2(RequestParameter* rp);};
 
 class Add_Requester
@@ -43,7 +45,9 @@ Add_Return& Add(RequestParameter* rp);void Free_Add(Add_Return *response);
 
 //---------No Os-----------
 uint32_t RequestTick;
+//NoOs_QueryServiceState接口只能放到while1执行,不能放到中断里面跑
 Add_Return& NoOs_QueryServiceState(RequestParameter* rp);
+//NoOs_Add接口只能放到while1执行,不能放到中断里面跑
 Add_Return& NoOs_Add(RequestParameter* rp);};
 
 class NoArg_Requester
@@ -60,7 +64,9 @@ void Free_NoArg(NoArg_Return *response);
 
 //---------No Os-----------
 uint32_t RequestTick;
+//NoOs_QueryServiceState接口只能放到while1执行,不能放到中断里面跑
 NoArg_Return& NoOs_QueryServiceState(RequestParameter* rp);
+//NoOs_NoArg接口只能放到while1执行,不能放到中断里面跑
 NoArg_Return& NoOs_NoArg(RequestParameter* rp);
 };
 
@@ -76,6 +82,7 @@ NoReturn_Return NoReturn_reqresp;
 NoReturn_Return& NoReturn(RequestParameter* rp,int32_t a);
 //---------No Os-----------
 uint32_t RequestTick;
+//NoOs_NoReturn接口只能放到while1执行,不能放到中断里面跑
 NoReturn_Return& NoOs_NoReturn(RequestParameter* rp,int32_t a);
 };
 
@@ -91,6 +98,7 @@ NoArgAndReturn_Return NoArgAndReturn_reqresp;
 NoArgAndReturn_Return& NoArgAndReturn(RequestParameter* rp);
 //---------No Os-----------
 uint32_t RequestTick;
+//NoOs_NoArgAndReturn接口只能放到while1执行,不能放到中断里面跑
 NoArgAndReturn_Return& NoOs_NoArgAndReturn(RequestParameter* rp);
 };
 

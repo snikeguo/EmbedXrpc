@@ -190,7 +190,7 @@ void ServerThread()
 		t.David.u2 = 0x66778899;
 		t.David.uend1 = 1;
 		t.David.uend2 = 2;
-		//DateTimeChanger.DateTimeChange(&rp, &t);//调用委托
+		DateTimeChanger.DateTimeChange(&rp, &t);//调用委托
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 #if EmbedXrpc_UsingOs==0
 		ServerRpc.NoOs_ServiceExecute(0);

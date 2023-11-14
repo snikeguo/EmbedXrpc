@@ -7,6 +7,7 @@ extern EmbedXrpcObject ClientRpc;
 
 #define AllTypeBufferLen	4096
 
+uint8_t ClientBuffer[AllTypeBufferLen];
 bool ServerSend(RequestParameter* rp,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
@@ -16,7 +17,8 @@ bool ServerSend(RequestParameter* rp,
 		printf("ServerSend:0x%.2x\n", data[i]);
 
 	}*/
-	ClientRpc.ReceivedMessage(dataLen, data, *rp->Udtl,false);
+	memcpy(ClientBuffer, data, dataLen);
+	ClientRpc.ReceivedMessage(dataLen, ClientBuffer, *rp->Udtl,false);
 	return true;
 }
 
@@ -133,14 +135,14 @@ static InitConfig InitCfg =
 	{
 		1,//ServiceThreadPriority
 		2048,
-		false,//UseRingBufferWhenReceiving
+		true,//UseRingBufferWhenReceiving
 		{
 			true,//IsSendToQueue
 			10,//MessageQueueOfRequestService_MaxItemNumber
 			10,//ServiceMessageQueue_MaxItemNumber
 		},
 		{
-			{nullptr,0,0},//BlockBufferOfRequestService_Config
+			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
 			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
 		},
 	},
@@ -155,7 +157,7 @@ void Server_Init()
 DateTimeChange_Requester DateTimeChanger(&ServerRpc);//实例化委托对象
 void ServerThread()
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
+	//std::this_thread::sleep_for(std::chrono::milliseconds(0xffffffff));
 	DateTime_t t;
 	uint8_t data[128];
 	t.DateString = data;
@@ -189,7 +191,10 @@ void ServerThread()
 		t.David.uend1 = 1;
 		t.David.uend2 = 2;
 		DateTimeChanger.DateTimeChange(&rp, &t);//调用委托
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+#if EmbedXrpc_UsingOs==0
+		ServerRpc.NoOs_ServiceExecute(0);
+#endif
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(10000));//等待RPC调用全部完毕
 	ServerRpc.DeInit();

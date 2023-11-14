@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\EmbedLibrary\noos_queue.c" />
     <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp" />
     <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c" />
@@ -35,6 +36,7 @@
     <ClCompile Include="XrpcCodeGen\Server\Sample1.Server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\EmbedLibrary\noos_queue.h" />
     <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h" />

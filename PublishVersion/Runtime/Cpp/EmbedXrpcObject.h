@@ -105,8 +105,8 @@ public:
 
 	uint32_t ServicesCount;
 	ServiceDescribe* Services;
-
-	ReceiveItemInfo CurrentReceivedData;
+	uint16_t CurrentRequestSid;
+	void NoOs_ServiceExecute(int IsIsr);
 public:
 	//client节点构造函数
 	void Init(ClientNodeQuicklyInitConfig* client)
@@ -145,6 +145,7 @@ public:
 
 
 	static void ServiceThread(void* arg);
+	
 
 	RequestResponseState Wait(uint32_t sid, ReceiveItemInfo* recData,int IsIsr);
 
