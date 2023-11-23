@@ -362,7 +362,7 @@ namespace EmbedXrpcIdlParser
             if (service.ReturnStructType.TargetFields.Count > 1)//index 0 is state. 1 is returnfield
             {
                 csw.WriteLine($"auto waitstate=ResponseState_Timeout;");
-                noOsCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
+                //noOsCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
             }
 
             csw.WriteLine($"if (rp->IsProvideBuffer == false)");
