@@ -112,7 +112,7 @@ namespace EmbedXrpcIdlParser
             CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
 
             //sw.WriteLine($"[RequestServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
-            sw.WriteLine($"public class {service.ServiceName}_Requester<DTL>:IRequestService<DTL> where DTL:struct");
+            sw.WriteLine($"public class {service.ServiceName}_Requester<DTL>:IRequestService<DTL> //where DTL:struct");
             sw.WriteLine("{");//class begin
 
             sw.WriteLine("private EmbedXrpcObject<DTL> XrpcObject=null;");
@@ -190,7 +190,7 @@ namespace EmbedXrpcIdlParser
         {
             CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
             sw.WriteLine($"[ResponseServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
-            sw.WriteLine($"public partial class {service.ServiceName}_Service<DTL>:IService<DTL> where DTL:struct");
+            sw.WriteLine($"public partial class {service.ServiceName}_Service<DTL>:IService<DTL> //where DTL:struct");
             sw.WriteLine("{");//class begin
             sw.WriteLine($"public static readonly UInt16 {service.ServiceName}_ServiceId={service.ServiceId};//0x{Convert.ToString(service.ServiceId, 16)}");
             sw.WriteLine($"public UInt16 GetSid(){{ return {service.ServiceName}_ServiceId;}}");
@@ -222,7 +222,12 @@ namespace EmbedXrpcIdlParser
                 sw.WriteLine($"Response.Serialize(sendManager);");
             }
             sw.WriteLine("}");//function end
-            sw.WriteLine($"//public void {service.ServiceName}(ref serviceInvokeParameter{dh}{externstr});");
+            sw.WriteLine($"/*");
+            sw.WriteLine($"public partial class {service.ServiceName}_Service<DTL>:IService<DTL> //where DTL:struct");
+            sw.WriteLine("{");
+            sw.WriteLine($"public void {service.ServiceName}(ref ServiceInvokeParameter<DTL> serviceInvokeParameter{dh}{externstr}){{}}");
+            sw.WriteLine("}");
+            sw.WriteLine($"*/");
             sw.WriteLine("}");//class end
 
             CppSerializableCommon.MacroControlWriteEnd(sw, service.MacroControlAttribute);
