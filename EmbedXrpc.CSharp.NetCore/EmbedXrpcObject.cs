@@ -165,7 +165,7 @@ namespace EmbedXrpc
             {
                 goto sqs;
             }
-            UInt32 calcrc = GetBufferCrc(alldata, 12, (int)dataLen);
+            UInt32 calcrc = GetBufferCrc(alldata, (int)(12+offset), (int)dataLen);
             if(wantedBufCrc!=calcrc)
             {
                 goto sqs;
