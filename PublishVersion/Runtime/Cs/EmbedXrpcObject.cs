@@ -10,7 +10,7 @@ using David.Common;
 namespace EmbedXrpc
 {
 
-    public class EmbedXrpcObject<DTL> where DTL:struct  
+    public class EmbedXrpcObject<DTL>   
     {
         public UInt32 TimeOut { get; set; }
         public object ObjectMutex { get; private set; } = new object();
