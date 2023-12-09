@@ -233,9 +233,10 @@ namespace EmbedXrpc
                                 serviceInvokeParameter.Response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
                                 serviceInvokeParameter.RpcObject = this;
                                 serviceInvokeParameter.TargetTimeOut = recData.TargetTimeOut;
-                                AllServices[i].Service.Invoke(serviceInvokeParameter,
+                                var exec_task= AllServices[i].Service.Invoke(serviceInvokeParameter,
                                     rsm,
                                     sendsm);
+                                exec_task.Wait();
                                 SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);//手动关闭 怕用户忘了
 
                                 //lock (ObjectMutex)
