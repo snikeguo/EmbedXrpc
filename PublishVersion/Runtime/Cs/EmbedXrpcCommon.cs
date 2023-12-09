@@ -38,7 +38,7 @@ namespace EmbedXrpc
     public interface IService<DTL> 
     {
         UInt16 GetSid();
-        void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager);
+        Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager);
     }
     public interface IRequestService<DTL> 
     {
@@ -54,7 +54,7 @@ namespace EmbedXrpc
         public string Name { get; set; }
         public UInt16 Sid { get; set; }//有可能是Response
     };*/
-    public delegate bool Send<DTL>(DTL userDataOfTransportLayer, int dataLen, int offset, byte[] data);
+    public delegate Task<bool> Send<DTL>(DTL userDataOfTransportLayer, int dataLen, int offset, byte[] data);
     public struct EmbeXrpcRawData<DTL> 
     {
         public UInt16 Sid { get; set; }

@@ -13,7 +13,7 @@ namespace EmbedXrpc
     public class EmbedXrpcObject<DTL>   
     {
         public UInt32 TimeOut { get; set; }
-        public object ObjectMutex { get; private set; } = new object();
+        public Mutex ObjectMutex { get; private set; } = new Mutex();
         
         public Win32Queue<EmbeXrpcRawData<DTL>> MessageQueueOfRequestServiceHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData<DTL>>();
         private List<ServiceDescribe<DTL>> AllServices { get; set; } = new List<ServiceDescribe<DTL>>();
@@ -112,7 +112,7 @@ namespace EmbedXrpc
             ServiceThreadCancellationTokenSource.Cancel();
             //ServiceThreadHandle.Abort();
         }
-        public RequestResponseState Wait<T>(UInt32 sid,ref T response) where T: IEmbedXrpcSerialization
+        public RequestResponseState Wait<T>(UInt32 sid,T response) where T: IEmbedXrpcSerialization
         {
             EmbeXrpcRawData<DTL> recData;
             //response = default(T);
@@ -165,7 +165,7 @@ namespace EmbedXrpc
             {
                 goto sqs;
             }
-            UInt32 calcrc = GetBufferCrc(alldata, 12, (int)dataLen);
+            UInt32 calcrc = GetBufferCrc(alldata, (int)(12+offset), (int)dataLen);
             if(wantedBufCrc!=calcrc)
             {
                 goto sqs;
@@ -233,7 +233,7 @@ namespace EmbedXrpc
                                 serviceInvokeParameter.Response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
                                 serviceInvokeParameter.RpcObject = this;
                                 serviceInvokeParameter.TargetTimeOut = recData.TargetTimeOut;
-                                AllServices[i].Service.Invoke(ref serviceInvokeParameter,
+                                AllServices[i].Service.Invoke(serviceInvokeParameter,
                                     rsm,
                                     sendsm);
                                 SuspendTimer.Change(Timeout.Infinite, Timeout.Infinite);//手动关闭 怕用户忘了

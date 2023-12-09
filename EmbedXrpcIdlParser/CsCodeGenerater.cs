@@ -135,11 +135,12 @@ namespace EmbedXrpcIdlParser
                 }
             }
             var dh = pars == "" ? "" : ",";
-            sw.WriteLine($"public {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)} Invoke(DTL userDataOfTransportLayer{dh}{pars})");
+            sw.WriteLine($"public async Task<{CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}> Invoke(DTL userDataOfTransportLayer{dh}{pars})");
             sw.WriteLine("{");//function begin
             sw.WriteLine($"{service.ReturnStructType.TypeName} reqresp=new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();");
-            sw.WriteLine("lock(XrpcObject.ObjectMutex) ");
-            sw.WriteLine("{");//lock begin
+            //sw.WriteLine("lock(XrpcObject.ObjectMutex) ");
+            sw.WriteLine("XrpcObject.ObjectMutex.WaitOne();");
+            //sw.WriteLine("{");//lock begin
             sw.WriteLine("XrpcObject.MessageQueueOfRequestServiceHandle.Reset();");
             sw.WriteLine($"{CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)} request =new {CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)}();");
             for (int pi = 0; pi < service.ParameterStructType.TargetFields.Count; pi++)
@@ -165,19 +166,21 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine("XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));");
             sw.WriteLine("XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));");
             sw.WriteLine("XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));");
-
-            sw.WriteLine("if( XrpcObject.Send ( userDataOfTransportLayer,sm.Index,0,XrpcObject.RequestBuffer )==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
+            sw.WriteLine("var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);");
+            sw.WriteLine("if( send_result==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
                 "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
-                sw.WriteLine($"var waitstate=XrpcObject.Wait<{CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}>({service.ServiceName}_ServiceId, ref reqresp);");
+                sw.WriteLine($"var waitstate=XrpcObject.Wait<{CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}>({service.ServiceName}_ServiceId, reqresp);");
                 sw.WriteLine("if(reqresp==null)");
-                sw.WriteLine($"{{reqresp=new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();}}");
+                sw.WriteLine($"{{\nreqresp=new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();\n}}");
                 sw.WriteLine("reqresp.State=waitstate;");
                 sw.WriteLine("goto exi;");
             }
-            sw.WriteLine("}");//lock begin
-            sw.WriteLine("exi:\r\nreturn reqresp;");
+            //sw.WriteLine("}");//lock begin
+            sw.WriteLine("exi:");
+            sw.WriteLine("XrpcObject.ObjectMutex.ReleaseMutex();");
+            sw.WriteLine("return reqresp;");
 
             sw.WriteLine("}");//function end
 
@@ -198,7 +201,7 @@ namespace EmbedXrpcIdlParser
             {
                 sw.WriteLine($"private {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)} Response = new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();");
             }
-            sw.WriteLine("public  void Invoke(ref ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)");
+            sw.WriteLine("public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)");
             sw.WriteLine("{");//function begin
             sw.WriteLine($"{CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)} request = new {CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)}();");
             sw.WriteLine($"request.Deserialize(recManager);");
@@ -216,7 +219,7 @@ namespace EmbedXrpcIdlParser
                 }
             }
             var dh = pars == "" ? "" : ",";
-            sw.WriteLine($"{service.ServiceName}(ref serviceInvokeParameter{dh}{pars});");
+            sw.WriteLine($"await {service.ServiceName}(serviceInvokeParameter{dh}{pars});");
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
                 sw.WriteLine($"Response.Serialize(sendManager);");
@@ -225,7 +228,7 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine($"/*");
             sw.WriteLine($"public partial class {service.ServiceName}_Service<DTL>:IService<DTL> //where DTL:struct");
             sw.WriteLine("{");
-            sw.WriteLine($"public void {service.ServiceName}(ref ServiceInvokeParameter<DTL> serviceInvokeParameter{dh}{externstr}){{}}");
+            sw.WriteLine($"public async Task {service.ServiceName}(ServiceInvokeParameter<DTL> serviceInvokeParameter{dh}{externstr}){{}}");
             sw.WriteLine("}");
             sw.WriteLine($"*/");
             sw.WriteLine("}");//class end
@@ -282,6 +285,7 @@ namespace EmbedXrpcIdlParser
             csStreamWriter.WriteLine("using System.Reflection;");
             csStreamWriter.WriteLine("using System.Collections.Generic;");
             csStreamWriter.WriteLine("using EmbedXrpc;");
+            csStreamWriter.WriteLine("using System.Threading.Tasks;");
             foreach (var userNs in idlInfo.GenerationOption.UserNamespace)
             {
                 csStreamWriter.WriteLine($"using {userNs};");
