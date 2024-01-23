@@ -112,7 +112,13 @@ namespace EmbedXrpcIdlParser
             }
             CommonHsw.WriteLine($"}}{CppCsNanoSerializer.GetCppTypeDefineName(targetEnum)};\r\n\r\n");
         }
-
+        public static void EmitConstStruct(ConstStruct_TargetType targetConstStruct, StreamWriter CommonHsw)
+        {
+            foreach (var field in targetConstStruct.TargetConstValueFields)
+            {
+                CommonHsw.WriteLine($"#define {field.TargetField.FieldName} {field.Value}");
+            }
+        }
         public static void EmitStruct(StructType_TargetType structType, StreamWriter CommonHsw)
         {
             /*

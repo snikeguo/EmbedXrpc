@@ -169,8 +169,11 @@ namespace EmbedXrpcIdlParser
                 ServerCsw = new StreamWriter(cppCodeGenParameter.OutPutPath + "Server/" + outputattr.OutPutFileName + ".Server.cpp", false, encode);
                 ServerCsw.WriteLine($"#include\"{outputattr.OutPutFileName}.Server.h\"");
             }
-            
 
+            foreach (var constStruct in cppCodeGenParameter.FileIdlInfo.TargetConstStructs)
+            {
+                CppSerializableCommon.EmitConstStruct(constStruct, CommonHsw);
+            }
             foreach (var em in cppCodeGenParameter.FileIdlInfo.TargetEnums)
             {
                 //EmitFbsEnum(em);

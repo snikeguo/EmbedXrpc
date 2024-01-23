@@ -210,7 +210,21 @@ namespace EmbedXrpcIdlParser
             }
         }
     }
+    public class ConstValue
+    {
+        public Base_TargetField TargetField { get; set; }
+        public object Value { get; set; }
+    }
+    public class ConstStruct_TargetType : ITargetType
+    {
+        public List<ConstValue> TargetConstValueFields { get; set; }=new List<ConstValue>();
 
+        public Type TargetType { get; set; }
+
+        public string TypeName { get; set; }
+
+        public bool IsNeedFreeMemoryForNativeLanguage => false;
+    }
 
     public interface ITargetField
     {
@@ -300,6 +314,7 @@ namespace EmbedXrpcIdlParser
 
         public NoDeserializeParameterAttribute NoDeserializeParameterAttribute { get; internal set; }
     }
+
     /// <summary>
     /// 本文件中所有的资源
     /// </summary>
@@ -310,6 +325,7 @@ namespace EmbedXrpcIdlParser
         public List<ArrayType_TargetType> TargetArrayTypes { get; set; } = new List<ArrayType_TargetType>();
         public List<StructType_TargetType> TargetStructs { get; set; } = new List<StructType_TargetType>();
         public List<TargetService> TargetServices { get; set; } = new List<TargetService>();
+        public List<ConstStruct_TargetType> TargetConstStructs = new List<ConstStruct_TargetType>();
         public GenerationOption GenerationOption { get; set; }=null;
         public int ServiceId { get; set; }
     }
@@ -446,6 +462,28 @@ namespace EmbedXrpcIdlParser
         {
 
             internal ITargetType BitFieldBaseTargetType { get; set; } = null;
+        }
+        private ConstStruct_TargetType ConstStructParse(Type object_type)
+        {
+            ConstStruct_TargetType targetConstStruct = new ConstStruct_TargetType();
+            var fields = object_type.GetFields(BindingFlags.Static| BindingFlags.Public);
+            for (int field_index = 0; field_index < fields.Length; field_index++)
+            {
+                var field = fields[field_index];
+                if (IsBaseType(field.FieldType) == true)
+                {
+                    ConstValue constValue = new ConstValue();
+                    Base_TargetField targetfield = new Base_TargetField();
+                    targetfield.TargetType = GetInstance(field.FieldType);
+                    targetfield.FieldName = field.Name;
+                    constValue.TargetField = targetfield;
+                    constValue.Value = field.GetValue(null);
+                    targetConstStruct.TargetConstValueFields.Add(constValue);
+                }
+            }
+            targetConstStruct.TargetType = object_type;
+            targetConstStruct.TypeName = object_type.Name;
+            return targetConstStruct;
         }
         private StructType_TargetType StructTypeParse(Type object_type)
         {
@@ -874,8 +912,18 @@ namespace EmbedXrpcIdlParser
                     }
                     else//struct
                     {
-                        var struct_type = StructTypeParse(type);
-                        fileIdlInfo.TargetStructs.Add(struct_type);
+                        var constValueAttribute = type.GetCustomAttribute<ConstValueAttribute>();
+                        if (constValueAttribute != null)
+                        {
+                            var constStruct_type = ConstStructParse(type);
+                            fileIdlInfo.TargetConstStructs.Add(constStruct_type);
+                        }
+                        else
+                        {
+                            var struct_type = StructTypeParse(type);
+                            fileIdlInfo.TargetStructs.Add(struct_type);
+                        }
+                        
                     }
 
                 }

@@ -11,7 +11,17 @@ namespace EmbedXrpcIdlParser
     public class CsCodeGenerater
     {
         public CSharpCodeGenParameter CSharpCodeGenParameter { get; set; }
-        
+
+        public void GenerateConstStruct(StreamWriter sw, ConstStruct_TargetType constStructType_TargetType)
+        {
+            sw.WriteLine($"public class {constStructType_TargetType.TypeName}");
+            sw.WriteLine("{");
+            foreach (var field in constStructType_TargetType.TargetConstValueFields)
+            {
+                sw.WriteLine($"public const {CppCsNanoSerializer.GetCsTypeDefineName(field.TargetField.TargetType)} {field.TargetField.FieldName}={field.Value};");
+            }
+            sw.WriteLine("}");
+        }
 
         private void GenerateStruct(StreamWriter sw, StructType_TargetType objectType_TargetType)
         {
@@ -306,7 +316,10 @@ namespace EmbedXrpcIdlParser
                 }
                 csStreamWriter.WriteLine("}");//enum begin
             }
-
+            foreach (var constStruct in idlInfo.TargetConstStructs)
+            {
+                GenerateConstStruct(csStreamWriter, constStruct);
+            }
             foreach (var stru in idlInfo.TargetStructs)
             {
                 GenerateStruct(csStreamWriter, stru);

@@ -228,6 +228,13 @@ namespace EmbedXrpcIdlParser
         }
         public int Value { get; set; }
     }
+
+    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
+    public class ConstValueAttribute : Attribute
+    {
+        
+    }
+
 #if false
     [AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = true)]
     public class RoleAttribute : Attribute
