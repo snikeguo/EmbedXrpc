@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net7.0;net472</TargetFrameworks>
+	  <TargetFrameworks>net7.0</TargetFrameworks>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Version>0.0.1</Version>
     <Authors>snikeguo email:408260925@qq.com</Authors>
     <Company>snikeguo</Company>
     <Description>和单片机通讯的序列化和RPC库</Description>
-    <Platforms>AnyCPU</Platforms>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 

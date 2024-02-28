@@ -127,10 +127,9 @@ namespace EmbedXrpcIdlParser
              */
             StringBuilder FieldNumberSb = new StringBuilder();
 
-            if (structType.AlignAttribute != null)
+            if (structType.CppStructDefineRetouchBeginAttribute != null)
             {
-                CommonHsw.WriteLine("#pragma pack(push)");
-                CommonHsw.WriteLine($"#pragma pack({structType.AlignAttribute.Value})");
+                CommonHsw.WriteLine($"{structType.CppStructDefineRetouchBeginAttribute.Content}");
             }
 
             CommonHsw.WriteLine($"typedef struct {CppCsNanoSerializer.GetCppTypeDefineName(structType)}");
@@ -181,9 +180,9 @@ namespace EmbedXrpcIdlParser
             }
             CommonHsw.WriteLine($"}}{CppCsNanoSerializer.GetCppTypeDefineName(structType)};");
 
-            if (structType.AlignAttribute != null)
+            if (structType.CppStructDefineRetouchEndAttribute != null)
             {
-                CommonHsw.WriteLine("#pragma pack(pop)");
+                CommonHsw.WriteLine($"{structType.CppStructDefineRetouchEndAttribute}");
             }
 
             FieldNumberSb.Append("\r\n");

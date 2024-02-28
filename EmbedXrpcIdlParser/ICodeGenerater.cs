@@ -162,7 +162,8 @@ namespace EmbedXrpcIdlParser
         public ITargetField UnionTargetTypeField { get; set; }
 
         public List<CppCustomMethodSignatureAttribute> CppCustomMethodSignatures { get; set; }
-        public AlignAttribute AlignAttribute { get; set; }
+        public CppStructDefineRetouchBeginAttribute CppStructDefineRetouchBeginAttribute { get; set; }
+        public CppStructDefineRetouchEndAttribute CppStructDefineRetouchEndAttribute { get; set; }
 
         public bool? _IsNeedFreeMemoryForNativeLanguage;
         public bool IsNeedFreeMemoryForNativeLanguage
@@ -507,7 +508,8 @@ namespace EmbedXrpcIdlParser
             List<CppCustomMethodSignatureAttribute> cppCustomMethodSignatures = new List<CppCustomMethodSignatureAttribute>(object_type.GetCustomAttributes<CppCustomMethodSignatureAttribute>());
             targetStructType.CppCustomMethodSignatures = cppCustomMethodSignatures;
 
-            targetStructType.AlignAttribute = object_type.GetCustomAttribute<AlignAttribute>();
+            targetStructType.CppStructDefineRetouchBeginAttribute = object_type.GetCustomAttribute<CppStructDefineRetouchBeginAttribute>();
+            targetStructType.CppStructDefineRetouchEndAttribute = object_type.GetCustomAttribute<CppStructDefineRetouchEndAttribute>();
 
             bool isWriteUnion = false;
             //bool IsUnionComplete = false;

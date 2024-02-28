@@ -219,14 +219,25 @@ namespace EmbedXrpcIdlParser
     }
 
     [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
-    public class AlignAttribute : Attribute
+    public class CppStructDefineRetouchBeginAttribute : Attribute
     {
         
-        public AlignAttribute(int v)
+        public CppStructDefineRetouchBeginAttribute(string v)
         {
-            Value = v;   
+            Content = v;   
         }
-        public int Value { get; set; }
+        public string Content { get; set; }
+    }
+
+    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
+    public class CppStructDefineRetouchEndAttribute : Attribute
+    {
+
+        public CppStructDefineRetouchEndAttribute(string v)
+        {
+            Content = v;
+        }
+        public string Content { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = true)]
