@@ -341,6 +341,11 @@ namespace EmbedXrpcIdlParser
                 noOsCsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::NoOs_{service.ServiceName}(RequestParameter* rp)\n{{");
             }
 
+            noOsCsw.WriteLine("if(RpcObject->CurrentRequestSid!=EmbedXrpcNoReceivedSid)");
+            noOsCsw.WriteLine("{");
+            noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State=RequestState_Failed;//rpc object is busy!");
+            noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+            noOsCsw.WriteLine("}");
 
 
             csw.WriteLine("//write serialization code:{0}({1})", service.ServiceName, temp_fileds);
@@ -522,7 +527,7 @@ namespace EmbedXrpcIdlParser
 
 
             csw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\n}}");
-            noOsCsw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\n}}");
+            noOsCsw.WriteLine($"if(result==false)\n{{\n{service.ServiceName}_reqresp.State=RequestState_Failed;\nRpcObject->CurrentRequestSid=EmbedXrpcNoReceivedSid;}}");
 
             csw.WriteLine("else\n{");
             noOsCsw.WriteLine("else\n{");
@@ -609,6 +614,13 @@ namespace EmbedXrpcIdlParser
             if (service.ReturnStructType.TargetFields.Count > 1)
             {
                 noOsCsw.Write($"{service.ReturnStructType.TypeName}& {service.ServiceName}_Requester::NoOs_QueryServiceState(RequestParameter* rp)\n{{");
+
+                noOsCsw.WriteLine($"if(RpcObject->CurrentRequestSid!={service.ServiceName}_ServiceId)");
+                noOsCsw.WriteLine("{");
+                noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State=ResponseState_NoReceived;");
+                noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
+                noOsCsw.WriteLine("}");
+
                 noOsCsw.WriteLine($"SerializationManager sm;");
                 noOsCsw.WriteLine("El_Memset(&sm,0,sizeof(SerializationManager));");
                 noOsCsw.WriteLine($"uint32_t nowTick = El_GetTick(rp->IsIsr);");
@@ -616,6 +628,7 @@ namespace EmbedXrpcIdlParser
                 noOsCsw.WriteLine("memset(&currentReceivedResponseData,0,sizeof(currentReceivedResponseData));");
 
                 noOsCsw.WriteLine("if((RequestTick+RpcObject->TimeOut)<nowTick)\n{");
+                noOsCsw.WriteLine($"RpcObject->CurrentRequestSid=EmbedXrpcNoReceivedSid;");
                 noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_Timeout;");
                 noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
                 noOsCsw.WriteLine("}");
@@ -634,6 +647,7 @@ namespace EmbedXrpcIdlParser
                 noOsCsw.WriteLine($"sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;");
                 noOsCsw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp,rp->IsIsr);");
                 noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_Ok;");
+                noOsCsw.WriteLine($"RpcObject->CurrentRequestSid=EmbedXrpcNoReceivedSid;");
                 noOsCsw.WriteLine("}");
 
                 noOsCsw.WriteLine($"else if (currentReceivedResponseData.Sid == EmbedXrpcSuspendSid)\n{{");
