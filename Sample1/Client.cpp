@@ -13,7 +13,7 @@ bool ClientSend(RequestParameter* rp,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	memcpy(ServerBuffer, data, dataLen);
-	assert(ServerRpc.ReceivedMessage(dataLen, ServerBuffer, *rp->Udtl,false) == ReceivedMessageStatus::Ok);
+	assert(ServerRpc.ReceivedMessage(dataLen, ServerBuffer,false) == ReceivedMessageStatus::Ok);
 	return true;
 }
 //特化子类继承
@@ -61,17 +61,9 @@ static InitConfig InitCfg =
 	{
 		1,//ServiceThreadPriority
 		2048,
-		true,//UseRingBufferWhenReceiving
-		{
-			true,//IsSendToQueue
-			10,//MessageQueueOfRequestService_MaxItemNumber
-			10,//ServiceMessageQueue_MaxItemNumber
-		},
-		{
-			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
-			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferConfig
-		},
-
+		true,//IsSendToQueue
+		40960,//MessageQueueOfRequestService_MaxItemNumber
+		40960,//ServiceMessageQueue_MaxItemNumber
 	},
 	nullptr,
 };
@@ -94,7 +86,6 @@ void ClientThread()
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
 	win32UserDataOfTransportLayerTest.Port = 6666;
 	RequestParameter rp;
-	rp.Udtl = &win32UserDataOfTransportLayerTest;
 	rp.IsIsr = 0;
 	rp.IsProvideBuffer = true;
 	rp.Buffer = requestBuffer;

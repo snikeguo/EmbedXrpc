@@ -51,9 +51,6 @@
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedSerialization.c">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\ringbuffer.c">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp">
       <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClCompile>
@@ -69,9 +66,6 @@
     <ClCompile Include="Server.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedXrpcSerialization\BlockBufferProvider.c">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\EmbedXrpcSerialization\SoftCrc32.c">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
@@ -80,9 +74,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\EmbedXrpcSerialization\BlockBufferProvider.h">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h">
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
@@ -90,9 +81,6 @@
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcObject.h">
-      <Filter>EmbedXrpcLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EmbedXrpcSerialization\ringbuffer.h">
       <Filter>EmbedXrpcLib</Filter>
     </ClInclude>
     <ClInclude Include="XrpcCodeGen\Sample1.EmbedXrpcSerialization.h">

@@ -3,6 +3,7 @@
 #include "stdint.h"
 #include "assert.h"
 #include "string.h"
+
 //#include "console.h"
 #ifdef __cplusplus
 extern "C" {
@@ -30,7 +31,7 @@ extern "C" {
 
 #define Windows 1
 #define FreeRtos	2
-#define SupportedOs	Windows
+#define SupportedOs	FreeRtos
 
 #if SupportedOs==Windows
 #include "windows.h"
@@ -52,19 +53,18 @@ extern "C" {
 	#include "task.h"
 	#include "semphr.h"
 	#include "timers.h"
+	#include "message_buffer.h"
 	typedef SemaphoreHandle_t  El_Mutex_t;
 	typedef TimerHandle_t El_Timer_t;
 	typedef SemaphoreHandle_t  El_Semaphore_t;
 	typedef TaskHandle_t El_Thread_t;
 	typedef QueueHandle_t El_Queue_t;
+
 #define El_Debug	rt_kprintf
 #define El_Assert configASSERT
 #define El_Delay(x)    vTaskDelay(x)
 #define ThreadBeginHook()
 #define ThreadExitHook()	vTaskDelete(xTaskGetCurrentTaskHandle());
-#define taskENTER_CRITICAL()    
-#define taskEXIT_CRITICAL()
-#error "please porting taskENTER_CRITICAL/taskEXIT_CRITICAL interface!"
 #endif
 #define El_Strncpy strncpy
 #define El_Strncmp    strncmp
@@ -103,6 +103,7 @@ extern "C" {
 	QueueState El_SendQueue(El_Queue_t queue, void* item, uint32_t itemSize,int isIsr);
 	void El_ResetQueue(El_Queue_t queue, int isIsr);
 	uint32_t El_QueueSpacesAvailable(El_Queue_t queue, int isIsr);
+
 	void* El_Malloc(uint32_t size);
 	void El_Free(void* ptr);
 	void El_Memcpy(void* d, const void* s, uint32_t size);

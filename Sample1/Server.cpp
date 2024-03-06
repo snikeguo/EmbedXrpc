@@ -18,7 +18,7 @@ bool ServerSend(RequestParameter* rp,
 
 	}*/
 	memcpy(ClientBuffer, data, dataLen);
-	ClientRpc.ReceivedMessage(dataLen, ClientBuffer, *rp->Udtl,false);
+	ClientRpc.ReceivedMessage(dataLen, ClientBuffer, false);
 	return true;
 }
 
@@ -53,7 +53,6 @@ public:
 	{
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
-		RpcObj->UserDataOfTransportLayerOfSuspendTimerUsed.Port = 777;
 		//El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2,0);
 		this->IsFreeResponse = true;
 
@@ -135,16 +134,9 @@ static InitConfig InitCfg =
 	{
 		1,//ServiceThreadPriority
 		2048,
-		true,//UseRingBufferWhenReceiving
-		{
-			true,//IsSendToQueue
-			10,//MessageQueueOfRequestService_MaxItemNumber
-			10,//ServiceMessageQueue_MaxItemNumber
-		},
-		{
-			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
-			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferProvider
-		},
+		true,//IsSendToQueue
+		40960,//MessageQueueOfRequestService_MaxItemNumber
+		40960,//ServiceMessageQueue_MaxItemNumber
 	},
 	nullptr,
 };
@@ -166,7 +158,6 @@ void ServerThread()
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "192.168.1.101");
 	win32UserDataOfTransportLayerTest.Port = 7777;
 	RequestParameter rp;
-	rp.Udtl = &win32UserDataOfTransportLayerTest;
 	rp.IsIsr = 0;
 	while (testcount-- > 0)
 	{

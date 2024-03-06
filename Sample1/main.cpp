@@ -8,9 +8,10 @@ extern void ClientThread();
 extern void ServerThread();
 extern void Client_Init();
 extern void Server_Init();
+extern "C" void FreeRTOSInit(uint32_t heapSize);
 int main(int argc, char *argv[])
 {
-
+	FreeRTOSInit(1024 *1024 * 1);
 	Client_Init();
 	std::thread c = std::thread(ClientThread);
 	c.detach();

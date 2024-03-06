@@ -365,34 +365,31 @@ namespace EmbedXrpcIdlParser
 
             csw.WriteLine($"uint32_t bufferLen = 0;");
             noOsCsw.WriteLine($"uint32_t bufferLen = 0;");
-            noOsCsw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);");
+            
 
             if (service.ReturnStructType.TargetFields.Count > 1)//index 0 is state. 1 is returnfield
             {
                 csw.WriteLine($"auto waitstate=ResponseState_Timeout;");
                 //noOsCsw.WriteLine($"auto waitstate=ResponseState_Timeout;");
             }
+            csw.WriteLine("xMessageBufferReset(RpcObject->ClientUseRespondedData);");
+            noOsCsw.WriteLine("xMessageBufferReset(RpcObject->ClientUseRespondedData);");
 
             csw.WriteLine($"if (rp->IsProvideBuffer == false)");
             csw.WriteLine("{");
             noOsCsw.WriteLine($"if (rp->IsProvideBuffer == false)");
             noOsCsw.WriteLine("{");
 
-            csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
+            csw.WriteLine("if(RpcObject->ClientUseDataLinkBuffer.MutexHandle!=nullptr)");
             csw.WriteLine("{");
-            csw.WriteLine("El_TakeMutex(RpcObject->DataLinkBufferForRequest.MutexHandle, El_WAIT_FOREVER,rp->IsIsr);");
+            csw.WriteLine("El_TakeMutex(RpcObject->ClientUseDataLinkBuffer.MutexHandle, El_WAIT_FOREVER,rp->IsIsr);");
             csw.WriteLine("}");
-            csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-            csw.WriteLine("BlockRingBufferProvider_Reset(RpcObject->BlockBufferProviderOfRequestService,rp->IsIsr);");
-            csw.WriteLine("}\r\nelse\r\n{");
-            csw.WriteLine("El_ResetQueue(RpcObject->MessageQueueOfRequestService,rp->IsIsr);");
+           
 
-            csw.WriteLine("}");
-
-            csw.WriteLine("buffer = RpcObject->DataLinkBufferForRequest.Buffer;");
-            csw.WriteLine("bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;");
-            noOsCsw.WriteLine("buffer = RpcObject->DataLinkBufferForRequest.Buffer;");
-            noOsCsw.WriteLine("bufferLen = RpcObject->DataLinkBufferForRequest.BufferLen;");
+            csw.WriteLine("buffer = RpcObject->ClientUseDataLinkBuffer.Buffer;");
+            csw.WriteLine("bufferLen = RpcObject->ClientUseDataLinkBuffer.BufferLen;");
+            noOsCsw.WriteLine("buffer = RpcObject->ClientUseDataLinkBuffer.Buffer;");
+            noOsCsw.WriteLine("bufferLen = RpcObject->ClientUseDataLinkBuffer.BufferLen;");
 
             csw.WriteLine("}");
             noOsCsw.WriteLine("}");
@@ -543,13 +540,9 @@ namespace EmbedXrpcIdlParser
                 csw.WriteLine("if(waitstate == RequestResponseState::ResponseState_Ok)");
                 csw.WriteLine("{");
 
-                csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==true)\r\n{");
-                csw.WriteLine("sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;");
-                csw.WriteLine("}\r\nelse\r\n{");
                 csw.WriteLine("sm.Index=0;");
                 csw.WriteLine("sm.BufferLen = recData.DataLen;");
                 csw.WriteLine("sm.Buf = recData.Data;");
-                csw.WriteLine("}");
                 //csw.WriteLine($"if(RpcObject->RpcConfig.CheckSumValid==true)\r\n{{");
                 //csw.WriteLine("SerializationManager_SetCalculateSum(&sm,0);");
                 //csw.WriteLine("SerializationManager_SetReferenceSum(&sm,recData.CheckSum);");
@@ -559,17 +552,7 @@ namespace EmbedXrpcIdlParser
                 //csw.WriteLine("El_Assert(SerializationManager_GetReferenceSum(&sm)==SerializationManager_GetCalculateSum(&sm));");
                 //csw.WriteLine("}");
                 csw.WriteLine("}");
-                csw.WriteLine("if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)\r\n{");
-                //csw.WriteLine("if(waitstate != RequestResponseState::ResponseState_Timeout)");
-                //csw.WriteLine("{");
-
-                csw.WriteLine("if (recData.DataLen > 0)");
-                csw.WriteLine("{");
-                csw.WriteLine("El_Free(recData.Data);");
-                csw.WriteLine("}");
-
-                //csw.WriteLine("}");
-                csw.WriteLine("}//if(RpcObject->RpcConfig.UseRingBufferWhenReceiving==false)");
+                
 
                 csw.WriteLine($"{service.ServiceName}_reqresp.State=waitstate;");
             }
@@ -579,9 +562,9 @@ namespace EmbedXrpcIdlParser
             csw.WriteLine("if (rp->IsProvideBuffer == false)");
             csw.WriteLine("{");
 
-            csw.WriteLine("if(RpcObject->DataLinkBufferForRequest.MutexHandle!=nullptr)");
+            csw.WriteLine("if(RpcObject->ClientUseDataLinkBuffer.MutexHandle!=nullptr)");
             csw.WriteLine("{");
-            csw.WriteLine("El_ReleaseMutex(RpcObject->DataLinkBufferForRequest.MutexHandle,rp->IsIsr);");
+            csw.WriteLine("El_ReleaseMutex(RpcObject->ClientUseDataLinkBuffer.MutexHandle,rp->IsIsr);");
             csw.WriteLine("}");
 
             csw.WriteLine("}");
@@ -633,10 +616,21 @@ namespace EmbedXrpcIdlParser
                 noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
                 noOsCsw.WriteLine("}");
 
-                noOsCsw.WriteLine("if(BlockRingBufferProvider_Receive(RpcObject->BlockBufferProviderOfRequestService, &currentReceivedResponseData,0,rp->IsIsr) == False)\n{");
+                noOsCsw.WriteLine("size_t allDataLen=xMessageBufferReceive(RpcObject->ClientUseRespondedData,RpcObject->ClientUseDataLinkBuffer.Buffer,RpcObject->ClientUseDataLinkBuffer.BufferLen,0);");
+                noOsCsw.WriteLine("if(allDataLen== 0)\n{");
                 noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_NoReceived;");
                 noOsCsw.WriteLine($"return {service.ServiceName}_reqresp;");
                 noOsCsw.WriteLine("}");
+
+                noOsCsw.WriteLine("uint8_t* allData = RpcObject->ClientUseDataLinkBuffer.Buffer;");
+                noOsCsw.WriteLine("uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);");
+                noOsCsw.WriteLine("uint16_t targettimeout = (uint16_t)(allData[2] | ((allData[3] & 0x3f) << 8));");
+                noOsCsw.WriteLine("uint32_t dataLen = allDataLen - 12;");
+                noOsCsw.WriteLine("uint8_t* data = &allData[12];");
+                noOsCsw.WriteLine("currentReceivedResponseData.Sid = serviceId;");
+                noOsCsw.WriteLine("currentReceivedResponseData.DataLen = dataLen;");
+                noOsCsw.WriteLine("currentReceivedResponseData.TargetTimeout = targettimeout;");
+                noOsCsw.WriteLine("currentReceivedResponseData.Data = data;");
 
                 noOsCsw.WriteLine("if(currentReceivedResponseData.Sid == EmbedXrpcNoReceivedSid)\n{");
                 noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_NoReceived;");
@@ -644,7 +638,6 @@ namespace EmbedXrpcIdlParser
 
                 noOsCsw.WriteLine($"else if (currentReceivedResponseData.Sid == {service.ServiceName}_ServiceId)\n{{");
                 noOsCsw.WriteLine($"sm.Index=0;");
-                noOsCsw.WriteLine($"sm.BlockBufferProvider = RpcObject->BlockBufferProviderOfRequestService;");
                 noOsCsw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp,rp->IsIsr);");
                 noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_Ok;");
                 noOsCsw.WriteLine($"RpcObject->CurrentRequestSid=EmbedXrpcNoReceivedSid;");

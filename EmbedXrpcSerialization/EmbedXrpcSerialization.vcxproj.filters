@@ -21,12 +21,6 @@
     <ClInclude Include="EmbedSerialization.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="BlockBufferProvider.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ringbuffer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="EmbedXrpcObject.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -39,12 +33,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EmbedSerialization.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="BlockBufferProvider.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ringbuffer.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="EmbedXrpcObject.cpp">
