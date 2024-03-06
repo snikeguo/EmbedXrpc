@@ -233,16 +233,21 @@ ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint
 #error "EmbedXrpc_UsingOs is not defined!"
 #endif
 
-sqr:
+//sqr:
 	if (rt == ReceiveType_Response)
 	{
+		size_t size;
 		if (isIsr)
 		{
-			xMessageBufferSendFromISR(ClientUseRespondedData, allData, allDataLen, NULL);
+			size = xMessageBufferSendFromISR(ClientUseRespondedData, allData, allDataLen, NULL);
 		}
 		else
 		{
-			xMessageBufferSend(ClientUseRespondedData, allData, allDataLen, 0);
+			size = xMessageBufferSend(ClientUseRespondedData, allData, allDataLen, 0);
+		}
+		if (size == allDataLen)
+		{
+			El_SendQueueResult = ReceivedMessageStatus::Ok;
 		}
 	}
 	else if (rt == ReceiveType_Request) // server
@@ -250,13 +255,18 @@ sqr:
 		// EmbedSerializationShowMessage("EmbedXrpcObject","Server ReceivedMessage  El_Malloc :0x%x,size:%d\n", (uint32_t)raw.Data, dataLen);
 		if (RpcConfig.IsSendToQueue == true)
 		{
+			size_t size;
 			if (isIsr)
 			{
-				xMessageBufferSendFromISR(ServerUseRequestedData, allData, allDataLen, NULL);
+				size=xMessageBufferSendFromISR(ServerUseRequestedData, allData, allDataLen, NULL);
 			}
 			else
 			{
-				xMessageBufferSend(ServerUseRequestedData, allData, allDataLen, 0);
+				size=xMessageBufferSend(ServerUseRequestedData, allData, allDataLen, 0);
+			}
+			if (size == allDataLen)
+			{
+				El_SendQueueResult = ReceivedMessageStatus::Ok;
 			}
 		}
 		else
@@ -388,18 +398,18 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo *recDat
 		recData->Data = data;
 		if (sid == recData->Sid)
 		{
-			EmbedSerializationShowMessage("EmbedXrpcObject", "sid == recData.Sid\n");
+			El_Debug("EmbedXrpcObject:sid == recData.Sid\n");
 			ret = ResponseState_Ok;
 			break;//接受OK跳出
 		}
 		else if (recData->Sid == EmbedXrpcSuspendSid)
 		{
-			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcSuspendSid\n");
+			El_Debug("EmbedXrpcObject:Client:recData.Sid == EmbedXrpcSuspendSid\n");
 			endTick = El_GetTick(IsIsr) + TimeOut;
 		}
 		else if (recData->Sid == EmbedXrpcUnsupportedSid)
 		{
-			EmbedSerializationShowMessage("EmbedXrpcObject", "Client:recData.Sid == EmbedXrpcUnsupportedSid\n");
+			El_Debug("EmbedXrpcObject:Client:recData.Sid == EmbedXrpcUnsupportedSid\n");
 			ret = ResponseState_Timeout;
 		}
 		else

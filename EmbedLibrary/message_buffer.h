@@ -61,10 +61,11 @@
 #ifndef FREERTOS_MESSAGE_BUFFER_H
 #define FREERTOS_MESSAGE_BUFFER_H
 
+#if 0
 #ifndef INC_FREERTOS_H
     #error "include FreeRTOS.h must appear in source files before include message_buffer.h"
 #endif
-
+#endif
 /* Message buffers are built onto of stream buffers. */
 #include "stream_buffer.h"
 

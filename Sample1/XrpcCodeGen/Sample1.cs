@@ -400,7 +400,6 @@ if(sm.Buf!=null) bytes=sm.ToBytes(DateStringLen,typeof(System.Byte));
 if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
 sm.Index+=1;
 #if MyMacro==TRUE
-if(DateStringLen>(byte)(1)) throw new OverflowException();
 for(byte DateString_index=0;DateString_index<DateStringLen;DateString_index++)
 {
 if(sm.Buf!=null) bytes=sm.ToBytes(DateString[DateString_index],typeof(System.Byte));
@@ -422,7 +421,6 @@ Sec=(Int32)sm.DeserializeField(typeof(System.Int32),4);
 Sex=(Sex)sm.DeserializeField(typeof(System.UInt64),8);
 DateStringLen=(byte)sm.DeserializeField(typeof(System.Byte),1);
 #if MyMacro==TRUE
-if(DateStringLen>(byte)(1)) throw new OverflowException();
 DateString=new byte[DateStringLen];
 for(byte DateString_index=0;DateString_index<DateStringLen;DateString_index++)
 {
@@ -472,7 +470,6 @@ byte[] bytes=null;
 if(sm.Buf!=null) bytes=sm.ToBytes(EnumArrayLen,typeof(System.Int32));
 if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
 sm.Index+=4;
-if(EnumArrayLen>(Int32)(1)) throw new OverflowException();
 for(Int32 EnumArray_index=0;EnumArray_index<EnumArrayLen;EnumArray_index++)
 {
 if(sm.Buf!=null) bytes=sm.ToBytes(EnumArray[EnumArray_index],typeof(Sex));
@@ -482,7 +479,6 @@ sm.Index+=8;
 if(sm.Buf!=null) bytes=sm.ToBytes(ObjectArrayLen,typeof(System.Int32));
 if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
 sm.Index+=4;
-if(EnumArrayLen>(Int32)(1)) throw new OverflowException();
 for(Int32 DateTimeArray_index=0;DateTimeArray_index<EnumArrayLen;DateTimeArray_index++)
 {
 DateTimeArray[DateTimeArray_index].Serialize(sm);
@@ -497,14 +493,12 @@ FiexDateTimeArray[FiexDateTimeArray_index].Serialize(sm);
 public void Deserialize(SerializationManager sm)
 {
 EnumArrayLen=(Int32)sm.DeserializeField(typeof(System.Int32),4);
-if(EnumArrayLen>(Int32)(1)) throw new OverflowException();
 EnumArray=new Sex[EnumArrayLen];
 for(Int32 EnumArray_index=0;EnumArray_index<EnumArrayLen;EnumArray_index++)
 {
 EnumArray[EnumArray_index]=(UInt64)sm.DeserializeField(typeof(System.UInt64),8);
 }
 ObjectArrayLen=(Int32)sm.DeserializeField(typeof(System.Int32),4);
-if(EnumArrayLen>(Int32)(1)) throw new OverflowException();
 DateTimeArray=new DateTime_t[EnumArrayLen];
 for(Int32 DateTimeArray_index=0;DateTimeArray_index<EnumArrayLen;DateTimeArray_index++)
 {
@@ -807,7 +801,6 @@ sm.Index+=4;
 if(sm.Buf!=null) bytes=sm.ToBytes(dataLen,typeof(System.Int32));
 if(sm.Buf!=null) Array.Copy(bytes,0,sm.Buf,sm.Index,bytes.Length);
 sm.Index+=4;
-if(dataLen>(Int32)(1)) throw new OverflowException();
 for(Int32 data_index=0;data_index<dataLen;data_index++)
 {
 if(sm.Buf!=null) bytes=sm.ToBytes(data[data_index],typeof(System.Byte));
@@ -826,7 +819,6 @@ public void Deserialize(SerializationManager sm)
 a=(Int32)sm.DeserializeField(typeof(System.Int32),4);
 b=(Int32)sm.DeserializeField(typeof(System.Int32),4);
 dataLen=(Int32)sm.DeserializeField(typeof(System.Int32),4);
-if(dataLen>(Int32)(1)) throw new OverflowException();
 data=new byte[dataLen];
 for(Int32 data_index=0;data_index<dataLen;data_index++)
 {

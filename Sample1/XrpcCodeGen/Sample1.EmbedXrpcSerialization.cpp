@@ -204,7 +204,6 @@ if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->DateStringLen,sizeof(uint8_t));
 sm->Index+=1;
 El_Assert(sm->Index<=sm->BufferLen);
 #if MyMacro==TRUE
-El_Assert(obj->DateStringLen<=1);
 for(uint8_t DateString_index=0;DateString_index<obj->DateStringLen;DateString_index++)
 {
 if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->DateString[DateString_index],sizeof(uint8_t));
@@ -228,7 +227,6 @@ DeserializeField((uint8_t *)&obj->DateStringLen,sm,1,sizeof(uint8_t),isIsr);
 #if MyMacro==TRUE
 obj->DateString=(uint8_t *)El_Malloc(sizeof(uint8_t)*obj->DateStringLen);
 El_Memset(obj->DateString,0,sizeof(uint8_t)*obj->DateStringLen);
-El_Assert(obj->DateStringLen<=1);
 for(uint8_t DateString_index=0;DateString_index<obj->DateStringLen;DateString_index++)
 {
 DeserializeField((uint8_t *)&obj->DateString[DateString_index],sm,1,sizeof(uint8_t),isIsr);
@@ -253,7 +251,6 @@ void TestSerialize_Serialize(SerializationManager *sm,TestSerialize *obj)
 if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->EnumArrayLen,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Assert(obj->EnumArrayLen<=1);
 for(int32_t EnumArray_index=0;EnumArray_index<obj->EnumArrayLen;EnumArray_index++)
 {
 if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->EnumArray[EnumArray_index],sizeof(Sex)<=8?sizeof(Sex):8);
@@ -263,7 +260,6 @@ El_Assert(sm->Index<=sm->BufferLen);
 if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->ObjectArrayLen,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Assert(obj->EnumArrayLen<=1);
 for(int32_t DateTimeArray_index=0;DateTimeArray_index<obj->EnumArrayLen;DateTimeArray_index++)
 {
 DateTime_t_Serialize(sm,&obj->DateTimeArray[DateTimeArray_index]);
@@ -280,7 +276,6 @@ void TestSerialize_Deserialize(SerializationManager *sm,TestSerialize *obj,int i
 DeserializeField((uint8_t *)&obj->EnumArrayLen,sm,4,sizeof(int32_t),isIsr);
 obj->EnumArray=(Sex *)El_Malloc(sizeof(Sex)*obj->EnumArrayLen);
 El_Memset(obj->EnumArray,0,sizeof(Sex)*obj->EnumArrayLen);
-El_Assert(obj->EnumArrayLen<=1);
 for(int32_t EnumArray_index=0;EnumArray_index<obj->EnumArrayLen;EnumArray_index++)
 {
 DeserializeField((uint8_t *)&obj->EnumArray[EnumArray_index],sm,8,sizeof(Sex),isIsr);
@@ -288,7 +283,6 @@ DeserializeField((uint8_t *)&obj->EnumArray[EnumArray_index],sm,8,sizeof(Sex),is
 DeserializeField((uint8_t *)&obj->ObjectArrayLen,sm,4,sizeof(int32_t),isIsr);
 obj->DateTimeArray=(DateTime_t *)El_Malloc(sizeof(DateTime_t)*obj->EnumArrayLen);
 El_Memset(obj->DateTimeArray,0,sizeof(DateTime_t)*obj->EnumArrayLen);
-El_Assert(obj->EnumArrayLen<=1);
 for(int32_t DateTimeArray_index=0;DateTimeArray_index<obj->EnumArrayLen;DateTimeArray_index++)
 {
 DateTime_t_Deserialize(sm,&obj->DateTimeArray[DateTimeArray_index],isIsr);
@@ -431,7 +425,6 @@ El_Assert(sm->Index<=sm->BufferLen);
 if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->dataLen,sizeof(int32_t));
 sm->Index+=4;
 El_Assert(sm->Index<=sm->BufferLen);
-El_Assert(obj->dataLen<=1);
 for(int32_t data_index=0;data_index<obj->dataLen;data_index++)
 {
 if(sm->Buf) El_Memcpy(&sm->Buf[sm->Index],&obj->data[data_index],sizeof(uint8_t));
@@ -452,7 +445,6 @@ DeserializeField((uint8_t *)&obj->b,sm,4,sizeof(int32_t),isIsr);
 DeserializeField((uint8_t *)&obj->dataLen,sm,4,sizeof(int32_t),isIsr);
 obj->data=(uint8_t *)El_Malloc(sizeof(uint8_t)*obj->dataLen);
 El_Memset(obj->data,0,sizeof(uint8_t)*obj->dataLen);
-El_Assert(obj->dataLen<=1);
 for(int32_t data_index=0;data_index<obj->dataLen;data_index++)
 {
 DeserializeField((uint8_t *)&obj->data[data_index],sm,1,sizeof(uint8_t),isIsr);

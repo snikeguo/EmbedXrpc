@@ -12,11 +12,15 @@ bool ServerSend(RequestParameter* rp,
 	EmbedXrpcObject* rpcObj,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去，如果你的协议没有client的request请求，这个可以为null
 {
-	/*for (size_t i = 4; i < dataLen; i++)
+#if 0
+	printf("ServerSend:");
+	for (size_t i = 0; i < 8; i++)
 	{
-		printf("ServerSend:0x%.2x\n", data[i]);
+		printf("0x%.2x,", data[i]);
 
-	}*/
+	}
+	printf("\n");
+#endif
 	memcpy(ClientBuffer, data, dataLen);
 	ClientRpc.ReceivedMessage(dataLen, ClientBuffer, false);
 	return true;
@@ -53,7 +57,8 @@ public:
 	{
 		EmbedXrpcObject* RpcObj = 
 			(EmbedXrpcObject*)serviceInvokeParameter->RpcObject;
-		//El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut / 2,0);
+		El_TimerStart(RpcObj->SuspendTimer, serviceInvokeParameter->TargetTimeOut/2,0);
+		//xTimerStart(RpcObj->SuspendTimer, 0);
 		this->IsFreeResponse = true;
 
 		Response.ReturnValue.Sum = 1;
@@ -67,7 +72,8 @@ public:
 
 		Response.ReturnValue.dataLen = 0;
 		Response.ReturnValue.data = NULL;
-		printf("server: addservice 模拟耗时操作  延时2秒\n");
+		printf("server: addservice 模拟耗时操作  延时5秒\n");
+		Sleep(5000);
 		//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 		//strncpy((char *)Response.ReturnValue.data, "6789", dataLen + 1);
 		//printf("len:%d\n", dataLen);
@@ -161,7 +167,6 @@ void ServerThread()
 	rp.IsIsr = 0;
 	while (testcount-- > 0)
 	{
-
 		auto ti = (time(nullptr));
 		auto localti = localtime(&ti);
 		t.Day = localti->tm_mday;
@@ -187,6 +192,6 @@ void ServerThread()
 		ServerRpc.NoOs_ServiceExecute(0);
 #endif
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(10000));//等待RPC调用全部完毕
+	Sleep(10000);//等待RPC调用全部完毕
 	ServerRpc.DeInit();
 }

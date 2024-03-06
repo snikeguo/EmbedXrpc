@@ -499,7 +499,7 @@ namespace EmbedXrpcIdlParser
                     //    }
                     //}
                     var maxAttr = array_TargetField.MaxCountAttribute;
-                    if(maxAttr!=null)
+                    if(maxAttr!=null && maxAttr.IsFixed==true)
                     {
                         SerializeCodeSb.AppendLine($"El_Assert({lenstring}<={maxAttr.MaxCount});");
                         CsSerializeCodeSb.AppendLine($"if({cslenstring}>({cs_len_type_string})({maxAttr.MaxCount})) throw new OverflowException();");
@@ -539,7 +539,7 @@ namespace EmbedXrpcIdlParser
                         DeserializeCodeSb.AppendLine($"El_Memset(obj->{field.FieldName},0,sizeof({defineOfStr})*{lenstring});");
                     }
 
-                    if (maxAttr != null)
+                    if (maxAttr != null && maxAttr.IsFixed==true)
                     {
                         DeserializeCodeSb.AppendLine($"El_Assert({lenstring}<={maxAttr.MaxCount});");
                         CsDeserializeCodeSb.AppendLine($"if({cslenstring}>({cs_len_type_string})({maxAttr.MaxCount})) throw new OverflowException();");

@@ -13,7 +13,8 @@ bool ClientSend(RequestParameter* rp,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	memcpy(ServerBuffer, data, dataLen);
-	assert(ServerRpc.ReceivedMessage(dataLen, ServerBuffer,false) == ReceivedMessageStatus::Ok);
+	auto x = ServerRpc.ReceivedMessage(dataLen, ServerBuffer, false);
+	assert(x == ReceivedMessageStatus::Ok);
 	return true;
 }
 //特化子类继承
@@ -53,9 +54,9 @@ static InitConfig InitCfg =
 {
 	"Client",
 	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
-	{nullptr,0,false},
+	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
 	ClientSend,
-	1000,
+	10000,
 	AllServices,
 	2,
 	{
@@ -93,6 +94,7 @@ void ClientThread()
 	while (testcount-- > 0)
 	{
 #if 1
+		//vTaskDelay(-1);
 		a++;
 		b++;
 		Client.Add_SendData.a = a;
@@ -135,8 +137,8 @@ void ClientThread()
 #if EmbedXrpc_UsingOs==0
 		ClientRpc.NoOs_ServiceExecute(0);
 #endif
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		Sleep(500);
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
+	Sleep(3000);//等待RPC调用全部完毕
 	ClientRpc.DeInit();
 }

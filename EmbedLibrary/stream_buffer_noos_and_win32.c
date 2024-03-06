@@ -34,13 +34,13 @@
 #define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 /* FreeRTOS includes. */
-#include "FreeRTOS.h"
-#include "task.h"
-#include "stream_buffer.h"
+//#include "FreeRTOS.h"
+//#include "task.h"
+#include "EmbedLibrary.h"
 
-#if ( configUSE_TASK_NOTIFICATIONS != 1 )
-    #error configUSE_TASK_NOTIFICATIONS must be set to 1 to build stream_buffer.c
-#endif
+//#if ( configUSE_TASK_NOTIFICATIONS != 1 )
+//    #error configUSE_TASK_NOTIFICATIONS must be set to 1 to build stream_buffer.c
+//#endif
 
 /* Lint e961, e9021 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
@@ -93,37 +93,12 @@
  * that uses task notifications. */
 #ifndef sbSEND_COMPLETED
     #define sbSEND_COMPLETED( pxStreamBuffer )                               \
-    vTaskSuspendAll();                                                       \
-    {                                                                        \
-        if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )              \
-        {                                                                    \
-            ( void ) xTaskNotify( ( pxStreamBuffer )->xTaskWaitingToReceive, \
-                                  ( uint32_t ) 0,                            \
-                                  eNoAction );                               \
-            ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                \
-        }                                                                    \
-    }                                                                        \
-    ( void ) xTaskResumeAll();
+    El_ReleaseSemaphore(pxStreamBuffer->NotifySemaphore,0)
 #endif /* sbSEND_COMPLETED */
 
 #ifndef sbSEND_COMPLETE_FROM_ISR
     #define sbSEND_COMPLETE_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken )       \
-    {                                                                                   \
-        UBaseType_t uxSavedInterruptStatus;                                             \
-                                                                                        \
-        uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();     \
-        {                                                                               \
-            if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )                     \
-            {                                                                           \
-                ( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive, \
-                                             ( uint32_t ) 0,                            \
-                                             eNoAction,                                 \
-                                             pxHigherPriorityTaskWoken );               \
-                ( pxStreamBuffer )->xTaskWaitingToReceive = NULL;                       \
-            }                                                                           \
-        }                                                                               \
-        portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );                    \
-    }
+    El_ReleaseSemaphore(pxStreamBuffer->NotifySemaphore,1)
 #endif /* sbSEND_COMPLETE_FROM_ISR */
 /*lint -restore (9026) */
 
@@ -139,12 +114,15 @@
 /* Structure that hold state information on the buffer. */
 typedef struct StreamBufferDef_t                 /*lint !e9058 Style convention uses tag. */
 {
+    El_Mutex_t  DataMutex;
+    El_Semaphore_t  NotifySemaphore;
+
     volatile size_t xTail;                       /* Index to the next item to read within the buffer. */
     volatile size_t xHead;                       /* Index to the next item to write within the buffer. */
     size_t xLength;                              /* The length of the buffer pointed to by pucBuffer. */
     size_t xTriggerLevelBytes;                   /* The number of bytes that must be in the stream buffer before a task that is waiting for data is unblocked. */
-    volatile TaskHandle_t xTaskWaitingToReceive; /* Holds the handle of a task waiting for data, or NULL if no tasks are waiting. */
-    volatile TaskHandle_t xTaskWaitingToSend;    /* Holds the handle of a task waiting to send data to a message buffer that is full. */
+    //volatile TaskHandle_t xTaskWaitingToReceive; /* Holds the handle of a task waiting for data, or NULL if no tasks are waiting. */
+    //volatile TaskHandle_t xTaskWaitingToSend;    /* Holds the handle of a task waiting to send data to a message buffer that is full. */
     uint8_t * pucBuffer;                         /* Points to the buffer itself - that is - the RAM that stores the data passed through the buffer. */
     uint8_t ucFlags;
 
@@ -261,7 +239,7 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         if( xBufferSizeBytes < ( xBufferSizeBytes + 1 + sizeof( StreamBuffer_t ) ) )
         {
             xBufferSizeBytes++;
-            pucAllocatedMemory = ( uint8_t * ) pvPortMalloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) ); /*lint !e9079 malloc() only returns void*. */
+            pucAllocatedMemory = ( uint8_t * ) El_Malloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) ); /*lint !e9079 malloc() only returns void*. */
         }
         else
         {
@@ -283,7 +261,12 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
         {
             traceSTREAM_BUFFER_CREATE_FAILED( xIsMessageBuffer );
         }
-
+        StreamBufferHandle_t handle = (StreamBufferHandle_t)pucAllocatedMemory;
+        if (handle != NULL)
+        {
+            handle->DataMutex = El_CreateMutex("stream_buffer.DataMutex");
+            handle->NotifySemaphore = El_CreateSemaphore("stream_buffer.NotifySemaphore");
+        }
         return ( StreamBufferHandle_t ) pucAllocatedMemory; /*lint !e9087 !e826 Safe cast as allocated memory is aligned. */
     }
 
@@ -361,7 +344,11 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             xReturn = NULL;
             traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
         }
-
+        if (xReturn != NULL)
+        {
+            xReturn->DataMutex = El_CreateMutex("stream_buffer.DataMutex");
+            xReturn->NotifySemaphore = El_CreateSemaphore("stream_buffer.NotifySemaphore");
+        }
         return xReturn;
     }
 
@@ -382,7 +369,7 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
             {
                 /* Both the structure and the buffer were allocated using a single call
                 * to pvPortMalloc(), hence only one call to vPortFree() is required. */
-                vPortFree( ( void * ) pxStreamBuffer ); /*lint !e9087 Standard free() semantics require void *, plus pxStreamBuffer was allocated by pvPortMalloc(). */
+                El_Free( ( void * ) pxStreamBuffer ); /*lint !e9087 Standard free() semantics require void *, plus pxStreamBuffer was allocated by pvPortMalloc(). */
             }
         #else
             {
@@ -421,11 +408,11 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
     #endif
 
     /* Can only reset a message buffer if there are no tasks blocked on it. */
-    taskENTER_CRITICAL();
+    El_TakeMutex(pxStreamBuffer->DataMutex,-1,0);//taskENTER_CRITICAL();
     {
-        if( pxStreamBuffer->xTaskWaitingToReceive == NULL )
+        //if( pxStreamBuffer->xTaskWaitingToReceive == NULL )
         {
-            if( pxStreamBuffer->xTaskWaitingToSend == NULL )
+            //if( pxStreamBuffer->xTaskWaitingToSend == NULL )
             {
                 prvInitialiseNewStreamBuffer( pxStreamBuffer,
                                               pxStreamBuffer->pucBuffer,
@@ -444,7 +431,8 @@ BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
             }
         }
     }
-    taskEXIT_CRITICAL();
+    El_ReleaseMutex(pxStreamBuffer->DataMutex,0);
+    //taskEXIT_CRITICAL();
 
     return xReturn;
 }
@@ -524,7 +512,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
     StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
     size_t xReturn, xSpace = 0;
     size_t xRequiredSpace = xDataLengthBytes;
-    TimeOut_t xTimeOut;
+    //TimeOut_t xTimeOut;
 
     /* The maximum amount of space a stream buffer will ever report is its length
      * minus 1. */
@@ -571,7 +559,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
             mtCOVERAGE_TEST_MARKER();
         }
     }
-
+#if 0
     if( xTicksToWait != ( TickType_t ) 0 )
     {
         vTaskSetTimeOutState( &xTimeOut );
@@ -610,7 +598,7 @@ size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
     {
         mtCOVERAGE_TEST_MARKER();
     }
-
+#endif
     if( xSpace == ( size_t ) 0 )
     {
         xSpace = xStreamBufferSpacesAvailable( pxStreamBuffer );
@@ -778,7 +766,7 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
     {
         /* Checking if there is data and clearing the notification state must be
          * performed atomically. */
-        taskENTER_CRITICAL();
+        El_TakeMutex(pxStreamBuffer->DataMutex, -1,0);//taskENTER_CRITICAL();
         {
             xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
 
@@ -790,25 +778,25 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
             if( xBytesAvailable <= xBytesToStoreMessageLength )
             {
                 /* Clear notification state as going to wait for data. */
-                ( void ) xTaskNotifyStateClear( NULL );
+                El_ResetSemaphore(pxStreamBuffer->NotifySemaphore,0); //( void ) xTaskNotifyStateClear( NULL ); 如果当前队列的有效数据不够,就先复位信号量(去掉之前的),准备好接受了
 
                 /* Should only be one reader. */
-                configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
-                pxStreamBuffer->xTaskWaitingToReceive = xTaskGetCurrentTaskHandle();
+                //configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
+                //pxStreamBuffer->xTaskWaitingToReceive = xTaskGetCurrentTaskHandle();
             }
             else
             {
                 mtCOVERAGE_TEST_MARKER();
             }
         }
-        taskEXIT_CRITICAL();
+        El_ReleaseMutex(pxStreamBuffer->DataMutex,0);//taskEXIT_CRITICAL();
 
         if( xBytesAvailable <= xBytesToStoreMessageLength )
         {
             /* Wait for data to be available. */
             traceBLOCKING_ON_STREAM_BUFFER_RECEIVE( xStreamBuffer );
-            ( void ) xTaskNotifyWait( ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
-            pxStreamBuffer->xTaskWaitingToReceive = NULL;
+            El_TakeSemaphore(xStreamBuffer->NotifySemaphore, xTicksToWait,0); //( void ) xTaskNotifyWait( ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
+            //pxStreamBuffer->xTaskWaitingToReceive = NULL;
 
             /* Recheck the data available after blocking. */
             xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
@@ -1065,7 +1053,7 @@ BaseType_t xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer )
     return xReturn;
 }
 /*-----------------------------------------------------------*/
-
+#if 0
 BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer,
                                               BaseType_t * pxHigherPriorityTaskWoken )
 {
@@ -1126,6 +1114,7 @@ BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuf
 
     return xReturn;
 }
+#endif
 /*-----------------------------------------------------------*/
 
 static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer,
@@ -1274,8 +1263,23 @@ static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
             configASSERT( memset( pucBuffer, ( int ) xWriteValue, xBufferSizeBytes ) == pucBuffer );
         } /*lint !e529 !e438 xWriteValue is only used if configASSERT() is defined. */
     #endif
-
-    ( void ) memset( ( void * ) pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) ); /*lint !e9087 memset() requires void *. */
+#if 0
+        volatile size_t xTail;                       /* Index to the next item to read within the buffer. */
+        volatile size_t xHead;                       /* Index to the next item to write within the buffer. */
+        size_t xLength;                              /* The length of the buffer pointed to by pucBuffer. */
+        size_t xTriggerLevelBytes;                   /* The number of bytes that must be in the stream buffer before a task that is waiting for data is unblocked. */
+        //volatile TaskHandle_t xTaskWaitingToReceive; /* Holds the handle of a task waiting for data, or NULL if no tasks are waiting. */
+        //volatile TaskHandle_t xTaskWaitingToSend;    /* Holds the handle of a task waiting to send data to a message buffer that is full. */
+        uint8_t* pucBuffer;                         /* Points to the buffer itself - that is - the RAM that stores the data passed through the buffer. */
+        uint8_t ucFlags;
+#endif
+        pxStreamBuffer->xTail = 0;
+        pxStreamBuffer->xHead = 0;
+        pxStreamBuffer->xLength = 0;
+        pxStreamBuffer->xTriggerLevelBytes = 0;
+        pxStreamBuffer->pucBuffer = NULL;
+        pxStreamBuffer->ucFlags = 0;
+    //( void ) memset( ( void * ) &pxStreamBuffer->reserved1, 0x00, sizeof( StreamBuffer_t )-offsetof(StreamBuffer_t, reserved1) ); /*lint !e9087 memset() requires void *. */
     pxStreamBuffer->pucBuffer = pucBuffer;
     pxStreamBuffer->xLength = xBufferSizeBytes;
     pxStreamBuffer->xTriggerLevelBytes = xTriggerLevelBytes;

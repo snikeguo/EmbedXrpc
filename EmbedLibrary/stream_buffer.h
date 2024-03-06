@@ -50,10 +50,11 @@
 #ifndef STREAM_BUFFER_H
 #define STREAM_BUFFER_H
 
+#if 0
 #ifndef INC_FREERTOS_H
     #error "include FreeRTOS.h must appear in source files before include stream_buffer.h"
 #endif
-
+#endif
 /* *INDENT-OFF* */
 #if defined( __cplusplus )
     extern "C" {
@@ -136,6 +137,23 @@ typedef struct StreamBufferDef_t * StreamBufferHandle_t;
  * \ingroup StreamBufferManagement
  */
 #define xStreamBufferCreate( xBufferSizeBytes, xTriggerLevelBytes )    xStreamBufferGenericCreate( xBufferSizeBytes, xTriggerLevelBytes, pdFALSE )
+
+typedef struct xSTATIC_STREAM_BUFFER
+{
+    El_Mutex_t  DataMutex;
+    El_Semaphore_t  NotifySemaphore;
+
+    size_t uxDummy1[4];
+    void* pvDummy2[3];
+    uint8_t ucDummy3;
+#if ( configUSE_TRACE_FACILITY == 1 )
+    UBaseType_t uxDummy4;
+#endif
+
+} StaticStreamBuffer_t;
+
+/* Message buffers are built on stream buffers. */
+typedef StaticStreamBuffer_t StaticMessageBuffer_t;
 
 /**
  * stream_buffer.h

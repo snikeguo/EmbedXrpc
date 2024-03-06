@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -144,6 +144,7 @@
     <ClInclude Include="Win32.Port\BlockQueue.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="stream_buffer_noos_and_win32.c" />
     <ClCompile Include="Win32.Port\BlockQueue.cpp" />
     <ClCompile Include="Win32.Port\El.Win32.Port.cpp" />
   </ItemGroup>

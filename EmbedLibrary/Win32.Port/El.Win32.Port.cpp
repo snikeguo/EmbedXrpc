@@ -27,8 +27,8 @@ extern "C"
 	{
 		//QMutex* mutex = new QMutex();
 #if EmbedXrpc_UsingOs == 1
-		std::timed_mutex* mutex = new std::timed_mutex();
-		return  mutex;
+		HANDLE handle = CreateMutexA(NULL, FALSE, NULL);
+		return  handle;
 #else
 		return nullptr;
 #endif
@@ -47,7 +47,10 @@ extern "C"
 	El_Semaphore_t  El_CreateSemaphore(const char* SemaphoreName)
 	{
 #if EmbedXrpc_UsingOs == 1
-		Semaphore* sem = new Semaphore();
+		//这个函数会多次执行
+		//由于代码设计使然，SemaphoreName 每次执行的值一样
+		//HANDLE sem = CreateEventA(NULL, FALSE, FALSE, SemaphoreName);//有问题
+		HANDLE sem = CreateEventA(NULL, FALSE, FALSE, NULL);//没问题
 		return sem;
 #else
 		return nullptr;
@@ -134,8 +137,8 @@ extern "C"
 	void El_DeleteMutex(El_Mutex_t mutex)
 	{
 #if EmbedXrpc_UsingOs == 1
-		auto qtMutex = static_cast<std::mutex*>(mutex);
-		delete qtMutex;
+		HANDLE handle = (HANDLE)mutex;
+		CloseHandle(handle);
 #else
 		return;
 #endif
@@ -154,9 +157,8 @@ extern "C"
 	void El_DeleteSemaphore(El_Semaphore_t sem)
 	{
 #if EmbedXrpc_UsingOs == 1
-		Semaphore* qtsem = static_cast<Semaphore*>(sem);
-		qtsem->Reset();
-		delete sem;
+		HANDLE handle = (HANDLE)sem;
+		CloseHandle(handle);
 #else
 		
 #endif
@@ -211,25 +213,60 @@ extern "C"
 
 	
 
-	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr)
+	bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr)
 	{
 #if EmbedXrpc_UsingOs == 1
-		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
-		std::chrono::milliseconds to(timeout);
-		return m->try_lock_for(to);
+		HANDLE handle = (HANDLE)mutex;
+		DWORD r = WaitForSingleObject(handle, timeout);
+		if (r == WAIT_OBJECT_0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 #else
 		return true;
 #endif
 	}
-	Bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr)
+	bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr)
 	{
 #if EmbedXrpc_UsingOs == 1
-		std::timed_mutex* m = static_cast<std::timed_mutex*>(mutex);
-		m->unlock();
-		return true;
+		HANDLE handle = (HANDLE)mutex;
+		return (bool)ReleaseMutex(handle);
 #else
 		return true;
 #endif
+	}
+	QueueState El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout, int isIsr)
+	{
+		HANDLE handle = (HANDLE)sem;
+		
+		DWORD r= WaitForSingleObject(sem, timeout);
+		if (r == WAIT_OBJECT_0)
+		{
+			return QueueState::QueueState_OK;
+		}
+		else if (r == WAIT_TIMEOUT)
+		{
+			return QueueState::QueueState_Timeout;
+		}
+		else
+		{
+			El_Debug("[El_TakeSemaphore]:%d,", r);
+			return QueueState::QueueState_Timeout;
+		}
+	}
+	void El_ReleaseSemaphore(El_Semaphore_t sem, int isIsr)
+	{
+		HANDLE handle = (HANDLE)sem;
+		SetEvent(handle);
+	}
+	void El_ResetSemaphore(El_Semaphore_t sem, int isIsr)
+	{
+		HANDLE handle = (HANDLE)sem;
+		ResetEvent(handle);
 	}
 
 	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout, int isIsr)
@@ -288,7 +325,7 @@ extern "C"
 	{
 		auto x = malloc(size);
 		allsize += size;
-		printf("	memory malloc!allsize:%4d\n",allsize);
+		//printf("	memory malloc!allsize:%4d\n",allsize);
 		return x;
 	}
 	void El_Free(void* ptr)
@@ -296,7 +333,7 @@ extern "C"
 		size_t sz= _msize(ptr);
 		free(ptr);
 		allsize -= sz;
-		printf("	memory free!allsize:%d\n", allsize);
+		//printf("	memory free!allsize:%d\n", allsize);
 	}
 	void El_Memcpy(void* d, const void* s, uint32_t size)
 	{
