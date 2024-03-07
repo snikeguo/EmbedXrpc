@@ -3,6 +3,8 @@
 #include "stdint.h"
 #include "assert.h"
 #include "string.h"
+#include "stdio.h"
+#include "stdbool.h"
 //#include "console.h"
 #ifdef __cplusplus
 extern "C" {
@@ -33,7 +35,9 @@ extern "C" {
 #define SupportedOs	Windows
 
 #if SupportedOs==Windows
-#include "windows.h"
+
+	#include "windows.h"
+	#include "assert.h"
 	typedef void* El_Semaphore_t;
 	typedef void* El_Mutex_t;
 	typedef void* El_Thread_t;
@@ -47,24 +51,65 @@ extern "C" {
 #define ThreadExitHook()	
 #define taskENTER_CRITICAL()    
 #define taskEXIT_CRITICAL()
+
+//为了移植FreeRTOS自带的IPC机制 所定义的宏
+#define PRIVILEGED_FUNCTION
+#define configSUPPORT_DYNAMIC_ALLOCATION	1
+#define configSUPPORT_STATIC_ALLOCATION	1
+#define configMESSAGE_BUFFER_LENGTH_TYPE size_t
+
+#define configASSERT_DEFINED	1 //校验静态和动态结构体是否一致的宏，建议打开
+
+#define configMIN( a, b )    ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
+
+#define traceSTREAM_BUFFER_CREATE	
+#define traceSTREAM_BUFFER_CREATE_FAILED
+#define traceSTREAM_BUFFER_CREATE_STATIC_FAILED
+#define traceSTREAM_BUFFER_DELETE
+#define traceSTREAM_BUFFER_RESET
+#define traceBLOCKING_ON_STREAM_BUFFER_SEND
+#define traceSTREAM_BUFFER_SEND
+#define traceSTREAM_BUFFER_SEND_FAILED
+#define traceBLOCKING_ON_STREAM_BUFFER_RECEIVE
+#define traceSTREAM_BUFFER_RECEIVE
+#define traceSTREAM_BUFFER_RECEIVE_FAILED
+#define traceSTREAM_BUFFER_RECEIVE_FROM_ISR
+#define traceSTREAM_BUFFER_SEND_FROM_ISR
+
+#define sbRECEIVE_COMPLETED
+#define sbRECEIVE_COMPLETED_FROM_ISR
+
+#define mtCOVERAGE_TEST_MARKER()
+
+
+
+#define pdTRUE	1
+#define	pdPASS	1
+#define pdFALSE 0
+#define pdFAIL	0
+#define errQUEUE_EMPTY ((BaseType_t)0)
+#define errQUEUE_FULL ((BaseType_t)0)
+
+#define configASSERT	assert
+
+	typedef int32_t BaseType_t;
+	typedef uint32_t TickType_t;
+	typedef uint32_t UBaseType_t;
+
+	void* pvPortMalloc(size_t size);
+	void vPortFree(void*);
+
+#include "message_buffer_noos_and_win32.h"
+#include "queue_noos_and_win32.h"
 #elif SupportedOs==FreeRtos
 	#include "FreeRTOS.h"
 	#include "task.h"
 	#include "semphr.h"
 	#include "timers.h"
-	typedef SemaphoreHandle_t  El_Mutex_t;
-	typedef TimerHandle_t El_Timer_t;
-	typedef SemaphoreHandle_t  El_Semaphore_t;
-	typedef TaskHandle_t El_Thread_t;
-	typedef QueueHandle_t El_Queue_t;
-#define El_Debug	rt_kprintf
-#define El_Assert configASSERT
-#define El_Delay(x)    vTaskDelay(x)
+	#include "message_buffer.h"
+#define El_Debug	printf
 #define ThreadBeginHook()
 #define ThreadExitHook()	vTaskDelete(xTaskGetCurrentTaskHandle());
-#define taskENTER_CRITICAL()    
-#define taskEXIT_CRITICAL()
-#error "please porting taskENTER_CRITICAL/taskEXIT_CRITICAL interface!"
 #endif
 #define El_Strncpy strncpy
 #define El_Strncmp    strncmp
@@ -92,10 +137,10 @@ extern "C" {
 	void El_TimerStop(El_Timer_t timer, int isIsr);
 
 
-	Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr);
-	Bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr);
+	bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout, int isIsr);
+	bool El_ReleaseMutex(El_Mutex_t mutex, int isIsr);
 
-	Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout,int isIsr);
+	QueueState El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout,int isIsr);
 	void El_ReleaseSemaphore(El_Semaphore_t sem,int isIsr);
 	void El_ResetSemaphore(El_Semaphore_t sem,int isIsr);
 
@@ -103,6 +148,7 @@ extern "C" {
 	QueueState El_SendQueue(El_Queue_t queue, void* item, uint32_t itemSize,int isIsr);
 	void El_ResetQueue(El_Queue_t queue, int isIsr);
 	uint32_t El_QueueSpacesAvailable(El_Queue_t queue, int isIsr);
+
 	void* El_Malloc(uint32_t size);
 	void El_Free(void* ptr);
 	void El_Memcpy(void* d, const void* s, uint32_t size);

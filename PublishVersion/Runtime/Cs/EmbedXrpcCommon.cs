@@ -26,42 +26,39 @@ namespace EmbedXrpc
         public static readonly UInt16 EmbedXrpcUnsupportedSid = 0x2;
     }
 
-    public class ServiceInvokeParameter<DTL> 
+    public class ServiceInvokeParameter 
     {
-        public DTL Request_UserDataOfTransportLayer;
-        public DTL Response_UserDataOfTransportLayer;
-        public EmbedXrpcObject<DTL> RpcObject;
+        public EmbedXrpcObject RpcObject;
         public UInt16 TargetTimeOut;
     };
 
 
-    public interface IService<DTL> 
+    public interface IService 
     {
         UInt16 GetSid();
-        Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager);
+        Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager);
     }
-    public interface IRequestService<DTL> 
+    public interface IRequestService 
     {
         UInt16 GetSid();
     }
-    public class ServiceDescribe<DTL> 
+    public class ServiceDescribe 
     {
         public string Name { get; set; }
-        public IService<DTL> Service { get; set; }
+        public IService Service { get; set; }
     }
     /*public class RequestServiceDescribe
     {
         public string Name { get; set; }
         public UInt16 Sid { get; set; }//有可能是Response
     };*/
-    public delegate Task<bool> Send<DTL>(DTL userDataOfTransportLayer, int dataLen, int offset, byte[] data);
-    public struct EmbeXrpcRawData<DTL> 
+    public delegate Task<bool> Send(int dataLen, int offset, byte[] data);
+    public struct EmbeXrpcRawData 
     {
         public UInt16 Sid { get; set; }
         public UInt16 TargetTimeOut { get; set; }
         public byte[] Data { get; set; }
         public UInt32 DataLen { get; set; }
-        public DTL UserDataOfTransportLayer { get; set; }
     }
     
 
