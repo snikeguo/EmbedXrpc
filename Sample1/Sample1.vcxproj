@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\EmbedLibrary\queue_noos_and_win32.c" />
     <ClCompile Include="..\EmbedLibrary\stream_buffer_noos_and_win32.c" />
     <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp" />
     <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp" />

@@ -87,12 +87,14 @@ extern "C" {
 #define	pdPASS	1
 #define pdFALSE 0
 #define pdFAIL	0
-
+#define errQUEUE_EMPTY ((BaseType_t)0)
+#define errQUEUE_FULL ((BaseType_t)0)
 
 #define configASSERT	assert
 
 	typedef int32_t BaseType_t;
 	typedef uint32_t TickType_t;
+	typedef uint32_t UBaseType_t;
 
 	void* pvPortMalloc(size_t size);
 	void vPortFree(void*);
