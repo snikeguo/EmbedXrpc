@@ -81,9 +81,15 @@ static void mbTask1()
 			uint32_t cnt = rand() % 4096;
 			if (cnt == 0)
 				continue;
-			xMessageBufferSend(mbh, txData, cnt, 0);
-			mbs++;
-			mbs_count += cnt;
+			if (xMessageBufferSend(mbh, txData, cnt, 0))
+			{
+				mbs++;
+				mbs_count += cnt;
+			}
+			else
+			{
+				printf("message buffer is full!\n");
+			}
 		}
 		ULONGLONG n = GetTickCount64();
 		if ((n - t) > 10000)

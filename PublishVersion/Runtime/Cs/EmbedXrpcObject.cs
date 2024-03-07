@@ -10,20 +10,19 @@ using David.Common;
 namespace EmbedXrpc
 {
 
-    public class EmbedXrpcObject<DTL>   
+    public class EmbedXrpcObject   
     {
         public UInt32 TimeOut { get; set; }
         public Mutex ObjectMutex { get; private set; } = new Mutex();
         
-        public Win32Queue<EmbeXrpcRawData<DTL>> MessageQueueOfRequestServiceHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData<DTL>>();
-        private List<ServiceDescribe<DTL>> AllServices { get; set; } = new List<ServiceDescribe<DTL>>();
+        public Win32Queue<EmbeXrpcRawData> MessageQueueOfRequestServiceHandle { get; private set; } = new Win32Queue<EmbeXrpcRawData>();
+        private List<ServiceDescribe> AllServices { get; set; } = new List<ServiceDescribe>();
 
-        public Send<DTL> Send;
+        public Send Send;
         private Assembly Assembly;
 
         //server
         private Timer SuspendTimer;
-        public DTL UserDataOfTransportLayerOfSuspendTimerUsed { get; set; }
         public void Start_SuspendTimer(int period)
         {
             SuspendTimer.Change(period, period);
@@ -35,13 +34,13 @@ namespace EmbedXrpc
 
         private Thread ServiceThreadHandle;
         private CancellationTokenSource ServiceThreadCancellationTokenSource;
-        private Win32Queue<EmbeXrpcRawData<DTL>> ServiceQueueHandle = new Win32Queue<EmbeXrpcRawData<DTL>>();
+        private Win32Queue<EmbeXrpcRawData> ServiceQueueHandle = new Win32Queue<EmbeXrpcRawData>();
         
         //public bool IsEnableMataDataEncode { get; set; }
         public int BufferLen { get; private set; }
         public byte[] RequestBuffer { get; private set; }
         public byte[] ResponseBuffer { get; private set; }
-        public EmbedXrpcObject(UInt32 timeout, Send<DTL> send, Assembly assembly,int maxBufferLen)
+        public EmbedXrpcObject(UInt32 timeout, Send send, Assembly assembly,int maxBufferLen)
         {
             //IsEnableMataDataEncode = isEnableMataDataEncode;
             BufferLen = maxBufferLen;
@@ -54,11 +53,9 @@ namespace EmbedXrpc
                 var responseServiceInfoAttr = oldtype.GetCustomAttribute<ResponseServiceInfoAttribute>();
                 if (responseServiceInfoAttr != null)
                 {
-                    var dtlType = typeof(DTL);
-                    var genericType = oldtype.MakeGenericType(dtlType);
-                    ServiceDescribe<DTL> service = new ServiceDescribe<DTL>();
+                    ServiceDescribe service = new ServiceDescribe();
                     service.Name = responseServiceInfoAttr.Name;
-                    service.Service = (IService<DTL>)assembly.CreateInstance(genericType.FullName);
+                    service.Service = (IService)assembly.CreateInstance(oldtype.FullName);
                     AllServices.Add(service);
                 }
             }
@@ -81,7 +78,7 @@ namespace EmbedXrpc
         }
         private void SuspendTimerCallback(object s)
         {
-            EmbedXrpcObject<DTL> server = s as EmbedXrpcObject<DTL>;
+            EmbedXrpcObject server = s as EmbedXrpcObject;
             byte[] sendBytes = new byte[12];
             sendBytes[0] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 0 & 0xff);
             sendBytes[1] = (byte)(EmbedXrpcCommon.EmbedXrpcSuspendSid >> 8 & 0xff);
@@ -99,7 +96,7 @@ namespace EmbedXrpc
             sendBytes[9] = (byte)(bufCrc >> 8 & 0xff);
             sendBytes[10] = (byte)(bufCrc >> 16 & 0xff);
             sendBytes[11] = (byte)(bufCrc >> 32 & 0xff);
-            Send(UserDataOfTransportLayerOfSuspendTimerUsed,sendBytes.Length, 0, sendBytes);
+            Send(sendBytes.Length, 0, sendBytes);
         }
 
         
@@ -114,7 +111,7 @@ namespace EmbedXrpc
         }
         public RequestResponseState Wait<T>(UInt32 sid,T response) where T: IEmbedXrpcSerialization
         {
-            EmbeXrpcRawData<DTL> recData;
+            EmbeXrpcRawData recData;
             //response = default(T);
             Type res_t =typeof(T);
             RequestResponseState ret = RequestResponseState.ResponseState_Ok;
@@ -147,7 +144,7 @@ namespace EmbedXrpc
             }
             return ret;
         }
-        public void ReceivedMessage(UInt32 validdataLen, UInt32 offset,byte[] alldata,DTL userDataOfTransportLayer)
+        public void ReceivedMessage(UInt32 validdataLen, UInt32 offset,byte[] alldata)
         {
             QueueStatus queueStatus = QueueStatus.Empty;
             if (alldata.Length < offset + validdataLen)
@@ -171,8 +168,7 @@ namespace EmbedXrpc
                 goto sqs;
             }
 
-            EmbeXrpcRawData<DTL> raw = new EmbeXrpcRawData<DTL>();
-            raw.UserDataOfTransportLayer = userDataOfTransportLayer;
+            EmbeXrpcRawData raw = new EmbeXrpcRawData();
             ReceiveType rt = (ReceiveType)(alldata[3 + offset] >> 6);
             if (rt== ReceiveType.Response)
             {
@@ -209,8 +205,8 @@ namespace EmbedXrpc
         }
         private void ServiceThread()
         {
-            EmbeXrpcRawData<DTL> recData;
-            ServiceInvokeParameter < DTL > serviceInvokeParameter =new ServiceInvokeParameter<DTL>();
+            EmbeXrpcRawData recData;
+            ServiceInvokeParameter serviceInvokeParameter =new ServiceInvokeParameter();
             bool isFindService=false;
             //try
             {
@@ -229,8 +225,6 @@ namespace EmbedXrpc
 
                                 //Console.WriteLine($"get client timeout value{recData.TargetTimeOut}");
                                 //SuspendTimer.Change(recData.TargetTimeOut / 2, recData.TargetTimeOut / 2);.
-                                serviceInvokeParameter.Request_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
-                                serviceInvokeParameter.Response_UserDataOfTransportLayer = recData.UserDataOfTransportLayer;
                                 serviceInvokeParameter.RpcObject = this;
                                 serviceInvokeParameter.TargetTimeOut = recData.TargetTimeOut;
                                 var exec_task= AllServices[i].Service.Invoke(serviceInvokeParameter,
@@ -262,7 +256,7 @@ namespace EmbedXrpc
                                         ResponseBuffer[10] = (byte)(bufcrc >> 16 & 0xff);
                                         ResponseBuffer[11] = (byte)(bufcrc >> 24 & 0xff);
 
-                                        Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendsm.Index, 0, ResponseBuffer);
+                                        Send(sendsm.Index, 0, ResponseBuffer);
                                     }
                                 }
                                 break;
@@ -290,7 +284,7 @@ namespace EmbedXrpc
                             sendBytes[11] = (byte)(bufcrc >> 24 & 0xff);
 
 
-                            Send(serviceInvokeParameter.Response_UserDataOfTransportLayer, sendBytes.Length, 0, sendBytes);
+                            Send(sendBytes.Length, 0, sendBytes);
                         }
                     }
                     if(ServiceThreadCancellationTokenSource.IsCancellationRequested==true)

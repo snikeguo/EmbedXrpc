@@ -13,7 +13,8 @@ bool ClientSend(RequestParameter* rp,
 	uint32_t dataLen, uint8_t* data)//client 最终通过这个函数发送出去
 {
 	memcpy(ServerBuffer, data, dataLen);
-	assert(ServerRpc.ReceivedMessage(dataLen, ServerBuffer, *rp->Udtl,false) == ReceivedMessageStatus::Ok);
+	auto x = ServerRpc.ReceivedMessage(dataLen, ServerBuffer, false);
+	assert(x == ReceivedMessageStatus::ReceivedMessageStatus_Ok);
 	return true;
 }
 //特化子类继承
@@ -53,25 +54,17 @@ static InitConfig InitCfg =
 {
 	"Client",
 	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
-	{nullptr,0,false},
+	{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,false},//Buffer for Request
 	ClientSend,
-	1000,
+	10000,
 	AllServices,
 	2,
 	{
 		1,//ServiceThreadPriority
 		2048,
-		true,//UseRingBufferWhenReceiving
-		{
-			true,//IsSendToQueue
-			10,//MessageQueueOfRequestService_MaxItemNumber
-			10,//ServiceMessageQueue_MaxItemNumber
-		},
-		{
-			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//BlockBufferOfRequestService_Config
-			{new uint8_t[AllTypeBufferLen],AllTypeBufferLen,10},//ServiceBlockBufferConfig
-		},
-
+		true,//IsSendToQueue
+		40960,//MessageQueueOfRequestService_MaxItemNumber
+		40960,//ServiceMessageQueue_MaxItemNumber
 	},
 	nullptr,
 };
@@ -94,7 +87,6 @@ void ClientThread()
 	strcpy(win32UserDataOfTransportLayerTest.IpAddress, "127.0.0.1");
 	win32UserDataOfTransportLayerTest.Port = 6666;
 	RequestParameter rp;
-	rp.Udtl = &win32UserDataOfTransportLayerTest;
 	rp.IsIsr = 0;
 	rp.IsProvideBuffer = true;
 	rp.Buffer = requestBuffer;
@@ -102,6 +94,7 @@ void ClientThread()
 	while (testcount-- > 0)
 	{
 #if 1
+		//vTaskDelay(-1);
 		a++;
 		b++;
 		Client.Add_SendData.a = a;
@@ -144,8 +137,8 @@ void ClientThread()
 #if EmbedXrpc_UsingOs==0
 		ClientRpc.NoOs_ServiceExecute(0);
 #endif
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		Sleep(500);
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));//等待RPC调用全部完毕
+	Sleep(3000);//等待RPC调用全部完毕
 	ClientRpc.DeInit();
 }

@@ -19,36 +19,18 @@ enum RequestResponseState
     //ResponseState_UnsupportedSid = 6,
     ResponseState_NoReceived = 7,//only no os mode
  };
- struct BlockBufferProviderConfig
- {
-     uint8_t* Buffer;
-     uint32_t Size;
-     uint32_t MaxItemNumber;
- };
+
  struct EmbedXrpcConfig
  {
      int ServiceThreadPriority;
      uint32_t ServiceThreadStackSize;
-     bool UseRingBufferWhenReceiving;//如果为1，则使用RingBufferConfig 否则使用DynamicMemoryConfig
-     struct
-     {
-         bool IsSendToQueue;
+     bool IsSendToQueue;
 
-         //client部分:
-         uint32_t MessageQueueOfRequestService_MaxItemNumber;
+     //client部分:
+     uint32_t ClientUseRespondedDataMaxSize;
 
-         //server部分:
-         uint32_t ServiceMessageQueue_MaxItemNumber;
-     }DynamicMemoryConfig;
-     struct
-     {
-         //client
-         BlockBufferProviderConfig BlockBufferOfRequestService_Config;
-
-         //server
-         BlockBufferProviderConfig ServiceBlockBufferConfig;
-     }RingBufferConfig;
-
+     //server部分:
+     uint32_t ServerUseRequestedDataMaxSize;
  };
  enum ReceiveType_t
  {
@@ -59,7 +41,6 @@ enum RequestResponseState
  class RequestParameter
  {
  public:
-     UserDataOfTransportLayer_t* Udtl;
      int IsIsr = 0;
      bool IsProvideBuffer;
      uint32_t BufferLen;
@@ -69,8 +50,6 @@ enum RequestResponseState
  class ServiceInvokeParameter
  {
  public:
-     UserDataOfTransportLayer_t* Request_UserDataOfTransportLayer;
-     UserDataOfTransportLayer_t Response_UserDataOfTransportLayer;
      EmbedXrpcObject* RpcObject;
      uint16_t TargetTimeOut;
      int IsIsr = 0;
