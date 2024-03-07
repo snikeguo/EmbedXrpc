@@ -14,7 +14,7 @@ bool ClientSend(RequestParameter* rp,
 {
 	memcpy(ServerBuffer, data, dataLen);
 	auto x = ServerRpc.ReceivedMessage(dataLen, ServerBuffer, false);
-	assert(x == ReceivedMessageStatus::Ok);
+	assert(x == ReceivedMessageStatus::ReceivedMessageStatus_Ok);
 	return true;
 }
 //特化子类继承

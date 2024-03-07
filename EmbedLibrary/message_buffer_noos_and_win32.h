@@ -67,7 +67,7 @@
 #endif
 #endif
 /* Message buffers are built onto of stream buffers. */
-#include "stream_buffer.h"
+#include "stream_buffer_noos_and_win32.h"
 
 /* *INDENT-OFF* */
 #if defined( __cplusplus )

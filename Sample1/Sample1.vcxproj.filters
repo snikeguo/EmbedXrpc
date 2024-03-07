@@ -48,9 +48,6 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
-    </ClCompile>
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp">
       <Filter>EmbedXrpcLib</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     </ClInclude>
     <ClInclude Include="XrpcCodeGen\EmbedXrpcVersion.h">
       <Filter>CodeGen</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h">
-      <Filter>EmbedXrpcLib\Win32.Port</Filter>
     </ClInclude>
     <ClInclude Include="MyInclude.h">
       <Filter>头文件</Filter>

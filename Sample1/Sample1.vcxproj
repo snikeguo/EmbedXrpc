@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="..\EmbedLibrary\queue_noos_and_win32.c" />
     <ClCompile Include="..\EmbedLibrary\stream_buffer_noos_and_win32.c" />
-    <ClCompile Include="..\EmbedLibrary\Win32.Port\BlockQueue.cpp" />
     <ClCompile Include="..\EmbedLibrary\Win32.Port\El.Win32.Port.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\EmbedXrpcObject.cpp" />
     <ClCompile Include="..\EmbedXrpcSerialization\SoftCrc32.c" />
@@ -34,7 +33,6 @@
     <ClCompile Include="XrpcCodeGen\Server\Sample1.Server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\EmbedLibrary\Win32.Port\BlockQueue.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedSerialization.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcCommon.h" />
     <ClInclude Include="..\EmbedXrpcSerialization\EmbedXrpcObject.h" />
@@ -105,7 +103,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>.;../EmbedXrpcSerialization;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(SolutionDir)FreeRTOS.V10.4.3/FreeRTOS/include;$(SolutionDir)FreeRTOS.V10.4.3/FreeRTOS/Win32.portable;$(IncludePath)</IncludePath>
+    <IncludePath>.;../EmbedXrpcSerialization;XrpcCodeGen;XrpcCodeGen/Client;XrpcCodeGen/Server;$(SolutionDir)EmbedLibrary;$(SolutionDir)EmbedLibrary/Win32.Port;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
   </PropertyGroup>

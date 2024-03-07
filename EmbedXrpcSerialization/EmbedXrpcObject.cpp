@@ -201,8 +201,8 @@ void EmbedXrpcObject::NoOs_ServiceExecute(int isIsr)
 ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint8_t *allData,  int isIsr)
 {
 	if (allDataLen < 12)
-		return ReceivedMessageStatus::InvalidData;
-	ReceivedMessageStatus El_SendQueueResult = QueueFull;
+		return ReceivedMessageStatus::ReceivedMessageStatus_InvalidData;
+	ReceivedMessageStatus El_SendQueueResult = ReceivedMessageStatus_QueueFull;
 
 	ReceiveItemInfo raw;
 	uint16_t serviceId = (uint16_t)(allData[0] | allData[1] << 8);
@@ -215,12 +215,12 @@ ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint
 	uint32_t wantedBufCrc = (uint32_t)(allData[8] | allData[9] << 8 | allData[10] << 16 | allData[11] << 24);
 	if (wantedDataLen != dataLen)
 	{
-		return ReceivedMessageStatus::InvalidData;
+		return ReceivedMessageStatus::ReceivedMessageStatus_InvalidData;
 	}
 	uint32_t calBufCrc = GetBufferCrc(wantedDataLen, data);
 	if (wantedBufCrc != calBufCrc)
 	{
-		return ReceivedMessageStatus::InvalidData;
+		return ReceivedMessageStatus::ReceivedMessageStatus_InvalidData;
 	}
 
 	El_Memset(&raw, 0, sizeof(ReceiveItemInfo));
@@ -247,7 +247,7 @@ ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint
 		}
 		if (size == allDataLen)
 		{
-			El_SendQueueResult = ReceivedMessageStatus::Ok;
+			El_SendQueueResult = ReceivedMessageStatus::ReceivedMessageStatus_Ok;
 		}
 	}
 	else if (rt == ReceiveType_Request) // server
@@ -266,14 +266,14 @@ ReceivedMessageStatus EmbedXrpcObject::ReceivedMessage(uint32_t allDataLen, uint
 			}
 			if (size == allDataLen)
 			{
-				El_SendQueueResult = ReceivedMessageStatus::Ok;
+				El_SendQueueResult = ReceivedMessageStatus::ReceivedMessageStatus_Ok;
 			}
 		}
 		else
 		{
 			raw.Data = data;
 			ServiceExecute(this, raw, false, isIsr);
-			El_SendQueueResult = ReceivedMessageStatus::Ok;
+			El_SendQueueResult = ReceivedMessageStatus::ReceivedMessageStatus_Ok;
 		}
 	}
 	return El_SendQueueResult;

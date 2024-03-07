@@ -363,6 +363,11 @@ void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
 
     traceSTREAM_BUFFER_DELETE( xStreamBuffer );
 
+    El_DeleteMutex(xStreamBuffer->DataMutex);
+    pxStreamBuffer->DataMutex = NULL;
+    El_DeleteSemaphore(xStreamBuffer->NotifySemaphore);
+    pxStreamBuffer->NotifySemaphore = NULL;
+
     if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_STATICALLY_ALLOCATED ) == ( uint8_t ) pdFALSE )
     {
         #if ( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
@@ -769,27 +774,22 @@ size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
         El_TakeMutex(pxStreamBuffer->DataMutex, -1,0);//taskENTER_CRITICAL();
         {
             xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
-
-            /* If this function was invoked by a message buffer read then
-             * xBytesToStoreMessageLength holds the number of bytes used to hold
-             * the length of the next discrete message.  If this function was
-             * invoked by a stream buffer read then xBytesToStoreMessageLength will
-             * be 0. */
-            if( xBytesAvailable <= xBytesToStoreMessageLength )
-            {
-                /* Clear notification state as going to wait for data. */
-                El_ResetSemaphore(pxStreamBuffer->NotifySemaphore,0); //( void ) xTaskNotifyStateClear( NULL ); 如果当前队列的有效数据不够,就先复位信号量(去掉之前的),准备好接受了
-
-                /* Should only be one reader. */
-                //configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
-                //pxStreamBuffer->xTaskWaitingToReceive = xTaskGetCurrentTaskHandle();
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
-            }
         }
         El_ReleaseMutex(pxStreamBuffer->DataMutex,0);//taskEXIT_CRITICAL();
+
+        if (xBytesAvailable <= xBytesToStoreMessageLength)
+        {
+            /* Clear notification state as going to wait for data. */
+            El_ResetSemaphore(pxStreamBuffer->NotifySemaphore, 0); //( void ) xTaskNotifyStateClear( NULL ); 如果当前队列的有效数据不够,就先复位信号量(去掉之前的),准备好接受了
+
+            /* Should only be one reader. */
+            //configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
+            //pxStreamBuffer->xTaskWaitingToReceive = xTaskGetCurrentTaskHandle();
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
 
         if( xBytesAvailable <= xBytesToStoreMessageLength )
         {

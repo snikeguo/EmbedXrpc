@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using EmbedXrpc;
 using System.Threading.Tasks;
 // auto code gen ! DO NOT modify this file!
-//C# Code Generater Version:4.5.0.0
+//C# Code Generater Version:5.0.0.0
 namespace Sample1
 {
     using UInt8 = Byte;
@@ -124,6 +124,7 @@ namespace Sample1
             if (sm.Buf != null) Array.Copy(bytes, 0, sm.Buf, sm.Index, bytes.Length);
             sm.Index += 4;
             //PtrTest1:NoSerialization
+            if (1 > (UInt32)(1)) throw new OverflowException();
             for (UInt32 data1_index = 0; data1_index < 1; data1_index++)
             {
                 if (sm.Buf != null) bytes = sm.ToBytes(data1[data1_index], typeof(System.Byte));
@@ -149,6 +150,7 @@ namespace Sample1
             Sum6 = bitsTempValue1 >> 30;
             Sum7 = (UInt32)sm.DeserializeField(typeof(System.UInt32), 4);
             //PtrTest1:NoSerialization
+            if (1 > (UInt32)(1)) throw new OverflowException();
             data1 = new byte[1];
             for (UInt32 data1_index = 0; data1_index < 1; data1_index++)
             {
@@ -159,13 +161,13 @@ namespace Sample1
     }
     public class Student : IEmbedXrpcSerialization
     {
-#if MyMacro == true
+#if MyMacro
         public const int Student_a_FieldNumber = 1;
         [NoSerialization]
         [FieldNumber(1)]
         [ArrayLenFieldFlag(false)]
         public Int32 a { get; set; }
-#endif // #if MyMacro==true
+#endif // #ifdef MyMacro
 
 
         public const int Student_b_FieldNumber = 2;
@@ -188,13 +190,13 @@ namespace Sample1
         public byte u1 { get; set; }
 
 
-#if MyMacro == true
+#if MyMacro
         public const int Student_u2_FieldNumber = 5;
         [UnionField]
         [FieldNumber(5)]
         [ArrayLenFieldFlag(false)]
         public UInt64 u2 { get; set; }
-#endif // #if MyMacro==true
+#endif // #ifdef MyMacro
 
 
         public const int Student_u3_FieldNumber = 6;
@@ -287,13 +289,13 @@ namespace Sample1
                     if (sm.Buf != null) Array.Copy(bytes, 0, sm.Buf, sm.Index, bytes.Length);
                     sm.Index += 1;
                     break;
-#if MyMacro == true
+#if MyMacro
                 case Student_u2_FieldNumber:
                     if (sm.Buf != null) bytes = sm.ToBytes(u2, typeof(System.UInt64));
                     if (sm.Buf != null) Array.Copy(bytes, 0, sm.Buf, sm.Index, bytes.Length);
                     sm.Index += 8;
                     break;
-#endif // #if MyMacro==true
+#endif // #ifdef MyMacro
                 case Student_u3_FieldNumber:
                     if (sm.Buf != null) bytes = sm.ToBytes(u3, typeof(System.UInt64));
                     if (sm.Buf != null) Array.Copy(bytes, 0, sm.Buf, sm.Index, bytes.Length);
@@ -338,11 +340,11 @@ namespace Sample1
                 case Student_u1_FieldNumber:
                     u1 = (byte)sm.DeserializeField(typeof(System.Byte), 1);
                     break;
-#if MyMacro == true
+#if MyMacro
                 case Student_u2_FieldNumber:
                     u2 = (UInt64)sm.DeserializeField(typeof(System.UInt64), 8);
                     break;
-#endif // #if MyMacro==true
+#endif // #ifdef MyMacro
                 case Student_u3_FieldNumber:
                     u3 = (Sex)sm.DeserializeField(typeof(System.UInt64), 8);
                     break;
@@ -580,6 +582,7 @@ namespace Sample1
         public void Serialize(SerializationManager sm)
         {
             byte[] bytes = null;
+            if (1 > (UInt32)(1)) throw new OverflowException();
             for (UInt32 now_index = 0; now_index < 1; now_index++)
             {
                 now[now_index].Serialize(sm);
@@ -588,6 +591,7 @@ namespace Sample1
 
         public void Deserialize(SerializationManager sm)
         {
+            if (1 > (UInt32)(1)) throw new OverflowException();
             now = new DateTime_t[1];
             for (UInt32 now_index = 0; now_index < 1; now_index++)
             {
@@ -619,17 +623,17 @@ namespace Sample1
         }
 
     }
-#if MyMacro == true
-    public class DateTimeChange_Requester<DTL> : IRequestService<DTL> //where DTL:struct
+#if MyMacro
+    public class DateTimeChange_Requester : IRequestService
     {
-        private EmbedXrpcObject<DTL> XrpcObject = null;
-        public DateTimeChange_Requester(EmbedXrpcObject<DTL> xrpcObject)
+        private EmbedXrpcObject XrpcObject = null;
+        public DateTimeChange_Requester(EmbedXrpcObject xrpcObject)
         {
             XrpcObject = xrpcObject;
         }
         public static readonly UInt16 DateTimeChange_ServiceId = 16;//0x10
         public UInt16 GetSid() { return DateTimeChange_ServiceId; }
-        public async Task<DateTimeChange_Return> Invoke(DTL userDataOfTransportLayer, DateTime_t[] now)
+        public async Task<DateTimeChange_Return> Invoke(DateTime_t[] now)
         {
             DateTimeChange_Return reqresp = new DateTimeChange_Return();
             XrpcObject.ObjectMutex.WaitOne();
@@ -654,7 +658,7 @@ namespace Sample1
             XrpcObject.RequestBuffer[9] = ((byte)(bufcrc >> 8 & 0xff));
             XrpcObject.RequestBuffer[10] = ((byte)(bufcrc >> 16 & 0xff));
             XrpcObject.RequestBuffer[11] = ((byte)(bufcrc >> 24 & 0xff));
-            var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+            var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
             if (send_result == false)
             {
                 reqresp.State = RequestResponseState.RequestState_Failed;
@@ -669,27 +673,27 @@ namespace Sample1
             return reqresp;
         }
     }
-#endif // #if MyMacro==true
-#if MyMacro == true
+#endif // #ifdef MyMacro
+#if MyMacro
     [ResponseServiceInfo(Name = "DateTimeChange", ServiceId = 16)]
-    public partial class DateTimeChange_Service<DTL> : IService<DTL> //where DTL:struct
+    public partial class DateTimeChange_Service : IService
     {
         public static readonly UInt16 DateTimeChange_ServiceId = 16;//0x10
         public UInt16 GetSid() { return DateTimeChange_ServiceId; }
-        public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+        public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
         {
             DateTimeChange_Parameter request = new DateTimeChange_Parameter();
             request.Deserialize(recManager);
             await DateTimeChange(serviceInvokeParameter, request.now);
         }
         /*
-        public partial class DateTimeChange_Service<DTL>:IService<DTL> //where DTL:struct
+        public partial class DateTimeChange_Service:IService
         {
-        public async Task DateTimeChange(ServiceInvokeParameter<DTL> serviceInvokeParameter,DateTime_t[] now){}
+        public async Task DateTimeChange(ServiceInvokeParameter serviceInvokeParameter,DateTime_t[] now){}
         }
         */
     }
-#endif // #if MyMacro==true
+#endif // #ifdef MyMacro
 
 
     public class Add_Parameter : IEmbedXrpcSerialization
@@ -783,16 +787,16 @@ namespace Sample1
         }
 
     }
-    public class Add_Requester<DTL> : IRequestService<DTL> //where DTL:struct
+    public class Add_Requester : IRequestService
     {
-        private EmbedXrpcObject<DTL> XrpcObject = null;
-        public Add_Requester(EmbedXrpcObject<DTL> xrpcObject)
+        private EmbedXrpcObject XrpcObject = null;
+        public Add_Requester(EmbedXrpcObject xrpcObject)
         {
             XrpcObject = xrpcObject;
         }
         public static readonly UInt16 Add_ServiceId = 17;//0x11
         public UInt16 GetSid() { return Add_ServiceId; }
-        public async Task<Add_Return> Invoke(DTL userDataOfTransportLayer, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
+        public async Task<Add_Return> Invoke(Int32 a, Int32 b, Int32 dataLen, Byte[] data)
         {
             Add_Return reqresp = new Add_Return();
             XrpcObject.ObjectMutex.WaitOne();
@@ -820,7 +824,7 @@ namespace Sample1
             XrpcObject.RequestBuffer[9] = ((byte)(bufcrc >> 8 & 0xff));
             XrpcObject.RequestBuffer[10] = ((byte)(bufcrc >> 16 & 0xff));
             XrpcObject.RequestBuffer[11] = ((byte)(bufcrc >> 24 & 0xff));
-            var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+            var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
             if (send_result == false)
             {
                 reqresp.State = RequestResponseState.RequestState_Failed;
@@ -843,12 +847,12 @@ namespace Sample1
         }
     }
     [ResponseServiceInfo(Name = "Add", ServiceId = 17)]
-    public partial class Add_Service<DTL> : IService<DTL> //where DTL:struct
+    public partial class Add_Service : IService
     {
         public static readonly UInt16 Add_ServiceId = 17;//0x11
         public UInt16 GetSid() { return Add_ServiceId; }
         private Add_Return Response = new Add_Return();
-        public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+        public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
         {
             Add_Parameter request = new Add_Parameter();
             request.Deserialize(recManager);
@@ -856,9 +860,9 @@ namespace Sample1
             Response.Serialize(sendManager);
         }
         /*
-        public partial class Add_Service<DTL>:IService<DTL> //where DTL:struct
+        public partial class Add_Service:IService
         {
-        public async Task Add(ServiceInvokeParameter<DTL> serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,Byte[] data){}
+        public async Task Add(ServiceInvokeParameter serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,Byte[] data){}
         }
         */
     }

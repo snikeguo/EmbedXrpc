@@ -51,7 +51,7 @@ struct Student
 
     [NoSerialization]
     [FieldNumber(1)]
-    [MacroControl("MyMacro", "true")]
+    [MacroControl("MyMacro")]
     int a;
     [FieldNumber(2)]
     int b;
@@ -67,7 +67,7 @@ struct Student
 
     [FieldNumber(5)]
     [UnionField]
-    [MacroControl("MyMacro", "true")]
+    [MacroControl("MyMacro")]
     UInt64 u2;
 
     [FieldNumber(6)]
@@ -158,7 +158,7 @@ struct DateTime_t
 }
 [FileName("sample1.cs")]
 
-[MacroControl("MyMacro", "true")]
+[MacroControl("MyMacro")]
 delegate void DateTimeChange(DateTime_t[] now);
 
 

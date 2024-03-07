@@ -66,9 +66,9 @@ struct InitConfig
 };
 enum ReceivedMessageStatus
 {
-	InvalidData,
-	QueueFull,
-	Ok,
+	ReceivedMessageStatus_InvalidData,
+	ReceivedMessageStatus_QueueFull,
+	ReceivedMessageStatus_Ok,
 };
 uint32_t GetBufferCrc(uint32_t len, uint8_t* Buf);
 class EmbedXrpcObject

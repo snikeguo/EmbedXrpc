@@ -1,6 +1,8 @@
-﻿using EmbedXrpc;
+﻿using David.Common;
+using EmbedXrpc;
 using Sample1;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,17 +15,17 @@ using System.Threading.Tasks;
 
 namespace Sample1
 {
-    public partial class DateTimeChange_Service<DTL> : IService<DTL>
+    public partial class DateTimeChange_Service : IService
     {
-        public async Task DateTimeChange(ServiceInvokeParameter<DTL> serviceInvokeParameter, DateTime_t[] now)
+        public async Task DateTimeChange(ServiceInvokeParameter serviceInvokeParameter, DateTime_t[] now)
         {
             var t = now[0];
             Console.WriteLine($"{t.Year}-{t.Month}-{t.Day}  {t.Hour}:{t.Min}:{t.Sec}");
         }
     }
-    public partial class Add_Service<DTL> : IService<DTL>
+    public partial class Add_Service : IService
     {
-        public async Task Add(ServiceInvokeParameter<DTL> serviceInvokeParameter, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
+        public async Task Add(ServiceInvokeParameter serviceInvokeParameter, Int32 a, Int32 b, Int32 dataLen, Byte[] data)
         {
             serviceInvokeParameter.RpcObject.Start_SuspendTimer(serviceInvokeParameter.TargetTimeOut / 2);
             Response.ReturnValue = (Int64)a + b;
@@ -36,15 +38,68 @@ namespace Sample1
 namespace EmbedXrpc
 {
 
-    struct Win32UserDataOfTransportLayer
-    {
-        public string Ip { get; set; }
-        public int Port { get; set; }
-    }
     class Program
     {
+        
+        static Win32Queue<int> queue = null;
+        static uint s = 0;
+        static uint r = 0;
         static void Main(string[] args)
         {
+            queue = new Win32Queue<int>();
+            Task.Run(() =>
+            {
+                while(true)
+                {
+                    var t = Environment.TickCount64;
+                    bool g = true;
+                    bool show = false;
+                    int a = 0;
+                    while (true)
+                    {
+                        if (g)
+                        {
+                            queue.Send(a);
+                            s++;
+                            a++;
+                        }
+                        var n = Environment.TickCount64;
+                        if ((n - t) > 10000)
+                        {
+                            g = false;
+                            if (show == false)
+                            {
+                                Console.WriteLine($"s:{s}");
+                                show = true;
+                            }
+                        }
+                    }
+                }
+            });
+
+            Task.Run(() =>
+            {
+                var t = Environment.TickCount64;
+                bool show = false;
+                int a = 0;
+                while (true)
+                {
+                    if (queue.Receive(out a, 10) ==  QueueStatus.OK)
+                    {
+                        r++;
+                    }
+                    var n = Environment.TickCount64;
+                    if ((n - t) > 15000)
+                    {
+                        if (show == false)
+                        {
+                            Console.WriteLine($"r:{r},a:{a},queue:{queue.Count}\n");
+                            show = true;
+                        }
+                    }
+                }
+            });
+            Thread.Sleep(-1);
             Student2 stu = new Student2();
             stu.u8 = 0xff;
             stu.s8 = -1;
@@ -76,20 +131,20 @@ namespace EmbedXrpc
             dest.Deserialize(sm);
 
 
-            client = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(100, clientSend, Assembly.GetExecutingAssembly(),4096);
+            client = new EmbedXrpcObject(100, clientSend, Assembly.GetExecutingAssembly(),4096);
             client.Start();
-            server = new EmbedXrpcObject<Win32UserDataOfTransportLayer>(2000, serverSend, Assembly.GetExecutingAssembly(), 4096);
+            server = new EmbedXrpcObject(2000, serverSend, Assembly.GetExecutingAssembly(), 4096);
             server.Start();
             Task.Run(async () =>
             {
-                Add_Requester<Win32UserDataOfTransportLayer> inter_Add = new Add_Requester<Win32UserDataOfTransportLayer>(client);
+                Add_Requester inter_Add = new Add_Requester(client);
                 while (true)
                 {
                     Random random = new Random();
                     int a = random.Next();
                     Thread.Sleep(1000);
                     int b = random.Next();
-                    var reAdd =await inter_Add.Invoke(new Win32UserDataOfTransportLayer() {  Ip="123",Port=11},a,b,0,null);
+                    var reAdd =await inter_Add.Invoke(a,b,0,null);
                     if(reAdd.State != RequestResponseState.ResponseState_Ok)
                     {
                         Console.WriteLine("request failed! error code:{0}", reAdd.State);
@@ -122,11 +177,11 @@ namespace EmbedXrpc
             Task.Run(() =>
             {
                 Thread.Sleep(-1);
-                DateTimeChange_Requester<Win32UserDataOfTransportLayer> broadcastDataTime = new DateTimeChange_Requester<Win32UserDataOfTransportLayer>(server);
+                DateTimeChange_Requester broadcastDataTime = new DateTimeChange_Requester(server);
                 while (true)
                 {
                     Thread.Sleep(1000);
-                    broadcastDataTime.Invoke(new Win32UserDataOfTransportLayer() { Ip = "123", Port = 11 }, new DateTime_t[1] {
+                    broadcastDataTime.Invoke(new DateTime_t[1] {
                     new DateTime_t()
                     {
                         Year = DateTime.Now.Year,
@@ -148,20 +203,18 @@ namespace EmbedXrpc
             }
         }
 
-        static EmbedXrpcObject<Win32UserDataOfTransportLayer> client;
-        static EmbedXrpcObject<Win32UserDataOfTransportLayer> server;
-        public static async Task<bool> clientSend(Win32UserDataOfTransportLayer win32UserDataOfTransportLayer,int dataLen, int offset, byte[] data)
+        static EmbedXrpcObject client;
+        static EmbedXrpcObject server;
+        public static async Task<bool> clientSend(int dataLen, int offset, byte[] data)
         {
-            //Console.WriteLine($"clientSend {sid}");
-            Win32UserDataOfTransportLayer ClientAddressInfo = new Win32UserDataOfTransportLayer() { Port = 1, Ip = "192.168.1.1" };
-            server.ReceivedMessage((UInt32)dataLen, (UInt32)offset,data, ClientAddressInfo);
+            server.ReceivedMessage((UInt32)dataLen, (UInt32)offset,data);
             return true;
         }
-        public static async Task<bool> serverSend(Win32UserDataOfTransportLayer win32UserDataOfTransportLayer, int dataLen, int offset, byte[] data)
+        public static async Task<bool> serverSend( int dataLen, int offset, byte[] data)
         {
             //Console.WriteLine($"serverSend {sid}");
-            Win32UserDataOfTransportLayer ServerAddressInfo = new Win32UserDataOfTransportLayer() { Port = 2, Ip = "127.0.0.1" };
-            client.ReceivedMessage((UInt32)dataLen, (UInt32)offset, data, ServerAddressInfo);
+
+            client.ReceivedMessage((UInt32)dataLen, (UInt32)offset, data);
             return true;
         }
     }

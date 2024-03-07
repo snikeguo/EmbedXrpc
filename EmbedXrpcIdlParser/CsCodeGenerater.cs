@@ -122,11 +122,11 @@ namespace EmbedXrpcIdlParser
             CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
 
             //sw.WriteLine($"[RequestServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
-            sw.WriteLine($"public class {service.ServiceName}_Requester<DTL>:IRequestService<DTL> //where DTL:struct");
+            sw.WriteLine($"public class {service.ServiceName}_Requester:IRequestService");
             sw.WriteLine("{");//class begin
 
-            sw.WriteLine("private EmbedXrpcObject<DTL> XrpcObject=null;");
-            sw.WriteLine($"public {service.ServiceName}_Requester(EmbedXrpcObject<DTL> xrpcObject)");
+            sw.WriteLine("private EmbedXrpcObject XrpcObject=null;");
+            sw.WriteLine($"public {service.ServiceName}_Requester(EmbedXrpcObject xrpcObject)");
             sw.WriteLine("{");//function begin
             sw.WriteLine("XrpcObject=xrpcObject;");
             sw.WriteLine("}");//function end
@@ -145,7 +145,7 @@ namespace EmbedXrpcIdlParser
                 }
             }
             var dh = pars == "" ? "" : ",";
-            sw.WriteLine($"public async Task<{CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}> Invoke(DTL userDataOfTransportLayer{dh}{pars})");
+            sw.WriteLine($"public async Task<{CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}> Invoke({pars})");
             sw.WriteLine("{");//function begin
             sw.WriteLine($"{service.ReturnStructType.TypeName} reqresp=new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();");
             //sw.WriteLine("lock(XrpcObject.ObjectMutex) ");
@@ -176,7 +176,7 @@ namespace EmbedXrpcIdlParser
             sw.WriteLine("XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));");
             sw.WriteLine("XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));");
             sw.WriteLine("XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));");
-            sw.WriteLine("var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);");
+            sw.WriteLine("var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);");
             sw.WriteLine("if( send_result==false)\n {\nreqresp.State=RequestResponseState.RequestState_Failed;\n goto exi;\n}\n" +
                 "else\n{\nreqresp.State=RequestResponseState.RequestState_Ok;\n}");
             if (service.ReturnStructType.TargetFields.Count > 1)
@@ -203,7 +203,7 @@ namespace EmbedXrpcIdlParser
         {
             CppSerializableCommon.MacroControlWriteBegin(sw, service.MacroControlAttribute);
             sw.WriteLine($"[ResponseServiceInfo(Name=\"{service.ServiceName}\",ServiceId={service.ServiceId})]");
-            sw.WriteLine($"public partial class {service.ServiceName}_Service<DTL>:IService<DTL> //where DTL:struct");
+            sw.WriteLine($"public partial class {service.ServiceName}_Service:IService");
             sw.WriteLine("{");//class begin
             sw.WriteLine($"public static readonly UInt16 {service.ServiceName}_ServiceId={service.ServiceId};//0x{Convert.ToString(service.ServiceId, 16)}");
             sw.WriteLine($"public UInt16 GetSid(){{ return {service.ServiceName}_ServiceId;}}");
@@ -211,7 +211,7 @@ namespace EmbedXrpcIdlParser
             {
                 sw.WriteLine($"private {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)} Response = new {CppCsNanoSerializer.GetCsTypeDefineName(service.ReturnStructType)}();");
             }
-            sw.WriteLine("public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)");
+            sw.WriteLine("public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)");
             sw.WriteLine("{");//function begin
             sw.WriteLine($"{CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)} request = new {CppCsNanoSerializer.GetCsTypeDefineName(service.ParameterStructType)}();");
             sw.WriteLine($"request.Deserialize(recManager);");
@@ -236,9 +236,9 @@ namespace EmbedXrpcIdlParser
             }
             sw.WriteLine("}");//function end
             sw.WriteLine($"/*");
-            sw.WriteLine($"public partial class {service.ServiceName}_Service<DTL>:IService<DTL> //where DTL:struct");
+            sw.WriteLine($"public partial class {service.ServiceName}_Service:IService");
             sw.WriteLine("{");
-            sw.WriteLine($"public async Task {service.ServiceName}(ServiceInvokeParameter<DTL> serviceInvokeParameter{dh}{externstr}){{}}");
+            sw.WriteLine($"public async Task {service.ServiceName}(ServiceInvokeParameter serviceInvokeParameter{dh}{externstr}){{}}");
             sw.WriteLine("}");
             sw.WriteLine($"*/");
             sw.WriteLine("}");//class end

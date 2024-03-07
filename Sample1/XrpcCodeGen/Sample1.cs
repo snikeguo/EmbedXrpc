@@ -567,16 +567,16 @@ State=(RequestResponseState)sm.DeserializeField(typeof(System.Byte),1);
 }
 
 }
-public class DateTimeChange_Requester<DTL>:IRequestService<DTL> //where DTL:struct
+public class DateTimeChange_Requester:IRequestService
 {
-private EmbedXrpcObject<DTL> XrpcObject=null;
-public DateTimeChange_Requester(EmbedXrpcObject<DTL> xrpcObject)
+private EmbedXrpcObject XrpcObject=null;
+public DateTimeChange_Requester(EmbedXrpcObject xrpcObject)
 {
 XrpcObject=xrpcObject;
 }
 public static readonly UInt16 DateTimeChange_ServiceId=16;//0x10
 public UInt16 GetSid(){ return DateTimeChange_ServiceId;}
-public async Task<DateTimeChange_Return> Invoke(DTL userDataOfTransportLayer,DateTime_t[] now)
+public async Task<DateTimeChange_Return> Invoke(DateTime_t[] now)
 {
 DateTimeChange_Return reqresp=new DateTimeChange_Return();
 XrpcObject.ObjectMutex.WaitOne();
@@ -601,7 +601,7 @@ XrpcObject.RequestBuffer[8]=((byte)(bufcrc&0xff));
 XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));
 XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));
 XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));
-var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
 if( send_result==false)
  {
 reqresp.State=RequestResponseState.RequestState_Failed;
@@ -617,20 +617,20 @@ return reqresp;
 }
 }
 [ResponseServiceInfo(Name="DateTimeChange",ServiceId=16)]
-public partial class DateTimeChange_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class DateTimeChange_Service:IService
 {
 public static readonly UInt16 DateTimeChange_ServiceId=16;//0x10
 public UInt16 GetSid(){ return DateTimeChange_ServiceId;}
-public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 DateTimeChange_Parameter request = new DateTimeChange_Parameter();
 request.Deserialize(recManager);
 await DateTimeChange(serviceInvokeParameter,request.now);
 }
 /*
-public partial class DateTimeChange_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class DateTimeChange_Service:IService
 {
-public async Task DateTimeChange(ServiceInvokeParameter<DTL> serviceInvokeParameter,DateTime_t[] now){}
+public async Task DateTimeChange(ServiceInvokeParameter serviceInvokeParameter,DateTime_t[] now){}
 }
 */
 }
@@ -688,16 +688,16 @@ State=(RequestResponseState)sm.DeserializeField(typeof(System.Byte),1);
 }
 
 }
-public class Test2_Requester<DTL>:IRequestService<DTL> //where DTL:struct
+public class Test2_Requester:IRequestService
 {
-private EmbedXrpcObject<DTL> XrpcObject=null;
-public Test2_Requester(EmbedXrpcObject<DTL> xrpcObject)
+private EmbedXrpcObject XrpcObject=null;
+public Test2_Requester(EmbedXrpcObject xrpcObject)
 {
 XrpcObject=xrpcObject;
 }
 public static readonly UInt16 Test2_ServiceId=17;//0x11
 public UInt16 GetSid(){ return Test2_ServiceId;}
-public async Task<Test2_Return> Invoke(DTL userDataOfTransportLayer,DateTime_t[] now)
+public async Task<Test2_Return> Invoke(DateTime_t[] now)
 {
 Test2_Return reqresp=new Test2_Return();
 XrpcObject.ObjectMutex.WaitOne();
@@ -722,7 +722,7 @@ XrpcObject.RequestBuffer[8]=((byte)(bufcrc&0xff));
 XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));
 XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));
 XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));
-var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
 if( send_result==false)
  {
 reqresp.State=RequestResponseState.RequestState_Failed;
@@ -738,20 +738,20 @@ return reqresp;
 }
 }
 [ResponseServiceInfo(Name="Test2",ServiceId=17)]
-public partial class Test2_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class Test2_Service:IService
 {
 public static readonly UInt16 Test2_ServiceId=17;//0x11
 public UInt16 GetSid(){ return Test2_ServiceId;}
-public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 Test2_Parameter request = new Test2_Parameter();
 request.Deserialize(recManager);
 await Test2(serviceInvokeParameter,request.now);
 }
 /*
-public partial class Test2_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class Test2_Service:IService
 {
-public async Task Test2(ServiceInvokeParameter<DTL> serviceInvokeParameter,DateTime_t[] now){}
+public async Task Test2(ServiceInvokeParameter serviceInvokeParameter,DateTime_t[] now){}
 }
 */
 }
@@ -864,16 +864,16 @@ ReturnValue.Deserialize(sm);
 }
 
 }
-public class Add_Requester<DTL>:IRequestService<DTL> //where DTL:struct
+public class Add_Requester:IRequestService
 {
-private EmbedXrpcObject<DTL> XrpcObject=null;
-public Add_Requester(EmbedXrpcObject<DTL> xrpcObject)
+private EmbedXrpcObject XrpcObject=null;
+public Add_Requester(EmbedXrpcObject xrpcObject)
 {
 XrpcObject=xrpcObject;
 }
 public static readonly UInt16 Add_ServiceId=18;//0x12
 public UInt16 GetSid(){ return Add_ServiceId;}
-public async Task<Add_Return> Invoke(DTL userDataOfTransportLayer,Int32 a,Int32 b,Int32 dataLen,Byte[] data,TestSerialize[] test)
+public async Task<Add_Return> Invoke(Int32 a,Int32 b,Int32 dataLen,Byte[] data,TestSerialize[] test)
 {
 Add_Return reqresp=new Add_Return();
 XrpcObject.ObjectMutex.WaitOne();
@@ -902,7 +902,7 @@ XrpcObject.RequestBuffer[8]=((byte)(bufcrc&0xff));
 XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));
 XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));
 XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));
-var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
 if( send_result==false)
  {
 reqresp.State=RequestResponseState.RequestState_Failed;
@@ -925,12 +925,12 @@ return reqresp;
 }
 }
 [ResponseServiceInfo(Name="Add",ServiceId=18)]
-public partial class Add_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class Add_Service:IService
 {
 public static readonly UInt16 Add_ServiceId=18;//0x12
 public UInt16 GetSid(){ return Add_ServiceId;}
 private Add_Return Response = new Add_Return();
-public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 Add_Parameter request = new Add_Parameter();
 request.Deserialize(recManager);
@@ -938,9 +938,9 @@ await Add(serviceInvokeParameter,request.a,request.b,request.dataLen,request.dat
 Response.Serialize(sendManager);
 }
 /*
-public partial class Add_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class Add_Service:IService
 {
-public async Task Add(ServiceInvokeParameter<DTL> serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,Byte[] data,TestSerialize[] test){}
+public async Task Add(ServiceInvokeParameter serviceInvokeParameter,Int32 a,Int32 b,Int32 dataLen,Byte[] data,TestSerialize[] test){}
 }
 */
 }
@@ -990,16 +990,16 @@ ReturnValue=(bool)sm.DeserializeField(typeof(System.Boolean),1);
 }
 
 }
-public class NoArg_Requester<DTL>:IRequestService<DTL> //where DTL:struct
+public class NoArg_Requester:IRequestService
 {
-private EmbedXrpcObject<DTL> XrpcObject=null;
-public NoArg_Requester(EmbedXrpcObject<DTL> xrpcObject)
+private EmbedXrpcObject XrpcObject=null;
+public NoArg_Requester(EmbedXrpcObject xrpcObject)
 {
 XrpcObject=xrpcObject;
 }
 public static readonly UInt16 NoArg_ServiceId=19;//0x13
 public UInt16 GetSid(){ return NoArg_ServiceId;}
-public async Task<NoArg_Return> Invoke(DTL userDataOfTransportLayer)
+public async Task<NoArg_Return> Invoke()
 {
 NoArg_Return reqresp=new NoArg_Return();
 XrpcObject.ObjectMutex.WaitOne();
@@ -1023,7 +1023,7 @@ XrpcObject.RequestBuffer[8]=((byte)(bufcrc&0xff));
 XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));
 XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));
 XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));
-var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
 if( send_result==false)
  {
 reqresp.State=RequestResponseState.RequestState_Failed;
@@ -1046,12 +1046,12 @@ return reqresp;
 }
 }
 [ResponseServiceInfo(Name="NoArg",ServiceId=19)]
-public partial class NoArg_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class NoArg_Service:IService
 {
 public static readonly UInt16 NoArg_ServiceId=19;//0x13
 public UInt16 GetSid(){ return NoArg_ServiceId;}
 private NoArg_Return Response = new NoArg_Return();
-public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 NoArg_Parameter request = new NoArg_Parameter();
 request.Deserialize(recManager);
@@ -1059,9 +1059,9 @@ await NoArg(serviceInvokeParameter);
 Response.Serialize(sendManager);
 }
 /*
-public partial class NoArg_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class NoArg_Service:IService
 {
-public async Task NoArg(ServiceInvokeParameter<DTL> serviceInvokeParameter){}
+public async Task NoArg(ServiceInvokeParameter serviceInvokeParameter){}
 }
 */
 }
@@ -1111,16 +1111,16 @@ State=(RequestResponseState)sm.DeserializeField(typeof(System.Byte),1);
 }
 
 }
-public class NoReturn_Requester<DTL>:IRequestService<DTL> //where DTL:struct
+public class NoReturn_Requester:IRequestService
 {
-private EmbedXrpcObject<DTL> XrpcObject=null;
-public NoReturn_Requester(EmbedXrpcObject<DTL> xrpcObject)
+private EmbedXrpcObject XrpcObject=null;
+public NoReturn_Requester(EmbedXrpcObject xrpcObject)
 {
 XrpcObject=xrpcObject;
 }
 public static readonly UInt16 NoReturn_ServiceId=20;//0x14
 public UInt16 GetSid(){ return NoReturn_ServiceId;}
-public async Task<NoReturn_Return> Invoke(DTL userDataOfTransportLayer,Int32 a)
+public async Task<NoReturn_Return> Invoke(Int32 a)
 {
 NoReturn_Return reqresp=new NoReturn_Return();
 XrpcObject.ObjectMutex.WaitOne();
@@ -1145,7 +1145,7 @@ XrpcObject.RequestBuffer[8]=((byte)(bufcrc&0xff));
 XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));
 XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));
 XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));
-var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
 if( send_result==false)
  {
 reqresp.State=RequestResponseState.RequestState_Failed;
@@ -1161,20 +1161,20 @@ return reqresp;
 }
 }
 [ResponseServiceInfo(Name="NoReturn",ServiceId=20)]
-public partial class NoReturn_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class NoReturn_Service:IService
 {
 public static readonly UInt16 NoReturn_ServiceId=20;//0x14
 public UInt16 GetSid(){ return NoReturn_ServiceId;}
-public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 NoReturn_Parameter request = new NoReturn_Parameter();
 request.Deserialize(recManager);
 await NoReturn(serviceInvokeParameter,request.a);
 }
 /*
-public partial class NoReturn_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class NoReturn_Service:IService
 {
-public async Task NoReturn(ServiceInvokeParameter<DTL> serviceInvokeParameter,Int32 a){}
+public async Task NoReturn(ServiceInvokeParameter serviceInvokeParameter,Int32 a){}
 }
 */
 }
@@ -1214,16 +1214,16 @@ State=(RequestResponseState)sm.DeserializeField(typeof(System.Byte),1);
 }
 
 }
-public class NoArgAndReturn_Requester<DTL>:IRequestService<DTL> //where DTL:struct
+public class NoArgAndReturn_Requester:IRequestService
 {
-private EmbedXrpcObject<DTL> XrpcObject=null;
-public NoArgAndReturn_Requester(EmbedXrpcObject<DTL> xrpcObject)
+private EmbedXrpcObject XrpcObject=null;
+public NoArgAndReturn_Requester(EmbedXrpcObject xrpcObject)
 {
 XrpcObject=xrpcObject;
 }
 public static readonly UInt16 NoArgAndReturn_ServiceId=21;//0x15
 public UInt16 GetSid(){ return NoArgAndReturn_ServiceId;}
-public async Task<NoArgAndReturn_Return> Invoke(DTL userDataOfTransportLayer)
+public async Task<NoArgAndReturn_Return> Invoke()
 {
 NoArgAndReturn_Return reqresp=new NoArgAndReturn_Return();
 XrpcObject.ObjectMutex.WaitOne();
@@ -1247,7 +1247,7 @@ XrpcObject.RequestBuffer[8]=((byte)(bufcrc&0xff));
 XrpcObject.RequestBuffer[9]=((byte)(bufcrc>>8&0xff));
 XrpcObject.RequestBuffer[10]=((byte)(bufcrc>>16&0xff));
 XrpcObject.RequestBuffer[11]=((byte)(bufcrc>>24&0xff));
-var send_result = await XrpcObject.Send(userDataOfTransportLayer, sm.Index, 0, XrpcObject.RequestBuffer);
+var send_result = await XrpcObject.Send(sm.Index, 0, XrpcObject.RequestBuffer);
 if( send_result==false)
  {
 reqresp.State=RequestResponseState.RequestState_Failed;
@@ -1263,20 +1263,20 @@ return reqresp;
 }
 }
 [ResponseServiceInfo(Name="NoArgAndReturn",ServiceId=21)]
-public partial class NoArgAndReturn_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class NoArgAndReturn_Service:IService
 {
 public static readonly UInt16 NoArgAndReturn_ServiceId=21;//0x15
 public UInt16 GetSid(){ return NoArgAndReturn_ServiceId;}
-public async Task Invoke(ServiceInvokeParameter<DTL> serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
+public async Task Invoke(ServiceInvokeParameter serviceInvokeParameter, SerializationManager recManager, SerializationManager sendManager)
 {
 NoArgAndReturn_Parameter request = new NoArgAndReturn_Parameter();
 request.Deserialize(recManager);
 await NoArgAndReturn(serviceInvokeParameter);
 }
 /*
-public partial class NoArgAndReturn_Service<DTL>:IService<DTL> //where DTL:struct
+public partial class NoArgAndReturn_Service:IService
 {
-public async Task NoArgAndReturn(ServiceInvokeParameter<DTL> serviceInvokeParameter){}
+public async Task NoArgAndReturn(ServiceInvokeParameter serviceInvokeParameter){}
 }
 */
 }

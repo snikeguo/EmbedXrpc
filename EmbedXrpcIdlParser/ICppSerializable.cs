@@ -31,7 +31,7 @@ namespace EmbedXrpcIdlParser
                 }
                 else
                 {
-                    retstring = $"#ifdef {MacroControlAttribute.MacroName}";
+                    retstring = $"#if {MacroControlAttribute.MacroName}";
                     sw?.WriteLine(retstring);
                 }
                 return retstring;

@@ -99,8 +99,8 @@ extern "C" {
 	void* pvPortMalloc(size_t size);
 	void vPortFree(void*);
 
-#include "message_buffer.h"
-
+#include "message_buffer_noos_and_win32.h"
+#include "queue_noos_and_win32.h"
 #elif SupportedOs==FreeRtos
 	#include "FreeRTOS.h"
 	#include "task.h"
