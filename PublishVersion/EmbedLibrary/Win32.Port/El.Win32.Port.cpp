@@ -1,6 +1,7 @@
 #include  "EmbedLibrary.h"
+#if EmbedXrpc_UsingOs == 1
 #include <thread>
-#include "windows.h"
+#endif
 #include "EmbedXrpcCommon.h"
 extern "C"
 {
@@ -33,16 +34,17 @@ extern "C"
 	El_Semaphore_t  El_CreateSemaphore(const char* SemaphoreName)
 	{
 #if EmbedXrpc_UsingOs == 1
-		//Õâ¸öº¯Êı»á¶à´ÎÖ´ĞĞ
-		//ÓÉÓÚ´úÂëÉè¼ÆÊ¹È»£¬SemaphoreName Ã¿´ÎÖ´ĞĞµÄÖµÒ»Ñù
-		//HANDLE sem = CreateEventA(NULL, FALSE, FALSE, SemaphoreName);//ÓĞÎÊÌâ
-		HANDLE sem = CreateEventA(NULL, FALSE, FALSE, NULL);//Ã»ÎÊÌâ
+		//è¿™ä¸ªå‡½æ•°ä¼šå¤šæ¬¡æ‰§è¡Œ
+		//ç”±äºä»£ç è®¾è®¡ä½¿ç„¶ï¼ŒSemaphoreName æ¯æ¬¡æ‰§è¡Œçš„å€¼ä¸€æ ·
+		//HANDLE sem = CreateEventA(NULL, FALSE, FALSE, SemaphoreName);//æœ‰é—®é¢˜
+		HANDLE sem = CreateEventA(NULL, FALSE, FALSE, NULL);//æ²¡é—®é¢˜
 		return sem;
 #else
 		return nullptr;
 #endif
 	}
-	class Win32Timer //¼òµ¥µÄtimer
+#if EmbedXrpc_UsingOs == 1
+	class Win32Timer //ç®€å•çš„timer
 	{
 	public:
 		Win32Timer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
@@ -101,6 +103,7 @@ extern "C"
 		void (*timercb)(void* arg);
 		void* arg;
 	};
+#endif
 	El_Timer_t El_CreateTimer(const char* timerName, uint32_t timeout, void (*timercb)(void* arg), void* Arg)
 	{
 #if EmbedXrpc_UsingOs == 1
@@ -216,6 +219,7 @@ extern "C"
 	}
 	QueueState El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		HANDLE handle = (HANDLE)sem;
 		
 		DWORD r= WaitForSingleObject(sem, timeout);
@@ -232,16 +236,27 @@ extern "C"
 			El_Debug("[El_TakeSemaphore]:%d,", r);
 			return QueueState::QueueState_Timeout;
 		}
+#else
+		return QueueState::QueueState_OK;
+#endif
 	}
 	void El_ReleaseSemaphore(El_Semaphore_t sem, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		HANDLE handle = (HANDLE)sem;
 		SetEvent(handle);
+#else
+
+#endif
 	}
 	void El_ResetSemaphore(El_Semaphore_t sem, int isIsr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		HANDLE handle = (HANDLE)sem;
 		ResetEvent(handle);
+#else
+
+#endif
 	}
 
 	QueueState El_ReceiveQueue(El_Queue_t queue, void* item, uint32_t itemSize, uint32_t timeout, int isIsr)
@@ -264,26 +279,31 @@ extern "C"
 	}
 	uint32_t El_QueueSpacesAvailable(El_Queue_t queue, int isIsr)
 	{
-#if EmbedXrpc_UsingOs == 1
-		return -1;
-#else
-		QueueHandle_t q = (QueueHandle_t)queue;
-		return uxQueueSpacesAvailable(q);
-#endif
+	    QueueHandle_t q = (QueueHandle_t)queue;
+	    return uxQueueSpacesAvailable(q);
 	}
 	int32_t allsize = 0;
 	void* El_Malloc(uint32_t size)
 	{
+#if EmbedXrpc_UsingOs == 1
 		auto x = malloc(size);
 		allsize += size;
 		//printf("	memory malloc!allsize:%4d\n",allsize);
 		return x;
+#else
+		auto x = pvPortMalloc(size);
+		return x;
+#endif
 	}
 	void El_Free(void* ptr)
 	{
+#if EmbedXrpc_UsingOs == 1
 		size_t sz= _msize(ptr);
 		free(ptr);
 		allsize -= sz;
+#else
+		vPortFree(ptr);
+#endif
 		//printf("	memory free!allsize:%d\n", allsize);
 	}
 	void El_Memcpy(void* d, const void* s, uint32_t size)

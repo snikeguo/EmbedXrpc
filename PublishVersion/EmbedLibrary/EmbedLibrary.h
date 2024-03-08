@@ -32,33 +32,39 @@ extern "C" {
 
 #define Windows 1
 #define FreeRtos	2
-#define SupportedOs	Windows
+#define NoOs        3
+#define SupportedOs	NoOs
 
+#if SupportedOs==Windows ||SupportedOs==NoOs
 #if SupportedOs==Windows
-
 	#include "windows.h"
+#endif
 	#include "assert.h"
 	typedef void* El_Semaphore_t;
 	typedef void* El_Mutex_t;
 	typedef void* El_Thread_t;
 	typedef void* El_Queue_t;
-	typedef void* El_Semaphore_t;
 	typedef void* El_Timer_t;
-	#define El_Assert assert
+	#define El_Assert(x) if((x)==0) {__disable();while(1);}
+#if SupportedOs==Windows
 #define El_Debug	printf
 #define El_Delay(x)    Sleep(x)
+#else
+#define El_Debug(x)
+#define El_Delay(x)
+#endif
 #define ThreadBeginHook()
 #define ThreadExitHook()	
 #define taskENTER_CRITICAL()    
 #define taskEXIT_CRITICAL()
 
-//Ϊ����ֲFreeRTOS�Դ���IPC���� ������ĺ�
+    //为了移植FreeRTOS自带的IPC机制 所定义的宏
 #define PRIVILEGED_FUNCTION
 #define configSUPPORT_DYNAMIC_ALLOCATION	1
 #define configSUPPORT_STATIC_ALLOCATION	1
 #define configMESSAGE_BUFFER_LENGTH_TYPE size_t
 
-#define configASSERT_DEFINED	1 //У�龲̬�Ͷ�̬�ṹ���Ƿ�һ�µĺ꣬�����
+#define configASSERT_DEFINED	1 //校验静态和动态结构体是否一致的宏，建议打开
 
 #define configMIN( a, b )    ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
 
@@ -90,7 +96,7 @@ extern "C" {
 #define errQUEUE_EMPTY ((BaseType_t)0)
 #define errQUEUE_FULL ((BaseType_t)0)
 
-#define configASSERT	assert
+#define configASSERT	El_Assert
 
 	typedef int32_t BaseType_t;
 	typedef uint32_t TickType_t;
@@ -107,9 +113,18 @@ extern "C" {
 	#include "semphr.h"
 	#include "timers.h"
 	#include "message_buffer.h"
-#define El_Debug	printf
+
+	typedef SemaphoreHandle_t El_Semaphore_t;
+		typedef SemaphoreHandle_t El_Mutex_t;
+		typedef TaskHandle_t El_Thread_t;
+		typedef QueueHandle_t El_Queue_t;
+		typedef TimerHandle_t El_Timer_t;
+		#define El_Assert configASSERT
+#define El_Debug(x)	//printf
+#define El_Delay(x)    vTaskDelay(x)
 #define ThreadBeginHook()
 #define ThreadExitHook()	vTaskDelete(xTaskGetCurrentTaskHandle());
+
 #endif
 #define El_Strncpy strncpy
 #define El_Strncmp    strncmp
