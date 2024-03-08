@@ -94,10 +94,10 @@ void El_TimerStop(El_Timer_t timer,int isIsr)
 	TimerHandle_t xtimer = (TimerHandle_t)timer;
 	xTimerStop(xtimer, 0);
 }
-Bool El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout,int isIsr)
+QueueState El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout,int isIsr)
 {
 	auto frsem = static_cast<QueueHandle_t>(sem);
-	return xSemaphoreTake(frsem, timeout) == pdTRUE ? True : False;
+	return xSemaphoreTake(frsem, timeout) == pdTRUE ? QueueState_OK : QueueState_Timeout;
 }
 void El_ReleaseSemaphore(El_Semaphore_t sem,int isIsr)
 {
@@ -109,30 +109,30 @@ void El_ResetSemaphore(El_Semaphore_t sem,int isIsr)
 	auto frsem = static_cast<QueueHandle_t>(sem);
 	xQueueReset(frsem); //
 }
-Bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout,int isIsr)
+bool El_TakeMutex(El_Mutex_t mutex, uint32_t timeout,int isIsr)
 {
 	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreTake(m, timeout);
 	if (r == pdTRUE)
 	{
-		return True;
+		return true;
 	}
 	else
 	{
-		return False;
+		return false;
 	}
 }
-Bool El_ReleaseMutex(El_Mutex_t mutex,int isIsr)
+bool El_ReleaseMutex(El_Mutex_t mutex,int isIsr)
 {
 	auto m = static_cast<SemaphoreHandle_t >(mutex);
 	auto r = xSemaphoreGive(m);
 	if (r == pdTRUE)
 	{
-		return True;
+		return true;
 	}
 	else
 	{
-		return False;
+		return false;
 	}
 }
 

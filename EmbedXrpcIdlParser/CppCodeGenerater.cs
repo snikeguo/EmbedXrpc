@@ -627,6 +627,7 @@ namespace EmbedXrpcIdlParser
                 noOsCsw.WriteLine("uint16_t targettimeout = (uint16_t)(allData[2] | ((allData[3] & 0x3f) << 8));");
                 noOsCsw.WriteLine("uint32_t dataLen = allDataLen - 12;");
                 noOsCsw.WriteLine("uint8_t* data = &allData[12];");
+                
                 noOsCsw.WriteLine("currentReceivedResponseData.Sid = serviceId;");
                 noOsCsw.WriteLine("currentReceivedResponseData.DataLen = dataLen;");
                 noOsCsw.WriteLine("currentReceivedResponseData.TargetTimeout = targettimeout;");
@@ -637,7 +638,9 @@ namespace EmbedXrpcIdlParser
                 noOsCsw.WriteLine("}");
 
                 noOsCsw.WriteLine($"else if (currentReceivedResponseData.Sid == {service.ServiceName}_ServiceId)\n{{");
-                noOsCsw.WriteLine($"sm.Index=0;");
+                noOsCsw.WriteLine("sm.Index=0;");
+                noOsCsw.WriteLine("sm.BufferLen = dataLen;");
+                noOsCsw.WriteLine("sm.Buf = data;");
                 noOsCsw.WriteLine($"{service.ReturnStructType.TypeName}_Deserialize(&sm,&{service.ServiceName}_reqresp,rp->IsIsr);");
                 noOsCsw.WriteLine($"{service.ServiceName}_reqresp.State = RequestResponseState::ResponseState_Ok;");
                 noOsCsw.WriteLine($"RpcObject->CurrentRequestSid=EmbedXrpcNoReceivedSid;");

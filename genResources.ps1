@@ -27,7 +27,8 @@ Copy-Item -Path .\EmbedLibrary\queue_noos_and_win32.h  -Destination PublishVersi
 Copy-Item -Path .\EmbedLibrary\message_buffer_noos_and_win32.h  -Destination PublishVersion\EmbedLibrary\message_buffer_noos_and_win32.h
 Copy-Item -Path .\EmbedLibrary\stream_buffer_noos_and_win32.c  -Destination PublishVersion\EmbedLibrary\stream_buffer_noos_and_win32.c
 Copy-Item -Path .\EmbedLibrary\queue_noos_and_win32.c  -Destination PublishVersion\EmbedLibrary\queue_noos_and_win32.c
-
+Copy-Item -Path .\EmbedLibrary\freeRtosHeap4.c -Destination PublishVersion\EmbedLibrary\freeRtosHeap4.c
+Copy-Item -Path .\EmbedLibrary\freeRtosHeap4.h  -Destination PublishVersion\EmbedLibrary\freeRtosHeap4.h
 
 # copy Sample
 if(Test-Path .\PublishVersion\Sample1)

@@ -317,5 +317,5 @@ extern "C"
 }
 uint32_t El_GetTick(int isIsr)
 {
-	return GetTickCount();
+	return 0;
 }
