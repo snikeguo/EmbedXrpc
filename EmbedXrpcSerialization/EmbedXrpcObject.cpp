@@ -392,10 +392,25 @@ RequestResponseState EmbedXrpcObject::Wait(uint32_t sid, ReceiveItemInfo *recDat
 		uint16_t targettimeout = (uint16_t)(allData[2] | ((allData[3] & 0x3f) << 8));
 		uint32_t dataLen = allDataLen - 12;
 		uint8_t* data = &allData[12];
+		
+		uint32_t wantedDataLen = (uint32_t)(allData[4] | allData[5] << 8 | allData[6] << 16 | allData[7] << 24);
+		uint32_t wantedBufCrc = (uint32_t)(allData[8] | allData[9] << 8 | allData[10] << 16 | allData[11] << 24);
+
+		if (wantedDataLen != dataLen)
+		{
+			return RequestResponseState::ResponseState_InvalidData;
+		}
+		uint32_t calBufCrc = GetBufferCrc(wantedDataLen, data);
+		if (wantedBufCrc != calBufCrc)
+		{
+			return RequestResponseState::ResponseState_InvalidData;
+		}
+
 		recData->Sid = serviceId;
 		recData->DataLen = dataLen;
 		recData->TargetTimeout = targettimeout;
 		recData->Data = data;
+
 		if (sid == recData->Sid)
 		{
 			El_Debug("EmbedXrpcObject:sid == recData.Sid\n");

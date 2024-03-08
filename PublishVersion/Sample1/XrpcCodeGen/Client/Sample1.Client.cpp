@@ -424,6 +424,22 @@ Add_Return& Add_Requester::NoOs_QueryServiceState(RequestParameter* rp)
 	uint16_t targettimeout = (uint16_t)(allData[2] | ((allData[3] & 0x3f) << 8));
 	uint32_t dataLen = allDataLen - 12;
 	uint8_t* data = &allData[12];
+
+	uint32_t wantedDataLen = (uint32_t)(allData[4] | allData[5] << 8 | allData[6] << 16 | allData[7] << 24);
+	uint32_t wantedBufCrc = (uint32_t)(allData[8] | allData[9] << 8 | allData[10] << 16 | allData[11] << 24);
+
+	if (wantedDataLen != dataLen)
+	{
+		Add_reqresp.State = RequestResponseState::ResponseState_InvalidData;
+		return Add_reqresp;
+	}
+	uint32_t calBufCrc = GetBufferCrc(wantedDataLen, data);
+	if (wantedBufCrc != calBufCrc)
+	{
+		Add_reqresp.State = RequestResponseState::ResponseState_InvalidData;
+		return Add_reqresp;
+	}
+
 	currentReceivedResponseData.Sid = serviceId;
 	currentReceivedResponseData.DataLen = dataLen;
 	currentReceivedResponseData.TargetTimeout = targettimeout;

@@ -17,7 +17,9 @@ enum RequestResponseState
     ResponseState_Timeout = 4,
     //ResponseState_SidError = 5,
     //ResponseState_UnsupportedSid = 6,
+
     ResponseState_NoReceived = 7,//only no os mode
+    ResponseState_InvalidData = 8,
  };
 
  struct EmbedXrpcConfig
