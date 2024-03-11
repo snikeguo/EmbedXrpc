@@ -74,7 +74,7 @@ void EmbedXrpcObject::DeInit()
 		{
 			El_Delay(10);
 		}
-		El_DeleteThread(ServiceThreadHandle);
+		//El_DeleteThread(ServiceThreadHandle);//对于RTOS来说，执行ThreadExitHook宏会自己删除自己，对于win来说，直接返回了！所以不需要手动显式删除
 	}
 	El_DeleteTimer(SuspendTimer);
 }

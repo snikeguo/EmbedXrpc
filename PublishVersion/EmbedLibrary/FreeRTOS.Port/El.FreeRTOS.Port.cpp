@@ -57,20 +57,25 @@ El_Semaphore_t El_CreateSemaphore(const char *SemaphoreName)
 }
 void El_DeleteThread(El_Thread_t thread)
 {
+	vTaskDelete(thread);
 }
 void El_DeleteMutex(El_Mutex_t mutex)
 {
+	vSemaphoreDelete(mutex);
 }
 void El_DeleteQueue(El_Queue_t queue)
 {
+	vQueueDelete(queue);
 }
 void El_DeleteSemaphore(El_Semaphore_t sem)
 {
+	vSemaphoreDelete(sem);
 }
 void El_DeleteTimer(El_Timer_t timer)
 {
 	TimerHandle_t xtimer = (TimerHandle_t)timer;
 	xTimerStop(xtimer,0);
+	xTimerDelete(xtimer,0);
 	FreeRtosTimer_t *frt = (FreeRtosTimer_t *)pvTimerGetTimerID(xtimer);
 	vPortFree(frt);
 }
@@ -97,7 +102,8 @@ void El_TimerStop(El_Timer_t timer,int isIsr)
 QueueState El_TakeSemaphore(El_Semaphore_t sem, uint32_t timeout,int isIsr)
 {
 	auto frsem = static_cast<QueueHandle_t>(sem);
-	return xSemaphoreTake(frsem, timeout) == pdTRUE ? QueueState_OK : QueueState_Timeout;
+	auto r=xSemaphoreTake(frsem, timeout);
+	return r == pdTRUE ? QueueState_OK : QueueState_Timeout;
 }
 void El_ReleaseSemaphore(El_Semaphore_t sem,int isIsr)
 {
